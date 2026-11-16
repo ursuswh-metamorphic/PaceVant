@@ -1,0 +1,1 @@
+{"additionalProperties":false,"properties":{"status":{"enum":["SUBMITTED","PENDING","CONFIRMED","REVERTED","FAILED_TO_SUBMIT","STALE_REQUIRES_REEVALUATION"],"title":"Status","type":"string"},"tx_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Tx Hash","type":"string"}},"required":["tx_hash","status"],"title":"ExecutionSubmission","type":"object"}

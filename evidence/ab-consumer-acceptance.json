@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "consumer_mode": "ISOLATED_LOCAL_PROTOCOL_PROBE",
+  "a_implementation_exercised": false,
+  "backend_app_imported": false,
+  "sdk_only_http_pipeline": true,
+  "lowercase_eip712_addresses": true,
+  "manifest_and_artifacts_verified": true,
+  "readonly_nonce_preflight": true,
+  "tampered_approval_rejected": true,
+  "idempotent_submission": true,
+  "execution_status": "CONFIRMED"
+}

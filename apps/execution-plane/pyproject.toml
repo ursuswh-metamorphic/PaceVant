@@ -1,0 +1,19 @@
+[project]
+name = "treasury-execution-plane"
+version = "1.1.0"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+  "treasury-contracts-api==1.1.0",
+  "fastapi==0.121.3", "uvicorn==0.38.0", "web3==7.14.0",
+  "pydantic==2.12.4", "pydantic-settings==2.12.0", "rfc8785==0.1.4",
+  "httpx==0.28.1", "pytest==9.0.1", "jsonschema==4.25.1",
+  "filelock==3.20.0",
+]
+
+[tool.uv.sources]
+treasury-contracts-api = { path = "../../packages/contracts-api", editable = true }
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = ["integration: requires anvil and compiled Foundry contracts"]

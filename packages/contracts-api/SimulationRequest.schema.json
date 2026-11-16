@@ -1,0 +1,1 @@
+{"additionalProperties":false,"properties":{"build_id":{"title":"Build Id","type":"string"},"expected_policy_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Expected Policy Hash","type":"string"}},"required":["build_id","expected_policy_hash"],"title":"SimulationRequest","type":"object"}

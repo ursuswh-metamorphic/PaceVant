@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.*
+!.env.example
+coverage/
+*.log
+out/
+cache-foundry/
+.ruff_cache/
+.execution-data*/
+.control-data*/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+deployments/execution-local.json
+.env-update-*

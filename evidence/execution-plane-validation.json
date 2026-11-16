@@ -1,0 +1,55 @@
+{
+  "scope": "PERSON_B_EXECUTION_PLANE_V1_1",
+  "local_chain_id": 31337,
+  "forge_version": "1.7.1",
+  "solidity_tests": {"passed": 27, "failed": 0, "fuzz_runs": 256},
+  "python_tests": {"passed": 34, "failed": 0},
+  "signature_golden": "PASS_PYTHON_VIEM_SOLIDITY",
+  "lint": "PASS_RUFF_0_14_6",
+  "git_diff_check": "PASS",
+  "secret_scan": "PASS",
+  "local_execution": "CONFIRMED",
+  "baseline_verification": "COMPLETE",
+  "mild_stress": "SUCCESS_SAFE",
+  "adverse_stress": "PROTECTED_REVERT",
+  "live_http_api_smoke": "PASS",
+  "receipt_zero_monitor_test": "PASS_REVERTED_WITH_ZERO_TOKEN_DELTAS",
+  "configuration": {
+    "file": ".env",
+    "profiles": ["B_LOCAL_*", "B_FUJI_*"],
+    "local_env_merged": true,
+    "api_key_preserved": true,
+    "portable_profile_paths": true,
+    "one_command_local_stack_test": "PASS",
+    "config_output_secret_redaction_test": "PASS"
+  },
+  "a_control_plane_sde_integration": "NOT_RUN_A_IMPLEMENTATION_NOT_AVAILABLE",
+  "ab_protocol_compatibility": {
+    "status": "PASS_PROTOCOL_A_IMPLEMENTATION_PENDING",
+    "sdk_only_consumer_http_pipeline": "PASS",
+    "sdk_wheel_without_backend_app": "PASS",
+    "lowercase_address_signature_execution": "PASS",
+    "readonly_nonce_preflight": "PASS",
+    "openapi_abi_handoff_manifest_drift_checks": "PASS",
+    "same_key_rpc_drop_recovery": "PASS_SAME_SIGNED_BYTES_SINGLE_SPEND",
+    "local_idle_timestamp_freshness": "PASS"
+  },
+  "fuji_deployment": "NOT_RUN_A_ATTESTOR_PUBLIC_ADDRESS_PENDING",
+  "refactor": {
+    "legacy_source_and_dependencies_removed": true,
+    "existing_env_files_byte_identical": 3,
+    "original_docs_retained": 12,
+    "chain_module": "apps/execution-plane/app/chain/",
+    "signature_integration_test": "tests/integration/eip712-golden.mjs",
+    "root_check_command": "npm run check",
+    "direct_npm_dependencies": 4
+  },
+  "evidence_refs": [
+    "execution-plane-local.json",
+    "execution-plane-api-smoke.json",
+    "execution-plane-configuration.json",
+    "ab-consumer-acceptance.json",
+    "shared-sdk-package.json",
+    "execution-plane-secret-scan.json"
+  ]
+}
