@@ -1,0 +1,8 @@
+{
+  "source": "MOCK_FIXTURE",
+  "goal": "Buy WAVAX with 500 USDC",
+  "usdc_base_units": "8500000000",
+  "wavax_base_units": "75000000000000000000",
+  "price_age_seconds": 120,
+  "expected_verdicts": ["ESCALATE"]
+}

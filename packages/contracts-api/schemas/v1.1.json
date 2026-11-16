@@ -1,0 +1,1042 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI Treasury Security wire contract v1.1",
+  "$defs": {
+    "TransactionProposal": {
+      "additionalProperties": false,
+      "properties": {
+        "intent_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Intent Id",
+          "type": "string"
+        },
+        "mandate_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Mandate Id",
+          "type": "string"
+        },
+        "mandate_version": {
+          "exclusiveMinimum": 0,
+          "title": "Mandate Version",
+          "type": "integer"
+        },
+        "action": {
+          "const": "SWAP_EXACT_INPUT",
+          "title": "Action",
+          "type": "string"
+        },
+        "chain_id": {
+          "const": 43113,
+          "title": "Chain Id",
+          "type": "integer"
+        },
+        "vault_address": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Vault Address",
+          "type": "string"
+        },
+        "router": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Router",
+          "type": "string"
+        },
+        "token_in": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Token In",
+          "type": "string"
+        },
+        "token_out": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Token Out",
+          "type": "string"
+        },
+        "amount_in_base_units": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Amount In Base Units",
+          "type": "string"
+        },
+        "slippage_bps": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Slippage Bps",
+          "type": "integer"
+        },
+        "recipient": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Recipient",
+          "type": "string"
+        },
+        "deadline": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Deadline",
+          "type": "integer"
+        },
+        "user_goal_reason": {
+          "maxLength": 250,
+          "minLength": 1,
+          "title": "User Goal Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "intent_id",
+        "mandate_id",
+        "mandate_version",
+        "action",
+        "chain_id",
+        "vault_address",
+        "router",
+        "token_in",
+        "token_out",
+        "amount_in_base_units",
+        "slippage_bps",
+        "recipient",
+        "deadline",
+        "user_goal_reason"
+      ],
+      "title": "TransactionProposal",
+      "type": "object"
+    },
+    "BuiltTransaction": {
+      "additionalProperties": false,
+      "properties": {
+        "build_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Build Id",
+          "type": "string"
+        },
+        "intent_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Intent Id",
+          "type": "string"
+        },
+        "chain_id": {
+          "const": 43113,
+          "title": "Chain Id",
+          "type": "integer"
+        },
+        "vault_address": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Vault Address",
+          "type": "string"
+        },
+        "router": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Router",
+          "type": "string"
+        },
+        "token_in": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Token In",
+          "type": "string"
+        },
+        "token_out": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Token Out",
+          "type": "string"
+        },
+        "amount_in_base_units": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Amount In Base Units",
+          "type": "string"
+        },
+        "min_amount_out_base_units": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Min Amount Out Base Units",
+          "type": "string"
+        },
+        "router_calldata": {
+          "pattern": "^0x(?:[0-9a-fA-F]{2}){4,4096}$",
+          "title": "Router Calldata",
+          "type": "string"
+        },
+        "calldata_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Calldata Hash",
+          "type": "string"
+        },
+        "policy_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Policy Hash",
+          "type": "string"
+        },
+        "nonce": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Nonce",
+          "type": "string"
+        },
+        "deadline": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Deadline",
+          "type": "integer"
+        },
+        "quote_ref": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Quote Ref",
+          "type": "string"
+        },
+        "adapter_version": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Adapter Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "build_id",
+        "intent_id",
+        "chain_id",
+        "vault_address",
+        "router",
+        "token_in",
+        "token_out",
+        "amount_in_base_units",
+        "min_amount_out_base_units",
+        "router_calldata",
+        "calldata_hash",
+        "policy_hash",
+        "nonce",
+        "deadline",
+        "quote_ref",
+        "adapter_version"
+      ],
+      "title": "BuiltTransaction",
+      "type": "object"
+    },
+    "Baseline": {
+      "additionalProperties": false,
+      "properties": {
+        "execution_status": {
+          "enum": [
+            "SUCCESS",
+            "REVERTED",
+            "INCONCLUSIVE"
+          ],
+          "title": "Execution Status",
+          "type": "string"
+        },
+        "token_in_delta_base_units": {
+          "pattern": "^(0|-?[1-9][0-9]{0,77})$",
+          "title": "Token In Delta Base Units",
+          "type": "string"
+        },
+        "token_out_delta_base_units": {
+          "pattern": "^(0|-?[1-9][0-9]{0,77})$",
+          "title": "Token Out Delta Base Units",
+          "type": "string"
+        },
+        "unexpected_transfer": {
+          "title": "Unexpected Transfer",
+          "type": "boolean"
+        },
+        "unauthorized_approval": {
+          "title": "Unauthorized Approval",
+          "type": "boolean"
+        },
+        "gas_used": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Gas Used",
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution_status",
+        "token_in_delta_base_units",
+        "token_out_delta_base_units",
+        "unexpected_transfer",
+        "unauthorized_approval",
+        "gas_used"
+      ],
+      "title": "Baseline",
+      "type": "object"
+    },
+    "StressTest": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "SUCCESS_SAFE",
+            "PROTECTED_REVERT",
+            "UNSAFE_EXECUTION",
+            "INCONCLUSIVE"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "output_base_units": {
+          "anyOf": [
+            {
+              "pattern": "^(0|[1-9][0-9]{0,77})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Base Units"
+        },
+        "revert_reason": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revert Reason"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "status"
+      ],
+      "title": "StressTest",
+      "type": "object"
+    },
+    "SimulationEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "intent_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Intent Id",
+          "type": "string"
+        },
+        "build_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Build Id",
+          "type": "string"
+        },
+        "chain_id": {
+          "const": 43113,
+          "title": "Chain Id",
+          "type": "integer"
+        },
+        "vault_address": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Vault Address",
+          "type": "string"
+        },
+        "policy_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Policy Hash",
+          "type": "string"
+        },
+        "calldata_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Calldata Hash",
+          "type": "string"
+        },
+        "nonce": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Nonce",
+          "type": "string"
+        },
+        "deadline": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Deadline",
+          "type": "integer"
+        },
+        "fork_block": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Fork Block",
+          "type": "integer"
+        },
+        "bytecode_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Bytecode Hash",
+          "type": "string"
+        },
+        "simulation_mode": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Simulation Mode",
+          "type": "string"
+        },
+        "baseline": {
+          "$ref": "#/$defs/Baseline"
+        },
+        "stress_tests": {
+          "items": {
+            "$ref": "#/$defs/StressTest"
+          },
+          "maxItems": 20,
+          "title": "Stress Tests",
+          "type": "array"
+        },
+        "verification_status": {
+          "enum": [
+            "COMPLETE",
+            "INCOMPLETE",
+            "INCONCLUSIVE"
+          ],
+          "title": "Verification Status",
+          "type": "string"
+        },
+        "parser_version": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Parser Version",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "MOCK_FIXTURE",
+            "REAL_LOCAL_SIM",
+            "FORK_SIM"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "artifact_refs": {
+          "items": {
+            "maxLength": 250,
+            "pattern": "^artifact://[a-zA-Z0-9_-]+(/[a-zA-Z0-9_.-]+){1,8}$",
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Artifact Refs",
+          "type": "array"
+        },
+        "evidence_manifest_ref": {
+          "maxLength": 250,
+          "pattern": "^artifact://[a-zA-Z0-9_-]+(/[a-zA-Z0-9_.-]+){1,8}$",
+          "title": "Evidence Manifest Ref",
+          "type": "string"
+        },
+        "evidence_root": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Evidence Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "intent_id",
+        "build_id",
+        "chain_id",
+        "vault_address",
+        "policy_hash",
+        "calldata_hash",
+        "nonce",
+        "deadline",
+        "fork_block",
+        "bytecode_hash",
+        "simulation_mode",
+        "baseline",
+        "stress_tests",
+        "verification_status",
+        "parser_version",
+        "source",
+        "artifact_refs",
+        "evidence_manifest_ref",
+        "evidence_root"
+      ],
+      "title": "SimulationEvidence",
+      "type": "object"
+    },
+    "PortfolioSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "snapshot_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "chain_id": {
+          "const": 43113,
+          "title": "Chain Id",
+          "type": "integer"
+        },
+        "vault_address": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Vault Address",
+          "type": "string"
+        },
+        "block_number": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Block Number",
+          "type": "integer"
+        },
+        "usdc_base_units": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Usdc Base Units",
+          "type": "string"
+        },
+        "wavax_base_units": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Wavax Base Units",
+          "type": "string"
+        },
+        "price_usdc_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Price Usdc Usd E8",
+          "type": "string"
+        },
+        "price_wavax_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Price Wavax Usd E8",
+          "type": "string"
+        },
+        "price_source": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Price Source",
+          "type": "string"
+        },
+        "price_timestamp": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Price Timestamp",
+          "type": "integer"
+        },
+        "history_version": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "History Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "snapshot_id",
+        "chain_id",
+        "vault_address",
+        "block_number",
+        "usdc_base_units",
+        "wavax_base_units",
+        "price_usdc_usd_e8",
+        "price_wavax_usd_e8",
+        "price_source",
+        "price_timestamp",
+        "history_version"
+      ],
+      "title": "PortfolioSnapshot",
+      "type": "object"
+    },
+    "EconomicRiskAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "intent_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Intent Id",
+          "type": "string"
+        },
+        "build_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Build Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "INCONCLUSIVE"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "projected_wavax_exposure_bps": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Projected Wavax Exposure Bps"
+        },
+        "max_wavax_exposure_bps": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Max Wavax Exposure Bps",
+          "type": "integer"
+        },
+        "violations": {
+          "items": {
+            "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+            "type": "string"
+          },
+          "title": "Violations",
+          "type": "array"
+        },
+        "calculation_version": {
+          "const": "risk-v1",
+          "default": "risk-v1",
+          "title": "Calculation Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "intent_id",
+        "build_id",
+        "snapshot_id",
+        "result",
+        "projected_wavax_exposure_bps",
+        "max_wavax_exposure_bps",
+        "violations"
+      ],
+      "title": "EconomicRiskAssessment",
+      "type": "object"
+    },
+    "SecurityDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "intent_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Intent Id",
+          "type": "string"
+        },
+        "build_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Build Id"
+        },
+        "verdict": {
+          "enum": [
+            "APPROVE",
+            "REPLAN",
+            "REJECT",
+            "ESCALATE"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "reason_codes": {
+          "items": {
+            "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+            "type": "string"
+          },
+          "title": "Reason Codes",
+          "type": "array"
+        },
+        "policy_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Policy Hash",
+          "type": "string"
+        },
+        "calldata_hash": {
+          "anyOf": [
+            {
+              "pattern": "^0x[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Calldata Hash"
+        },
+        "simulation_evidence_root": {
+          "anyOf": [
+            {
+              "pattern": "^0x[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Simulation Evidence Root"
+        },
+        "mandate_version": {
+          "title": "Mandate Version",
+          "type": "integer"
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Snapshot Id"
+        },
+        "created_at": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Created At",
+          "type": "integer"
+        },
+        "expires_at": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Expires At",
+          "type": "integer"
+        },
+        "source": {
+          "const": "SDE_V1",
+          "default": "SDE_V1",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "intent_id",
+        "build_id",
+        "verdict",
+        "reason_codes",
+        "policy_hash",
+        "calldata_hash",
+        "simulation_evidence_root",
+        "mandate_version",
+        "snapshot_id",
+        "created_at",
+        "expires_at"
+      ],
+      "title": "SecurityDecision",
+      "type": "object"
+    },
+    "Approval": {
+      "additionalProperties": false,
+      "properties": {
+        "policyHash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Policyhash",
+          "type": "string"
+        },
+        "evidenceRoot": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Evidenceroot",
+          "type": "string"
+        },
+        "router": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Router",
+          "type": "string"
+        },
+        "tokenIn": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Tokenin",
+          "type": "string"
+        },
+        "tokenOut": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Tokenout",
+          "type": "string"
+        },
+        "amountIn": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Amountin",
+          "type": "string"
+        },
+        "minAmountOut": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Minamountout",
+          "type": "string"
+        },
+        "calldataHash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Calldatahash",
+          "type": "string"
+        },
+        "nonce": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Nonce",
+          "type": "string"
+        },
+        "deadline": {
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "title": "Deadline",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policyHash",
+        "evidenceRoot",
+        "router",
+        "tokenIn",
+        "tokenOut",
+        "amountIn",
+        "minAmountOut",
+        "calldataHash",
+        "nonce",
+        "deadline"
+      ],
+      "title": "Approval",
+      "type": "object"
+    },
+    "Domain": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "TreasuryPolicyVault",
+          "default": "TreasuryPolicyVault",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "1",
+          "default": "1",
+          "title": "Version",
+          "type": "string"
+        },
+        "chainId": {
+          "const": 43113,
+          "default": 43113,
+          "title": "Chainid",
+          "type": "integer"
+        },
+        "verifyingContract": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Verifyingcontract",
+          "type": "string"
+        }
+      },
+      "required": [
+        "verifyingContract"
+      ],
+      "title": "Domain",
+      "type": "object"
+    },
+    "SignedPDR": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "build_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Build Id",
+          "type": "string"
+        },
+        "domain": {
+          "$ref": "#/$defs/Domain"
+        },
+        "approval": {
+          "$ref": "#/$defs/Approval"
+        },
+        "signature": {
+          "pattern": "^0x[0-9a-fA-F]{130}$",
+          "title": "Signature",
+          "type": "string"
+        },
+        "typed_data_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Typed Data Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "build_id",
+        "domain",
+        "approval",
+        "signature",
+        "typed_data_hash"
+      ],
+      "title": "SignedPDR",
+      "type": "object"
+    },
+    "ExecutionResult": {
+      "additionalProperties": false,
+      "properties": {
+        "build_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Build Id",
+          "type": "string"
+        },
+        "decision_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "chain_id": {
+          "const": 43113,
+          "title": "Chain Id",
+          "type": "integer"
+        },
+        "tx_hash": {
+          "anyOf": [
+            {
+              "pattern": "^0x[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tx Hash"
+        },
+        "status": {
+          "enum": [
+            "SUBMITTED",
+            "PENDING",
+            "CONFIRMED",
+            "REVERTED",
+            "FAILED_TO_SUBMIT",
+            "STALE_REQUIRES_REEVALUATION"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "block_number": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Number"
+        },
+        "gas_used": {
+          "anyOf": [
+            {
+              "pattern": "^(0|[1-9][0-9]{0,77})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gas Used"
+        },
+        "actual_token_in_delta_base_units": {
+          "anyOf": [
+            {
+              "pattern": "^(0|-?[1-9][0-9]{0,77})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actual Token In Delta Base Units"
+        },
+        "actual_token_out_delta_base_units": {
+          "anyOf": [
+            {
+              "pattern": "^(0|-?[1-9][0-9]{0,77})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actual Token Out Delta Base Units"
+        },
+        "revert_reason": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revert Reason"
+        },
+        "event_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Event Refs",
+          "type": "array"
+        },
+        "artifact_refs": {
+          "items": {
+            "maxLength": 250,
+            "pattern": "^artifact://[a-zA-Z0-9_-]+(/[a-zA-Z0-9_.-]+){1,8}$",
+            "type": "string"
+          },
+          "title": "Artifact Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "build_id",
+        "decision_id",
+        "chain_id",
+        "tx_hash",
+        "status"
+      ],
+      "title": "ExecutionResult",
+      "type": "object"
+    },
+    "ExecutionSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "tx_hash": {
+          "anyOf": [
+            {
+              "pattern": "^0x[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tx Hash"
+        },
+        "status": {
+          "enum": [
+            "SUBMITTED",
+            "PENDING",
+            "CONFIRMED",
+            "REVERTED",
+            "FAILED_TO_SUBMIT",
+            "STALE_REQUIRES_REEVALUATION"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tx_hash",
+        "status"
+      ],
+      "title": "ExecutionSubmission",
+      "type": "object"
+    }
+  }
+}

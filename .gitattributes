@@ -1,0 +1,2 @@
+fixtures/eip712_golden/manifest.jcs -text
+fixtures/eip712_golden/report.json -text

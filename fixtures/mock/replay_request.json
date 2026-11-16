@@ -1,0 +1,6 @@
+{
+  "source": "MOCK_FIXTURE",
+  "scenario": "normal_swap",
+  "request": {"decision_id": "$previous_approved_decision_id"},
+  "expected_error": "ATTESTATION_ALREADY_ISSUED"
+}

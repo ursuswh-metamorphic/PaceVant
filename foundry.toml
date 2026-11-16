@@ -1,0 +1,7 @@
+[profile.default]
+src = "tests/integration/solidity"
+test = "tests/integration/solidity"
+out = "data/forge-out"
+cache_path = "data/forge-cache"
+solc_version = "0.8.30"
+fs_permissions = [{ access = "read", path = "./fixtures/eip712_golden" }]

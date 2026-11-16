@@ -1,0 +1,23 @@
+{
+  "mandate_id": "mandate_demo",
+  "version": 1,
+  "chain_id": 43113,
+  "vault_address": "0x1111111111111111111111111111111111111111",
+  "owner": "0x6666666666666666666666666666666666666666",
+  "router": "0x2222222222222222222222222222222222222222",
+  "token_in": "0x3333333333333333333333333333333333333333",
+  "token_out": "0x4444444444444444444444444444444444444444",
+  "policy_hash": "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+  "max_usdc_per_swap_base_units": "500000000",
+  "max_usdc_spend_per_day_base_units": "1000000000",
+  "max_daily_execution_cost_usd_e8": "5000000000",
+  "max_avax_exposure_bps": 2500,
+  "max_slippage_bps": 100,
+  "max_replans": 2,
+  "expires_at": 4102444800,
+  "status": "ACTIVE",
+  "required_stress": {
+    "reserve_shift_mild": "SUCCESS_REQUIRED",
+    "reserve_shift_adverse": "PROTECTED_REVERT_ALLOWED"
+  }
+}

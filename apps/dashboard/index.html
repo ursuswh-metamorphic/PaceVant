@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PaceVant · Treasury Control Plane</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell mast-content">
+      <a class="identity" href="/" aria-label="PaceVant, trang chủ"><span class="brand-mark"></span>PaceVant</a>
+      <div class="mast-right"><a href="/docs">API</a><span class="environment"><i></i> Local mock</span></div>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="intro" aria-labelledby="title">
+      <div>
+        <p class="overline">AI TREASURY SECURITY</p>
+        <h1 id="title">Treasury Control Plane</h1>
+        <p>Kiểm tra đề xuất swap, giới hạn danh mục và chữ ký PDR.</p>
+      </div>
+      <p class="notice"><i></i> Dữ liệu và receipt mô phỏng</p>
+    </section>
+
+    <section class="summary" aria-label="Mandate và danh mục">
+      <article class="metric">
+        <span>Mandate</span><strong id="mandate">—</strong><small id="policy-status">Đang tải chính sách</small>
+      </article>
+      <article class="metric">
+        <span>Danh mục mẫu</span><strong id="portfolio-value">—</strong><small id="portfolio-balances">Đang tải số dư</small>
+      </article>
+      <article class="metric">
+        <span>Trần WAVAX</span><strong id="exposure-limit">—</strong><small id="current-exposure">Tỷ trọng theo giá oracle test</small>
+      </article>
+      <article class="metric">
+        <span>Hạn mức USDC</span><strong id="day-limit">—</strong><small id="trade-limit">Mỗi ngày UTC</small>
+      </article>
+    </section>
+
+    <div class="workspace">
+      <aside class="panel scenario-panel" aria-labelledby="scenario-title">
+        <div class="panel-heading"><h2 id="scenario-title">Kịch bản</h2></div>
+        <form id="run-form">
+          <fieldset id="scenarios">
+            <legend class="sr-only">Chọn kịch bản</legend>
+            <label><input type="radio" name="scenario" value="normal_swap" checked>
+              <span><b>Swap hợp lệ</b><small>500 USDC trong giới hạn</small></span></label>
+            <label><input type="radio" name="scenario" value="exposure_limit">
+              <span><b>Vượt trần WAVAX</b><small>500 USDC đưa tỷ trọng lên 28%</small></span></label>
+            <label><input type="radio" name="scenario" value="injection">
+              <span><b>Prompt injection</b><small>Market feed yêu cầu đổi recipient</small></span></label>
+            <label><input type="radio" name="scenario" value="stale_price">
+              <span><b>Giá đã cũ</b><small>Giá oracle vượt thời hạn</small></span></label>
+          </fieldset>
+          <button type="submit" id="run" disabled>Chạy kiểm tra <span aria-hidden="true">→</span></button>
+        </form>
+        <p class="error" id="error" role="alert" hidden></p>
+      </aside>
+
+      <section class="panel workflow-panel" aria-labelledby="workflow-title">
+        <div class="panel-heading workflow-heading">
+          <div><h2 id="workflow-title">Quy trình kiểm tra</h2><p id="workflow-id">Chưa có lượt chạy</p></div>
+          <span class="status idle" id="workflow-status" aria-live="polite">Sẵn sàng</span>
+        </div>
+        <div class="empty" id="empty">
+          <div class="empty-icon" aria-hidden="true"><i></i><i></i><i></i></div>
+          <p id="empty-message">Chọn một kịch bản và chạy kiểm tra.</p>
+        </div>
+        <div id="workflow-body" hidden>
+          <div id="attempts" class="attempts" aria-label="Các lần đề xuất"></div>
+          <div class="workflow-grid">
+            <ol id="timeline" class="timeline" aria-label="Các bước kiểm tra"></ol>
+            <div id="details" class="details" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer class="shell"><span>PaceVant</span><span>Shared Integration Contract v1.1 · EIP-712</span></footer>
+</body>
+</html>

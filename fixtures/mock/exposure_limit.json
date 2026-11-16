@@ -1,0 +1,7 @@
+{
+  "source": "MOCK_FIXTURE",
+  "goal": "Buy WAVAX with 500 USDC",
+  "usdc_base_units": "7700000000",
+  "wavax_base_units": "115000000000000000000",
+  "expected_verdicts": ["REPLAN", "APPROVE"]
+}

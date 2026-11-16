@@ -1,0 +1,223 @@
+import json
+import sqlite3
+from contextlib import contextmanager
+from pathlib import Path
+
+from app.errors import ControlError
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS workflows (
+    id TEXT PRIMARY KEY,
+    status TEXT NOT NULL,
+    body TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS events (
+    sequence INTEGER PRIMARY KEY AUTOINCREMENT,
+    workflow_id TEXT NOT NULL REFERENCES workflows(id),
+    stage TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    body TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS decisions (
+    id TEXT PRIMARY KEY,
+    workflow_id TEXT NOT NULL REFERENCES workflows(id),
+    intent_id TEXT NOT NULL UNIQUE,
+    build_id TEXT UNIQUE,
+    snapshot_id TEXT UNIQUE,
+    body TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS decisions_no_update
+BEFORE UPDATE ON decisions BEGIN SELECT RAISE(ABORT, 'immutable decision'); END;
+CREATE TRIGGER IF NOT EXISTS decisions_no_delete
+BEFORE DELETE ON decisions BEGIN SELECT RAISE(ABORT, 'immutable decision'); END;
+
+CREATE TABLE IF NOT EXISTS attestations (
+    decision_id TEXT PRIMARY KEY REFERENCES decisions(id),
+    scope TEXT NOT NULL,
+    nonce TEXT NOT NULL,
+    state TEXT NOT NULL,
+    issued_at INTEGER NOT NULL,
+    expires_at INTEGER NOT NULL,
+    signed_pdr TEXT NOT NULL,
+    UNIQUE(scope, nonce)
+);
+CREATE INDEX IF NOT EXISTS attestations_scope_state ON attestations(scope, state);
+"""
+
+
+def dump(value):
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+
+class Store:
+    def __init__(self, path: Path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.path = path
+        with self.connection() as conn:
+            conn.execute("PRAGMA journal_mode = WAL")
+            conn.executescript(SCHEMA)
+
+    @contextmanager
+    def connection(self, *, write=False):
+        conn = sqlite3.connect(self.path, timeout=10)
+        conn.row_factory = sqlite3.Row
+        try:
+            conn.execute("PRAGMA foreign_keys = ON")
+            if write:
+                conn.execute("BEGIN IMMEDIATE")
+            yield conn
+            conn.commit()
+        except BaseException:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
+    def start(self, id_, metadata):
+        with self.connection(write=True) as conn:
+            conn.execute("INSERT INTO workflows VALUES (?, 'STARTED', ?)", (id_, dump(metadata)))
+
+    @staticmethod
+    def _event(conn, id_, stage, now, data):
+        conn.execute(
+            "INSERT INTO events(workflow_id, stage, created_at, body) VALUES (?, ?, ?, ?)",
+            (id_, stage, now, dump(data)),
+        )
+        conn.execute("UPDATE workflows SET status=? WHERE id=?", (stage, id_))
+
+    def event(self, id_, stage, now, **data):
+        with self.connection(write=True) as conn:
+            self._event(conn, id_, stage, now, data)
+
+    def workflow(self, id_):
+        with self.connection() as conn:
+            row = conn.execute("SELECT * FROM workflows WHERE id=?", (id_,)).fetchone()
+            if row is None:
+                raise ControlError("WORKFLOW_NOT_FOUND", 404)
+            events = conn.execute(
+                "SELECT * FROM events WHERE workflow_id=? ORDER BY sequence", (id_,)
+            ).fetchall()
+        return {
+            "workflow_id": id_,
+            "status": row["status"],
+            **json.loads(row["body"]),
+            "timeline": [
+                {"stage": event["stage"], "at": event["created_at"], **json.loads(event["body"])}
+                for event in events
+            ],
+        }
+
+    def record(self, workflow_id, stage, decision, bundle, suggested_amount, evaluation):
+        with self.connection(write=True) as conn:
+            try:
+                conn.execute(
+                    "INSERT INTO decisions VALUES (?, ?, ?, ?, ?, ?)",
+                    (
+                        decision.decision_id,
+                        workflow_id,
+                        decision.intent_id,
+                        decision.build_id,
+                        decision.snapshot_id,
+                        dump(bundle),
+                    ),
+                )
+            except sqlite3.IntegrityError:
+                raise ControlError("DECISION_REFERENCE_ALREADY_USED") from None
+            event_data = {"decision": decision.model_dump()}
+            if stage == "REPLAN_REQUIRED" and suggested_amount:
+                event_data["suggested_amount_base_units"] = str(suggested_amount)
+            if evaluation:
+                self._event(conn, workflow_id, "EVALUATED", decision.created_at, evaluation)
+            self._event(conn, workflow_id, stage, decision.created_at, event_data)
+
+    def decision(self, *, decision_id=None, intent_id=None, build_id=None):
+        filters = [
+            (key, value)
+            for key, value in [
+                ("id", decision_id),
+                ("intent_id", intent_id),
+                ("build_id", build_id),
+            ]
+            if value is not None
+        ]
+        if not filters:
+            raise ValueError("decision reference required")
+        where = " AND ".join(f"{key}=?" for key, _ in filters)
+        with self.connection() as conn:
+            row = conn.execute(
+                f"SELECT workflow_id, body FROM decisions WHERE {where}",
+                tuple(value for _, value in filters),
+            ).fetchone()
+        if row is None:
+            raise ControlError("DECISION_NOT_FOUND", 404)
+        return row["workflow_id"], json.loads(row["body"])
+
+    def history_version(self):
+        with self.connection() as conn:
+            row = conn.execute(
+                "SELECT COALESCE(MAX(sequence), 0) FROM events WHERE stage='CONFIRMED'"
+            ).fetchone()
+        return row[0]
+
+    def attempts(self, workflow_id):
+        with self.connection() as conn:
+            rows = conn.execute(
+                "SELECT body FROM decisions WHERE workflow_id=? ORDER BY rowid", (workflow_id,)
+            ).fetchall()
+        return [json.loads(row["body"]) for row in rows]
+
+    def reserve_signature(self, *, id_, workflow_id, scope, nonce, now, expires_at, sign):
+        with self.connection(write=True) as conn:
+            issued = conn.execute(
+                "SELECT 1 FROM attestations WHERE decision_id=?", (id_,)
+            ).fetchone()
+            if issued:
+                raise ControlError("ATTESTATION_ALREADY_ISSUED")
+            if conn.execute(
+                "SELECT 1 FROM attestations WHERE scope=? AND "
+                "(state IN ('SUBMITTING', 'SUBMITTED', 'RECEIPT_MISMATCH') "
+                "OR (state='ATTESTED' AND expires_at>?))",
+                (scope, now),
+            ).fetchone():
+                raise ControlError("VAULT_APPROVAL_IN_FLIGHT")
+            if conn.execute(
+                "SELECT 1 FROM attestations WHERE scope=? AND nonce=?", (scope, nonce)
+            ).fetchone():
+                raise ControlError("NONCE_REPLAY")
+            # Once the SQLite write lock has been acquired, recheck chain, evidence and
+            # economic state before signing. No other local approval can pass the gate meanwhile.
+            signed, issued_at = sign()
+            conn.execute(
+                "INSERT INTO attestations VALUES (?, ?, ?, 'ATTESTED', ?, ?, ?)",
+                (
+                    id_,
+                    scope,
+                    nonce,
+                    issued_at,
+                    expires_at,
+                    signed.model_dump_json(),
+                ),
+            )
+            self._event(
+                conn,
+                workflow_id,
+                "ATTESTED",
+                issued_at,
+                {
+                    "decision_id": id_,
+                    "typed_data_hash": signed.typed_data_hash,
+                    "expires_at": expires_at,
+                    "nonce": nonce,
+                },
+            )
+        return signed
+
+    def transition(self, workflow_id, decision_id, expected, state, now, **details):
+        with self.connection(write=True) as conn:
+            cursor = conn.execute(
+                "UPDATE attestations SET state=? WHERE decision_id=? AND state=?",
+                (state, decision_id, expected),
+            )
+            if cursor.rowcount:
+                self._event(conn, workflow_id, state, now, {"decision_id": decision_id, **details})
+            return bool(cursor.rowcount)

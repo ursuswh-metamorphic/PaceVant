@@ -1,0 +1,170 @@
+{
+  "built_transaction": {
+    "build_id": "build_golden",
+    "intent_id": "intent_golden",
+    "chain_id": 43113,
+    "vault_address": "0x1111111111111111111111111111111111111111",
+    "router": "0x2222222222222222222222222222222222222222",
+    "token_in": "0x3333333333333333333333333333333333333333",
+    "token_out": "0x4444444444444444444444444444444444444444",
+    "amount_in_base_units": "500000000",
+    "min_amount_out_base_units": "24750000000000000000",
+    "router_calldata": "0xaabbccdd01020304",
+    "calldata_hash": "0xa427df014f1c017d1a5951de6141f0307ae880a5d96c65fa87a3fbab68e739a4",
+    "policy_hash": "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    "nonce": "1001",
+    "deadline": 2000000030,
+    "quote_ref": "quote_golden",
+    "adapter_version": "mock-swap-v1"
+  },
+  "signed_pdr": {
+    "decision_id": "decision_golden",
+    "build_id": "build_golden",
+    "domain": {
+      "name": "TreasuryPolicyVault",
+      "version": "1",
+      "chainId": 43113,
+      "verifyingContract": "0x1111111111111111111111111111111111111111"
+    },
+    "approval": {
+      "policyHash": "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "evidenceRoot": "0xb4ecbe8c6c22d8c3510d0ac24b588ec429d27863a7383da5c852fdbb0212287d",
+      "router": "0x2222222222222222222222222222222222222222",
+      "tokenIn": "0x3333333333333333333333333333333333333333",
+      "tokenOut": "0x4444444444444444444444444444444444444444",
+      "amountIn": "500000000",
+      "minAmountOut": "24750000000000000000",
+      "calldataHash": "0xa427df014f1c017d1a5951de6141f0307ae880a5d96c65fa87a3fbab68e739a4",
+      "nonce": "1001",
+      "deadline": "2000000030"
+    },
+    "signature": "0x4d4e2d99063d4a679bf37387e49648f197ee539d8e95fb4d522286df9ad229ea5af4917f6606974a73fc245933047c20f69991c39f05da0848509249b24c2d191b",
+    "typed_data_hash": "0x21828c89da9624c8c329dee3f75609b5938e48003bda67f6e9476ad0dfb83b9e"
+  },
+  "signer": "0x2b5ad5c4795c026514f8317c7a215e218dccd6cf",
+  "typed_data": {
+    "types": {
+      "EIP712Domain": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "chainId",
+          "type": "uint256"
+        },
+        {
+          "name": "verifyingContract",
+          "type": "address"
+        }
+      ],
+      "Approval": [
+        {
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "evidenceRoot",
+          "type": "bytes32"
+        },
+        {
+          "name": "router",
+          "type": "address"
+        },
+        {
+          "name": "tokenIn",
+          "type": "address"
+        },
+        {
+          "name": "tokenOut",
+          "type": "address"
+        },
+        {
+          "name": "amountIn",
+          "type": "uint256"
+        },
+        {
+          "name": "minAmountOut",
+          "type": "uint256"
+        },
+        {
+          "name": "calldataHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "nonce",
+          "type": "uint256"
+        },
+        {
+          "name": "deadline",
+          "type": "uint256"
+        }
+      ]
+    },
+    "primaryType": "Approval",
+    "domain": {
+      "name": "TreasuryPolicyVault",
+      "version": "1",
+      "chainId": 43113,
+      "verifyingContract": "0x1111111111111111111111111111111111111111"
+    },
+    "message": {
+      "policyHash": "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "evidenceRoot": "0xb4ecbe8c6c22d8c3510d0ac24b588ec429d27863a7383da5c852fdbb0212287d",
+      "router": "0x2222222222222222222222222222222222222222",
+      "tokenIn": "0x3333333333333333333333333333333333333333",
+      "tokenOut": "0x4444444444444444444444444444444444444444",
+      "amountIn": "500000000",
+      "minAmountOut": "24750000000000000000",
+      "calldataHash": "0xa427df014f1c017d1a5951de6141f0307ae880a5d96c65fa87a3fbab68e739a4",
+      "nonce": "1001",
+      "deadline": "2000000030"
+    }
+  },
+  "simulation_evidence": {
+    "schema_version": "1.1",
+    "intent_id": "intent_golden",
+    "build_id": "build_golden",
+    "nonce": "1001",
+    "deadline": 2000000030,
+    "simulation_mode": "MOCK",
+    "source": "MOCK_FIXTURE",
+    "baseline": {
+      "execution_status": "SUCCESS",
+      "token_in_delta_base_units": "-500000000",
+      "token_out_delta_base_units": "25000000000000000000",
+      "unexpected_transfer": false,
+      "unauthorized_approval": false,
+      "gas_used": "210000"
+    },
+    "stress_tests": [
+      {
+        "scenario_id": "reserve_shift_mild",
+        "status": "SUCCESS_SAFE",
+        "output_base_units": "24950000000000000000"
+      },
+      {
+        "scenario_id": "reserve_shift_adverse",
+        "status": "PROTECTED_REVERT",
+        "revert_reason": "MIN_OUTPUT_NOT_MET"
+      }
+    ],
+    "chain_id": 43113,
+    "vault_address": "0x1111111111111111111111111111111111111111",
+    "policy_hash": "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    "calldata_hash": "0xa427df014f1c017d1a5951de6141f0307ae880a5d96c65fa87a3fbab68e739a4",
+    "fork_block": 12345678,
+    "bytecode_hash": "0xb1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+    "parser_version": "extractor-v1",
+    "verification_status": "COMPLETE",
+    "artifact_refs": [
+      "artifact://simulation/build_golden/report.json"
+    ],
+    "evidence_manifest_ref": "artifact://simulation/build_golden/manifest.json",
+    "evidence_root": "0xb4ecbe8c6c22d8c3510d0ac24b588ec429d27863a7383da5c852fdbb0212287d"
+  }
+}
