@@ -10,10 +10,11 @@ sys.path[:0] = [str(ROOT / "apps" / "control-plane"), str(ROOT / "packages" / "c
 def main():
     from pydantic import TypeAdapter, ValidationError
 
+    from app.domain import Id
     from app.errors import ControlError
     from app.orchestration.service import ControlPlane
     from app.settings import Settings
-    from treasury_contract.wire import Hash, Id
+    from treasury_contracts.models import Hash
 
     parser = argparse.ArgumentParser(description="Recover a workflow from a B execution receipt.")
     parser.add_argument("workflow_id")

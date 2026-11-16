@@ -4,10 +4,12 @@ from time import monotonic
 
 from eth_keys import keys
 
-from app.attestor.typed import approval_for, digest, sign_digest
+from app.attestor.typed import sign_digest
+from app.domain import SecurityDecision
 from app.errors import ControlError
 from app.storage import Store
-from treasury_contract.wire import BuiltTransaction, Domain, SecurityDecision, SignedPDR
+from treasury_contracts.crypto import approval_for, digest, domain_for
+from treasury_contracts.models import BuiltTransaction, SignedPDR
 
 
 class Attestor:
@@ -56,7 +58,7 @@ class Attestor:
             raise ControlError("STALE_REQUIRES_REEVALUATION")
         if decision.simulation_evidence_root is None:
             raise ControlError("SIMULATION_INCOMPLETE")
-        domain = Domain(verifyingContract=built.vault_address, chainId=built.chain_id)
+        domain = domain_for(built)
         approval = approval_for(built, decision.simulation_evidence_root)
         message_hash = digest(domain, approval)
         return SignedPDR(
@@ -64,6 +66,6 @@ class Attestor:
             build_id=built.build_id,
             domain=domain,
             approval=approval,
-            signature=sign_digest(self._key, message_hash),
-            typed_data_hash=f"0x{message_hash.hex()}",
+            signature=sign_digest(self._key, bytes.fromhex(message_hash[2:])),
+            typed_data_hash=message_hash,
         ), now

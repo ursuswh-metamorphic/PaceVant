@@ -2,7 +2,7 @@ import re
 from uuid import uuid4
 
 from app.models import Mandate
-from treasury_contract.wire import TransactionProposal
+from treasury_contracts.models import TransactionProposal
 
 VERSION = "rules-v1"
 GOAL = re.compile(

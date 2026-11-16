@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 from app import alignment, economic_risk, experience, planner, portfolio, sde
 from app.attestor import Attestor
+from app.domain import EconomicRiskAssessment, PortfolioSnapshot, SecurityDecision
 from app.errors import ControlError
 from app.models import Alignment, ChainBalances, Mandate, OraclePrice
 from app.orchestration.client import ExecutionClient, RestExecutionClient
@@ -19,14 +20,7 @@ from app.orchestration.fuji import FujiVerifier
 from app.orchestration.mock import MockExecutionClient
 from app.settings import FIXTURES, Settings
 from app.storage import Store
-from treasury_contract.wire import (
-    BuiltTransaction,
-    EconomicRiskAssessment,
-    PortfolioSnapshot,
-    SecurityDecision,
-    SimulationEvidence,
-    TransactionProposal,
-)
+from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 STAGES = {
     "APPROVE": "APPROVED",
@@ -72,8 +66,8 @@ class ControlPlane:
         if settings.mode != "MOCK":
             self.http = httpx.Client(
                 base_url=settings.execution_url,
-                headers={"Authorization": f"Bearer {settings.execution_token}"},
-                timeout=httpx.Timeout(8, connect=3),
+                headers={"X-API-Key": settings.execution_token},
+                timeout=httpx.Timeout(15, connect=3),
                 trust_env=False,
                 follow_redirects=False,
             )
@@ -120,7 +114,7 @@ class ControlPlane:
 
     def client(self, workflow_id: str, mandate: Mandate, scenario: str | None = None):
         if self.http:
-            return RestExecutionClient(self.http, workflow_id)
+            return RestExecutionClient(self.http, workflow_id, self.settings, self.store)
         if workflow_id in self.mock_clients:
             return self.mock_clients[workflow_id]
         return MockExecutionClient(
@@ -138,13 +132,25 @@ class ControlPlane:
     def standalone_proposal(self, goal, mandate_id):
         mandate = self.mandate(mandate_id)
         client = self.client(f"propose_{uuid4().hex}", mandate)
-        issues = portfolio.policy_issues(mandate, client.context(), self.clock())
+        context = client.context()
+        issues = portfolio.policy_issues(mandate, context, self.clock())
         if issues:
             raise ControlError(issues[0])
         amount = planner.requested_amount(goal)
         if not amount:
             raise ControlError("TASK_UNCERTAIN", 422)
-        return planner.propose(mandate, amount, min(self.clock() + sde.TTL, mandate.expires_at))
+        return planner.propose(mandate, amount, self._deadline(mandate, self.clock(), context))
+
+    @staticmethod
+    def _deadline(mandate, now, context=None):
+        deadline = min(now + sde.TTL, mandate.expires_at, (now // 86400 + 1) * 86400 - 1)
+        if context is not None:
+            deadline = min(
+                deadline,
+                context.block_timestamp + min(sde.TTL, context.max_approval_ttl),
+                context.policy_expires_at or mandate.expires_at,
+            )
+        return deadline
 
     def treasury(self, request_id):
         mandate = self.mandate()
@@ -210,7 +216,8 @@ class ControlPlane:
         fixture = client.fixture if isinstance(client, MockExecutionClient) else {}
         for index in range(mandate.max_replans + 1):
             now = self.clock()
-            deadline = min(now + sde.TTL, mandate.expires_at, (now // 86400 + 1) * 86400 - 1)
+            context = client.context() if isinstance(client, RestExecutionClient) else None
+            deadline = self._deadline(mandate, now, context)
             proposed = planner.propose(
                 mandate,
                 amount,
@@ -224,7 +231,7 @@ class ControlPlane:
             self.store.event(
                 workflow_id, aligned.verdict, self.clock(), alignment=aligned.model_dump()
             )
-            decision = self._evaluate(workflow_id, mandate, client, proposed, aligned)
+            decision = self._evaluate(workflow_id, mandate, client, proposed, aligned, context)
             if decision.verdict == "APPROVE":
                 signed = self.attest(decision.decision_id)
                 self._submit(workflow_id, decision, signed)
@@ -236,12 +243,11 @@ class ControlPlane:
                 return
             amount = replacement
 
-    def _evaluate(self, workflow_id, mandate, client, proposal, aligned):
+    def _evaluate(self, workflow_id, mandate, client, proposal, aligned, context=None):
         built = sim = evaluation = balances = snapshot = None
         issues = []
-        context = None
         try:
-            context = client.context()
+            context = context or client.context()
             issues = portfolio.policy_issues(mandate, context, self.clock())
             if aligned.verdict == "ALIGNED" and not issues:
                 if int(proposal.amount_in_base_units) > int(mandate.max_usdc_per_swap_base_units):
@@ -253,7 +259,7 @@ class ControlPlane:
                 self.store.event(workflow_id, "BUILT", self.clock(), build=built.model_dump())
                 sim = client.simulate(built)
                 balances = client.balances()
-                context = client.context(nonce=built.nonce, fork_block=sim.fork_block)
+                context = client.context(built=built, fork_block=sim.fork_block)
                 issues = self.verify_evidence(client, built, sim, context)
                 self.store.event(
                     workflow_id,
@@ -270,7 +276,16 @@ class ControlPlane:
                         mandate, proposal, built, sim, snapshot, balances, context, self.clock()
                     )
         except ControlError as error:
-            issues.append(error.code)
+            issues.append(
+                "TRADE_SIZE_LIMIT"
+                if error.code in {"DAILY_SPEND_LIMIT", "INSUFFICIENT_BALANCE"}
+                else error.code
+            )
+            if error.code in {"DAILY_SPEND_LIMIT", "INSUFFICIENT_BALANCE"}:
+                try:
+                    balances = client.balances()
+                except ControlError as balance_error:
+                    issues.append(balance_error.code)
 
         decision = sde.decide(
             mandate,
@@ -288,6 +303,16 @@ class ControlPlane:
             suggested = min(
                 int(mandate.max_usdc_per_swap_base_units), int(proposal.amount_in_base_units) - 1
             )
+            if balances is not None:
+                suggested = min(
+                    suggested,
+                    int(balances.usdc_base_units),
+                    max(
+                        0,
+                        int(mandate.max_usdc_spend_per_day_base_units)
+                        - int(balances.daily_spent_usdc_base_units),
+                    ),
+                )
         evidence = (
             {
                 "risk": evaluation.risk.model_dump(),
@@ -374,7 +399,7 @@ class ControlPlane:
         client = self.client(approved.workflow_id, mandate)
         verify_build(mandate, approved.proposal, built)
         balances = client.balances()
-        context = client.context(nonce=built.nonce, fork_block=sim.fork_block)
+        context = client.context(built=built, fork_block=sim.fork_block)
         if portfolio.policy_issues(mandate, context, self.clock()):
             raise ControlError("STALE_REQUIRES_REEVALUATION")
         if (
@@ -389,6 +414,7 @@ class ControlPlane:
             "wavax_base_units",
             "daily_spent_usdc_base_units",
             "daily_execution_cost_usd_e8",
+            "daily_execution_cost_wei",
             "utc_day",
         )
         if any(
@@ -530,7 +556,7 @@ class ControlPlane:
                     updated = client.balances()
                     if (updated.chain_id, updated.vault_address) == (
                         built.chain_id,
-                        built.vault_address,
+                        built.vault_address.lower(),
                     ) and updated.block_number >= receipt.block_number:
                         details["post_execution_balances"] = updated.model_dump()
                 except ControlError:
@@ -544,6 +570,19 @@ class ControlPlane:
                 details["reason_codes"] = ["PROTECTED_REVERT"]
         else:
             state = "RECEIPT_MISMATCH"
+        if state in {"CONFIRMED", "REVERTED"} and isinstance(client, RestExecutionClient):
+            try:
+                utc_day, gas_cost_wei = client.execution_fee(receipt)
+                details["execution_fee"] = {
+                    "chain_id": built.chain_id,
+                    "vault_address": built.vault_address.lower(),
+                    "utc_day": utc_day,
+                    "gas_cost_wei": gas_cost_wei,
+                }
+            except ControlError as error:
+                if error.code != "RECEIPT_MISMATCH":
+                    return
+                state = "RECEIPT_MISMATCH"
         self.store.transition(workflow_id, id_, "SUBMITTED", state, self.clock(), **details)
 
     def workflow(self, id_):
@@ -567,12 +606,12 @@ class ControlPlane:
 
     def _expire_unknown_submission(self, workflow_id, decision_id, built, client):
         try:
-            context = client.context(nonce=built.nonce)
+            context = client.context(built=built)
         except ControlError:
             return
         if (
             (context.chain_id, context.vault_address, context.deployment)
-            == (built.chain_id, built.vault_address, self.settings.mode)
+            == (built.chain_id, built.vault_address.lower(), self.settings.mode)
             and portfolio.fresh(context.block_timestamp, self.clock())
             and context.block_timestamp > built.deadline
             and context.nonce_used is False

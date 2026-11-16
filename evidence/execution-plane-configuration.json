@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "configuration_file": ".env",
+  "local_key_matches_deployment": true,
+  "fuji_legacy_wallet_references_resolve": true,
+  "retired_local_env_removed": true,
+  "api_chain_id": 31337,
+  "artifacts_verified": true,
+  "historical_receipt": "CONFIRMED",
+  "missing_fuji_configuration": [
+    "B_FUJI_ATTESTOR_ADDRESS"
+  ]
+}

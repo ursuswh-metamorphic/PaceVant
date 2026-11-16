@@ -107,6 +107,20 @@ class Store:
             ],
         }
 
+    def execution_gas_spent(self, chain_id: int, vault_address: str, utc_day: int) -> int:
+        with self.connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT json_extract(body, '$.execution_fee.gas_cost_wei')
+                FROM events WHERE stage IN ('CONFIRMED', 'REVERTED')
+                  AND json_extract(body, '$.execution_fee.chain_id') = ?
+                  AND json_extract(body, '$.execution_fee.vault_address') = ?
+                  AND json_extract(body, '$.execution_fee.utc_day') = ?
+                """,
+                (chain_id, vault_address, utc_day),
+            ).fetchall()
+        return sum(int(row[0]) for row in rows)
+
     def record(self, workflow_id, stage, decision, bundle, suggested_amount, evaluation):
         with self.connection(write=True) as conn:
             try:

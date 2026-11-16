@@ -1,7 +1,7 @@
 from uuid import uuid4
 
+from app.domain import PortfolioSnapshot
 from app.models import ChainBalances, ChainContext, Mandate, OraclePrice
-from treasury_contract.wire import PortfolioSnapshot
 
 MAX_AGE = 60
 MAX_BLOCK_DRIFT = 3
@@ -15,9 +15,10 @@ def policy_issues(mandate: Mandate, context: ChainContext, now: int) -> list[str
     if (
         mandate.status != "ACTIVE"
         or mandate.expires_at <= now
+        or not context.policy_active
+        or (context.policy_expires_at is not None and context.policy_expires_at <= now)
         or context.paused
         or context.policy_hash != mandate.policy_hash
-        or context.policy_version != mandate.version
     ):
         return ["POLICY_REVOKED"]
     fields = (
@@ -31,6 +32,8 @@ def policy_issues(mandate: Mandate, context: ChainContext, now: int) -> list[str
         "max_usdc_spend_per_day_base_units",
     )
     if any(getattr(mandate, field) != getattr(context, field) for field in fields):
+        return ["HASH_MISMATCH"]
+    if mandate.max_slippage_bps > context.max_slippage_bps:
         return ["HASH_MISMATCH"]
     if not fresh(context.block_timestamp, now):
         return ["STALE_SNAPSHOT"]

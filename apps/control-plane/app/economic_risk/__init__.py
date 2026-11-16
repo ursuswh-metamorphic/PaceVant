@@ -1,14 +1,9 @@
 from dataclasses import dataclass
 
+from app.domain import EconomicRiskAssessment, PortfolioSnapshot
 from app.models import ChainBalances, ChainContext, Mandate
 from app.portfolio import MAX_BLOCK_DRIFT, fresh
-from treasury_contract.wire import (
-    BuiltTransaction,
-    EconomicRiskAssessment,
-    PortfolioSnapshot,
-    SimulationEvidence,
-    TransactionProposal,
-)
+from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 USDC_SCALE = 10**6
 WAVAX_SCALE = 10**18
@@ -102,11 +97,9 @@ def evaluate(
     fair_min_out = (
         amount * usdc_value_per_unit * (BPS - proposal.slippage_bps) // (wavax_price * BPS)
     )
-    gas_cost = (
-        int(evidence.baseline.gas_used) * int(balances.max_fee_per_gas_wei) * wavax_price
-        + WAVAX_SCALE
-        - 1
-    ) // WAVAX_SCALE
+    gas_wei = int(evidence.baseline.gas_used) * int(balances.max_fee_per_gas_wei)
+    gas_wei += int(balances.daily_execution_cost_wei)
+    gas_cost = (gas_wei * wavax_price + WAVAX_SCALE - 1) // WAVAX_SCALE
 
     violations = []
     if amount > min(max_trade, remaining):

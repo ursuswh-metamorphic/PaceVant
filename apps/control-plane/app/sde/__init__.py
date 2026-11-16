@@ -1,14 +1,9 @@
 from uuid import uuid4
 
+from app.domain import EconomicRiskAssessment, SecurityDecision
 from app.models import Alignment, ChainContext, Mandate
 from app.portfolio import MAX_BLOCK_DRIFT, policy_issues
-from treasury_contract.wire import (
-    BuiltTransaction,
-    EconomicRiskAssessment,
-    SecurityDecision,
-    SimulationEvidence,
-    TransactionProposal,
-)
+from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 TTL = 30
 HARD = {
@@ -64,7 +59,10 @@ def simulation_issues(mandate: Mandate, built: BuiltTransaction, evidence: Simul
         ):
             issues.append("SIMULATION_INCOMPLETE")
         if test.status == "PROTECTED_REVERT":
-            if test.revert_reason != "MIN_OUTPUT_NOT_MET" or test.output_base_units is not None:
+            if test.revert_reason != "MIN_OUTPUT_NOT_MET" or test.output_base_units not in (
+                None,
+                "0",
+            ):
                 issues.append("SIMULATION_INCOMPLETE")
             elif mandate.required_stress.get(test.scenario_id) == "SUCCESS_REQUIRED":
                 issues.append("REQUIRED_STRESS_NOT_SATISFIED")

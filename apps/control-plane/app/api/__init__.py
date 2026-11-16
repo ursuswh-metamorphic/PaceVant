@@ -11,20 +11,12 @@ from pydantic import StringConstraints
 from starlette.exceptions import HTTPException
 
 from app.alignment import check
+from app.domain import EconomicRiskAssessment, Id, SecurityDecision
 from app.errors import ControlError
 from app.models import Alignment, Goal, WorkflowRequest
 from app.orchestration.service import ControlPlane, utc_now
 from app.settings import DASHBOARD, Settings
-from treasury_contract.wire import (
-    EconomicRiskAssessment,
-    Hash,
-    Id,
-    SecurityDecision,
-    SignedPDR,
-    SimulationEvidence,
-    TransactionProposal,
-    Wire,
-)
+from treasury_contracts.models import Hash, SignedPDR, SimulationEvidence, TransactionProposal, Wire
 
 
 class AttestRequest(Wire):

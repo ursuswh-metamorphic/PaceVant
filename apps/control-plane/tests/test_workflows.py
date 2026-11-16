@@ -9,7 +9,7 @@ from app.api import create_app
 from app.errors import ControlError
 from app.orchestration.mock import MockExecutionClient
 from app.settings import FIXTURES, Settings
-from treasury_contract.wire import SimulationEvidence
+from treasury_contracts.models import SimulationEvidence
 
 NOW = 2_000_000_000
 TOKEN = "mock-internal-credential-for-tests-only"

@@ -2,20 +2,8 @@ from typing import Annotated, Literal
 
 from pydantic import Field, StringConstraints
 
-from treasury_contract.wire import (
-    Address,
-    ArtifactRef,
-    Baseline,
-    Bps,
-    Counter,
-    Hash,
-    Id,
-    Source,
-    StressTest,
-    Timestamp,
-    UInt,
-    Wire,
-)
+from app.domain import Address, ArtifactRef, Bps, Counter, Id, Source, Timestamp
+from treasury_contracts.models import Baseline, Hash, StressTest, UInt, Wire
 
 Mode = Literal["MOCK", "LOCAL", "FUJI"]
 Goal = Annotated[str, StringConstraints(min_length=1, max_length=500)]
@@ -31,7 +19,7 @@ class WorkflowRequest(Wire):
 class Mandate(Wire):
     mandate_id: Id
     version: Annotated[int, Field(gt=0)]
-    chain_id: Literal[43113] = 43113
+    chain_id: Literal[31337, 43113] = 43113
     vault_address: Address
     owner: Address
     router: Address
@@ -51,7 +39,7 @@ class Mandate(Wire):
 
 class ChainContext(Wire):
     deployment: Mode
-    chain_id: Literal[43113]
+    chain_id: Literal[31337, 43113]
     vault_address: Address
     owner: Address
     router: Address
@@ -61,6 +49,8 @@ class ChainContext(Wire):
     token_out_decimals: Literal[18]
     policy_hash: Hash
     policy_version: int
+    policy_active: bool = True
+    policy_expires_at: Timestamp | None = None
     paused: bool
     attestor: Address
     relayer: Address
@@ -73,10 +63,12 @@ class ChainContext(Wire):
     nonce_used: bool | None = None
     max_usdc_per_swap_base_units: UInt
     max_usdc_spend_per_day_base_units: UInt
+    max_slippage_bps: Bps = 100
+    max_approval_ttl: Annotated[int, Field(gt=0)] = 30
 
 
 class ChainBalances(Wire):
-    chain_id: Literal[43113]
+    chain_id: Literal[31337, 43113]
     vault_address: Address
     policy_hash: Hash
     block_number: Counter
@@ -86,11 +78,12 @@ class ChainBalances(Wire):
     utc_day: Counter
     daily_spent_usdc_base_units: UInt
     daily_execution_cost_usd_e8: UInt
+    daily_execution_cost_wei: UInt = "0"
     max_fee_per_gas_wei: UInt
 
 
 class OraclePrice(Wire):
-    chain_id: Literal[43113]
+    chain_id: Literal[31337, 43113]
     vault_address: Address
     price_usdc_usd_e8: UInt
     price_wavax_usd_e8: UInt

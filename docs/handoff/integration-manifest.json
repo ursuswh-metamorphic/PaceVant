@@ -1,0 +1,123 @@
+{
+  "contract_version": "1.1",
+  "status": "B_AND_SDK_PROTOCOL_READY_A_IMPLEMENTATION_PENDING",
+  "read_first": [
+    "docs/03_SHARED_INTEGRATION_CONTRACT.md",
+    "docs/01_GUIDE_PERSON_A_CONTROL_PLANE.md",
+    "docs/02_GUIDE_PERSON_B_EXECUTION_PLANE.md",
+    "docs/06_AB_INTEGRATION_HANDOFF.md",
+    "docs/07_AI_MERGE_PLAYBOOK.md",
+    "docs/08_AB_COMPATIBILITY_AUDIT.md"
+  ],
+  "sdk": {
+    "distribution": "treasury-contracts-api",
+    "version": "1.1.0",
+    "import_namespace": "treasury_contracts",
+    "project": "packages/contracts-api",
+    "install_from_a_project": "uv add ../../packages/contracts-api",
+    "client": "treasury_contracts.client.ExecutionClient",
+    "error": "treasury_contracts.client.ExecutionAPIError",
+    "readonly_preflight": "treasury_contracts.onchain.read_approval_state",
+    "do_not_import": "apps/execution-plane/app from the A interpreter"
+  },
+  "ownership": {
+    "A": ["apps/control-plane", "apps/dashboard"],
+    "B": ["apps/execution-plane", "contracts"],
+    "shared": ["packages/contracts-api", "fixtures", "tests/integration", "package.json", "package-lock.json", ".env.example", ".github/workflows"]
+  },
+  "network": {
+    "local_chain_id": 31337,
+    "fuji_chain_id": 43113,
+    "a_base_url": "http://127.0.0.1:8000",
+    "b_base_url": "http://127.0.0.1:8001"
+  },
+  "routes": [
+    {"method":"GET", "path":"/v1/chain/context", "response_model":"ChainContext"},
+    {"method":"GET", "path":"/v1/portfolio/onchain-snapshot", "response_model":"OnchainSnapshot"},
+    {"method":"POST", "path":"/v1/build", "request_model":"TransactionProposal", "response_model":"BuiltTransaction"},
+    {"method":"POST", "path":"/v1/simulations", "request_model":"SimulationRequest", "response_model":"SimulationEvidence"},
+    {"method":"POST", "path":"/v1/executions", "request_model":"ExecutionRequest", "response_model":"ExecutionSubmission"},
+    {"method":"GET", "path":"/v1/executions/{tx_hash}", "response_model":"ExecutionResult"},
+    {"method":"GET", "path":"/v1/artifacts/{content_hash}", "response_format":"RFC_8785_CANONICAL_JSON_BYTES"}
+  ],
+  "headers": {
+    "auth": "X-API-Key",
+    "post_idempotency": "Idempotency-Key",
+    "correlation": "X-Request-ID"
+  },
+  "wire": {
+    "amounts_and_uint256": "DECIMAL_INTEGER_STRINGS",
+    "usdc_decimals": 6,
+    "wavax_decimals": 18,
+    "timestamp_outside_approval": "UNIX_SECONDS_INTEGER",
+    "timestamp_inside_approval": "UINT256_DECIMAL_STRING",
+    "hashes": "LOWERCASE_0x_64_HEX",
+    "outer_keys": "snake_case",
+    "eip712_keys": "EXACT_camelCase",
+    "error_model": "ErrorEnvelope"
+  },
+  "eip712": {
+    "name": "TreasuryPolicyVault",
+    "version": "1",
+    "primary_type": "Approval",
+    "type_string": "Approval(bytes32 policyHash,bytes32 evidenceRoot,address router,address tokenIn,address tokenOut,uint256 amountIn,uint256 minAmountOut,bytes32 calldataHash,uint256 nonce,uint256 deadline)",
+    "chain_and_vault_binding": "DOMAIN_ONLY",
+    "evidence_hash": "keccak256(UTF8(RFC8785_MANIFEST_WITHOUT_evidence_root))",
+    "calldata_hash": "keccak256(CALLDATA_BYTES)"
+  },
+  "demo_limits": {
+    "max_per_swap_usdc_base_units": "500000000",
+    "max_daily_usdc_base_units": "1000000000",
+    "max_wavax_exposure_bps_a_owned": 2500,
+    "max_slippage_bps": 100,
+    "approval_ttl_seconds": 30,
+    "freshness_seconds": 60,
+    "max_block_drift": 3,
+    "max_replans_a_owned": 2
+  },
+  "important_semantics": [
+    "A and B run as separate processes; only the shared SDK crosses the import boundary",
+    "OnchainSnapshot has no prices or exposure; A adds trusted pricing/history",
+    "Mandate version is not the same counter as Vault policyVersion",
+    "Build nonce is allocated by B, not the relayer transaction count",
+    "Build/sim retries are immutable; execute retries keep the tx hash and may refresh status",
+    "PROTECTED_REVERT means rollback, not an actual token loss or UNSAFE_EXECUTION",
+    "Fuji attestor rejects MOCK_FIXTURE and plain REAL_LOCAL_SIM",
+    "consumer probe is a local protocol test, not A SDE authorization"
+  ],
+  "required_paths": [
+    "apps/execution-plane/pyproject.toml",
+    "apps/execution-plane/uv.lock",
+    "contracts/src/PolicyVault.sol",
+    "contracts/test/PolicyVault.t.sol",
+    "contracts/test/PDRGoldenVector.t.sol",
+    "contracts/script/Deploy.s.sol",
+    "foundry.toml",
+    "packages/contracts-api/pyproject.toml",
+    "packages/contracts-api/treasury_contracts/models.py",
+    "packages/contracts-api/treasury_contracts/client.py",
+    "packages/contracts-api/treasury_contracts/crypto.py",
+    "packages/contracts-api/treasury_contracts/onchain.py",
+    "packages/contracts-api/treasury_contracts/abi/PolicyVault.json",
+    "packages/contracts-api/openapi.json",
+    "fixtures/eip712_golden/vector.json",
+    "fixtures/eip712_golden/manifest.canonical.json",
+    "tests/integration/eip712-golden.mjs",
+    "tests/integration/a_consumer_probe.py",
+    ".env.example",
+    "docs/06_AB_INTEGRATION_HANDOFF.md",
+    "docs/07_AI_MERGE_PLAYBOOK.md",
+    "docs/08_AB_COMPATIBILITY_AUDIT.md"
+  ],
+  "future_a_paths_not_implemented_by_b": ["apps/control-plane", "apps/dashboard"],
+  "commands": {
+    "install_node": "npm ci --ignore-scripts",
+    "setup_b": "npm run setup",
+    "all_b_checks": "npm run check",
+    "consumer_contract": "npm run test:consumer",
+    "local_stack": "npm run local",
+    "schema_openapi_abi_export": "npm run schemas",
+    "a_tests_after_merge": "uv run --directory apps/control-plane pytest -q"
+  },
+  "pending_gates": ["A_SHARED_REVIEW", "A_SDE_SHIELD_RISK_TESTS", "REAL_A_ATTESTOR_INTEGRATION", "FULL_A_B_WORKFLOW", "FUJI_FORK_AND_TRANSACTION_RECEIPT"]
+}

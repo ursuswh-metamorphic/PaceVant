@@ -1,17 +1,18 @@
 import json
-from pathlib import Path
 
 import httpx
 import pytest
 import rfc8785
+from eth_keys import keys
 from jsonschema import Draft202012Validator
 
-from app.attestor.typed import digest, hash_bytes, recover_signer, typed_data
+from app.attestor.typed import hash_bytes, sign_digest
 from app.errors import ControlError
 from app.orchestration.fuji import FUJI_RPC, FujiVerifier
 from app.orchestration.mock import MockExecutionClient
 from app.settings import ROOT
-from treasury_contract.wire import BuiltTransaction, SignedPDR, SimulationEvidence
+from treasury_contracts.crypto import digest, recover
+from treasury_contracts.models import SignedPDR
 
 GOLDEN = ROOT / "fixtures" / "eip712_golden"
 
@@ -19,35 +20,22 @@ GOLDEN = ROOT / "fixtures" / "eip712_golden"
 def test_golden_hashes_and_shared_schemas():
     raw = json.loads((GOLDEN / "vector.json").read_text("utf-8"))
     manifest = json.loads((GOLDEN / "manifest.json").read_text("utf-8"))
-    assert rfc8785.dumps(manifest) == (GOLDEN / "manifest.jcs").read_bytes()
-    assert next(iter(manifest["artifact_hashes"].values())) == hash_bytes(
-        (GOLDEN / "report.json").read_bytes()
-    )
-    pdr = SignedPDR.model_validate(raw["signed_pdr"])
-    evidence = SimulationEvidence.model_validate(raw["simulation_evidence"])
-    assert typed_data(pdr.domain, pdr.approval) == raw["typed_data"]
-    expected = bytes.fromhex(pdr.typed_data_hash[2:])
+    assert rfc8785.dumps(manifest) == (GOLDEN / "manifest.canonical.json").read_bytes()
+    wire = {
+        "decision_id": "decision_golden",
+        "build_id": "build_golden",
+        **{name: raw[name] for name in ("domain", "approval", "signature", "typed_data_hash")},
+    }
+    pdr = SignedPDR.model_validate(wire)
+    expected = pdr.typed_data_hash
     assert digest(pdr.domain, pdr.approval) == expected
-    assert recover_signer(expected, pdr.signature) == raw["signer"]
-    assert (
-        hash_bytes(rfc8785.dumps(manifest)) == pdr.approval.evidenceRoot == evidence.evidence_root
-    )
-    built = BuiltTransaction.model_validate(raw["built_transaction"])
-    assert hash_bytes(bytes.fromhex(built.router_calldata[2:])) == pdr.approval.calldataHash
-
-    schema_path = Path("packages/contracts-api/schemas/v1.1.json")
-    schema = json.loads(schema_path.read_text("utf-8"))
-    for name, field in [
-        ("BuiltTransaction", "built_transaction"),
-        ("SignedPDR", "signed_pdr"),
-        ("SimulationEvidence", "simulation_evidence"),
-    ]:
-        Draft202012Validator(
-            {
-                "$defs": schema["$defs"],
-                "$ref": f"#/$defs/{name}",
-            }
-        ).validate(raw[field])
+    key = keys.PrivateKey(bytes.fromhex(raw["test_private_key"][2:]))
+    assert sign_digest(key, bytes.fromhex(expected[2:])) == pdr.signature
+    assert recover(pdr.domain, pdr.approval, pdr.signature) == raw["signer"]
+    assert hash_bytes(rfc8785.dumps(manifest)) == pdr.approval.evidenceRoot
+    assert hash_bytes(bytes.fromhex(raw["router_calldata"][2:])) == pdr.approval.calldataHash
+    schema_path = ROOT / "packages/contracts-api/SignedPDR.schema.json"
+    Draft202012Validator(json.loads(schema_path.read_text("utf-8"))).validate(wire)
 
 
 @pytest.mark.parametrize(

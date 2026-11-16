@@ -1,0 +1,7 @@
+{
+  "api_status": "PASS",
+  "chain_id": 31337,
+  "evidence_verified": true,
+  "execution_status": "CONFIRMED",
+  "snapshot_block": 13
+}

@@ -4,10 +4,11 @@ import rfc8785
 from eth_abi import encode as abi_encode
 from eth_utils import keccak
 
-from app.attestor.typed import approval_for, digest, hash_bytes, recover_signer
+from app.attestor.typed import hash_bytes
 from app.errors import ControlError
 from app.models import ChainBalances, ChainContext, EvidenceReport, Manifest, OraclePrice
-from treasury_contract.wire import (
+from treasury_contracts.crypto import approval_for, recover
+from treasury_contracts.models import (
     Baseline,
     BuiltTransaction,
     ExecutionResult,
@@ -42,7 +43,7 @@ class MockExecutionClient:
         self.policy_changed = False
         self.block_times = {BLOCK: clock()}
 
-    def context(self, *, nonce=None, fork_block=None):
+    def context(self, *, built=None, fork_block=None):
         m = self.mandate
         return ChainContext(
             deployment="MOCK",
@@ -56,6 +57,8 @@ class MockExecutionClient:
             token_out_decimals=18,
             policy_hash=hash_bytes(b"revoked") if self.policy_changed else m.policy_hash,
             policy_version=m.version,
+            policy_expires_at=m.expires_at,
+            max_slippage_bps=m.max_slippage_bps,
             paused=False,
             attestor=self.signer,
             relayer="0x" + "55" * 20,
@@ -64,7 +67,7 @@ class MockExecutionClient:
             fork_block=fork_block,
             fork_block_hash=self.block_hash(fork_block) if fork_block is not None else None,
             fork_block_timestamp=self.block_times.get(fork_block),
-            nonce_used=nonce in self.used_nonces if nonce is not None else None,
+            nonce_used=built.nonce in self.used_nonces if built is not None else None,
             bytecode_hash=BYTECODE,
             max_usdc_per_swap_base_units=m.max_usdc_per_swap_base_units,
             max_usdc_spend_per_day_base_units=m.max_usdc_spend_per_day_base_units,
@@ -147,7 +150,7 @@ class MockExecutionClient:
             build_id=built.build_id,
             nonce=built.nonce,
             deadline=built.deadline,
-            simulation_mode="MOCK",
+            simulation_mode="LOCAL_TEST_ATTESTOR",
             source="MOCK_FIXTURE",
             baseline=Baseline(
                 execution_status="SUCCESS",
@@ -161,6 +164,7 @@ class MockExecutionClient:
                 StressTest(
                     scenario_id="reserve_shift_mild",
                     status="SUCCESS_SAFE",
+                    scenario_hash=hash_bytes(b"mock reserve_shift_mild"),
                     output_base_units=str(
                         max(int(built.min_amount_out_base_units), out * 999 // 1000)
                     ),
@@ -168,6 +172,7 @@ class MockExecutionClient:
                 StressTest(
                     scenario_id="reserve_shift_adverse",
                     status="PROTECTED_REVERT",
+                    scenario_hash=hash_bytes(b"mock reserve_shift_adverse"),
                     revert_reason="MIN_OUTPUT_NOT_MET",
                 ),
             ],
@@ -213,7 +218,7 @@ class MockExecutionClient:
     def execute(self, built, pdr):
         if pdr.decision_id in self.idempotent_executions:
             return self.idempotent_executions[pdr.decision_id]
-        context = self.context(nonce=built.nonce)
+        context = self.context(built=built)
         if context.nonce_used:
             raise ControlError("NONCE_REPLAY")
         if context.policy_hash != built.policy_hash or built.deadline <= self.clock():
@@ -226,7 +231,7 @@ class MockExecutionClient:
             or pdr.build_id != built.build_id
             or pdr.domain.verifyingContract != built.vault_address
             or pdr.approval != approval_for(built, evidence.evidence_root)
-            or recover_signer(digest(pdr.domain, pdr.approval), pdr.signature) != self.signer
+            or recover(pdr.domain, pdr.approval, pdr.signature).lower() != self.signer
         ):
             raise ControlError("BAD_SIGNATURE")
         amount = int(built.amount_in_base_units)

@@ -1,6 +1,7 @@
 import json
 from typing import Protocol
 
+import httpx
 import rfc8785
 from pydantic import ValidationError
 
@@ -8,7 +9,7 @@ from app.attestor.typed import hash_bytes
 from app.errors import ControlError
 from app.models import ChainContext, EvidenceReport, Mandate, Manifest, Mode
 from app.portfolio import fresh
-from treasury_contract.wire import BuiltTransaction, SimulationEvidence, TransactionProposal
+from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 SOURCES = {"MOCK": "MOCK_FIXTURE", "LOCAL": "REAL_LOCAL_SIM", "FUJI": "FORK_SIM"}
 MANIFEST_FIELDS = (
@@ -57,22 +58,22 @@ def json_object(raw: bytes) -> dict:
 
 
 def verify_build(mandate: Mandate, proposal: TransactionProposal, built: BuiltTransaction):
-    if built.router != mandate.router:
+    if built.router.lower() != mandate.router:
         raise ControlError("ROUTER_NOT_ALLOWED")
-    if (built.token_in, built.token_out) != (mandate.token_in, mandate.token_out):
+    if (built.token_in.lower(), built.token_out.lower()) != (mandate.token_in, mandate.token_out):
         raise ControlError("TOKEN_NOT_ALLOWED")
     fields = (
         "intent_id",
         "chain_id",
-        "vault_address",
-        "router",
-        "token_in",
-        "token_out",
         "amount_in_base_units",
         "deadline",
     )
     if (
         any(getattr(proposal, field) != getattr(built, field) for field in fields)
+        or proposal.vault_address.lower() != built.vault_address.lower()
+        or proposal.router.lower() != built.router.lower()
+        or proposal.token_in.lower() != built.token_in.lower()
+        or proposal.token_out.lower() != built.token_out.lower()
         or built.policy_hash != mandate.policy_hash
         or hash_bytes(bytes.fromhex(built.router_calldata[2:])) != built.calldata_hash
     ):
@@ -89,6 +90,23 @@ def evidence_issues(
 ) -> list[str]:
     if sim.source != SOURCES[mode] or context.deployment != mode:
         return ["UNVERIFIED_SIMULATION_SOURCE"]
+    if mode != "MOCK":
+        try:
+            manifest = client.verify_evidence(built, sim)
+            timestamp = manifest["timestamp"]
+            if (
+                context.fork_block != sim.fork_block
+                or context.fork_block_hash != manifest["fork_block_hash"]
+                or type(timestamp) is not int
+                or context.fork_block_timestamp != timestamp
+                or timestamp > context.block_timestamp
+            ):
+                return ["HASH_MISMATCH"]
+            return [] if fresh(timestamp, now) else ["SIMULATION_INCOMPLETE"]
+        except (ControlError, httpx.HTTPError):
+            return ["SIMULATION_INCOMPLETE"]
+        except (ValueError, KeyError, TypeError, RecursionError):
+            return ["HASH_MISMATCH"]
     fields = (
         "build_id",
         "intent_id",

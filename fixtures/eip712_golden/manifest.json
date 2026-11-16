@@ -1,15 +1,1 @@
-{
-  "chain_id": 43113,
-  "vault_address": "0x1111111111111111111111111111111111111111",
-  "policy_hash": "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
-  "calldata_hash": "0xa427df014f1c017d1a5951de6141f0307ae880a5d96c65fa87a3fbab68e739a4",
-  "fork_block": 12345678,
-  "fork_block_hash": "0xf1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1",
-  "fork_block_timestamp": 2000000000,
-  "bytecode_hash": "0xb1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
-  "parser_version": "extractor-v1",
-  "verification_status": "COMPLETE",
-  "artifact_hashes": {
-    "artifact://simulation/build_golden/report.json": "0x16f40e0a22387bdf149198caea862754d24f1a19f93c420cd7ac930f59ea3d5b"
-  }
-}
+{"bytecode_hash":"0x79f03e6c49c07939f9404dc792893d616360143868ca4112a964d350d1f4a9e5","calldata_hash":"0xb4273377e4320b4015b4a975c5a397591eb6845ff57b23b5c74ae9421b6d7d94","chain_id":43113,"fork_block":12345678,"parser_version":"extractor-v1","policy_hash":"0x1367a60b5261604c7b93e77a56c4c4b400a63cb31cc8ef368f64a83dcb1b012f","scenario_artifacts":[],"source":"MOCK_FIXTURE","unicode_test":"Việt Nam","vault_address":"0x1111111111111111111111111111111111111111","verification_status":"INCOMPLETE"}

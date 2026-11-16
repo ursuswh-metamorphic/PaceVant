@@ -4,7 +4,7 @@ from eth_utils import keccak
 
 from app.models import Alignment, Mandate
 from app.planner import requested_amount
-from treasury_contract.wire import TransactionProposal
+from treasury_contracts.models import TransactionProposal
 
 INJECTION = re.compile(
     r"ignore.{0,50}(?:policy|instructions)|bỏ qua.{0,50}(?:policy|chính sách)|"
