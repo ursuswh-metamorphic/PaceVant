@@ -4,8 +4,10 @@ These observations are intentionally NOT fed into the trading authorizer: the
 current vault uses demo tokens and does not have verified USD prices for every
 asset. No mainnet RPC, static-price fallback, or transaction methods exist here.
 """
+import os
 import re
 import time
+from decimal import Decimal, InvalidOperation
 
 import httpx
 from eth_abi import decode
@@ -26,6 +28,7 @@ DECIMALS = "0x313ce567"
 VALUE_FOR = "0x" + keccak(text="valueFor(bytes32)")[:4].hex()
 ADDRESS = re.compile(r"^0x[0-9a-fA-F]{40}$")
 MAX_ORACLE_AGE_SECONDS = 30 * 60 * 60  # visibility only: published heartbeat is 24h
+COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
 
 
 class FujiReadError(Exception):
@@ -127,6 +130,43 @@ class FujiReader:
             info["status"] = "UNAVAILABLE"
             return info
 
+    def market(self):
+        """Optional real off-chain market reference; never an authorization source."""
+        output = {
+            "provider": "COINGECKO_DEMO",
+            "pair": "AVAX/USD",
+            "source_type": "OFFCHAIN_MARKET_API",
+            "status": "NOT_CONFIGURED",
+            "usable_for_decisions": False,
+        }
+        key = os.environ.get("PACEVANT_COINGECKO_DEMO_KEY")
+        if not key:
+            return output
+        try:
+            response = self.client.get(
+                COINGECKO_URL,
+                params={
+                    "ids": "avalanche-2",
+                    "vs_currencies": "usd",
+                    "include_last_updated_at": "true",
+                },
+                headers={"x-cg-demo-api-key": key, "Accept": "application/json"},
+            )
+            response.raise_for_status()
+            entry = response.json()["avalanche-2"]
+            price = Decimal(str(entry["usd"]))
+            updated = int(entry["last_updated_at"])
+            if not price.is_finite() or price <= 0 or updated > self.now:
+                raise ValueError("invalid price/timestamp")
+            output.update(
+                price_usd_e8=str(int(price * 100_000_000)),
+                updated_at=updated,
+                status="FRESH" if self.now - updated <= 180 else "STALE",
+            )
+        except (httpx.HTTPError, ValueError, KeyError, TypeError, InvalidOperation, OverflowError):
+            output["status"] = "UNAVAILABLE"
+        return output
+
     def snapshot(self, address):
         holder = require_address(address)
         if self.rpc("eth_chainId", []) != hex(FUJI_CHAIN_ID):
@@ -158,6 +198,7 @@ class FujiReader:
             "block_timestamp": int(head["timestamp"], 16),
             "assets": assets,
             "oracle": self.oracle(block),
+            "market": self.market(),
             "source": "FUJI_C_CHAIN_RPC",
             "execution_enabled": False,
             "used_for_sde_or_attestation": False,
@@ -165,5 +206,6 @@ class FujiReader:
                 "Read-only Fuji data; no swap, signing, key custody, or mainnet operations",
                 "Fuji test USDC and mock USDC are different contracts",
                 "No USD portfolio total without independently verified pricing for all tokens",
+                "CoinGecko off-chain market data is not a Fuji-native oracle and is display-only",
             ],
         }
