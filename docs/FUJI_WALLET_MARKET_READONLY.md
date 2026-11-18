@@ -1,87 +1,85 @@
-# Fuji Wallet + Portfolio Reader + Real Oracle/Market Reference
+# Fuji Observatory: ví, PolicyVault và oracle
 
-**Scope: Avalanche Fuji testnet ONLY (chain ID 43113).**
-No mainnet endpoints, mainnet deployments, real funds, signing, swaps, private-key collection, or PDR attestations are performed by this feature.
+PaceVant đọc trực tiếp Avalanche Fuji C-Chain `43113`. Đây là phần quan sát bổ sung cho kiến trúc A/B: số dư, oracle, PolicyVault, receipt và sự kiện thực thi có thể đối chiếu trên explorer. Trang chạy độc lập với B và không cần private key.
 
-## What was added
+## Chạy demo nhanh
 
-- `GET /v1/fuji/wallet/{address}` on the **Control Plane A** in `PACEVANT_MODE=FUJI`; requires existing Bearer operator token.
-- `/fuji-wallet`: small wallet-observability page. Connect an injected Core/MetaMask account on Fuji (read address only) **or** paste any public EOA/PolicyVault address. Browser never calls signing or transaction methods.
-- `scripts/fuji_wallet_read.py`: standalone read-only CLI usable without running the full A/B workflow.
-- `apps/control-plane/app/fuji_data.py`: pin RPC reads to a single Fuji block, check chain ID 43113 and block freshness, get native AVAX plus explicitly identified Fuji USDC/WAVAX ERC-20 balances, verify token decimals/code, and query the Fuji Witnet AVAX/USD price router.
-- Optional CoinGecko Demo API: live off-chain AVAX/USD market reference with price timestamp and freshness status. It is not an on-chain oracle.
+Cài Python 3.12, uv và chạy `uv sync --locked` ở root.
 
-## Commands
-
-Use the project's existing setup (Python 3.12, `uv sync --locked` at root).
-
-**Read any public Fuji address immediately (no private keys or B service):**
+CLI đọc địa chỉ công khai:
 
 ```powershell
-uv run --locked python scripts/fuji_wallet_read.py 0xYOUR_PUBLIC_FUJI_ADDRESS
+uv run --locked python scripts/fuji_wallet_read.py 0xYOUR_PUBLIC_ADDRESS --output data/fuji-snapshot.json
 ```
 
-To use the protected web UI, configure the existing **FUJI** A + B services as described in `docs/B_HANDOFF.md`; authenticate as operator and open:
-
-```
-http://127.0.0.1:8000/fuji-wallet
-```
-
-The UI requires a Bearer operator token to read the backend API. The token stays only in the current page's input field (not localStorage or URL), and is sent only to the same-origin backend. Do not expose the demo Control Plane publicly.
-
-Optional market feed:
+Web UI chỉ cần operator token dài ít nhất 24 ký tự, tự đặt trong terminal local:
 
 ```powershell
-$env:PACEVANT_COINGECKO_DEMO_KEY = "YOUR_DEMO_API_KEY"
-uv run --locked python scripts/fuji_wallet_read.py 0xYOUR_PUBLIC_FUJI_ADDRESS
+$env:PACEVANT_OPERATOR_TOKEN = "YOUR_LOCAL_OPERATOR_TOKEN_AT_LEAST_24_CHARACTERS"
+uv run --locked python scripts/serve.py --fuji-readonly --port 8012
 ```
 
-Do not commit API keys. If no key is set, market source displays `NOT_CONFIGURED`; a network error gives `UNAVAILABLE`; no fallback prices are invented.
+Mở [Fuji Observatory](http://127.0.0.1:8012/fuji-wallet). Nhập địa chỉ công khai và operator token. Có thể lấy địa chỉ qua Core/MetaMask trên Fuji. Mục mở rộng nhận thêm địa chỉ PolicyVault và tx hash.
 
-## Exact data sources & identifiers
+Nếu lưu token trong `.env`, dùng `uv run --env-file .env --locked python scripts/serve.py --fuji-readonly --port 8012`. Observer không khởi tạo ControlPlane, B adapter, attestor hay mock workflow. Full ControlPlane ở mode FUJI cũng phục vụ cùng trang/API, dùng xác thực operator hiện có.
 
-| Item | Network/source |
-|---|---|
-| C-Chain RPC | `https://api.avax-test.network/ext/bc/C/rpc` |
-| Chain ID | `43113` required |
-| Fuji Circle test USDC | `0x5425890298aed601595a70AB815c96711a31Bc65` |
-| Fuji WAVAX | `0xd00ae08403B9bbb9124bB305C09058E32C39A48c` |
-| Witnet Price Router on Fuji | `0x1111AbA2164AcdC6D291b08DfB374280035E1111` |
-| Witnet pair | `Price-AVAX/USD-6` (bytes32 keccak ID) |
-| CoinGecko (optional) | Demo API `/simple/price?ids=avalanche-2&vs_currencies=usd&include_last_updated_at=true` |
+`GET /v1/fuji/wallet/{address}?vault=0x…&tx_hash=0x…` yêu cầu `Authorization: Bearer …`. Token chỉ ở input của trang hiện tại; không ghi localStorage, URL hay file JSON tải xuống. Server bind loopback.
 
-Sources:
-- https://support.avax.network/en/articles/6224787-how-to-connect-to-the-fuji-testnet
-- https://build.avax.network/academy/blockchain/x402-payment-infrastructure/04-x402-on-avalanche/02-network-setup
-- https://docs.witnet.io/smart-contracts/witnet-data-feeds/addresses/avalanche-price-feeds
-- https://docs.witnet.io/smart-contracts/witnet-data-feeds/price-feeds-registry
-- https://docs.witnet.io/smart-contracts/witnet-data-feeds/api-reference
-- https://www.coingecko.com/learn/stream-real-time-crypto-prices-python
+CoinGecko là nguồn ngoài chain tùy chọn qua `PACEVANT_COINGECKO_DEMO_KEY`; key chỉ gửi đến API cố định của CoinGecko. Chưa cấu hình thì trả `NOT_CONFIGURED`.
 
-## Trust and valuation boundaries
+## Dữ liệu thực sự đọc được
 
-1. Wallet/token balances are real `eth_getBalance` and `balanceOf` reads at one pinned block, **not mocked**, with chain/decimals/code checks.
-2. The Witnet router provides **real on-chain oracle observations**, but the published Fuji AVAX/USD feed has a **24h heartbeat** and can be stale. Display freshness threshold (30h) is **not** acceptable as a transaction risk threshold. If oracle has not updated in a long time, UI shows `STALE`; errors show `UNAVAILABLE`.
-3. CoinGecko is **off-chain market data**. Do not substitute its quote for an on-chain verified oracle or a DEX execution price. It's only a reference.
-4. Testnet USDC has no guaranteed redemption/peg for our risk model; mock USDC from PolicyVault is a **different token contract**. `price_usd_e8` from AVAX is **not** enough to calculate or authorize a correct USD portfolio valuation.
-5. This change does **not** alter `EconomicRiskEvaluator`, `SDE`, `Attestor`, `PolicyVault.sol`, or their existing sources/permission semantics. Specifically, it **does not** feed live observations into APPROVE/PDR. This is intentional: first validate reliable market/oracle feeds for both assets and compatible fork/execution state.
-6. `getWallet` requests must be rate limited and authenticated as already provided by operator token. Public endpoint must not be exposed without extra auth and throttling.
+- Kiểm tra chain ID, pin block number/hash/timestamp; mọi balance, code và eth_call đọc tại block đã pin. Cuối lượt đọc kiểm tra lại hash tại cùng chiều cao.
+- Native AVAX, Circle test USDC và WAVAX: base units nguyên, decimals, loại tài sản, địa chỉ token, bytecode hash. Token lỗi là `UNAVAILABLE`, không thay thành số dư 0. `snapshot_status` COMPLETE/PARTIAL chỉ mô tả ba số dư ví.
+- Chainlink: description, decimals, round ID, raw answer, answeredInRound, thời điểm bắt đầu/cập nhật và heartbeat. Giá âm, round thiếu, timestamp tương lai bị đánh dấu `UNVERIFIED`.
+- Witnet: pair ID, raw price, timestamp và ERC-2362 status. Status khác 200 không có giá hợp lệ.
+- Pyth: feed ID, raw price, exponent, confidence interval, publish time và tuổi dữ liệu. Ngưỡng hiển thị 60 giây là cấu hình của observer.
+- PolicyVault tùy chọn: owner, attestor, policy hash/version/expiry, active/paused, trần mỗi swap, dailySpent và ngân sách còn lại theo ngày UTC của block. Số dư Vault dùng đúng token trả về từ `usdc()/wavax()`, không dùng nhầm token mặc định của reader.
+- Receipt tùy chọn: block thuộc chain quan sát, trạng thái thành công/revert/pending, recipient có khớp Vault, gas và phí thực trả. Khi tx gọi đúng Vault, giải mã `SwapExecuted` gồm nonce, policyHash, evidenceRoot, token/amount in/out và đọc `usedNonce(nonce)` ở block snapshot.
+- Download JSON kèm source URLs, explorer links và `observation_hash` (Keccak-256 của RFC 8785 canonical JSON). Khi kiểm tra hash bỏ trường `observation_hash` và trường API bổ sung `cached` nếu có. Hash hỗ trợ phát hiện thay đổi artifact; không phải chữ ký hay bằng chứng đồng thuận.
 
-## Tests / evidence
+## Registry và địa chỉ Fuji
+
+| Nguồn | Hợp đồng / feed | Chu kỳ dùng để hiển thị |
+|---|---|---|
+| Chainlink AVAX/USD | `0x5498BB86BC934c8D34FDA08E81D444153d0D06aD` | heartbeat 600 giây |
+| Chainlink USDC/USD | `0x97FE42a7E96640D932bbc0e1580c73E705A8EB73` | heartbeat 86400 giây |
+| Witnet router, Price-AVAX/USD-6 | `0x1111AbA2164AcdC6D291b08DfB374280035E1111` | heartbeat tài liệu 24 giờ |
+| Pyth AVAX/USD | `0x23f0e8FAeE7bbb405E7A7C3d60138FCfd43d7509` | observer yêu cầu tuổi ≤60 giây |
+| Circle test USDC | `0x5425890298aed601595a70AB815c96711a31Bc65` | decimals 6 |
+| WAVAX | `0xd00ae08403B9bbb9124bB305C09058E32C39A48c` | decimals 18 |
+
+Pyth AVAX feed ID: `0x93da3352f9f1d105fdfe4971cfa80e9dd777bfc5d0f683ebb6e1294b92137bb7`.
+
+Nguồn chính thức đã dùng:
+
+- [Chainlink Fuji feed registry](https://reference-data-directory.vercel.app/feeds-avalanche-fuji-testnet.json), được dẫn từ [cấu hình Chainlink documentation](https://github.com/smartcontractkit/documentation/blob/main/src/features/data/chains.ts).
+- [Chainlink: đọc data feeds](https://docs.chain.link/data-feeds/using-data-feeds).
+- [Witnet: Avalanche feed addresses](https://docs.witnet.io/smart-contracts/witnet-data-feeds/addresses/avalanche-price-feeds).
+- [Pyth EVM contract registry](https://github.com/pyth-network/pyth-crosschain/blob/main/contract_manager/src/store/contracts/EvmPriceFeedContracts.json) và [Hermes AVAX/USD feed lookup](https://hermes.pyth.network/v2/price_feeds?query=AVAX%2FUSD&asset_type=crypto).
+- [Pyth Core pull interface](https://github.com/pyth-network/pyth-crosschain/blob/main/target_chains/ethereum/sdk/solidity/IPyth.sol): đọc giá lưu trong contract không tự kéo bản cập nhật mới.
+- [Avalanche: Chronicle integration](https://build.avax.network/integrations/chronicle-data-feeds) liệt kê AVAX/USD Fuji `0x8b3328b27436263e0BfE7597a0D97B1BEE9cC576`. Đây là lựa chọn nghiên cứu tiếp, chưa có adapter trong bản này; cần xác minh quyền đọc theo caller, heartbeat và cơ chế cấp quyền trước khi chọn.
+- [CoinGecko Demo API](https://docs.coingecko.com/demo/reference/simple-price).
+
+## Hiện trạng và giới hạn
+
+Xem [báo cáo kiểm chứng](FUJI_AVALANCHE_INTEGRATION_REPORT.md) và [snapshot live](../evidence/fuji-oracle-readonly-live.json). Đây là kết quả tại thời điểm ghi nhận; freshness sẽ thay đổi.
+
+`WITHIN_HEARTBEAT` chỉ nói feed chưa vượt heartbeat công bố. Heartbeat USDC 24 giờ có thể quá chậm cho một giao dịch cụ thể. Không tự động ghép giá các nhà cung cấp, dùng giá cũ, hoặc thay giá thiếu bằng $1.
+
+Mọi nguồn trả `usable_for_decisions=false`; snapshot trả `used_for_sde_or_attestation=false`. AVAX/USD và USDC/USD không chứng minh MockUSDC của Vault có giá đó. Muốn nối vào APPROVE/PDR phải đồng nhất token, nguồn giá, ngưỡng tuổi, block evidence và fork/execution state xuyên suốt A/B.
+
+Kiểm tra ABI của Vault thành công chỉ xác nhận đọc được interface; bytecode hash cần đối chiếu deployment manifest tin cậy. Oracle proxy bytecode hash cũng không chứng minh implementation hay registry chưa đổi. Snapshot dựa vào một RPC, dùng pin-height/hash-recheck; chưa có xác minh state proof hoặc đồng thuận đa RPC.
+
+HTTP reader có deadline 20 giây, giới hạn mỗi request/response, không redirect/proxy môi trường. Service dùng connection pool, tối đa hai lượt đọc đồng thời, 30 request/phút cho mỗi process và cache 5 giây giữ nguyên observed_at. Rate limit này phục vụ local demo; nhiều worker cần limiter dùng chung nếu triển khai lớn hơn.
+
+## Kiểm tra
 
 ```powershell
-uv run --locked python -m pytest apps/control-plane/tests/test_fuji_data.py -q
+uv run --locked python -m pytest -q
+uv run --locked ruff check .
+uv run --locked ruff format --check .
 npm run test:ab
 ```
 
-Tests mock the **HTTP transport**, not price logic, for deterministic assertions. They cover pinned chain reads, returned balances, price timestamps, stale/bad status, mainnet chain rejection, invalid wallet address, and forbidden transaction methods.
-
-**Verification not yet performed here:** This authoring environment has no direct network route to the Fuji RPC; run CLI on your machine, capture output/receipt independently, and mark live read as `UNVERIFIED` until observed. This feature never submits a transaction, so there is no new Fuji transaction hash.
-
-## Next steps to bring this into the agent workflow safely
-
-- Add a vetted on-chain USD price feed or validated oracle route for **each permitted asset** and check staleness appropriately for each feed.
-- Decide whether the PoC will use **Circle test USDC** or **your deployed MockUSDC** and use the **same token addresses** throughout wallet reader, quote builder, simulation, PDR, Vault and portfolio reader.
-- Bind wallet snapshot `block_hash` and oracle observation reference to the risk decision, with recheck before signing.
-- Keep an explicit hard failure when assets lack adequate pricing/price source freshness; do not set test USDC automatically to $1 in the authorization path.
-- Optional: extend the Reader to include PolicyVault's owner, active mandate hash, allowances and daily spend via ABI, and an indexed transaction history.
+Các unit test dùng HTTP transport giả lập cho trạng thái lỗi và dữ liệu cố định. Live artifact và dashboard dùng RPC Fuji thật. Chưa có địa chỉ deployment/receipt Fuji của PolicyVault hiện tại trong workspace nên chưa xác nhận swap thật hoặc nonce thực trên Fuji trong lần nâng cấp này.

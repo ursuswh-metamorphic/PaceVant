@@ -11,9 +11,10 @@ from pydantic import StringConstraints
 from starlette.exceptions import HTTPException
 
 from app.alignment import check
-from app.fuji_data import FujiReadError, FujiReader
 from app.domain import EconomicRiskAssessment, Id, SecurityDecision
 from app.errors import ControlError
+from app.fuji_api import install_fuji_routes
+from app.fuji_service import FujiService
 from app.models import Alignment, Goal, WorkflowRequest
 from app.orchestration.service import ControlPlane, utc_now
 from app.settings import DASHBOARD, Settings
@@ -71,10 +72,14 @@ def create_app(settings=None, clock=utc_now):
     @asynccontextmanager
     async def lifespan(app):
         app.state.control = ControlPlane(settings, clock)
+        if settings.mode == "FUJI":
+            app.state.fuji = FujiService(clock=clock)
         try:
             yield
         finally:
             app.state.control.close()
+            if settings.mode == "FUJI":
+                app.state.fuji.close()
 
     app = FastAPI(title="PaceVant Treasury Control Plane", version="1.1", lifespan=lifespan)
 
@@ -177,35 +182,9 @@ def create_app(settings=None, clock=utc_now):
     def treasury(request: Request, service: Service):
         return service.treasury(request.state.request_id)
 
-    @app.get("/v1/fuji/wallet/{address}", dependencies=[Depends(operator)])
-    def fuji_wallet_snapshot(address: str):
-        """Read Fuji balances and oracle reference; never authorizes transactions."""
-        if settings.mode != "FUJI":
-            raise ControlError("FUJI_MODE_REQUIRED", 409)
-        try:
-            import httpx
-
-            with httpx.Client(timeout=httpx.Timeout(12, connect=3), trust_env=False) as http:
-                return FujiReader(http, now=clock()).snapshot(address)
-        except FujiReadError as error:
-            status = 400 if error.code == "INVALID_WALLET_ADDRESS" else 503
-            raise ControlError(error.code, status) from None
-
     if settings.mode == "FUJI":
         app.mount("/assets", StaticFiles(directory=DASHBOARD), name="assets")
-
-        @app.get("/fuji-wallet", include_in_schema=False)
-        def fuji_wallet_page():
-            return FileResponse(
-                DASHBOARD / "fuji-wallet.html",
-                headers={
-                    "Content-Security-Policy": (
-                        "default-src 'self'; script-src 'self'; style-src 'self'; "
-                        "connect-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'"
-                    ),
-                    "X-Content-Type-Options": "nosniff",
-                },
-            )
+        install_fuji_routes(app, [Depends(operator)])
 
     if settings.mode == "MOCK":
         app.mount("/assets", StaticFiles(directory=DASHBOARD), name="assets")

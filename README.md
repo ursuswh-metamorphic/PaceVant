@@ -67,12 +67,12 @@ API: `http://127.0.0.1:8001/docs`; dùng `B_API_KEY` trong **`.env` duy nhất**
 
 ## Fuji Wallet + Oracle (read-only, testnet-only)
 
-A new **observability-only** feature reads native AVAX, Fuji USDC and WAVAX balances pinned to one Fuji block, a Fuji Witnet AVAX/USD oracle observation, and optionally a CoinGecko off-chain market reference. It never signs, swaps, approves, or feeds an oracle value into SDE/PDR.
+The Fuji Observatory reads AVAX, Circle test USDC and WAVAX at a pinned block, Chainlink AVAX/USD and USDC/USD, Witnet and Pyth observations, plus optional PolicyVault state and execution receipts. It exports source and block evidence; prices remain outside SDE/PDR authorization.
 
 ```powershell
 uv run --locked python scripts/fuji_wallet_read.py 0xYOUR_PUBLIC_FUJI_ADDRESS
 ```
 
-With the configured FUJI-mode Control Plane, open `http://127.0.0.1:8000/fuji-wallet` to connect a Core/MetaMask address or paste a public vault address. Full instructions, address provenance and limitations: [Fuji wallet / oracle guide](docs/FUJI_WALLET_MARKET_READONLY.md).
+Run `uv run --locked python scripts/serve.py --fuji-readonly --port 8012` with `PACEVANT_OPERATOR_TOKEN` set locally (24+ characters), then open `http://127.0.0.1:8012/fuji-wallet`. No B service or private key is required. See the [observer guide](docs/FUJI_WALLET_MARKET_READONLY.md) and [live verification report](docs/FUJI_AVALANCHE_INTEGRATION_REPORT.md).
 
 **Important:** Fiat-looking testnet token quantities are not real assets; a real AVAX/USD feed is not sufficient to value a MockUSDC treasury. This reader is intentionally not in the approval path. Do not interpret legacy ERC-4337 Fuji receipts as deployments of the current PolicyVault.

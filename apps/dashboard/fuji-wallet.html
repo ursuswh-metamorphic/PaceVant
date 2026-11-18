@@ -1,40 +1,76 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PaceVant — Fuji Wallet & Oracle</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PaceVant · Fuji Observatory</title>
   <link rel="stylesheet" href="/assets/fuji-wallet.css">
   <script src="/assets/fuji-wallet.js" defer></script>
 </head>
 <body>
-<main>
-  <header><div><p class="eyebrow">PACEVANT · READ-ONLY OBSERVABILITY</p><h1>Avalanche Fuji Wallet</h1>
-    <p>Kết nối Core/MetaMask hoặc nhập một địa chỉ công khai. Không gửi giao dịch, không ký, không cần private key.</p></div>
-    <span class="network">FUJI · CHAIN 43113</span>
-  </header>
-  <section class="panel">
-    <h2>Wallet address</h2>
-    <div class="controls">
-      <input id="wallet" placeholder="0x... (EOA hoặc PolicyVault)" aria-label="Địa chỉ ví công khai" maxlength="42" autocomplete="off">
-      <button id="connect">Connect wallet</button>
+  <header class="masthead"><div class="shell mast-content">
+    <a class="brand" href="/fuji-wallet">PaceVant</a>
+    <nav><a href="/docs">API</a><span>Fuji C-Chain · 43113</span></nav>
+  </div></header>
+  <main class="shell">
+    <section class="intro">
+      <p class="eyebrow">AVALANCHE OBSERVATORY</p>
+      <h1>Ví, Vault &amp; Oracle Fuji</h1>
+      <p>Số dư và trạng thái hợp đồng theo cùng một block. Giá oracle hiển thị nguồn, thời điểm cập nhật và heartbeat.</p>
+    </section>
+    <section class="panel query" aria-labelledby="query-heading">
+      <div class="panel-head"><h2 id="query-heading">Đọc dữ liệu testnet</h2>
+        <button id="connect" type="button" class="secondary">Kết nối Core / MetaMask</button>
+      </div>
+      <form id="query-form">
+        <div class="fields">
+          <label>Địa chỉ ví công khai<input id="wallet" placeholder="0x…" maxlength="42" autocomplete="off" required></label>
+          <label>Operator token<input id="token" type="password" placeholder="Credential của backend" autocomplete="off" required></label>
+        </div>
+        <details class="optional">
+          <summary>Đối chiếu thêm PolicyVault và receipt</summary>
+          <div class="fields">
+            <label>Địa chỉ PolicyVault<input id="vault-address" placeholder="0x…" maxlength="42" autocomplete="off"></label>
+            <label>Transaction hash<input id="tx-hash" placeholder="0x…" maxlength="66" autocomplete="off"></label>
+          </div>
+        </details>
+        <div class="actions">
+          <p>Token chỉ dùng trong trang hiện tại. Mọi số dư thuộc mạng Fuji.</p>
+          <button id="refresh" type="submit">Đọc snapshot <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+      <p id="status" role="status" aria-live="polite">Nhập địa chỉ ví để bắt đầu.</p>
+    </section>
+    <div id="result" hidden>
+      <section class="chain-strip" aria-label="Provenance">
+        <div><span>Block đã đối chiếu hash</span><a id="block-link"></a></div>
+        <div><span>Thời điểm block</span><strong id="block-time"></strong></div>
+        <div><span>Snapshot</span><strong id="snapshot-status"></strong></div>
+        <div><span>Địa chỉ</span><a id="explorer" target="_blank" rel="noopener noreferrer">Mở explorer ↗</a></div>
+      </section>
+      <div id="assets" class="assets" aria-label="Số dư ví"></div>
+      <section class="panel">
+        <div class="panel-head"><div><h2>Oracle trên Avalanche Fuji</h2>
+          <p>Trong heartbeat là trạng thái cập nhật của feed. Giá tham khảo chưa tham gia cấp quyền ký PDR.</p></div></div>
+        <div id="oracles" class="oracles"></div>
+        <div id="market" class="market"></div>
+      </section>
+      <section class="panel" id="vault-panel" hidden>
+        <div class="panel-head"><h2>PolicyVault</h2><a id="vault-link" target="_blank" rel="noopener noreferrer">Mở hợp đồng ↗</a></div>
+        <div id="vault-content" class="details-content"></div>
+      </section>
+      <section class="panel" id="receipt-panel" hidden>
+        <div class="panel-head"><h2>Receipt trên Fuji</h2><a id="receipt-link" target="_blank" rel="noopener noreferrer">Mở giao dịch ↗</a></div>
+        <div id="receipt-content" class="details-content"></div>
+      </section>
+      <section class="panel evidence">
+        <div class="panel-head"><div><h2>Bằng chứng quan sát</h2>
+          <p>JSON gồm block hash, địa chỉ feed, bytecode hash, round ID và giá gốc.</p></div>
+          <button id="download" type="button" class="secondary">Tải JSON</button></div>
+        <details><summary>Xem JSON và observation hash</summary><pre id="raw"></pre></details>
+      </section>
     </div>
-    <div class="controls">
-      <input id="token" type="password" placeholder="Operator token (chỉ lưu trong bộ nhớ trang)" aria-label="Operator token" autocomplete="off">
-      <button id="refresh">Read Fuji snapshot</button>
-    </div>
-    <p id="status" aria-live="polite">Chưa thực hiện RPC request.</p>
-  </section>
-  <section class="panel" id="result" hidden>
-    <div class="meta"><h2>Live chain snapshot</h2><a id="explorer" target="_blank" rel="noopener noreferrer">Open Fuji explorer</a></div>
-    <p id="block"></p>
-    <div id="assets" class="cards"></div>
-    <h2>On-chain oracle reference (Witnet)</h2>
-    <div id="oracle" class="oracle"></div>
-    <h2>Live off-chain market reference (CoinGecko, optional)</h2>
-    <div id="market" class="oracle"></div>
-    <p class="warning">Giá oracle có thể không đủ mới để giao dịch. Reader này chỉ để quan sát, KHÔNG tự động đưa giá hoặc số dư vào SDE/PDR. Test USDC và MockUSDC là các hợp đồng khác nhau.</p>
-    <details><summary>Provenance · Raw JSON</summary><pre id="raw"></pre></details>
-  </section>
-</main>
+  </main>
+  <footer class="shell">PaceVant · Avalanche Fuji testnet · EIP-712 PolicyVault</footer>
 </body>
 </html>
