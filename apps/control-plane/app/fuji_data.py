@@ -11,6 +11,7 @@ from decimal import Decimal, InvalidOperation
 
 import httpx
 from eth_abi import decode
+from eth_abi.exceptions import DecodingError
 from eth_utils import keccak
 
 FUJI_RPC = "https://api.avax-test.network/ext/bc/C/rpc"
@@ -126,7 +127,7 @@ class FujiReader:
                 # Not usable for SDE: Fuji test USDC does not have a second
                 # validated USD feed and may not track actual USD value.
             return info
-        except (FujiReadError, OverflowError, ValueError, TypeError):
+        except (FujiReadError, DecodingError, OverflowError, ValueError, TypeError):
             info["status"] = "UNAVAILABLE"
             return info
 
