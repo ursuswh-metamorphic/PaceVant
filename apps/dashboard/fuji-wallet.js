@@ -22,6 +22,11 @@ function render(data) {
     (o.price_usd_e8 ? " · $" + formatToken(o.price_usd_e8, 8) : "") +
     (o.updated_at ? " · updated " + new Date(o.updated_at * 1000).toISOString() : "") +
     " · trading authorization: disabled";
+  const m = data.market;
+  $("market").textContent = "AVAX / USD · " + m.provider + " · " + m.status +
+    (m.price_usd_e8 ? " · $" + formatToken(m.price_usd_e8, 8) : "") +
+    (m.updated_at ? " · updated " + new Date(m.updated_at * 1000).toISOString() : "") +
+    " · trading authorization: disabled";
   $("raw").textContent = JSON.stringify(data, null, 2);
 }
 $("connect").addEventListener("click", async () => {
