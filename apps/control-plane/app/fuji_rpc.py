@@ -45,6 +45,13 @@ def hex_data(value):
     return bytes.fromhex(value[2:])
 
 
+def timestamp_fields(now, updated):
+    # Invalid uint256 timestamps must not overflow canonical JSON or browser Date.
+    if not 0 <= updated <= 253402300799:
+        return {"updated_at_raw": str(updated), "age_seconds": None}
+    return {"updated_at": updated, "age_seconds": now - updated if updated else None}
+
+
 class FujiRPC:
     def __init__(self, client, now=None, monotonic=time.monotonic):
         self.client = client

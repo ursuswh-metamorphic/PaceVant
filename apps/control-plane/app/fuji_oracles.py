@@ -1,6 +1,6 @@
 """Public Fuji oracle contracts and observation-only price normalization."""
 
-from app.fuji_rpc import EXPLORER, FujiReadError
+from app.fuji_rpc import EXPLORER, FujiReadError, timestamp_fields
 
 CHAINLINK_DIRECTORY = (
     "https://reference-data-directory.vercel.app/feeds-avalanche-fuji-testnet.json"
@@ -43,11 +43,10 @@ def chainlink(reader, pair, address, heartbeat):
         out.update(
             decimals=decimals,
             answer_raw=str(price),
-            round_started_at=started,
+            round_started_at=str(started),
             round_id=str(round_id),
             answered_in_round=str(answered),
-            updated_at=updated,
-            age_seconds=reader.now - updated if updated else None,
+            **timestamp_fields(reader.now, updated),
         )
         if (
             price <= 0
@@ -91,8 +90,7 @@ def pyth(reader):
         )
         out.update(
             price_raw=str(price),
-            updated_at=updated,
-            age_seconds=reader.now - updated if updated else None,
+            **timestamp_fields(reader.now, updated),
             exponent=exponent,
             confidence_raw=str(confidence),
         )
@@ -103,7 +101,7 @@ def pyth(reader):
             amount = price * 10**scale if scale >= 0 else price // 10 ** (-scale)
             out.update(
                 price_usd_e8=str(amount),
-                confidence_bps=(confidence * 10000 + price - 1) // price,
+                confidence_bps=str((confidence * 10000 + price - 1) // price),
                 status="FRESH" if reader.now - updated <= 60 else "STALE",
             )
     except FujiReadError as error:

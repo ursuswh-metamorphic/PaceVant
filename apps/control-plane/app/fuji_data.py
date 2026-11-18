@@ -19,6 +19,7 @@ from app.fuji_rpc import (
     hex_data,
     quantity,
     require_address,
+    timestamp_fields,
 )
 
 FUJI_USDC = "0x5425890298aed601595a70AB815c96711a31Bc65"
@@ -90,9 +91,8 @@ class FujiReader(FujiRPC):
             )
             info.update(
                 price_raw=str(price),
-                updated_at=updated,
                 oracle_update_status=status,
-                age_seconds=self.now - updated if updated else None,
+                **timestamp_fields(self.now, updated),
             )
             if status != 200 or price <= 0 or not 0 < updated <= self.block["timestamp"]:
                 info.update(status="UNVERIFIED", reason_code="ORACLE_NO_VALID_UPDATE")
@@ -176,6 +176,8 @@ class FujiReader(FujiRPC):
                     value = "0x" + value.hex()
                 if name.endswith("base_units") or name == "policy_version":
                     value = str(value)
+                if name == "policy_expires_at" and value > 253402300799:
+                    raise FujiReadError("FUJI_BAD_POLICY_STATE")
                 out[name] = value
             utc_day = self.block["timestamp"] // 86400
             (spent,) = self.eth_call(address, "dailySpentUsdc(uint256)", ("uint256",), (utc_day,))

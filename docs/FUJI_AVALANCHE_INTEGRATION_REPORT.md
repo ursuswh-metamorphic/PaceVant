@@ -48,7 +48,8 @@ Chainlink hiện phù hợp nhất để trình diễn read-only từ dữ liệ
 
 ## Kiểm tra và phản biện
 
-- A: **55 tests passed** trên Windows; Ruff check/format và JavaScript syntax check passed.
+- A: **56 tests passed** trên Windows và Linux; Ruff check/format và JavaScript syntax check passed.
+- A+B: **4 integration tests passed** trên Linux/Anvil (normal, replan, stale oracle, pending reservation); Solidity compile và secret scan passed.
 - Dashboard: đọc live, auth lỗi hiển thị đúng, download JSON được và hash kiểm tra lại khớp. Ở viewport 390px, document width = scrollWidth = 375px, không tràn ngang.
 - Unit/transport tests cố định dữ liệu để tái hiện chain mismatch, RPC/ABI lỗi, reorg, stale/future update, invalid Chainlink round, malformed receipt, cache, rate/concurrency limit, deadline và header API-key isolation.
 - Snapshot và JSON tải từ dashboard đã kiểm tra lại Keccak/JCS. Đây là kiểm tra tính toàn vẹn artifact, chưa phải chữ ký tin cậy.

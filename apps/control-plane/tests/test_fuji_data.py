@@ -232,6 +232,14 @@ def test_oracle_stale_unresolved_and_future_are_explicit(age, status, expected):
     assert out["oracle"]["usable_for_decisions"] is False
 
 
+def test_extreme_uint256_timestamp_cannot_break_snapshot_canonical_json():
+    out, _ = read(oracle_age=NOW - (2**256 - 1))
+    assert out["oracle"]["status"] == "UNVERIFIED"
+    assert out["oracles"][0]["status"] == "UNVERIFIED"
+    assert "updated_at" not in out["oracles"][0]
+    assert out["oracles"][0]["updated_at_raw"] == str(2**256 - 1)
+
+
 @pytest.mark.parametrize(
     "malformed,code",
     [
