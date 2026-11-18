@@ -175,6 +175,8 @@ class FujiReader:
         if not isinstance(head, dict) or not all(k in head for k in ("number", "hash", "timestamp")):
             raise FujiReadError("FUJI_BAD_BLOCK")
         block = head["number"]  # pin every balance/price read to the same height
+        if not 0 <= self.now - int(head["timestamp"], 16) <= 120:
+            raise FujiReadError("FUJI_BLOCK_STALE")
         native = self.rpc("eth_getBalance", [holder, block])
         if not isinstance(native, str) or not native.startswith("0x"):
             raise FujiReadError("FUJI_BAD_BALANCE")
