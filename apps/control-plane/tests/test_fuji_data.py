@@ -21,6 +21,11 @@ def fake_client(*, chain_id="0xa869", oracle_age=300, oracle_status=200):
     observed = []
 
     def handler(request):
+        if request.method == "GET":
+            assert str(request.url).startswith("https://api.coingecko.com/api/v3/simple/price")
+            return httpx.Response(200, json={
+                "avalanche-2": {"usd": 23.50, "last_updated_at": NOW - 30}
+            })
         assert request.method == "POST"
         assert str(request.url) == FUJI_RPC
         req = json.loads(request.content)
@@ -113,3 +118,14 @@ def test_unsafe_method_is_never_forwarded():
     with http, pytest.raises(FujiReadError, match="UNSAFE_RPC_METHOD"):
         FujiReader(http).rpc("eth_sendRawTransaction", ["0xdeadbeef"])
     assert observed == []
+
+
+def test_optional_coingecko_is_real_api_shape_but_never_authorizes(monkeypatch):
+    monkeypatch.setenv("PACEVANT_COINGECKO_DEMO_KEY", "test-only-key")
+    http, observed = fake_client()
+    with http:
+        out = FujiReader(http, now=NOW).snapshot(WALLET)
+    assert out["market"]["price_usd_e8"] == "2350000000"
+    assert out["market"]["status"] == "FRESH"
+    assert out["market"]["usable_for_decisions"] is False
+    assert "eth_sendRawTransaction" not in observed
