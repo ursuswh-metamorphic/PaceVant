@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PaceVant — Fuji Wallet & Oracle</title>
+  <link rel="stylesheet" href="/assets/fuji-wallet.css">
+  <script src="/assets/fuji-wallet.js" defer></script>
+</head>
+<body>
+<main>
+  <header><div><p class="eyebrow">PACEVANT · READ-ONLY OBSERVABILITY</p><h1>Avalanche Fuji Wallet</h1>
+    <p>Kết nối Core/MetaMask hoặc nhập một địa chỉ công khai. Không gửi giao dịch, không ký, không cần private key.</p></div>
+    <span class="network">FUJI · CHAIN 43113</span>
+  </header>
+  <section class="panel">
+    <h2>Wallet address</h2>
+    <div class="controls">
+      <input id="wallet" placeholder="0x... (EOA hoặc PolicyVault)" aria-label="Địa chỉ ví công khai" maxlength="42" autocomplete="off">
+      <button id="connect">Connect wallet</button>
+    </div>
+    <div class="controls">
+      <input id="token" type="password" placeholder="Operator token (chỉ lưu trong bộ nhớ trang)" aria-label="Operator token" autocomplete="off">
+      <button id="refresh">Read Fuji snapshot</button>
+    </div>
+    <p id="status" aria-live="polite">Chưa thực hiện RPC request.</p>
+  </section>
+  <section class="panel" id="result" hidden>
+    <div class="meta"><h2>Live chain snapshot</h2><a id="explorer" target="_blank" rel="noopener noreferrer">Open Fuji explorer</a></div>
+    <p id="block"></p>
+    <div id="assets" class="cards"></div>
+    <h2>On-chain oracle reference (Witnet)</h2>
+    <div id="oracle" class="oracle"></div>
+    <p class="warning">Giá oracle có thể không đủ mới để giao dịch. Reader này chỉ để quan sát, KHÔNG tự động đưa giá hoặc số dư vào SDE/PDR. Test USDC và MockUSDC là các hợp đồng khác nhau.</p>
+    <details><summary>Provenance · Raw JSON</summary><pre id="raw"></pre></details>
+  </section>
+</main>
+</body>
+</html>
