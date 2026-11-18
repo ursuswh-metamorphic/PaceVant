@@ -25,7 +25,7 @@ BALANCE_OF = "0x70a08231"
 DECIMALS = "0x313ce567"
 VALUE_FOR = "0x" + keccak(text="valueFor(bytes32)")[:4].hex()
 ADDRESS = re.compile(r"^0x[0-9a-fA-F]{40}$")
-MAX_ORACLE_AGE_SECONDS = 300
+MAX_ORACLE_AGE_SECONDS = 30 * 60 * 60  # visibility only: published heartbeat is 24h
 
 
 class FujiReadError(Exception):
@@ -112,7 +112,7 @@ class FujiReader:
                 ["int256", "uint256", "uint256"], result
             )
             info.update(updated_at=int(updated_at), oracle_update_status=int(update_status))
-            if price <= 0 or update_status != 200 or updated_at > self.now:
+            if price > 0:\n                info["price_usd_e8"] = str(price * 100)\n            if price <= 0 or update_status != 200 or updated_at > self.now:
                 info["status"] = "UNVERIFIED"
             elif self.now - updated_at > MAX_ORACLE_AGE_SECONDS:
                 info["status"] = "STALE"
