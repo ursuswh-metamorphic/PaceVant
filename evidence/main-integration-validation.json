@@ -1,0 +1,105 @@
+{
+  "validation_date_vietnam": "2026-11-19",
+  "branch": "main",
+  "default_branch": "main",
+  "tested_commit": "5fcfcf7fc0367126b5f6ace15ae7be3de969d375",
+  "merged_prs": [
+    {
+      "number": 1,
+      "merge_commit": "e45f0570a61048998e2131610b2a6af73bafab42"
+    },
+    {
+      "number": 2,
+      "merge_commit": "cd9be15385b9ee1f38bc6753885571f7ea99db8b"
+    }
+  ],
+  "source_commits_preserved": true,
+  "ci": {
+    "status": "SUCCESS",
+    "url": "https://github.com/ursuswh-metamorphic/PaceVant/actions/runs/44562118338"
+  },
+  "fresh_checkout_checks": {
+    "control_plane": 59,
+    "execution_plane_including_ab": 51,
+    "ab_subset": 4,
+    "solidity": 37,
+    "opt_in_real_lfj_fork": 2,
+    "golden_signature": "PASS",
+    "ruff_and_format": "PASS",
+    "secret_scan": "PASS"
+  },
+  "http_smoke": {
+    "tested_commit": "5fcfcf7fc0367126b5f6ace15ae7be3de969d375",
+    "mock_api": {
+      "status": "PASS",
+      "workflow": "CONFIRMED",
+      "scope": "MOCK_FIXTURE"
+    },
+    "fuji_observer_api": {
+      "status": "PASS",
+      "block_number": 61337849,
+      "block_hash": "0x2ca8bc19c7a50f9df3e5fb85f03beb9cab674b958d8cd853d8abe8fd4a5ec9eb",
+      "cached_second_read": true,
+      "oracle_statuses": [
+        [
+          "CHAINLINK",
+          "AVAX/USD",
+          "WITHIN_HEARTBEAT"
+        ],
+        [
+          "CHAINLINK",
+          "USDC/USD",
+          "WITHIN_HEARTBEAT"
+        ],
+        [
+          "WITNET",
+          "AVAX/USD",
+          "UNVERIFIED"
+        ],
+        [
+          "PYTH",
+          "AVAX/USD",
+          "STALE"
+        ]
+      ]
+    }
+  },
+  "fork_validation": {
+    "main-fuji-fork-validation.json": {
+      "status": "COMPLETE",
+      "source_block": 61337883,
+      "evidence_root": "0xf698e3b208669386c6f1a70300fbf97b671ce26b32e45406cd67ad7e3b0dc9f9",
+      "stress": [
+        "SUCCESS_SAFE",
+        "PROTECTED_REVERT"
+      ],
+      "file_sha256": "c8a56f558ef251100f3dedd933d8acad7911d9f0a665c7d7853b962ff7890a70",
+      "scope": "ISOLATED_FUJI_FORK_NOT_PUBLIC_DEPLOYMENT_OR_SDE_APPROVAL"
+    },
+    "main-fuji-fork-validation-insufficient-stress-budget.json": {
+      "status": "INCONCLUSIVE",
+      "source_block": 61337855,
+      "evidence_root": "0xb6b9fef112cb747e1f615cad7c5bfd8b4d9c8bff5fd6eae2d26256cff32fbccd",
+      "stress": [
+        "SUCCESS_SAFE",
+        "INCONCLUSIVE"
+      ],
+      "file_sha256": "97d6b8ccd500656cad04937b6883a1cf9985e620323fc0b24baadd34f6e46ed3",
+      "scope": "ISOLATED_FUJI_FORK_NOT_PUBLIC_DEPLOYMENT_OR_SDE_APPROVAL"
+    }
+  },
+  "public_fuji_transactions_broadcast": 0,
+  "live_acceptance": "BLOCKED_ORACLE_TOKEN_IDENTITY_OPERATOR_SETUP_FUNDING_AND_LATENCY",
+  "branch_cleanup_scope": [
+    "codex/lfj-fuji-execution",
+    "feat/fuji-wallet-oracle-readonly"
+  ],
+  "historical_fork_reports": "Existing committed LFJ evidence is unchanged; fresh validation artifacts are retained in ignored local data/.",
+  "branch_cleanup": {
+    "remote_lfj": "DELETED",
+    "remote_readonly": "DELETED",
+    "local_lfj": "DELETED",
+    "local_readonly": "NOT_PRESENT",
+    "other_branches": "PRESERVED"
+  }
+}

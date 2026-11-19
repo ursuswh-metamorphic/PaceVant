@@ -6,7 +6,7 @@ Ngày 19/11/2026 (giờ Việt Nam), theo yêu cầu người dùng:
 - Merge [PR #1](https://github.com/ursuswh-metamorphic/PaceVant/pull/1), gồm Fuji wallet/oracle reader, tại `e45f057`.
 - Merge [PR #2](https://github.com/ursuswh-metamorphic/PaceVant/pull/2), gồm LFJ thật và fork evidence, tại `cd9be15`.
 - Đặt `main` làm default branch. Lịch sử hai nhánh nguồn được giữ nguyên trong main.
-- Chỉ xóa `codex/lfj-fuji-execution` và `feat/fuji-wallet-oracle-readonly` sau khi xác nhận các commit đã được giữ lại và kiểm tra hoàn tất. Các nhánh khác không thuộc yêu cầu dọn dẹp.
+- Đã xóa đúng hai nhánh remote `codex/lfj-fuji-execution` và `feat/fuji-wallet-oracle-readonly` sau khi xác nhận các commit được giữ lại và mọi kiểm tra hoàn tất. Nhánh local LFJ cũng đã xóa; local không có nhánh tên `feat/fuji-wallet-oracle-readonly`. Các nhánh khác được giữ nguyên.
 
 Source tree sau hai merge khớp nhánh LFJ đã kiểm thử; các cập nhật tiếp theo ở main chỉ bổ sung tài liệu và bằng chứng kiểm tra. Không nới policy, oracle identity, TTL, block drift hay quyền broadcast trong lúc ghép.
 
@@ -59,6 +59,8 @@ npm run test:lfj:fork
 ```
 
 Xem bằng chứng lịch sử trong [báo cáo LFJ](LFJ_FUJI_REPORT.md) và [oracle report](FUJI_AVALANCHE_INTEGRATION_REPORT.md). Artifact lịch sử giữ nguyên block/hash; freshness phải đọc lại khi dùng.
+
+Đợt kiểm tra lại từ checkout `main` sạch cũng đạt đủ 59/51/37/2 tests, lint, golden signature và secret scan. Hai API khởi động mới từ main đã kiểm tra: workflow MOCK CONFIRMED; observer Fuji đọc live, xác thực và cache hoạt động. [Kết quả tích hợp main](../evidence/main-integration-validation.json) ghi commit được test, CI, block/provenance và evidence root của lượt fork mới. Database demo đang dùng không bị thay đổi bởi smoke test.
 
 Những điều còn cần trước một vòng A→SDE→PDR→LFJ trên Fuji công khai:
 

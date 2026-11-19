@@ -2,7 +2,7 @@
 
 `main` là nhánh tích hợp và nhánh mặc định, gồm Control Plane A, Execution Plane B, Fuji Observatory và LFJ. Hai PR [#1](https://github.com/ursuswh-metamorphic/PaceVant/pull/1) / [#2](https://github.com/ursuswh-metamorphic/PaceVant/pull/2) đã được merge, giữ nguyên lịch sử. Xem [trạng thái tích hợp](docs/MAIN_INTEGRATION.md) cho cách chạy và các điều kiện live còn thiếu.
 
-A lập kế hoạch, kiểm tra chính sách và ký EIP-712. B dựng calldata, mô phỏng trên fork, gửi giao dịch qua `PolicyVault` và trả receipt. Hai dịch vụ dùng chung SDK và schema v1.1. [Hợp đồng tích hợp](docs/03_SHARED_INTEGRATION_CONTRACT.md)
+A lập kế hoạch, kiểm tra chính sách và ký EIP-712 khi SDE cấp quyền. B dựng calldata, mô phỏng trên fork, gửi giao dịch qua `PolicyVault` và trả receipt. Hai dịch vụ dùng chung SDK 1.2.0 và schema evidence v1.1. [Hợp đồng tích hợp](docs/03_SHARED_INTEGRATION_CONTRACT.md)
 
 ```text
 apps/execution-plane/     FastAPI B, builder, simulation, evidence, relayer, chain
