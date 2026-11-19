@@ -27,6 +27,8 @@ class Settings:
     attestor_key: str | None = None
     chain_rpc_url: str | None = None
     relayer_address: str | None = None
+    max_block_drift: int = 3
+    fuji_verification_rpc: str = "https://api.avax-test.network/ext/bc/C/rpc"
 
     @classmethod
     def from_env(cls):
@@ -84,7 +86,30 @@ class Settings:
             ):
                 raise RuntimeError("Use a loopback RPC for LOCAL and HTTPS for FUJI")
             TypeAdapter(Address).validate_python(env["RELAYER_ADDRESS"])
+        max_drift = int(os.environ.get("PACEVANT_MAX_BLOCK_DRIFT", "3"))
+        if not 1 <= max_drift <= 120:
+            raise RuntimeError("PACEVANT_MAX_BLOCK_DRIFT must be 1..120")
+        verification_rpc = os.environ.get(
+            "PACEVANT_FUJI_VERIFICATION_RPC", "https://api.avax-test.network/ext/bc/C/rpc"
+        )
+        parsed_verification = urlsplit(verification_rpc)
+        if (
+            not parsed_verification.hostname
+            or parsed_verification.username
+            or parsed_verification.password
+            or parsed_verification.fragment
+            or not (
+                parsed_verification.scheme == "https"
+                or (
+                    parsed_verification.scheme == "http"
+                    and parsed_verification.hostname in LOOPBACK
+                )
+            )
+        ):
+            raise RuntimeError("PACEVANT_FUJI_VERIFICATION_RPC must use HTTPS or loopback HTTP")
         return cls(
+            max_block_drift=max_drift,
+            fuji_verification_rpc=verification_rpc,
             mode=mode,
             db=Path(env["DB"] or ROOT / "data" / f"control-plane-{mode.lower()}.sqlite3"),
             mandate_file=Path(env["MANDATE_FILE"] or FIXTURES / "mandate.json"),

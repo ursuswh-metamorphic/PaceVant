@@ -1,32 +1,9 @@
 """Shared A/B integration contract v1.1. Money crosses the wire as decimal strings."""
 
 from typing import Annotated, Literal
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
-
-Address = Annotated[str, StringConstraints(pattern=r"^0x[0-9a-fA-F]{40}$")]
-Hash = Annotated[str, StringConstraints(pattern=r"^0x[0-9a-f]{64}$")]
-HexBytes = Annotated[str, StringConstraints(pattern=r"^0x(?:[0-9a-f]{2})*$")]
-UInt = Annotated[str, StringConstraints(pattern=r"^(0|[1-9][0-9]*)$")]
-Delta = Annotated[str, StringConstraints(pattern=r"^-?(0|[1-9][0-9]*)$")]
-
-
-class Wire(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    @field_validator("*", mode="after")
-    @classmethod
-    def uint_range(cls, value, info):
-        if (
-            isinstance(value, str)
-            and any(
-                getattr(meta, "pattern", None)
-                in {r"^(0|[1-9][0-9]*)$", r"^-?(0|[1-9][0-9]*)$"}
-                for meta in cls.model_fields[info.field_name].metadata
-            )
-            and abs(int(value)) >= 2**256
-        ):
-            raise ValueError("uint256 overflow")
-        return value
+from pydantic import Field, StringConstraints
+from .wire import Address, Hash, HexBytes, UInt, Delta, Wire
+from .v2 import EffectEvidenceV2, ProofPolicy, Registry, SignedPDRV2, SessionContext
 
 
 class TransactionProposal(Wire):
@@ -114,6 +91,7 @@ class StressTest(Wire):
 
 
 class SimulationEvidence(Wire):
+    effects_v2: EffectEvidenceV2 | None = Field(default=None, exclude_if=lambda v: v is None)
     schema_version: Literal["1.1"] = "1.1"
     intent_id: str
     build_id: str
@@ -137,6 +115,9 @@ class SimulationEvidence(Wire):
 
 
 class ExecutionResult(Wire):
+    block_hash: Hash | None = Field(default=None, exclude_if=lambda v: v is None)
+    confirmations: int | None = Field(default=None, exclude_if=lambda v: v is None, ge=0)
+    proof_session: SessionContext | None = Field(default=None, exclude_if=lambda v: v is None)
     build_id: str
     decision_id: str
     chain_id: int
@@ -165,7 +146,7 @@ class SimulationRequest(Wire):
 
 class ExecutionRequest(Wire):
     build_id: str
-    signed_pdr: SignedPDR
+    signed_pdr: SignedPDR | SignedPDRV2
 
 
 ExecutionStatus = Literal[
@@ -184,6 +165,9 @@ class ExecutionSubmission(Wire):
 
 
 class ChainContext(Wire):
+    proof_policy: ProofPolicy | None = Field(default=None, exclude_if=lambda v: v is None)
+    registry: Registry | None = Field(default=None, exclude_if=lambda v: v is None)
+    proof_session: SessionContext | None = Field(default=None, exclude_if=lambda v: v is None)
     chain_id: int
     vault_address: Address
     router: Address

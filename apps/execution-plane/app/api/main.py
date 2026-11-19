@@ -1,5 +1,8 @@
 import secrets
 import uuid
+from collections import deque
+from threading import Lock
+from time import monotonic
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Header
 from fastapi.exceptions import RequestValidationError
@@ -24,6 +27,8 @@ from ..settings import Settings
 from ..simulation.runner import Simulator
 from ..store import Store
 from ..transaction.builder import Builder
+from treasury_contracts.v2 import PreflightV2Request
+from treasury_contracts.http_limits import RequestSizeLimit
 
 
 def create_app(settings=None, chain=None):
@@ -33,9 +38,7 @@ def create_app(settings=None, chain=None):
     @asynccontextmanager
     async def lifespan(app):
         if not settings.api_key.get_secret_value():
-            raise RuntimeError(
-                "B_API_KEY must be configured; no unauthenticated execution service"
-            )
+            raise RuntimeError("B_API_KEY must be configured; no unauthenticated execution service")
         app.state.chain = chain or Chain(settings)
         app.state.builder = Builder(app.state.chain, store)
         app.state.simulator = Simulator(app.state.chain, store)
@@ -52,6 +55,18 @@ def create_app(settings=None, chain=None):
         },
     )
     app.state.store = store
+    app.add_middleware(RequestSizeLimit)
+    expensive_requests = deque()
+    rate_lock = Lock()
+
+    def expensive_rate():
+        with rate_lock:
+            now = monotonic()
+            while expensive_requests and now - expensive_requests[0] >= 60:
+                expensive_requests.popleft()
+            if len(expensive_requests) >= 30:
+                raise PlaneError("SIMULATION_RATE_LIMITED", "Simulation limit reached", 429, True)
+            expensive_requests.append(now)
 
     def auth(x_api_key: str | None = Header(default=None)):
         if not x_api_key or not secrets.compare_digest(
@@ -63,9 +78,7 @@ def create_app(settings=None, chain=None):
     async def request_id(request, call_next):
         incoming = request.headers.get("X-Request-Id", "")
         request.state.request_id = (
-            incoming
-            if 1 <= len(incoming) <= 128 and incoming.isprintable()
-            else str(uuid.uuid4())
+            incoming if 1 <= len(incoming) <= 128 and incoming.isprintable() else str(uuid.uuid4())
         )
         response = await call_next(request)
         response.headers["X-Request-ID"] = request.state.request_id
@@ -100,9 +113,7 @@ def create_app(settings=None, chain=None):
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
         # Never echo submitted PDRs/secrets/unknown request fields in error envelopes.
-        return error(
-            request, 400, "INVALID_SCHEMA", "Request does not match integration schema"
-        )
+        return error(request, 400, "INVALID_SCHEMA", "Request does not match integration schema")
 
     @app.exception_handler(Exception)
     async def unavailable(request, exc):
@@ -128,9 +139,7 @@ def create_app(settings=None, chain=None):
     def health():
         return {"status": "ok", "service": "execution-plane", "version": "1.1"}
 
-    @app.get(
-        "/v1/chain/context", response_model=ChainContext, dependencies=[Depends(auth)]
-    )
+    @app.get("/v1/chain/context", response_model=ChainContext, dependencies=[Depends(auth)])
     def context():
         return app.state.chain.context()
 
@@ -142,24 +151,16 @@ def create_app(settings=None, chain=None):
     def snapshot():
         return app.state.chain.snapshot()
 
-    @app.post(
-        "/v1/build", response_model=BuiltTransaction, dependencies=[Depends(auth)]
-    )
-    def build(
-        p: TransactionProposal, idempotency_key: str | None = Header(default=None)
-    ):
-        return mutate(
-            "build", idempotency_key, p.model_dump(), lambda: app.state.builder.build(p)
-        )
+    @app.post("/v1/build", response_model=BuiltTransaction, dependencies=[Depends(auth)])
+    def build(p: TransactionProposal, idempotency_key: str | None = Header(default=None)):
+        return mutate("build", idempotency_key, p.model_dump(), lambda: app.state.builder.build(p))
 
     @app.post(
         "/v1/simulations",
         response_model=SimulationEvidence,
-        dependencies=[Depends(auth)],
+        dependencies=[Depends(auth), Depends(expensive_rate)],
     )
-    def simulate(
-        p: SimulationRequest, idempotency_key: str | None = Header(default=None)
-    ):
+    def simulate(p: SimulationRequest, idempotency_key: str | None = Header(default=None)):
         return mutate(
             "simulate",
             idempotency_key,
@@ -172,14 +173,21 @@ def create_app(settings=None, chain=None):
         response_model=ExecutionSubmission,
         dependencies=[Depends(auth)],
     )
-    def execute(
-        p: ExecutionRequest, idempotency_key: str | None = Header(default=None)
-    ):
+    def execute(p: ExecutionRequest, idempotency_key: str | None = Header(default=None)):
         return mutate(
             "execute",
             idempotency_key,
             p.model_dump(),
             lambda: app.state.relayer.execute(p),
+        )
+
+    @app.post("/v2/simulations/preflight", dependencies=[Depends(auth), Depends(expensive_rate)])
+    def preflight(p: PreflightV2Request, idempotency_key: str | None = Header(default=None)):
+        return mutate(
+            "preflight-v2",
+            idempotency_key,
+            p.model_dump(mode="json"),
+            lambda: app.state.simulator.preflight_v2(p),
         )
 
     @app.get(

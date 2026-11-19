@@ -1,12 +1,24 @@
 "use strict";
 
 const byId = (id) => document.getElementById(id);
-const warn = new Set(["REPLAN_REQUIRED", "ESCALATED", "EXPIRED", "UNCERTAIN", "SUBMITTING", "SUBMITTED"]);
-const stop = new Set(["REJECTED", "REVERTED", "MISALIGNED", "RECEIPT_MISMATCH", "FAILED_TO_SUBMIT"]);
+const warn = new Set(["REPLAN_REQUIRED", "ESCALATED", "EXPIRED", "UNCERTAIN", "SUBMITTING", "SUBMITTED", "PROOF_INCONCLUSIVE"]);
+const stop = new Set(["REJECTED", "REVERTED", "MISALIGNED", "RECEIPT_MISMATCH", "FAILED_TO_SUBMIT", "PROOF_REJECTED"]);
 const tone = (stage) => stop.has(stage) ? "stop" : warn.has(stage) ? "warn" : "";
 const integerFormat = new Intl.NumberFormat("en-US");
 let mandateId;
 let defaultPortfolio;
+let deploymentMode = "MOCK";
+let operatorToken = "";
+let displayedInputDecimals = 6, displayedOutputDecimals = 18;
+const isReverse = (p) => p?.token_in?.toLowerCase() === activeMandate?.token_out?.toLowerCase();
+const symbol = (decimals) => decimals === 6 ? "USDC" : "WAVAX";
+
+function showRiskBudget(s, balances) {
+  byId("proof-budgets").textContent = s ? "Certified Risk Consumption: $" + units(s.used_usd_e8, 8) +
+    " / $" + units(s.limit_usd_e8, 8) + " · Global UTC day: $" + units(s.global_used_usd_e8, 8) +
+    " / $" + units(s.global_limit_usd_e8, 8) + " · USDC input spent: " + units(balances?.daily_spent_usdc_base_units, 6) +
+    " USDC. Đây là rủi ro dự phòng, tách biệt với lỗ thực tế và gas." : "Session unavailable — NO SIGN";
+}
 
 function units(value, places) {
   if (value == null) return "—";
@@ -19,7 +31,7 @@ function units(value, places) {
 }
 
 async function api(path, options) {
-  const response = await fetch(path, options);
+  const response = await fetch(path, {...options, headers:{...options?.headers, ...(operatorToken ? {Authorization:"Bearer " + operatorToken} : {})}});
   const data = await response.json();
   if (!response.ok) throw new Error(data.error?.code ?? "REQUEST_FAILED");
   return data;
@@ -46,6 +58,16 @@ function showPortfolio(portfolio, mandate, stage = "Danh mục mẫu") {
 async function loadTreasury() {
   const data = await api("/v1/treasury");
   const mandate = data.mandate;
+  deploymentMode = data.mode;
+  byId("proof-summary").hidden = !mandate.proof_policy;
+  if (mandate.proof_policy) {
+    const p = mandate.proof_policy, s = data.proof_session;
+    byId("proof-policy").textContent = p.authorization + " · Policy " + mandate.policy_hash +
+      " · Loss policy: " + units(p.max_relative_loss_bps, 2) + "% + $" + units(p.fixed_loss_usd_e8, 8) +
+      " · Oracle band: " + units(p.oracle_band_bps, 2) + "% · Tolerance: " + units(p.tolerance_bps, 2) + "%" +
+      " · Session " + mandate.session_id + " · Reverse cap: " + (BigInt(p.max_wavax_per_swap) ? units(p.max_wavax_per_swap, 18) + " WAVAX" : "DISABLED");
+    showRiskBudget(s, data.chain_balances);
+  }
   defaultPortfolio = data.portfolio;
   mandateId = mandate.mandate_id;
   byId("mandate").textContent = "Phiên bản " + mandate.version;
@@ -58,9 +80,22 @@ async function loadTreasury() {
 }
 
 function detailRows(event) {
+  if (event.proof) return {
+    "Proof": event.proof.status, "Reason": event.proof.reason,
+    "CHECK": event.proof.check_mode, "COMPILE": event.proof.compile_mode, "RISK BOUND": event.proof.risk_bound,
+    "Certified risk debit (USD)": units(event.proof.risk_debit_usd_e8, 8),
+    "Phi · signed lower bounds": event.proof.phi?.balance_bounds.map((b) => {
+      const decimals = activeMandate?.registry?.assets.find((a) => a.address === b.asset)?.decimals;
+      return b.asset + ": " + (decimals == null ? b.min_delta : units(b.min_delta, decimals) + " " + symbol(decimals));
+    }).join("; "),
+    "Residual allowance": event.proof.phi ? "0 for both tracked tokens" : null,
+    "Solver / encoder": event.proof.solver_version + " / " + event.proof.encoder_version,
+    "Fallback tau=0": String(event.proof.fallback_tau_zero),
+    "Counterexample prices (usdE8)": event.proof.witness ? JSON.stringify(event.proof.witness) : null,
+  };
   if (event.proposal) return {
-    "Intent": event.proposal.intent_id, "Swap": "USDC → WAVAX",
-    "Lượng USDC": units(event.proposal.amount_in_base_units, 6),
+    "Intent": event.proposal.intent_id, "Swap": isReverse(event.proposal) ? "WAVAX → USDC" : "USDC → WAVAX",
+    "Amount in": units(event.proposal.amount_in_base_units, isReverse(event.proposal) ? 18 : 6),
     "Recipient": event.proposal.recipient,
     "Slippage tối đa": units(event.proposal.slippage_bps, 2) + "%",
   };
@@ -71,7 +106,7 @@ function detailRows(event) {
   };
   if (event.build) return {
     "Build ID": event.build.build_id, "Calldata hash": event.build.calldata_hash,
-    "Min WAVAX": units(event.build.min_amount_out_base_units, 18), "Nonce": event.build.nonce,
+    "Min output": units(event.build.min_amount_out_base_units, isReverse(event.build) ? 6 : 18), "Nonce": event.build.nonce,
   };
   if (event.simulation) return {
     "Nguồn": event.simulation.source, "Provenance": event.provenance,
@@ -95,20 +130,20 @@ function detailRows(event) {
     "Decision ID": event.decision.decision_id,
   };
   if (event.typed_data_hash) return {
-    "PDR": "Đã ký bằng khóa mock", "Typed data hash": event.typed_data_hash,
+    "PDR": "EIP-712 attestation", "Typed data hash": event.typed_data_hash,
     "Nonce": event.nonce, "Hết hạn": new Date(event.expires_at * 1000).toISOString(),
   };
   if (event.receipt) return {
-    "Receipt": event.receipt.status, "Tx hash mô phỏng": event.receipt.tx_hash,
-    "USDC": units(event.receipt.actual_token_in_delta_base_units, 6),
-    "WAVAX": "+" + units(event.receipt.actual_token_out_delta_base_units, 18),
+    "Receipt": event.receipt.status, "Tx hash": event.receipt.tx_hash,
+    [symbol(displayedInputDecimals) + " input"]: units(event.receipt.actual_token_in_delta_base_units, displayedInputDecimals),
+    [symbol(displayedOutputDecimals) + " output"]: units(event.receipt.actual_token_out_delta_base_units, displayedOutputDecimals),
     "Gas": event.receipt.gas_used, "Revert reason": event.receipt.revert_reason,
     "USDC sau swap": event.post_execution_balances
       ? units(event.post_execution_balances.usdc_base_units, 6) : null,
     "WAVAX sau swap": event.post_execution_balances
       ? units(event.post_execution_balances.wavax_base_units, 18) : null,
   };
-  return {"Tx hash mô phỏng": event.tx_hash, "Reason codes": event.reason_codes?.join(", ")};
+  return {"Tx hash": event.tx_hash, "Reason codes": event.reason_codes?.join(", ")};
 }
 
 function renderDetail(event, button) {
@@ -142,6 +177,8 @@ function renderAttempt(groups, index) {
   const list = byId("timeline");
   list.replaceChildren();
   const events = groups[index];
+  displayedInputDecimals = isReverse(events.find((e) => e.proposal)?.proposal) ? 18 : 6;
+  displayedOutputDecimals = displayedInputDecimals === 6 ? 18 : 6;
   const entries = events.map((event) => {
     const item = document.createElement("li");
     const button = document.createElement("button");
@@ -170,7 +207,8 @@ function display(workflow, mandate) {
   groups.forEach((attempt, index) => {
     const button = document.createElement("button");
     const amount = attempt[0].proposal?.amount_in_base_units;
-    button.textContent = "Lần " + (index + 1) + (amount ? " · " + units(amount, 6) + " USDC" : "");
+    const decimals = isReverse(attempt[0].proposal) ? 18 : 6;
+    button.textContent = "Lần " + (index + 1) + (amount ? " · " + units(amount, decimals) + " " + symbol(decimals) : "");
     button.addEventListener("click", () => renderAttempt(groups, index));
     byId("attempts").append(button);
   });
@@ -180,10 +218,30 @@ function display(workflow, mandate) {
   byId("empty").hidden = true;
   byId("workflow-body").hidden = false;
   renderAttempt(groups, groups.length - 1);
+  const committed = workflow.timeline.findLast((event) => event.receipt?.proof_session);
+  if (committed) showRiskBudget(committed.receipt.proof_session, committed.post_execution_balances);
 }
 
 let activeMandate;
-loadTreasury().then((mandate) => { activeMandate = mandate; }).catch(showError);
+async function connectTreasury() {
+  activeMandate = await loadTreasury();
+  byId("connect-form").hidden = true;
+}
+api("/healthz").then((health) => {
+  deploymentMode = health.mode;
+  document.querySelector(".environment").textContent = health.mode;
+  document.querySelector(".notice").textContent = health.mode === "MOCK" ? "Dữ liệu và receipt mô phỏng" : "Testnet / local · controlled oracle · chưa audit";
+  if (health.mode === "MOCK") return connectTreasury();
+  byId("connect-form").hidden = false;
+  byId("scenarios").hidden = true;
+  byId("live-goal-label").hidden = false;
+}).catch(showError);
+byId("connect-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  operatorToken = byId("operator-token").value;
+  byId("operator-token").value = "";
+  try { await connectTreasury(); } catch (error) { operatorToken = ""; showError(error); }
+});
 
 byId("run-form").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -199,9 +257,17 @@ byId("run-form").addEventListener("submit", async (event) => {
   try {
     const result = await api("/v1/workflows/start", {
       method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({mandate_id: mandateId, goal: "Buy WAVAX with 500 USDC", scenario}),
+      body: JSON.stringify({mandate_id: mandateId, goal: deploymentMode === "MOCK" ? "Buy WAVAX with 500 USDC" : byId("live-goal").value,
+        ...(deploymentMode === "MOCK" ? {scenario} : {})}),
     });
-    display(await api("/v1/workflows/" + result.workflow_id), activeMandate);
+    const workflowPath = "/v1/workflows/" + result.workflow_id;
+    let workflow = await api(workflowPath);
+    display(workflow, activeMandate);
+    for (let poll = 0; poll < 30 && ["SUBMITTED", "SUBMITTING"].includes(workflow.status); poll++) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      workflow = await api(workflowPath);
+      display(workflow, activeMandate);
+    }
   } catch (error) {
     showError(error);
     byId("empty-message").textContent = "Chưa tải được kết quả. Có thể chạy lại kịch bản mock.";

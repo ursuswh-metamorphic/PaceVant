@@ -3,7 +3,7 @@ import re
 from eth_utils import keccak
 
 from app.models import Alignment, Mandate
-from app.planner import requested_amount
+from app.planner import requested_amount, reverse_goal
 from treasury_contracts.models import TransactionProposal
 
 INJECTION = re.compile(
@@ -18,7 +18,13 @@ def check(
 ) -> Alignment:
     evidence = [f"0x{keccak(text=tool_output).hex()}"] if tool_output else []
     reasons = []
-    if (proposal.token_in, proposal.token_out) != (mandate.token_in, mandate.token_out):
+    reverse = reverse_goal(goal)
+    pair = (
+        (mandate.token_out, mandate.token_in)
+        if reverse and mandate.proof_policy is not None
+        else (mandate.token_in, mandate.token_out)
+    )
+    if (proposal.token_in, proposal.token_out) != pair:
         reasons.append("TOKEN_NOT_ALLOWED")
     if proposal.router != mandate.router:
         reasons.append("ROUTER_NOT_ALLOWED")

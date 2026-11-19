@@ -7,7 +7,7 @@ from ..settings import ROOT, Settings
 def artifact(name):
     path = ROOT / "out" / f"{name}.sol" / f"{name}.json"
     if not path.is_file():
-        raise PlaneError("CONFIGURATION_ERROR", "Run npm run b:compile first", 503)
+        raise PlaneError("CONFIGURATION_ERROR", "Compile contracts with Python scripts/foundry.py first", 503)
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -92,7 +92,13 @@ class Chain:
         def call(name):
             return getattr(self.vault.functions, name)().call(block_identifier=n)
 
+        from treasury_contracts.onchain_v2 import read_v2_context
+        from treasury_contracts.v2 import ZERO_HASH
+        proof = read_v2_context(self.w3, self.vault.address,
+            self.deployment.get("session_id", ZERO_HASH), n,
+            required=self.deployment.get("pdr_version") == "2")
         return {
+            **proof,
             "chain_id": self.chain_id,
             "vault_address": self.vault.address,
             "router": self.router.address,

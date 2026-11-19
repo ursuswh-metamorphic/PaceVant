@@ -27,6 +27,7 @@ from .simulation.runner import Simulator, rpc
 from .execution.relayer import Relayer
 from .configuration import portable_path, update_env
 from .errors import PlaneError
+from treasury_contracts.toolchain import foundry_binary
 
 
 def save(path, value):
@@ -52,7 +53,12 @@ def send(w3, account, fn):
     return receipt
 
 
-def deploy(settings, fuji=False, write_env=True, env_file=None):
+def deploy(settings, fuji=False, write_env=True, env_file=None, v2_config=None):
+    from treasury_contracts.v2 import DeploymentProofConfig
+    if v2_config is not None:
+        v2_config = DeploymentProofConfig.model_validate(v2_config)
+        if fuji and v2_config.proof_policy.authorization != "OWNER_APPROVED":
+            raise RuntimeError("Fuji V2 requires explicit owner-approved risk configuration")
     w3 = Web3(
         Web3.HTTPProvider(
             settings.rpc_url, request_kwargs={"timeout": settings.rpc_timeout}
@@ -107,6 +113,8 @@ def deploy(settings, fuji=False, write_env=True, env_file=None):
         "PolicyVault", [owner.address, attestor, usdc.address, wavax.address]
     )
     send(w3, owner, vault.functions.setRouter(router.address, True))
+    if v2_config:
+        send(w3, owner, vault.functions.configureProofPolicy(router.address, v2_config.proof_policy.abi_tuple))
     send(
         w3,
         owner,
@@ -128,7 +136,21 @@ def deploy(settings, fuji=False, write_env=True, env_file=None):
     send(w3, owner, usdc.functions.mint(vault.address, 7700 * 10**6))
     send(w3, owner, wavax.functions.mint(vault.address, 115 * 10**18))
     send(w3, owner, wavax.functions.mint(router.address, 100000 * 10**18))
+    proof_deployment = {}
+    if v2_config:
+        from treasury_contracts.v2 import keccak as abi_keccak
+        from eth_abi import encode
+        now = w3.eth.get_block("latest").timestamp
+        session_id = abi_keccak(encode(["uint256", "address", "bytes32", "address"],
+            [w3.eth.chain_id, vault.address, vault.functions.activePolicyHash().call(), owner.address]))
+        receipt = send(w3, owner, vault.functions.createSession(session_id, now,
+            min(now+v2_config.session_duration_seconds,vault.functions.policyExpiresAt().call()),
+            int(v2_config.session_limit_usd_e8)))
+        send(w3, owner, usdc.functions.mint(router.address, 100000 * 10**6))
+        proof_deployment = {"pdr_version":"2", "session_id":session_id,
+            "session_creation_tx":Web3.to_hex(receipt.transactionHash),"session_creation_block":receipt.blockNumber}
     deployment = {
+        **proof_deployment,
         "schema_version": "1.1",
         "mode": "fuji" if fuji else "local",
         "chain_id": w3.eth.chain_id,
@@ -269,6 +291,7 @@ def main():
         ],
     )
     parser.add_argument("--env-file", type=Path)
+    parser.add_argument("--v2-config", type=Path, help="Explicit owner risk/session JSON; TEST_ONLY allowed only locally")
     parser.add_argument("--network", choices=["local", "fuji"])
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8001)
@@ -368,7 +391,8 @@ def main():
         else:
             print(
                 json.dumps(
-                    deploy(settings, args.command == "deploy-fuji", env_file=env_file),
+                    deploy(settings, args.command == "deploy-fuji", env_file=env_file,
+                           v2_config=json.loads(args.v2_config.read_text(encoding="utf-8")) if args.v2_config else None),
                     indent=2,
                 )
             )
@@ -396,7 +420,7 @@ def start_local(settings, env_file, host, port):
                 f"API port {port} is already in use; stop the existing API or use --port"
             ) from None
     subprocess.run(
-        ["node", str(ROOT / "scripts/foundry.mjs"), "forge", "build"],
+        [foundry_binary("forge", ROOT), "build"],
         cwd=ROOT,
         check=True,
     )

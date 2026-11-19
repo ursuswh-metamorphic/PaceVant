@@ -11,6 +11,7 @@ from contextlib import contextmanager
 
 import httpx
 import pytest
+from web3 import Web3
 
 from app.settings import ROOT
 from app.simulation.runner import rpc
@@ -50,17 +51,38 @@ def process_ready(command, url, env, output, *, cwd):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("amount", "price_age", "verdicts", "hold_receipt"),
+    ("amount", "price_age", "verdicts", "hold_receipt", "v2", "reverse"),
     [
-        (200, 0, ["APPROVE"], False),
-        (500, 0, ["REPLAN", "APPROVE"], False),
-        (200, 120, ["ESCALATE"], False),
-        (200, 0, ["APPROVE"], True),
+        (200, 0, ["APPROVE"], False, False, False),
+        (500, 0, ["REPLAN", "APPROVE"], False, False, False),
+        (200, 120, ["ESCALATE"], False, False, False),
+        (200, 0, ["APPROVE"], True, False, False),
+        (200, 0, ["APPROVE"], False, True, False),
+        (500, 0, ["REPLAN", "APPROVE"], False, True, False),
+        (1, 0, ["APPROVE"], False, True, True),
+        (20, 0, ["REPLAN", "APPROVE"], False, True, True),
+        (200, 120, ["ESCALATE"], False, True, False),
     ],
-    ids=["normal", "exposure-replan", "stale-oracle", "pending-reservation"],
+    ids=[
+        "normal",
+        "exposure-replan",
+        "stale-oracle",
+        "pending-reservation",
+        "v2-normal",
+        "v2-exposure-replan",
+        "v2-reverse",
+        "v2-reverse-cap",
+        "v2-stale",
+    ],
 )
-def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verdicts, hold_receipt):
+def test_start_workflow_through_a_and_b(
+    plane, tmp_path, amount, price_age, verdicts, hold_receipt, v2, reverse
+):
     _, chain, keys, _ = plane
+    if v2:
+        from v2_setup import activate
+
+        activate(chain, keys, tmp_path)
     a_port, b_port = open_port(), open_port()
     a_url, b_url = f"http://127.0.0.1:{a_port}", f"http://127.0.0.1:{b_port}"
     execution_key, operator_key, internal_key = (secrets.token_hex(32) for _ in range(3))
@@ -91,6 +113,12 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
         }
     )
     mandate["expires_at"] = context["policy_expires_at"]
+    if v2:
+        mandate.update(
+            proof_policy=context["proof_policy"],
+            registry=context["registry"],
+            session_id=context["proof_session"]["session_id"],
+        )
     mandate_path = tmp_path / "mandate.json"
     mandate_path.write_text(json.dumps(mandate), encoding="utf-8")
     oracle_path = tmp_path / "oracle.json"
@@ -155,7 +183,7 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
             encoding="utf-8",
         )
         request = {
-            "goal": f"Buy WAVAX with {amount} USDC",
+            "goal": f"Sell {amount} WAVAX for USDC" if reverse else f"Buy WAVAX with {amount} USDC",
             "mandate_id": mandate["mandate_id"],
         }
         if hold_receipt:
@@ -215,7 +243,21 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
         receipt = events[-1]["receipt"]
         onchain = chain.w3.eth.get_transaction_receipt(receipt["tx_hash"])
         assert onchain.status == 1 and onchain.to == chain.vault.address
-        assert receipt["actual_token_in_delta_base_units"] == "-200000000"
-        assert receipt["actual_token_out_delta_base_units"] == "10000000000000000000"
+        assert receipt["actual_token_in_delta_base_units"] == (
+            str(-(10 if amount == 20 else 1) * 10**18) if reverse else "-200000000"
+        )
+        assert receipt["actual_token_out_delta_base_units"] == (
+            str((200 if amount == 20 else 20) * 10**6) if reverse else "10000000000000000000"
+        )
         assert int(events[-1]["execution_fee"]["gas_cost_wei"]) > 0
-        assert int(chain.snapshot()["daily_spent_usdc_base_units"]) - before_spend == 200_000_000
+        assert int(chain.snapshot()["daily_spent_usdc_base_units"]) - before_spend == (
+            0 if reverse else 200_000_000
+        )
+        if v2:
+            proofs = [e["proof"] for e in events if e["stage"] == "PROVED"]
+            assert len(proofs) == 1 and proofs[0]["status"] == "VERIFIED"
+            assert all(
+                proofs[0][key] == "UNSAT" for key in ("check_mode", "compile_mode", "risk_bound")
+            )
+            assert receipt["proof_session"]["used_usd_e8"] == proofs[0]["risk_debit_usd_e8"]
+            assert receipt["block_hash"] == Web3.to_hex(onchain.blockHash)

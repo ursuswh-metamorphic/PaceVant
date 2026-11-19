@@ -9,7 +9,17 @@ from eth_keys import keys
 from eth_keys.constants import SECPK1_N
 from pydantic import ValidationError
 
-from app import alignment, economic_risk, experience, planner, portfolio, sde
+from app import (
+    alignment,
+    economic_risk,
+    experience,
+    planner,
+    portfolio,
+    sde,
+)
+from app import (
+    proof as proof_service,
+)
 from app.attestor import Attestor
 from app.domain import EconomicRiskAssessment, PortfolioSnapshot, SecurityDecision
 from app.errors import ControlError
@@ -21,6 +31,7 @@ from app.orchestration.mock import MockExecutionClient
 from app.settings import FIXTURES, Settings
 from app.storage import Store
 from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
+from treasury_contracts.v2 import ProofArtifactV2
 
 STAGES = {
     "APPROVE": "APPROVED",
@@ -41,6 +52,7 @@ class ApprovedAttempt:
     evidence: SimulationEvidence
     snapshot: PortfolioSnapshot
     balances: ChainBalances
+    proof: ProofArtifactV2 | None = None
 
 
 def utc_now() -> int:
@@ -84,7 +96,9 @@ class ControlPlane:
         issues = evidence_issues(client, self.settings.mode, built, evidence, context, self.clock())
         if not issues and self.fuji_http is not None:
             try:
-                FujiVerifier(self.fuji_http).verify(context, self.clock())
+                FujiVerifier(self.fuji_http, self.settings.fuji_verification_rpc).verify(
+                    context, self.clock()
+                )
             except ControlError as error:
                 issues.append(error.code)
         return issues
@@ -139,7 +153,12 @@ class ControlPlane:
         amount = planner.requested_amount(goal)
         if not amount:
             raise ControlError("TASK_UNCERTAIN", 422)
-        return planner.propose(mandate, amount, self._deadline(mandate, self.clock(), context))
+        return planner.propose(
+            mandate,
+            amount,
+            self._deadline(mandate, self.clock(), context),
+            reverse=planner.reverse_goal(goal),
+        )
 
     @staticmethod
     def _deadline(mandate, now, context=None):
@@ -178,6 +197,7 @@ class ControlPlane:
         return {
             "mode": self.settings.mode,
             "mandate": mandate,
+            "proof_session": context.proof_session,
             "portfolio": snapshot,
             "chain_balances": balances,
             "issues": list(dict.fromkeys(issues)),
@@ -223,6 +243,7 @@ class ControlPlane:
                 amount,
                 deadline,
                 alternate_recipient=fixture.get("poisoned_recipient"),
+                reverse=planner.reverse_goal(goal),
             )
             self.store.event(
                 workflow_id, "PROPOSED", now, attempt=index + 1, proposal=proposed.model_dump()
@@ -245,12 +266,19 @@ class ControlPlane:
 
     def _evaluate(self, workflow_id, mandate, client, proposal, aligned, context=None):
         built = sim = evaluation = balances = snapshot = None
+        proof = None
         issues = []
         try:
             context = context or client.context()
             issues = portfolio.policy_issues(mandate, context, self.clock())
             if aligned.verdict == "ALIGNED" and not issues:
-                if int(proposal.amount_in_base_units) > int(mandate.max_usdc_per_swap_base_units):
+                reverse = proposal.token_in.lower() == mandate.token_out
+                cap = (
+                    mandate.proof_policy.max_wavax_per_swap
+                    if reverse and mandate.proof_policy
+                    else mandate.max_usdc_per_swap_base_units
+                )
+                if int(proposal.amount_in_base_units) > int(cap):
                     # The builder may enforce the same cap before simulation.
                     issues.append("TRADE_SIZE_LIMIT")
                     raise ControlError("TRADE_SIZE_LIMIT")
@@ -275,6 +303,16 @@ class ControlPlane:
                     evaluation = economic_risk.evaluate(
                         mandate, proposal, built, sim, snapshot, balances, context, self.clock()
                     )
+                    if mandate.proof_policy is not None and evaluation.risk.result == "PASS":
+                        proof = proof_service.prove(
+                            mandate,
+                            built,
+                            sim,
+                            snapshot,
+                            context,
+                            self.clock(),
+                            self.store.proof_query,
+                        )
         except ControlError as error:
             issues.append(
                 "TRADE_SIZE_LIMIT"
@@ -297,17 +335,24 @@ class ControlPlane:
             evidence=sim,
             risk=evaluation.risk if evaluation else None,
             provenance_issues=issues,
+            proof=proof,
         )
         suggested = evaluation.suggested_amount if evaluation else 0
         if decision.verdict == "REPLAN" and not evaluation and "TRADE_SIZE_LIMIT" in issues:
-            suggested = min(
-                int(mandate.max_usdc_per_swap_base_units), int(proposal.amount_in_base_units) - 1
+            reverse = proposal.token_in.lower() == mandate.token_out
+            direction_cap = (
+                int(mandate.proof_policy.max_wavax_per_swap)
+                if reverse and mandate.proof_policy
+                else int(mandate.max_usdc_per_swap_base_units)
             )
+            suggested = min(direction_cap, int(proposal.amount_in_base_units) - 1)
             if balances is not None:
                 suggested = min(
                     suggested,
-                    int(balances.usdc_base_units),
-                    max(
+                    int(balances.wavax_base_units if reverse else balances.usdc_base_units),
+                    direction_cap
+                    if reverse
+                    else max(
                         0,
                         int(mandate.max_usdc_spend_per_day_base_units)
                         - int(balances.daily_spent_usdc_base_units),
@@ -335,6 +380,7 @@ class ControlPlane:
                 "build": built.model_dump() if built else None,
                 "simulation": sim.model_dump() if sim else None,
                 "suggested_amount": suggested,
+                **({"proof": proof.model_dump(mode="json")} if proof else {}),
                 **evidence,
             },
             suggested,
@@ -388,7 +434,18 @@ class ControlPlane:
         ):
             raise ControlError("HASH_MISMATCH")
         return ApprovedAttempt(
-            workflow_id, decision, mandate, proposal, aligned, built, sim, snapshot, balances
+            workflow_id,
+            decision,
+            mandate,
+            proposal,
+            aligned,
+            built,
+            sim,
+            snapshot,
+            balances,
+            ProofArtifactV2.model_validate(bundle["proof"])
+            if mandate.proof_policy and "proof" in bundle
+            else None,
         )
 
     def _verify_approval(self, approved: ApprovedAttempt):
@@ -432,6 +489,38 @@ class ControlPlane:
         risk = economic_risk.evaluate(
             mandate, approved.proposal, built, sim, fresh_snapshot, balances, context, now
         ).risk
+        proof = None
+        if mandate.proof_policy is not None:
+            proof = proof_service.prove(
+                mandate, built, sim, snapshot, context, now, self.store.proof_query
+            )
+            current = client.context(built=built)
+            fields = (
+                "session_id",
+                "policy_hash",
+                "starts_at",
+                "expires_at",
+                "active",
+                "limit_usd_e8",
+                "used_usd_e8",
+                "global_limit_usd_e8",
+                "global_used_usd_e8",
+            )
+            if (
+                approved.proof is None
+                or proof != approved.proof
+                or proof.context_hash != approved.decision.proof_context_hash
+                or current.proof_session is None
+                or context.proof_session is None
+                or any(
+                    getattr(current.proof_session, f) != getattr(context.proof_session, f)
+                    for f in fields
+                )
+                or current.proof_session.timestamp // 86400
+                != context.proof_session.timestamp // 86400
+            ):
+                raise ControlError("PROOF_INVALID")
+            client.preflight_v2(built, proof, mandate.session_id, mandate.required_stress)
         recomputed = sde.decide(
             mandate,
             approved.proposal,
@@ -442,10 +531,18 @@ class ControlPlane:
             evidence=sim,
             risk=risk,
             provenance_issues=issues,
+            proof=proof,
         )
         if recomputed.verdict != "APPROVE" or now >= approved.decision.expires_at:
             raise ControlError(next(iter(recomputed.reason_codes), "STALE_REQUIRES_REEVALUATION"))
         return client
+
+    def _verify_for_attestor(self, approved):
+        client = self._verify_approval(approved)
+        if approved.mandate.proof_policy is not None:
+            context = client.context(built=approved.built, fork_block=approved.evidence.fork_block)
+            return approved.proof, context.proof_session
+        return None
 
     def attest(self, id_):
         approved = self._approved(id_)
@@ -459,7 +556,7 @@ class ControlPlane:
             approved.decision,
             approved.built,
             scope,
-            lambda: self._verify_approval(approved),
+            lambda: self._verify_for_attestor(approved),
         )
 
     def _submit(self, workflow_id, decision, pdr):
@@ -566,7 +663,12 @@ class ControlPlane:
             == receipt.actual_token_out_delta_base_units
             == "0"
         ):
-            if receipt.revert_reason == "MIN_OUTPUT_NOT_MET":
+            if receipt.revert_reason in {
+                "MIN_OUTPUT_NOT_MET",
+                "POSTCONDITION_FAILED",
+                "SESSION_RISK_LIMIT",
+                "GLOBAL_RISK_LIMIT",
+            }:
                 details["reason_codes"] = ["PROTECTED_REVERT"]
         else:
             state = "RECEIPT_MISMATCH"
@@ -589,6 +691,38 @@ class ControlPlane:
         workflow = self.store.workflow(id_)
         if workflow["mode"] != self.settings.mode:
             return workflow
+        if self.settings.mode != "MOCK" and workflow["status"] in {"CONFIRMED", "REVERTED"}:
+            last = workflow["timeline"][-1]
+            _, bundle = self.store.decision(decision_id=last["decision_id"])
+            mandate = Mandate.model_validate(bundle["mandate"])
+            client = self.client(id_, mandate)
+            try:
+                current = client.execution(last["receipt"]["tx_hash"])
+                # Revalidate canonical receipt even after initial confirmation.
+                if current.status in {"PENDING", "SUBMITTED"} or current.block_hash != last[
+                    "receipt"
+                ].get("block_hash"):
+                    self.store.transition(
+                        id_,
+                        last["decision_id"],
+                        workflow["status"],
+                        "SUBMITTED",
+                        self.clock(),
+                        tx_hash=last["receipt"]["tx_hash"],
+                        reason_codes=["REORG_RECONCILIATION"],
+                    )
+                    workflow = self.store.workflow(id_)
+            except ControlError:
+                self.store.transition(
+                    id_,
+                    last["decision_id"],
+                    workflow["status"],
+                    "SUBMITTED",
+                    self.clock(),
+                    tx_hash=last["receipt"]["tx_hash"],
+                    reason_codes=["RECEIPT_REVALIDATION_UNAVAILABLE"],
+                )
+                workflow = self.store.workflow(id_)
         if workflow["status"] in {"SUBMITTED", "SUBMITTING"}:
             event = workflow["timeline"][-1]
             _, bundle = self.store.decision(decision_id=event["decision_id"])

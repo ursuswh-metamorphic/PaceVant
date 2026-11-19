@@ -15,6 +15,12 @@
     </div>
   </header>
   <main class="shell">
+    <form id="connect-form" class="panel proof-summary" hidden>
+      <label for="operator-token">Operator API credential</label>
+      <input id="operator-token" type="password" autocomplete="off" required>
+      <button type="submit">Kết nối treasury</button>
+      <small>Chỉ giữ trong bộ nhớ tab này. Không nhập private key.</small>
+    </form>
     <section class="intro" aria-labelledby="title">
       <div>
         <p class="overline">AI TREASURY SECURITY</p>
@@ -39,10 +45,19 @@
       </article>
     </section>
 
+    <section class="panel proof-summary" aria-label="Proof and risk budgets" id="proof-summary" hidden>
+      <div class="panel-heading"><h2>Proof-gated treasury V2.1</h2></div>
+      <p id="proof-policy"></p><p id="proof-budgets"></p>
+      <p>WAVAX exposure: PRE-SIGN ONLY. Oracle test có kiểm soát. Chưa audit.</p>
+    </section>
+
     <div class="workspace">
       <aside class="panel scenario-panel" aria-labelledby="scenario-title">
         <div class="panel-heading"><h2 id="scenario-title">Kịch bản</h2></div>
         <form id="run-form">
+          <label id="live-goal-label" for="live-goal" hidden>Owner goal (USDC ↔ WAVAX)
+            <input id="live-goal" value="Buy WAVAX with 200 USDC" maxlength="500">
+          </label>
           <fieldset id="scenarios">
             <legend class="sr-only">Chọn kịch bản</legend>
             <label><input type="radio" name="scenario" value="normal_swap" checked>

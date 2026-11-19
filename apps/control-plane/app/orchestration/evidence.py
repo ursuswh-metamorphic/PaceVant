@@ -60,7 +60,10 @@ def json_object(raw: bytes) -> dict:
 def verify_build(mandate: Mandate, proposal: TransactionProposal, built: BuiltTransaction):
     if built.router.lower() != mandate.router:
         raise ControlError("ROUTER_NOT_ALLOWED")
-    if (built.token_in.lower(), built.token_out.lower()) != (mandate.token_in, mandate.token_out):
+    pair = (built.token_in.lower(), built.token_out.lower())
+    if pair != (mandate.token_in, mandate.token_out) and not (
+        mandate.proof_policy is not None and pair == (mandate.token_out, mandate.token_in)
+    ):
         raise ControlError("TOKEN_NOT_ALLOWED")
     fields = (
         "intent_id",

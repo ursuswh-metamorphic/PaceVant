@@ -21,8 +21,9 @@ contract MockSwapAdapter is Ownable, ISwapAdapter {
         require(value > 0, "ZERO_PRICE"); outputPerUsdc = value; emit TestPriceUpdated(value);
     }
     function quote(address input, address output, uint256 amount) public view returns (uint256) {
-        if (input != usdc || output != wavax) revert UnsupportedPair();
-        return Math.mulDiv(amount, outputPerUsdc, 1e6);
+        if (input == usdc && output == wavax) return Math.mulDiv(amount, outputPerUsdc, 1e6);
+        if (input == wavax && output == usdc) return Math.mulDiv(amount, 1e6, outputPerUsdc);
+        revert UnsupportedPair();
     }
     function exactInput(address input, address output, uint256 amount, uint256 minOut, address recipient)
         external returns (uint256 result)

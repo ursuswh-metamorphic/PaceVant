@@ -16,3 +16,12 @@ deployments/execution-local.json
 .env-update-*
 data/
 *.sqlite*
+
+# Upstream PGS research/reference repository; local-only, never push
+/Proof-Gated-Signing/
+/cache/
+deployments/treasury-local-v2.json
+/.tools/
+/lib/openzeppelin-contracts/
+/lib/.openzeppelin-*/
+/deploy/*.env

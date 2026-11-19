@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from app.domain import EconomicRiskAssessment, SecurityDecision
 from app.models import Alignment, ChainContext, Mandate
-from app.portfolio import MAX_BLOCK_DRIFT, policy_issues
+from app.portfolio import policy_issues
 from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 TTL = 30
@@ -80,8 +80,38 @@ def decide(
     evidence: SimulationEvidence | None = None,
     risk: EconomicRiskAssessment | None = None,
     provenance_issues: list[str] | None = None,
+    proof=None,
 ) -> SecurityDecision:
     reasons = list(alignment.reason_codes)
+    needs_proof = mandate.proof_policy is not None or (
+        context is not None and context.proof_policy is not None
+    )
+    if needs_proof and proof is not None:
+        if proof.status != "VERIFIED" or (
+            proof.check_mode,
+            proof.compile_mode,
+            proof.risk_bound,
+        ) != ("UNSAT", "UNSAT", "UNSAT"):
+            reasons.append(proof.reason)
+        else:
+            from treasury_contracts.v2 import call_hash
+
+            if (
+                mandate.proof_policy is None
+                or mandate.registry is None
+                or built is None
+                or evidence is None
+                or evidence.effects_v2 is None
+                or proof.policy_hash != mandate.policy_hash
+                or proof.policy_config_hash != mandate.proof_policy.hash
+                or proof.registry_hash != mandate.registry.hash
+                or proof.evidence_root != evidence.effects_v2.hash
+                or proof.exact_call_hash != call_hash(built)
+                or proof.phi is None
+                or not proof.assumptions_satisfiable
+                or not proof.compiled_region_satisfiable
+            ):
+                reasons.append("PROOF_INVALID")
     if context is None:
         reasons.append("SIMULATION_INCOMPLETE")
     else:
@@ -99,7 +129,7 @@ def decide(
         if context is not None:
             if (
                 evidence.bytecode_hash != context.bytecode_hash
-                or not 0 <= context.block_number - evidence.fork_block <= MAX_BLOCK_DRIFT
+                or not 0 <= context.block_number - evidence.fork_block <= context.max_block_drift
             ):
                 reasons.append("HASH_MISMATCH")
             if context.nonce_used is not False:
@@ -110,6 +140,11 @@ def decide(
             reasons.append("RISK_INCONCLUSIVE")
         if built and (risk.intent_id, risk.build_id) != (built.intent_id, built.build_id):
             reasons.append("HASH_MISMATCH")
+
+    # A recoverable V1 gate may request a new intent without a proof or signature.
+    # Only an otherwise approvable V2 attempt must supply a verified proof here.
+    if needs_proof and proof is None and not reasons:
+        reasons.append("PROOF_REQUIRED")
 
     verdict = "ESCALATE"
     if HARD.intersection(reasons):
@@ -123,6 +158,8 @@ def decide(
     else:
         reasons.append("SIMULATION_INCOMPLETE")
     return SecurityDecision(
+        proof_context_hash=proof.context_hash if proof and proof.status == "VERIFIED" else None,
+        source="SDE_V2" if mandate.proof_policy else "SDE_V1",
         decision_id=f"decision_{uuid4().hex}",
         intent_id=proposal.intent_id,
         build_id=built.build_id if built else None,

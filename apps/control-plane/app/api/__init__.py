@@ -16,7 +16,9 @@ from app.errors import ControlError
 from app.models import Alignment, Goal, WorkflowRequest
 from app.orchestration.service import ControlPlane, utc_now
 from app.settings import DASHBOARD, Settings
+from treasury_contracts.http_limits import RequestSizeLimit
 from treasury_contracts.models import Hash, SignedPDR, SimulationEvidence, TransactionProposal, Wire
+from treasury_contracts.v2 import SignedPDRV2
 
 
 class AttestRequest(Wire):
@@ -76,6 +78,7 @@ def create_app(settings=None, clock=utc_now):
             app.state.control.close()
 
     app = FastAPI(title="PaceVant Treasury Control Plane", version="1.1", lifespan=lifespan)
+    app.add_middleware(RequestSizeLimit)
 
     @app.middleware("http")
     async def correlation(request, call_next):
@@ -164,7 +167,11 @@ def create_app(settings=None, clock=utc_now):
     def decision(payload: DecisionRequest, service: Service):
         return service.saved_decision(payload)
 
-    @app.post("/v1/approvals/attest", dependencies=[Depends(internal)], response_model=SignedPDR)
+    @app.post(
+        "/v1/approvals/attest",
+        dependencies=[Depends(internal)],
+        response_model=SignedPDR | SignedPDRV2,
+    )
     def attest(payload: AttestRequest, service: Service):
         return service.attest(payload.decision_id)
 
@@ -176,19 +183,34 @@ def create_app(settings=None, clock=utc_now):
     def treasury(request: Request, service: Service):
         return service.treasury(request.state.request_id)
 
-    if settings.mode == "MOCK":
-        app.mount("/assets", StaticFiles(directory=DASHBOARD), name="assets")
+    @app.get("/v2/proofs/{context_hash}", dependencies=[Depends(operator)])
+    def proof(context_hash: Hash, service: Service):
+        return service.store.proof(context_hash)
 
-        @app.get("/", include_in_schema=False)
-        def dashboard():
-            return FileResponse(
-                DASHBOARD / "index.html",
-                headers={
-                    "Content-Security-Policy": (
-                        "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'"
-                    ),
-                    "X-Content-Type-Options": "nosniff",
-                },
-            )
+    @app.get("/v2/treasury/sessions/{session_id}", dependencies=[Depends(operator)])
+    def session(session_id: Hash, request: Request, service: Service):
+        mandate = service.mandate()
+        if mandate.session_id != session_id:
+            raise ControlError("SESSION_NOT_FOUND", 404)
+        context = service.client(request.state.request_id, mandate).context()
+        return {
+            "session": context.proof_session,
+            "authoritative_source": "CHAIN",
+            "exposure_enforcement": "PRE_SIGN_ONLY",
+        }
+
+    app.mount("/assets", StaticFiles(directory=DASHBOARD), name="assets")
+
+    @app.get("/", include_in_schema=False)
+    def dashboard():
+        return FileResponse(
+            DASHBOARD / "index.html",
+            headers={
+                "Content-Security-Policy": (
+                    "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'"
+                ),
+                "X-Content-Type-Options": "nosniff",
+            },
+        )
 
     return app

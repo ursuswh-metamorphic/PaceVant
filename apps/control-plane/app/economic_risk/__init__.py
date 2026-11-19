@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from app.domain import EconomicRiskAssessment, PortfolioSnapshot
 from app.models import ChainBalances, ChainContext, Mandate
-from app.portfolio import MAX_BLOCK_DRIFT, fresh
+from app.portfolio import fresh
 from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 USDC_SCALE = 10**6
@@ -45,8 +45,8 @@ def evaluate(
         unknown.append("HASH_MISMATCH")
     if (
         not fresh(balances.block_timestamp, now)
-        or not 0 <= context.block_number - balances.block_number <= MAX_BLOCK_DRIFT
-        or abs(evidence.fork_block - balances.block_number) > MAX_BLOCK_DRIFT
+        or not 0 <= context.block_number - balances.block_number <= context.max_block_drift
+        or abs(evidence.fork_block - balances.block_number) > context.max_block_drift
         or balances.utc_day != now // 86400
         or balances.block_timestamp // 86400 != balances.utc_day
         or built.deadline // 86400 != balances.utc_day
@@ -70,13 +70,20 @@ def evaluate(
         )
 
     amount = int(built.amount_in_base_units)
-    available = int(snapshot.usdc_base_units)
+    reverse = built.token_in.lower() == mandate.token_out
+    available = int(snapshot.wavax_base_units if reverse else snapshot.usdc_base_units)
     used = int(balances.daily_spent_usdc_base_units)
-    max_trade = int(mandate.max_usdc_per_swap_base_units)
-    remaining = max(0, int(mandate.max_usdc_spend_per_day_base_units) - used)
+    max_trade = (
+        int(mandate.proof_policy.max_wavax_per_swap)
+        if reverse and mandate.proof_policy
+        else int(mandate.max_usdc_per_swap_base_units)
+    )
+    remaining = (
+        max_trade if reverse else max(0, int(mandate.max_usdc_spend_per_day_base_units) - used)
+    )
     usdc_value_per_unit = usdc_price * WAVAX_PER_USDC_SCALE
     wavax_value = int(snapshot.wavax_base_units) * wavax_price
-    total_value = available * usdc_value_per_unit + wavax_value
+    total_value = int(snapshot.usdc_base_units) * usdc_value_per_unit + wavax_value
     out = int(evidence.baseline.token_out_delta_base_units)
     if out <= 0 or not 0 < amount or amount > available or total_value == 0:
         reason = "TRADE_SIZE_LIMIT" if amount > available else "SIMULATION_INCOMPLETE"
@@ -91,17 +98,41 @@ def evaluate(
         )
 
     # Use common e8 * 1e18 units to preserve exact comparisons at the exposure boundary.
-    projected_wavax = wavax_value + out * wavax_price
-    projected_total = projected_wavax + (available - amount) * usdc_value_per_unit
+    projected_wavax = (
+        wavax_value - amount * wavax_price if reverse else wavax_value + out * wavax_price
+    )
+    projected_usdc = int(snapshot.usdc_base_units) + out if reverse else available - amount
+    projected_total = projected_wavax + projected_usdc * usdc_value_per_unit
     exposure = (projected_wavax * BPS + projected_total - 1) // projected_total
     fair_min_out = (
         amount * usdc_value_per_unit * (BPS - proposal.slippage_bps) // (wavax_price * BPS)
     )
+    if reverse:
+        fair_min_out = (
+            amount * wavax_price * (BPS - proposal.slippage_bps) // (usdc_value_per_unit * BPS)
+        )
     gas_wei = int(evidence.baseline.gas_used) * int(balances.max_fee_per_gas_wei)
     gas_wei += int(balances.daily_execution_cost_wei)
     gas_cost = (gas_wei * wavax_price + WAVAX_SCALE - 1) // WAVAX_SCALE
 
     violations = []
+    if (
+        mandate.proof_policy is not None
+        and mandate.registry is not None
+        and evidence.effects_v2 is not None
+    ):
+        from fractions import Fraction
+
+        from treasury_contracts.proof import loss_e8
+
+        p = mandate.proof_policy
+        loss, outgoing = loss_e8(
+            [r.delta for r in evidence.effects_v2.balances],
+            mandate.registry,
+            [usdc_price if a.decimals == 6 else wavax_price for a in mandate.registry.assets],
+        )
+        if loss > Fraction(p.max_relative_loss_bps, BPS) * outgoing + int(p.fixed_loss_usd_e8):
+            violations.append("VALUE_POLICY_COUNTEREXAMPLE")
     if amount > min(max_trade, remaining):
         violations.append("TRADE_SIZE_LIMIT")
     if exposure > mandate.max_avax_exposure_bps:
@@ -119,6 +150,8 @@ def evaluate(
         (total_value * mandate.max_avax_exposure_bps - wavax_value * BPS)
         // (usdc_value_per_unit * BPS),
     )
+    if reverse:
+        exposure_room = available
     return Evaluation(
         EconomicRiskAssessment(
             result="FAIL" if violations else "PASS",

@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Literal
-from pydantic import SecretStr
+from pydantic import SecretStr, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from treasury_contracts.toolchain import foundry_binary
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -32,6 +33,7 @@ class Settings(BaseSettings):
     max_ttl: int = 30
     freshness_seconds: int = 60
     max_block_drift: int = 3
+    required_confirmations: int = Field(default=1, ge=1, le=100)
 
     def model_post_init(self, __context):
         # Generic B_* overrides remain supported; normal .env configuration uses
@@ -50,30 +52,7 @@ class Settings(BaseSettings):
         if not self.data_dir.is_absolute():
             self.data_dir = ROOT / self.data_dir
         if not self.anvil_binary:
-            import platform
-            import shutil
-
-            system = (
-                "win32"
-                if platform.system() == "Windows"
-                else "darwin"
-                if platform.system() == "Darwin"
-                else "linux"
-            )
-            arch = (
-                "arm64"
-                if platform.machine().lower() in {"arm64", "aarch64"}
-                else "amd64"
-            )
-            suffix = f"{system}-{arch}/bin/anvil" + (
-                ".exe" if system == "win32" else ""
-            )
-            candidate = ROOT / ("node_modules/@foundry-rs/anvil-" + suffix)
-            self.anvil_binary = (
-                str(candidate)
-                if candidate.exists()
-                else shutil.which("anvil") or "anvil"
-            )
+            self.anvil_binary = foundry_binary("anvil", ROOT)
 
 
 class DeploymentSettings(Settings):

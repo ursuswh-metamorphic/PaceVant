@@ -123,3 +123,8 @@ footer.shell { color: var(--muted); display: flex; justify-content: space-betwee
   .details dl { grid-template-columns: 1fr; }
   .details dt { border: 0; padding-bottom: 0; }
 }
+ .proof-summary { margin-bottom: 24px; padding: 20px; overflow-wrap: anywhere; }
+ .proof-summary p { margin-top: 10px; font-size: 14px; line-height: 1.6; }
+ #live-goal-label { display: block; }
+ #live-goal-label[hidden], #connect-form[hidden] { display: none; }
+ #live-goal, #operator-token { display: block; width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #cbdcd3; border-radius: 6px; font: inherit; }

@@ -11,6 +11,16 @@ class Builder:
 
     def build(self, p: TransactionProposal):
         c = self.chain.context()
+        reverse = (p.token_in.lower(), p.token_out.lower()) == (
+            c["token_out"].lower(),
+            c["token_in"].lower(),
+        )
+        if reverse and c.get("proof_policy"):
+            c = {
+                **c,
+                "token_in": Web3.to_checksum_address(p.token_in),
+                "token_out": Web3.to_checksum_address(p.token_out),
+            }
         for field, expected, code in [
             ("chain_id", c["chain_id"], "CHAIN_MISMATCH"),
             ("vault_address", c["vault_address"], "BAD_RECIPIENT"),
@@ -22,14 +32,15 @@ class Builder:
             value = getattr(p, field)
             if str(value).lower() != str(expected).lower():
                 raise PlaneError(code, f"Unsupported {field}")
-        if (
-            not c["policy_active"]
-            or c["paused"]
-            or c["policy_expires_at"] < c["timestamp"]
-        ):
+        if not c["policy_active"] or c["paused"] or c["policy_expires_at"] < c["timestamp"]:
             raise PlaneError("POLICY_REVOKED", "Policy unavailable", 409)
         amount = int(p.amount_in_base_units)
-        if amount <= 0 or amount > int(c["max_per_swap_base_units"]):
+        cap = (
+            c["proof_policy"]["max_wavax_per_swap"]
+            if reverse and c.get("proof_policy")
+            else c["max_per_swap_base_units"]
+        )
+        if amount <= 0 or amount > int(cap):
             raise PlaneError("TRADE_SIZE_LIMIT", "Trade exceeds mandate")
         if p.slippage_bps > c["max_slippage_bps"]:
             raise PlaneError("BAD_PRICE_OR_SLIPPAGE", "Slippage exceeds mandate")
@@ -52,20 +63,19 @@ class Builder:
         if not v.allowedRouters(c["router"]).call(block_identifier=n):
             raise PlaneError("ROUTER_NOT_ALLOWED", "Router revoked")
         if not all(
-            v.allowedTokens(c[k]).call(block_identifier=n)
-            for k in ("token_in", "token_out")
+            v.allowedTokens(c[k]).call(block_identifier=n) for k in ("token_in", "token_out")
         ):
             raise PlaneError("TOKEN_NOT_ALLOWED", "Token revoked")
         snapshot = self.chain.snapshot(c)
-        if int(snapshot["usdc_base_units"]) < amount:
+        if int(snapshot["wavax_base_units" if reverse else "usdc_base_units"]) < amount:
             raise PlaneError("INSUFFICIENT_BALANCE", "Insufficient vault USDC")
-        if int(snapshot["daily_spent_usdc_base_units"]) + amount > int(
+        if not reverse and int(snapshot["daily_spent_usdc_base_units"]) + amount > int(
             c["max_spend_per_day_base_units"]
         ):
             raise PlaneError("DAILY_SPEND_LIMIT", "Daily budget exceeded")
-        quote = self.chain.router.functions.quote(
-            c["token_in"], c["token_out"], amount
-        ).call(block_identifier=n)
+        quote = self.chain.router.functions.quote(c["token_in"], c["token_out"], amount).call(
+            block_identifier=n
+        )
         min_out = quote * (10000 - p.slippage_bps) // 10000
         if min_out <= 0:
             raise PlaneError("BAD_PRICE_OR_SLIPPAGE", "Zero minOut")

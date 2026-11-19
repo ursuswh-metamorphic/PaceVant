@@ -11,7 +11,7 @@ for env in root.glob(".env*"):
     if "example" in env.name or not env.is_file():
         continue
     for name, value in dotenv_values(env).items():
-        if value and len(value) >= 16 and ("PRIVATE_KEY" in name or "API_KEY" in name):
+        if value and len(value) >= 16 and ("PRIVATE_KEY" in name or "API_KEY" in name or "TOKEN" in name or "ATTESTOR_KEY" in name):
             secrets.add(value.lower())
             if value.startswith("0x"):
                 secrets.add(value[2:].lower())

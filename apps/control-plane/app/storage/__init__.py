@@ -42,6 +42,22 @@ CREATE TABLE IF NOT EXISTS attestations (
     UNIQUE(scope, nonce)
 );
 CREATE INDEX IF NOT EXISTS attestations_scope_state ON attestations(scope, state);
+CREATE TABLE IF NOT EXISTS proof_artifacts (
+    context_hash TEXT PRIMARY KEY, decision_id TEXT NOT NULL UNIQUE REFERENCES decisions(id),
+    status TEXT NOT NULL, body TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS compiled_postconditions (
+    context_hash TEXT PRIMARY KEY REFERENCES proof_artifacts(context_hash),
+    post_conditions_hash TEXT NOT NULL, abi_blob BLOB NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS proofs_no_update BEFORE UPDATE ON proof_artifacts
+BEGIN SELECT RAISE(ABORT, 'immutable proof'); END;
+CREATE TRIGGER IF NOT EXISTS proofs_no_delete BEFORE DELETE ON proof_artifacts
+BEGIN SELECT RAISE(ABORT, 'immutable proof'); END;
+CREATE TRIGGER IF NOT EXISTS phi_no_update BEFORE UPDATE ON compiled_postconditions
+BEGIN SELECT RAISE(ABORT, 'immutable Phi'); END;
+CREATE TRIGGER IF NOT EXISTS phi_no_delete BEFORE DELETE ON compiled_postconditions
+BEGIN SELECT RAISE(ABORT, 'immutable Phi'); END;
 """
 
 
@@ -50,6 +66,27 @@ def dump(value):
 
 
 class Store:
+    def proof(self, context_hash):
+        with self.connection() as conn:
+            row = conn.execute(
+                "SELECT body FROM proof_artifacts WHERE context_hash=?", (context_hash,)
+            ).fetchone()
+        if row is None:
+            raise ControlError("PROOF_NOT_FOUND", 404)
+        return json.loads(row[0])
+
+    def proof_query(self, hash_, raw):
+        from treasury_contracts.v2 import keccak
+
+        if keccak(raw) != hash_:
+            raise ControlError("HASH_MISMATCH")
+        directory = self.path.parent / "proof-queries"
+        directory.mkdir(parents=True, exist_ok=True)
+        file = directory / (hash_[2:] + ".smt2")
+        if file.exists() and file.read_bytes() != raw:
+            raise ControlError("HASH_MISMATCH")
+        file.write_bytes(raw)
+
     def __init__(self, path: Path):
         path.parent.mkdir(parents=True, exist_ok=True)
         self.path = path
@@ -116,6 +153,10 @@ class Store:
                   AND json_extract(body, '$.execution_fee.chain_id') = ?
                   AND json_extract(body, '$.execution_fee.vault_address') = ?
                   AND json_extract(body, '$.execution_fee.utc_day') = ?
+                  AND sequence IN (
+                    SELECT MAX(sequence) FROM events WHERE stage IN ('CONFIRMED','REVERTED')
+                    GROUP BY COALESCE(json_extract(body, '$.receipt.tx_hash'), 'event_' || sequence)
+                  )
                 """,
                 (chain_id, vault_address, utc_day),
             ).fetchall()
@@ -138,10 +179,34 @@ class Store:
             except sqlite3.IntegrityError:
                 raise ControlError("DECISION_REFERENCE_ALREADY_USED") from None
             event_data = {"decision": decision.model_dump()}
-            if stage == "REPLAN_REQUIRED" and suggested_amount:
-                event_data["suggested_amount_base_units"] = str(suggested_amount)
             if evaluation:
                 self._event(conn, workflow_id, "EVALUATED", decision.created_at, evaluation)
+            if bundle.get("proof"):
+                from treasury_contracts.v2 import ProofArtifactV2
+
+                proof = ProofArtifactV2.model_validate(bundle["proof"])
+                conn.execute(
+                    "INSERT INTO proof_artifacts VALUES (?, ?, ?, ?)",
+                    (proof.context_hash, decision.decision_id, proof.status, dump(bundle["proof"])),
+                )
+                if proof.phi:
+                    conn.execute(
+                        "INSERT INTO compiled_postconditions VALUES (?, ?, ?)",
+                        (proof.context_hash, proof.phi.hash, proof.phi.abi_bytes),
+                    )
+                self._event(
+                    conn,
+                    workflow_id,
+                    "PROVED"
+                    if proof.status == "VERIFIED"
+                    else "PROOF_INCONCLUSIVE"
+                    if proof.status == "INCONCLUSIVE"
+                    else "PROOF_REJECTED",
+                    decision.created_at,
+                    {"proof": bundle["proof"]},
+                )
+            if stage == "REPLAN_REQUIRED" and suggested_amount:
+                event_data["suggested_amount_base_units"] = str(suggested_amount)
             self._event(conn, workflow_id, stage, decision.created_at, event_data)
 
     def decision(self, *, decision_id=None, intent_id=None, build_id=None):
@@ -182,6 +247,30 @@ class Store:
 
     def reserve_signature(self, *, id_, workflow_id, scope, nonce, now, expires_at, sign):
         with self.connection(write=True) as conn:
+            policy = conn.execute(
+                "SELECT json_extract(body, '$.mandate.policy_hash') FROM decisions WHERE id=?",
+                (id_,),
+            ).fetchone()
+            recent = conn.execute(
+                """SELECT json_extract(e.body, '$.receipt.revert_reason')
+                FROM events e JOIN attestations a ON a.decision_id=json_extract(e.body, '$.decision_id')
+                JOIN decisions d ON d.id=a.decision_id
+                WHERE a.scope=? AND e.stage IN ('CONFIRMED','REVERTED')
+                  AND json_extract(d.body, '$.mandate.policy_hash')=?
+                ORDER BY e.sequence DESC LIMIT 2""",
+                (scope, policy[0] if policy else None),
+            ).fetchall()
+            if len(recent) == 2 and all(
+                row[0]
+                in {
+                    "MIN_OUTPUT_NOT_MET",
+                    "POSTCONDITION_FAILED",
+                    "SESSION_RISK_LIMIT",
+                    "GLOBAL_RISK_LIMIT",
+                }
+                for row in recent
+            ):
+                raise ControlError("SIGNER_QUARANTINED", 403)
             issued = conn.execute(
                 "SELECT 1 FROM attestations WHERE decision_id=?", (id_,)
             ).fetchone()

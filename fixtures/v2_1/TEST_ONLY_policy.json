@@ -1,0 +1,16 @@
+{
+  "proof_policy": {
+    "max_wavax_per_swap": "10000000000000000000",
+    "max_relative_loss_bps": 300,
+    "fixed_loss_usd_e8": "0",
+    "oracle_band_bps": 100,
+    "tolerance_bps": 40,
+    "max_oracle_age": 60,
+    "max_session_risk_usd_e8": "1000000000",
+    "global_daily_risk_usd_e8": "2000000000",
+    "oracle_source_hash": "0xfc982662a25da4a88ef52b786fb83d801a8bc1320204fc4eb79b8d7d3054072c",
+    "authorization": "TEST_ONLY"
+  },
+  "session_limit_usd_e8": "1000000000",
+  "session_duration_seconds": 3600
+}

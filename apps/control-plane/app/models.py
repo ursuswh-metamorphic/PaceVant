@@ -4,6 +4,7 @@ from pydantic import Field, StringConstraints
 
 from app.domain import Address, ArtifactRef, Bps, Counter, Id, Source, Timestamp
 from treasury_contracts.models import Baseline, Hash, StressTest, UInt, Wire
+from treasury_contracts.v2 import ProofPolicy, Registry, SessionContext
 
 Mode = Literal["MOCK", "LOCAL", "FUJI"]
 Goal = Annotated[str, StringConstraints(min_length=1, max_length=500)]
@@ -17,6 +18,9 @@ class WorkflowRequest(Wire):
 
 
 class Mandate(Wire):
+    proof_policy: ProofPolicy | None = Field(default=None, exclude_if=lambda v: v is None)
+    registry: Registry | None = Field(default=None, exclude_if=lambda v: v is None)
+    session_id: Hash | None = Field(default=None, exclude_if=lambda v: v is None)
     mandate_id: Id
     version: Annotated[int, Field(gt=0)]
     chain_id: Literal[31337, 43113] = 43113
@@ -38,6 +42,10 @@ class Mandate(Wire):
 
 
 class ChainContext(Wire):
+    max_block_drift: Annotated[int, Field(ge=1, le=120)] = 3
+    proof_policy: ProofPolicy | None = Field(default=None, exclude_if=lambda v: v is None)
+    registry: Registry | None = Field(default=None, exclude_if=lambda v: v is None)
+    proof_session: SessionContext | None = Field(default=None, exclude_if=lambda v: v is None)
     deployment: Mode
     chain_id: Literal[31337, 43113]
     vault_address: Address

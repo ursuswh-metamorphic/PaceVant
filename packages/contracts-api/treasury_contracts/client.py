@@ -134,6 +134,8 @@ class ExecutionClient:
             if getattr(build, name) != getattr(evidence, name):
                 raise ValueError(f"Evidence binding mismatch: {name}")
         manifest = self.artifact(evidence.evidence_manifest_ref)
+        if manifest.get("effects_v2") != (evidence.effects_v2.model_dump(mode="json") if evidence.effects_v2 else None):
+            raise ValueError("V2 effects differ from committed manifest")
         if content_hash(manifest) != evidence.evidence_root:
             raise ValueError("Evidence root mismatch")
         for name in (
@@ -164,6 +166,15 @@ class ExecutionClient:
             raw = self.artifact(artifact["ref"])
             if content_hash(raw) != artifact["content_hash"]:
                 raise ValueError("Scenario content mismatch")
+            if evidence.effects_v2 and raw["scenario"]["scenario_id"] == "baseline":
+                e = evidence.effects_v2
+                reads = {build.token_in.lower(): (raw["before"]["usdc_base_units"], raw["after"]["usdc_base_units"]),
+                         build.token_out.lower(): (raw["before"]["wavax_base_units"], raw["after"]["wavax_base_units"])}
+                if any((b.before, b.after) != reads[b.asset] for b in e.balances):
+                    raise ValueError("Effects do not match authoritative balance reads")
+                for a, before, after in zip(e.allowances, raw["allowances_before"], raw["allowances_after"], strict=True):
+                    if (a.token, a.spender, a.before, a.after) != (before["token"], before["spender"], before["before"], after["after"]):
+                        raise ValueError("Effects do not match allowance reads")
         return manifest
 
     def execute(self, build_id: str, signed_pdr: SignedPDR, idempotency_key: str):

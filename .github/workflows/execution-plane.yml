@@ -16,4 +16,15 @@ jobs:
           version: '0.12.10'
       - run: npm ci --ignore-scripts
       - run: npm run setup
+      - run: uv sync --locked
+      - run: uv run --locked python scripts/bootstrap.py
+      - run: uv run --locked ruff check apps/control-plane tests scripts/treasury.py scripts/treasury_ops.py scripts/evaluate-protocol.py scripts/protocol_server.py scripts/container.py scripts/foundry.py scripts/bootstrap.py scripts/serve.py
       - run: npm run check
+      - run: uv run --locked python -m pytest -q
+      - run: node --check apps/dashboard/app.js
+  backend-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t treasury-backend .
+      - run: docker run --rm --entrypoint /bin/sh treasury-backend -c 'test -z "$(command -v node)" && test -z "$(command -v npm)" && test -z "$(command -v forge)" && anvil --version && python -c "import fastapi, treasury_contracts"'

@@ -47,6 +47,7 @@ class EconomicRiskAssessment(Wire):
 
 
 class SecurityDecision(Wire):
+    proof_context_hash: Hash | None = Field(default=None, exclude_if=lambda v: v is None)
     decision_id: Id
     intent_id: Id
     build_id: Id | None
@@ -59,4 +60,4 @@ class SecurityDecision(Wire):
     snapshot_id: Id | None
     created_at: Timestamp
     expires_at: Timestamp
-    source: Literal["SDE_V1"] = "SDE_V1"
+    source: Literal["SDE_V1", "SDE_V2"] = "SDE_V1"

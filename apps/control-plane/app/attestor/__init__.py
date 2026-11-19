@@ -10,6 +10,16 @@ from app.errors import ControlError
 from app.storage import Store
 from treasury_contracts.crypto import approval_for, digest, domain_for
 from treasury_contracts.models import BuiltTransaction, SignedPDR
+from treasury_contracts.v2 import (
+    DomainV2,
+    ProofArtifactV2,
+    SessionContext,
+    SignedPDRV2,
+    approval_v2,
+    call_hash,
+    digest_v2,
+    session_hash,
+)
 
 
 class Attestor:
@@ -51,13 +61,51 @@ class Attestor:
 
     def _sign_after_verification(
         self, decision: SecurityDecision, built: BuiltTransaction, verify
-    ) -> tuple[SignedPDR, int]:
-        verify()
+    ) -> tuple[SignedPDR | SignedPDRV2, int]:
+        verified = verify()
         now = self.clock()
         if not now < decision.expires_at == built.deadline <= now + 30:
             raise ControlError("STALE_REQUIRES_REEVALUATION")
         if decision.simulation_evidence_root is None:
             raise ControlError("SIMULATION_INCOMPLETE")
+        if (
+            decision.intent_id,
+            decision.build_id,
+            decision.policy_hash,
+            decision.calldata_hash,
+        ) != (built.intent_id, built.build_id, built.policy_hash, built.calldata_hash):
+            raise ControlError("HASH_MISMATCH")
+        if decision.source == "SDE_V2" or decision.proof_context_hash is not None:
+            if not isinstance(verified, tuple) or len(verified) != 2:
+                raise ControlError("PROOF_REQUIRED")
+            proof, session = verified
+            if (
+                not isinstance(proof, ProofArtifactV2)
+                or proof.status != "VERIFIED"
+                or proof.context_hash != decision.proof_context_hash
+                or not isinstance(session, SessionContext)
+                or proof.session_context_hash != session_hash(session)
+                or proof.exact_call_hash != call_hash(built)
+                or (proof.check_mode, proof.compile_mode, proof.risk_bound)
+                != ("UNSAT", "UNSAT", "UNSAT")
+                or not proof.assumptions_satisfiable
+                or not proof.compiled_region_satisfiable
+            ):
+                raise ControlError("PROOF_INVALID")
+            approval = approval_v2(
+                built, decision.simulation_evidence_root, proof, session.session_id
+            )
+            domain = DomainV2(chainId=built.chain_id, verifyingContract=built.vault_address)
+            message_hash = digest_v2(domain, approval)
+            return SignedPDRV2(
+                decision_id=decision.decision_id,
+                build_id=built.build_id,
+                domain=domain,
+                approval=approval,
+                phi=proof.phi,
+                signature=sign_digest(self._key, bytes.fromhex(message_hash[2:])),
+                typed_data_hash=message_hash,
+            ), now
         domain = domain_for(built)
         approval = approval_for(built, decision.simulation_evidence_root)
         message_hash = digest(domain, approval)

@@ -2,7 +2,7 @@
 name = "treasury-contracts-api"
 version = "1.1.0"
 requires-python = ">=3.10"
-dependencies = ["pydantic==2.12.4", "web3==7.14.0", "rfc8785==0.1.4", "httpx==0.28.1"]
+dependencies = ["pydantic==2.12.4", "web3==7.14.0", "rfc8785==0.1.4", "httpx==0.28.1", "z3-solver==4.15.4.0"]
 
 [build-system]
 requires = ["hatchling==1.28.0"]

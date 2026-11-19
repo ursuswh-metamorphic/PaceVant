@@ -12,6 +12,17 @@ def fresh(timestamp: int, now: int) -> bool:
 
 
 def policy_issues(mandate: Mandate, context: ChainContext, now: int) -> list[str]:
+    if context.proof_policy is not None or mandate.proof_policy is not None:
+        if (
+            mandate.proof_policy is None
+            or mandate.registry is None
+            or mandate.session_id is None
+            or context.proof_policy != mandate.proof_policy
+            or context.registry != mandate.registry
+            or context.proof_session is None
+            or context.proof_session.session_id != mandate.session_id
+        ):
+            return ["PROOF_REQUIRED"]
     if (
         mandate.status != "ACTIVE"
         or mandate.expires_at <= now

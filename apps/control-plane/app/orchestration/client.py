@@ -142,6 +142,8 @@ class RestExecutionClient:
         except (Web3Exception, OSError, ValueError):
             raise ControlError("CHAIN_RPC_UNAVAILABLE", 503, retryable=True) from None
         return ChainContext(
+            max_block_drift=self.settings.max_block_drift,
+            **self._proof_context(remote, fork_block),
             deployment=self.settings.mode,
             chain_id=remote.chain_id,
             vault_address=remote.vault_address,
@@ -170,6 +172,27 @@ class RestExecutionClient:
             max_slippage_bps=remote.max_slippage_bps,
             max_approval_ttl=remote.max_approval_ttl,
         )
+
+    def _proof_context(self, remote, fork_block):
+        from treasury_contracts.onchain_v2 import read_v2_context
+        from treasury_contracts.v2 import ZERO_HASH
+
+        try:
+            result = read_v2_context(
+                self.rpc,
+                remote.vault_address,
+                remote.proof_session.session_id if remote.proof_session else ZERO_HASH,
+                fork_block if fork_block is not None else remote.block_number,
+                required=remote.proof_policy is not None,
+            )
+            if result and (
+                result["proof_policy"] != remote.proof_policy.model_dump(mode="json")
+                or result["registry"] != remote.registry.model_dump(mode="json")
+            ):
+                raise ValueError("policy mismatch")
+            return result
+        except Exception:
+            raise ControlError("PROOF_CONTEXT_UNAVAILABLE", 503) from None
 
     def balances(self):
         remote = self._call(self.sdk.snapshot)
@@ -212,6 +235,35 @@ class RestExecutionClient:
 
     def verify_evidence(self, built, evidence):
         return self.sdk.verify_evidence(built, evidence)
+
+    def preflight_v2(self, built, proof, session_id, required_stress):
+        from treasury_contracts.v2 import PreflightV2Request
+
+        request = PreflightV2Request(
+            build_id=built.build_id,
+            proof=proof,
+            session_id=session_id,
+            required_stress=required_stress,
+        )
+        ref = self._call(
+            self.sdk._post,
+            "/v2/simulations/preflight",
+            request.model_dump(mode="json"),
+            "preflight-" + built.build_id,
+        )
+        try:
+            raw = self.sdk.artifact(ref["ref"])
+            if (
+                raw["proof_context_hash"] != proof.context_hash
+                or raw["post_conditions_hash"] != proof.phi.hash
+                or raw["receipt"]["status"] != 1
+                or raw["build_id"] != built.build_id
+                or raw["required_stress"] != required_stress
+            ):
+                raise ValueError("preflight binding")
+        except (KeyError, ValueError):
+            raise ControlError("PROOF_INVALID") from None
+        return ref
 
     def execute(self, built, pdr):
         key = f"execute-{pdr.decision_id}"

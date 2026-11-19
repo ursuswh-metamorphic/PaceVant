@@ -2,14 +2,15 @@ import httpx
 
 from app.attestor.typed import hash_bytes
 from app.errors import ControlError
-from app.portfolio import MAX_BLOCK_DRIFT, fresh
+from app.portfolio import fresh
 
 FUJI_RPC = "https://api.avax-test.network/ext/bc/C/rpc"
 
 
 class FujiVerifier:
-    def __init__(self, http: httpx.Client):
+    def __init__(self, http: httpx.Client, rpc_url=FUJI_RPC):
         self.http = http
+        self.rpc_url = rpc_url
 
     def verify(self, context, now):
         fork_block = hex(context.fork_block)
@@ -22,7 +23,7 @@ class FujiVerifier:
         )
         try:
             response = self.http.post(
-                FUJI_RPC,
+                self.rpc_url,
                 json=[
                     {"jsonrpc": "2.0", "id": i, "method": method, "params": params}
                     for i, (method, params) in enumerate(calls)
@@ -43,7 +44,7 @@ class FujiVerifier:
                 or int(fork["number"], 16) != context.fork_block
                 or fork["hash"] != context.fork_block_hash
                 or fork_timestamp != context.fork_block_timestamp
-                or not 0 <= head_block - context.fork_block <= MAX_BLOCK_DRIFT
+                or not 0 <= head_block - context.fork_block <= context.max_block_drift
                 or not fresh(fork_timestamp, now)
                 or not fork_code_bytes
                 or hash_bytes(fork_code_bytes) != context.bytecode_hash
