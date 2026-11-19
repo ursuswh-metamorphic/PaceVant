@@ -36,6 +36,54 @@ def run(api, scenario="normal_swap", goal="Buy WAVAX with 500 USDC"):
     return workflow, workflow["timeline"]
 
 
+def test_lfj_cannot_reuse_a_mock_usdc_price_to_obtain_sde_approval(api, monkeypatch):
+    original = MockExecutionClient.build
+
+    def lfj_version(self, proposal):
+        return original(self, proposal).model_copy(update={"adapter_version": "lfj-v1-fuji-v1"})
+
+    monkeypatch.setattr(MockExecutionClient, "build", lfj_version)
+    _, events = run(api, "normal_swap")
+    decision = events[-1]["decision"]
+    assert decision["verdict"] == "ESCALATE"
+    assert "ORACLE_TOKEN_IDENTITY_MISMATCH" in decision["reason_codes"]
+    assert "ATTESTED" not in [event["stage"] for event in events]
+
+
+def test_fuji_cannot_authorize_using_a_trusted_test_oracle_file(tmp_path):
+    from types import SimpleNamespace
+
+    from app.orchestration.service import ControlPlane
+
+    # A missing file would raise UNVERIFIED_PRICE if the old file-based path ran.
+    holder = SimpleNamespace(
+        settings=SimpleNamespace(mode="FUJI", oracle_file=tmp_path / "oracle.json")
+    )
+    with pytest.raises(ControlError, match="ORACLE_TOKEN_IDENTITY_MISMATCH"):
+        ControlPlane.price(holder, object())
+
+
+def test_fuji_settings_do_not_require_a_placeholder_test_oracle_file(monkeypatch):
+    import secrets
+
+    config = {
+        "MODE": "FUJI",
+        "MANDATE_FILE": "mandate-lfj.json",
+        "B_URL": "http://127.0.0.1:8001",
+        "B_TOKEN": "b" * 24,
+        "OPERATOR_TOKEN": "o" * 24,
+        "INTERNAL_TOKEN": "i" * 24,
+        "ATTESTOR_KEY": secrets.token_hex(32),
+        "CHAIN_RPC_URL": "https://api.avax-test.network/ext/bc/C/rpc",
+        "RELAYER_ADDRESS": "0x" + "12" * 20,
+    }
+    for name, value in config.items():
+        monkeypatch.setenv("PACEVANT_" + name, value)
+    monkeypatch.delenv("PACEVANT_ORACLE_FILE", raising=False)
+    settings = Settings.from_env()
+    assert settings.mode == "FUJI" and settings.oracle_file is None
+
+
 @pytest.mark.parametrize("scenario", ["normal_swap", "exposure_limit", "stale_price", "injection"])
 def test_scenario_acceptance(api, scenario):
     fixture = json.loads((FIXTURES / f"{scenario}.json").read_text("utf-8"))

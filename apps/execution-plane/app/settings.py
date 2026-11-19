@@ -7,9 +7,7 @@ ROOT = Path(__file__).resolve().parents[3]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_prefix="B_", env_file=ROOT / ".env", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_prefix="B_", env_file=ROOT / ".env", extra="ignore")
     mode: Literal["local", "fuji"] = "local"
     rpc_url: str = ""
     deployment_file: Path | None = None
@@ -32,14 +30,14 @@ class Settings(BaseSettings):
     max_ttl: int = 30
     freshness_seconds: int = 60
     max_block_drift: int = 3
+    # Deliberate local operator opt-in, never set by the API or preflight CLI.
+    fuji_broadcast_authorized: bool = False
 
     def model_post_init(self, __context):
         # Generic B_* overrides remain supported; normal .env configuration uses
         # B_LOCAL_* / B_FUJI_* so changing mode cannot reuse a local signing key.
         self.rpc_url = self.rpc_url or getattr(self, f"{self.mode}_rpc_url")
-        self.deployment_file = self.deployment_file or getattr(
-            self, f"{self.mode}_deployment_file"
-        )
+        self.deployment_file = self.deployment_file or getattr(self, f"{self.mode}_deployment_file")
         self.data_dir = self.data_dir or getattr(self, f"{self.mode}_data_dir")
         if not self.relayer_private_key.get_secret_value():
             self.relayer_private_key = getattr(self, f"{self.mode}_relayer_private_key")
@@ -60,19 +58,11 @@ class Settings(BaseSettings):
                 if platform.system() == "Darwin"
                 else "linux"
             )
-            arch = (
-                "arm64"
-                if platform.machine().lower() in {"arm64", "aarch64"}
-                else "amd64"
-            )
-            suffix = f"{system}-{arch}/bin/anvil" + (
-                ".exe" if system == "win32" else ""
-            )
+            arch = "arm64" if platform.machine().lower() in {"arm64", "aarch64"} else "amd64"
+            suffix = f"{system}-{arch}/bin/anvil" + (".exe" if system == "win32" else "")
             candidate = ROOT / ("node_modules/@foundry-rs/anvil-" + suffix)
             self.anvil_binary = (
-                str(candidate)
-                if candidate.exists()
-                else shutil.which("anvil") or "anvil"
+                str(candidate) if candidate.exists() else shutil.which("anvil") or "anvil"
             )
 
 

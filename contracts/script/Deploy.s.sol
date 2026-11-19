@@ -16,7 +16,7 @@ interface ScriptVm {
 contract Deploy {
     ScriptVm constant vm=ScriptVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     function run() external returns (PolicyVault vault,MockSwapAdapter adapter,MockUSDC usdc,MockWAVAX wavax) {
-        require(block.chainid==43113 || block.chainid==31337,"TEST_CHAINS_ONLY");
+        require(block.chainid==31337,"MOCK_DEPLOYMENT_LOCAL_ONLY");
         uint256 key=vm.envUint("B_FUJI_OWNER_PRIVATE_KEY");address admin=vm.addr(key);
         address attestor=vm.envAddress("B_FUJI_ATTESTOR_ADDRESS");
         require(attestor!=address(0) && attestor!=admin,"SEPARATE_ATTESTOR_REQUIRED");

@@ -28,7 +28,19 @@ class Relayer:
     def __init__(self, chain, store):
         self.chain, self.store = chain, store
 
-    def execute(self, request: ExecutionRequest):
+    def execute(self, request: ExecutionRequest, *, dry_run=False):
+        if self.chain.w3.eth.chain_id != self.chain.chain_id:
+            raise PlaneError("CHAIN_MISMATCH", "RPC network changed", 503)
+        if (
+            self.chain.settings.mode == "fuji"
+            and not dry_run
+            and not self.chain.settings.fuji_broadcast_authorized
+        ):
+            raise PlaneError(
+                "BROADCAST_NOT_AUTHORIZED",
+                "Fuji execution is disabled until explicitly authorized",
+                403,
+            )
         b = BuiltTransaction.model_validate(self.store.get("build", request.build_id))
         p = request.signed_pdr
         request_hash = content_hash(request.model_dump())
@@ -40,9 +52,14 @@ class Relayer:
             ).fetchone()
         if row:
             if row[0] != request_hash:
-                raise PlaneError(
-                    "NONCE_REPLAY", "Build already submitted with another PDR", 409
-                )
+                raise PlaneError("NONCE_REPLAY", "Build already submitted with another PDR", 409)
+            if dry_run:
+                return {
+                    "dry_run": True,
+                    "broadcast": False,
+                    "tx_hash": row[1],
+                    "status": self.monitor(row[1])["status"],
+                }
             try:
                 self.chain.w3.eth.get_transaction(row[1])
             except TransactionNotFound:
@@ -52,20 +69,14 @@ class Relayer:
                     # Original hash remains queryable even if rebroadcast times out.
                     pass
             return {"tx_hash": row[1], "status": self.monitor(row[1])["status"]}
-        evidence = SimulationEvidence.model_validate(
-            self.store.get("evidence", b.build_id)
-        )
+        evidence = SimulationEvidence.model_validate(self.store.get("evidence", b.build_id))
         if (
             evidence.verification_status != "COMPLETE"
             or evidence.baseline.execution_status != "SUCCESS"
         ):
-            raise PlaneError(
-                "SIMULATION_INCOMPLETE", "Complete successful evidence required", 409
-            )
+            raise PlaneError("SIMULATION_INCOMPLETE", "Complete successful evidence required", 409)
         if self.chain.settings.mode == "fuji" and evidence.source != "FORK_SIM":
-            raise PlaneError(
-                "SIMULATION_INCOMPLETE", "Fuji requires verified fork evidence", 409
-            )
+            raise PlaneError("SIMULATION_INCOMPLETE", "Fuji requires verified fork evidence", 409)
         if (
             p.build_id != b.build_id
             # EIP-712 encodes address bytes; checksum/lowercase spelling is equivalent.
@@ -80,6 +91,17 @@ class Relayer:
         if digest(p.domain, p.approval) != p.typed_data_hash:
             raise PlaneError("BAD_SIGNATURE", "Typed-data digest mismatch")
         c = self.chain.context()
+        if self.chain.is_lfj:
+            from ..dex.lfj import LFJClient
+
+            route = self.chain.verify_lfj(c["block_number"])
+            current_quote = LFJClient(self.chain.w3).verified_quote(
+                int(b.amount_in_base_units), c["block_number"], route
+            )
+            if int(current_quote["amount_out_base_units"]) < int(b.min_amount_out_base_units):
+                raise PlaneError(
+                    "STALE_REQUIRES_REEVALUATION", "LFJ quote moved below signed minOut", 409
+                )
         manifest = json.loads(self.store.read_artifact(evidence.evidence_root[2:]))
         stale = (
             c["policy_hash"] != b.policy_hash
@@ -88,8 +110,7 @@ class Relayer:
             or c["timestamp"] > b.deadline
             or int(time.time()) > b.deadline
             or c["policy_expires_at"] < c["timestamp"]
-            or c["block_number"] - evidence.fork_block
-            > self.chain.settings.max_block_drift
+            or c["block_number"] - evidence.fork_block > self.chain.settings.max_block_drift
             or max(c["timestamp"], int(time.time())) - manifest["timestamp"]
             > self.chain.settings.freshness_seconds
             or Web3.to_hex(self.chain.w3.eth.get_block(evidence.fork_block).hash)
@@ -109,14 +130,15 @@ class Relayer:
         if signer.lower() != c["attestor"].lower():
             raise PlaneError("BAD_SIGNATURE", "Signature is not from current attestor")
         key = self.chain.settings.relayer_private_key.get_secret_value()
-        if not key:
+        if not key and not dry_run:
             raise PlaneError(
                 "CONFIGURATION_ERROR",
                 f"B_{self.chain.settings.mode.upper()}_RELAYER_PRIVATE_KEY is not configured",
                 503,
             )
-        account = Account.from_key(key)
-        if account.address.lower() in {c["owner"].lower(), c["attestor"].lower()}:
+        account = Account.from_key(key) if key else None
+        sender = account.address if account else self.chain.deployment.get("relayer")
+        if not sender or sender.lower() in {c["owner"].lower(), c["attestor"].lower()}:
             raise PlaneError(
                 "CONFIGURATION_ERROR",
                 "Relayer must be distinct from owner and attestor",
@@ -126,7 +148,7 @@ class Relayer:
             approval_tuple(p.approval), b.router_calldata, p.signature
         )
         try:
-            gas = fn.estimate_gas({"from": account.address})
+            gas = fn.estimate_gas({"from": sender})
         except Exception:
             raise PlaneError(
                 "STALE_REQUIRES_REEVALUATION",
@@ -135,15 +157,26 @@ class Relayer:
             ) from None
         tx = fn.build_transaction(
             {
-                "from": account.address,
+                "from": sender,
                 "chainId": b.chain_id,
-                "nonce": self.chain.w3.eth.get_transaction_count(
-                    account.address, "pending"
-                ),
+                "nonce": self.chain.w3.eth.get_transaction_count(sender, "pending"),
                 "gas": gas * 12 // 10 + 10000,
                 "gasPrice": self.chain.w3.eth.gas_price,
             }
         )
+        if dry_run:
+            return {
+                "dry_run": True,
+                "broadcast": False,
+                "status": "PREFLIGHT_PASSED",
+                "build_id": b.build_id,
+                "relayer": sender,
+                "gas_estimate": str(gas),
+                "evidence_root": evidence.evidence_root,
+                "typed_data_hash": p.typed_data_hash,
+                "quote_ref": b.quote_ref,
+                "block_number": c["block_number"],
+            }
         signed = account.sign_transaction(tx)
         tx_hash = Web3.to_hex(signed.hash)
         raw = Web3.to_hex(signed.raw_transaction)
@@ -182,6 +215,7 @@ class Relayer:
             b.token_out,
             int(b.amount_in_base_units),
             int(b.min_amount_out_base_units),
+            dex_route=self.chain.deployment.get("lfj_route"),
         )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -194,14 +228,31 @@ class Relayer:
                 e["address"].lower() == b.vault_address.lower()
                 and e["args"]["nonce"] == int(b.nonce)
                 and Web3.to_hex(e["args"]["policyHash"]) == b.policy_hash
-                and Web3.to_hex(e["args"]["evidenceRoot"])
-                == p["approval"]["evidenceRoot"]
+                and Web3.to_hex(e["args"]["evidenceRoot"]) == p["approval"]["evidenceRoot"]
+                and e["args"]["tokenIn"].lower() == b.token_in.lower()
+                and e["args"]["tokenOut"].lower() == b.token_out.lower()
+                and e["args"]["amountIn"] == int(b.amount_in_base_units)
+                and e["args"]["amountOut"] == int(facts["token_out_delta_base_units"])
             )
         ]
         mismatch = receipt.status == 1 and (
             len(matching) != 1
             or facts["unexpected_transfer"]
             or facts["unauthorized_approval"]
+            or not self.chain.vault.functions.usedNonce(int(b.nonce)).call(
+                block_identifier=receipt.blockNumber
+            )
+            or self.chain.usdc.functions.allowance(b.vault_address, b.router).call(
+                block_identifier=receipt.blockNumber
+            )
+            != 0
+            or (
+                self.chain.is_lfj
+                and self.chain.usdc.functions.allowance(
+                    b.router, self.chain.deployment["lfj_route"]["lfj_router"]
+                ).call(block_identifier=receipt.blockNumber)
+                != 0
+            )
         )
         ref = self.store.artifact(
             {
@@ -209,6 +260,13 @@ class Relayer:
                 "events": plain(events),
                 "facts": facts,
                 "actual_delta_source": "RECEIPT_ERC20_TRANSFER_LOGS",
+                "dex_route": self.chain.deployment.get("lfj_route"),
+                "gas_cost_wei": str(receipt.gasUsed * receipt.effectiveGasPrice),
+                "simulation_output_base_units": self.store.get("evidence", b.build_id)["baseline"][
+                    "token_out_delta_base_units"
+                ],
+                "receipt_output_base_units": facts["token_out_delta_base_units"],
+                "signed_min_output_base_units": b.min_amount_out_base_units,
                 "review_required": mismatch,
                 "recommended_action": "PAUSE_REVIEW" if mismatch else None,
             }
@@ -220,9 +278,7 @@ class Relayer:
                 "block_number": receipt.blockNumber,
                 "gas_used": str(receipt.gasUsed),
                 "actual_token_in_delta_base_units": facts["token_in_delta_base_units"],
-                "actual_token_out_delta_base_units": facts[
-                    "token_out_delta_base_units"
-                ],
+                "actual_token_out_delta_base_units": facts["token_out_delta_base_units"],
                 "revert_reason": "CRITICAL_MISMATCH_PAUSE_REVIEW"
                 if mismatch
                 else "ONCHAIN_REVERT"

@@ -1,5 +1,7 @@
 # Triển khai và bàn giao phần B — Execution Plane v1.1
 
+**Cập nhật LFJ:** phần mock bên dưới tiếp tục dùng cho Local. Nhánh LFJ thêm adapter thật trên Fuji; `deploy:fuji` mặc định dry-run và broadcast cần cấp phép rõ ràng. Xem [hướng dẫn LFJ](LFJ_FUJI_INTEGRATION.md) và [báo cáo](LFJ_FUJI_REPORT.md); chưa có deployment/swap PaceVant trên Fuji công khai được xác nhận.
+
 Mã mới bám `03_SHARED_INTEGRATION_CONTRACT.md` và guide B ngày 16/11/2026. `PolicyVault` chỉ swap mock USDC → mock WAVAX; không phải smart account ERC-4337. Phần A vẫn sở hữu Planner, Shield, exposure/risk, SDE, attestor và dashboard.
 
 ## 1. Cấu trúc để merge với A

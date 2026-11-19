@@ -124,6 +124,10 @@ class ControlPlane:
     def price(self, client: ExecutionClient):
         if isinstance(client, MockExecutionClient):
             return client.price()
+        if self.settings.mode == "FUJI":
+            # LFJ faucet USDC is not Circle USDC. A file labelled TRUSTED_TEST_ORACLE
+            # cannot establish an independent USD valuation for this traded asset.
+            raise ControlError("ORACLE_TOKEN_IDENTITY_MISMATCH", 409)
         try:
             return OraclePrice.model_validate(json_object(self.settings.oracle_file.read_bytes()))
         except (ValueError, OSError):

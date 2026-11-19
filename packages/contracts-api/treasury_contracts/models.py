@@ -62,7 +62,7 @@ class BuiltTransaction(Wire):
     nonce: UInt
     deadline: int
     quote_ref: str
-    adapter_version: Literal["mock-swap-v1"] = "mock-swap-v1"
+    adapter_version: Literal["mock-swap-v1", "lfj-v1-fuji-v1"] = "mock-swap-v1"
 
 
 class Approval(Wire):

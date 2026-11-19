@@ -34,6 +34,10 @@ def evaluate(
         "max_wavax_exposure_bps": mandate.max_avax_exposure_bps,
     }
     unknown = []
+    if built.adapter_version == "lfj-v1-fuji-v1":
+        # No independently verified USD feed/peg exists for the LFJ faucet USDC
+        # configured by this adapter. Reject even a hand-supplied test-price snapshot.
+        unknown.append("ORACLE_TOKEN_IDENTITY_MISMATCH")
     if (
         (snapshot.chain_id, snapshot.vault_address) != (mandate.chain_id, mandate.vault_address)
         or (balances.chain_id, balances.vault_address) != (mandate.chain_id, mandate.vault_address)

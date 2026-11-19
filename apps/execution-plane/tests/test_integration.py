@@ -167,6 +167,9 @@ def test_fuji_refuses_local_sim_evidence(plane, monkeypatch):
     client, chain, keys, _ = plane
     b, e = build_and_simulate(client, chain)
     monkeypatch.setattr(chain.settings, "mode", "fuji")
+    # Exercise the evidence-source guard independently of the new broadcast switch.
+    # This fixture still points only to local Anvil, never public Fuji.
+    monkeypatch.setattr(chain.settings, "fuji_broadcast_authorized", True)
     r = post(
         client,
         "/v1/executions",

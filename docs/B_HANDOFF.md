@@ -1,5 +1,7 @@
 # Chạy Control Plane A với Execution Plane B
 
+**LFJ update:** dùng SDK 1.2.0 cho enum adapter LFJ. Fuji deploy mặc định dry-run; luồng mock trong tài liệu này dành cho Local. Xem [LFJ integration](LFJ_FUJI_INTEGRATION.md) để biết route thật, fork evidence và rào cản định giá khiến Fuji SDE chưa cấp PDR.
+
 A gọi B qua HTTP bằng SDK `treasury_contracts` v1.1. B dùng chain ID `31337` trên Anvil và `43113` trên Fuji. A đối chiếu chain, block, Vault và policy với RPC đã cấu hình. Chứng cứ `REAL_LOCAL_SIM` dành cho Local. Profile Fuji yêu cầu `FORK_SIM` khớp chain, canonical fork block và bytecode.
 
 ## Khởi động

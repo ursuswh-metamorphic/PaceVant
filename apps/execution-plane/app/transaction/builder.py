@@ -22,11 +22,7 @@ class Builder:
             value = getattr(p, field)
             if str(value).lower() != str(expected).lower():
                 raise PlaneError(code, f"Unsupported {field}")
-        if (
-            not c["policy_active"]
-            or c["paused"]
-            or c["policy_expires_at"] < c["timestamp"]
-        ):
+        if not c["policy_active"] or c["paused"] or c["policy_expires_at"] < c["timestamp"]:
             raise PlaneError("POLICY_REVOKED", "Policy unavailable", 409)
         amount = int(p.amount_in_base_units)
         if amount <= 0 or amount > int(c["max_per_swap_base_units"]):
@@ -52,8 +48,7 @@ class Builder:
         if not v.allowedRouters(c["router"]).call(block_identifier=n):
             raise PlaneError("ROUTER_NOT_ALLOWED", "Router revoked")
         if not all(
-            v.allowedTokens(c[k]).call(block_identifier=n)
-            for k in ("token_in", "token_out")
+            v.allowedTokens(c[k]).call(block_identifier=n) for k in ("token_in", "token_out")
         ):
             raise PlaneError("TOKEN_NOT_ALLOWED", "Token revoked")
         snapshot = self.chain.snapshot(c)
@@ -63,12 +58,25 @@ class Builder:
             c["max_spend_per_day_base_units"]
         ):
             raise PlaneError("DAILY_SPEND_LIMIT", "Daily budget exceeded")
-        quote = self.chain.router.functions.quote(
-            c["token_in"], c["token_out"], amount
-        ).call(block_identifier=n)
+        quote = self.chain.router.functions.quote(c["token_in"], c["token_out"], amount).call(
+            block_identifier=n
+        )
+        dex_quote = None
+        if self.chain.is_lfj:
+            from ..dex.lfj import LFJClient
+
+            route = self.chain.verify_lfj(n)
+            dex_quote = LFJClient(self.chain.w3).verified_quote(amount, n, route)
+            if quote != int(dex_quote["amount_out_base_units"]):
+                raise PlaneError("LFJ_QUOTE_MISMATCH", "Adapter and LFJ quoter disagree", 409)
         min_out = quote * (10000 - p.slippage_bps) // 10000
         if min_out <= 0:
             raise PlaneError("BAD_PRICE_OR_SLIPPAGE", "Zero minOut")
+        if self.chain.is_lfj and (
+            dex_quote["block_hash"] != c["block_hash"]
+            or Web3.to_hex(self.chain.w3.eth.get_block(n).hash) != c["block_hash"]
+        ):
+            raise PlaneError("HASH_MISMATCH", "Pinned LFJ build block changed", 409)
         data = self.chain.router.encode_abi(
             "exactInput",
             args=[c["token_in"], c["token_out"], amount, min_out, c["vault_address"]],
@@ -80,6 +88,7 @@ class Builder:
                 "slippage_bps": p.slippage_bps,
                 "snapshot": snapshot,
                 "bytecode_hashes": self.chain.deployment["bytecode_hashes"],
+                "dex_quote": dex_quote,
             }
         )
         nonce = self.store.nonce(f"{c['chain_id']}:{c['vault_address'].lower()}")
@@ -100,7 +109,7 @@ class Builder:
             nonce=nonce,
             deadline=p.deadline,
             quote_ref=quote_artifact["ref"],
-            adapter_version="mock-swap-v1",
+            adapter_version=self.chain.adapter_version,
         )
         built = BuiltTransaction(build_id="build_" + content_hash(fields)[2:], **fields)
         self.store.put("build", built.build_id, built.model_dump())
@@ -110,9 +119,10 @@ class Builder:
             {
                 "context": c,
                 "snapshot": snapshot,
-                "output_per_usdc": str(
-                    self.chain.router.functions.outputPerUsdc().call(block_identifier=n)
-                ),
+                "output_per_usdc": None
+                if self.chain.is_lfj
+                else str(self.chain.router.functions.outputPerUsdc().call(block_identifier=n)),
+                "dex_quote": dex_quote,
                 "proposal": p.model_dump(),
             },
         )
