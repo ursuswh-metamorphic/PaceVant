@@ -58,9 +58,7 @@ def fork_node(settings, block, chain_id):
         )
         for _ in range(120):
             if proc.poll() is not None:
-                raise PlaneError(
-                    "SIMULATION_INCOMPLETE", "Anvil fork process failed", 503, True
-                )
+                raise PlaneError("SIMULATION_INCOMPLETE", "Anvil fork process failed", 503, True)
             if w3.is_connected():
                 break
             time.sleep(0.1)
@@ -79,9 +77,7 @@ def fork_node(settings, block, chain_id):
 def override_attestor(w3, vault, signer):
     # Use compiler storageLayout, preserving packed owner/pause/other fields.
     layout = next(
-        x
-        for x in artifact("PolicyVault")["storageLayout"]["storage"]
-        if x["label"] == "attestor"
+        x for x in artifact("PolicyVault")["storageLayout"]["storage"] if x["label"] == "attestor"
     )
     slot, offset = int(layout["slot"]), int(layout["offset"])
     old = int.from_bytes(w3.eth.get_storage_at(vault, slot), "big")
@@ -109,10 +105,7 @@ class Simulator:
         b = BuiltTransaction.model_validate(self.store.get("build", build_id))
         saved = self.store.get("build-context", build_id)
         c = saved["context"]
-        if (
-            b.policy_hash != expected_hash
-            or self.chain.context()["policy_hash"] != expected_hash
-        ):
+        if b.policy_hash != expected_hash or self.chain.context()["policy_hash"] != expected_hash:
             raise PlaneError("HASH_MISMATCH", "Policy changed; rebuild required", 409)
         try:
             return self.store.get("evidence", build_id)
@@ -122,27 +115,21 @@ class Simulator:
         refs, scenarios, complete = [], [], True
         with fork_node(self.chain.settings, c["block_number"], b.chain_id) as w3:
             vault = contract(w3, "PolicyVault", b.vault_address)
-            router = contract(w3, "MockSwapAdapter", b.router)
+            router = contract(w3, self.chain.adapter_contract_name, b.router)
             usdc, wavax = (
-                contract(w3, "MockUSDC", b.token_in),
-                contract(w3, "MockWAVAX", b.token_out),
+                contract(w3, self.chain.token_contract_name or "MockUSDC", b.token_in),
+                contract(w3, self.chain.token_contract_name or "MockWAVAX", b.token_out),
             )
             for obj in (vault, router, usdc, wavax):
                 if w3.eth.get_code(obj.address) != self.chain.w3.eth.get_code(
                     obj.address, c["block_number"]
                 ):
-                    raise PlaneError(
-                        "SIMULATION_INCOMPLETE", "Fork bytecode mismatch", 503
-                    )
+                    raise PlaneError("SIMULATION_INCOMPLETE", "Fork bytecode mismatch", 503)
 
             def balances():
                 return {
-                    "usdc_base_units": str(
-                        usdc.functions.balanceOf(b.vault_address).call()
-                    ),
-                    "wavax_base_units": str(
-                        wavax.functions.balanceOf(b.vault_address).call()
-                    ),
+                    "usdc_base_units": str(usdc.functions.balanceOf(b.vault_address).call()),
+                    "wavax_base_units": str(wavax.functions.balanceOf(b.vault_address).call()),
                     "allowance_base_units": str(
                         usdc.functions.allowance(b.vault_address, b.router).call()
                     ),
@@ -150,18 +137,26 @@ class Simulator:
 
             if (
                 balances() != {k: saved["snapshot"][k] for k in balances()}
-                or Web3.to_hex(vault.functions.activePolicyHash().call())
-                != b.policy_hash
-                or str(router.functions.outputPerUsdc().call())
-                != saved["output_per_usdc"]
-                or Web3.to_hex(w3.eth.get_block(c["block_number"]).hash)
-                != c["block_hash"]
+                or Web3.to_hex(vault.functions.activePolicyHash().call()) != b.policy_hash
+                or (
+                    not self.chain.is_lfj
+                    and str(router.functions.outputPerUsdc().call()) != saved["output_per_usdc"]
+                )
+                or Web3.to_hex(w3.eth.get_block(c["block_number"]).hash) != c["block_hash"]
             ):
                 raise PlaneError(
                     "SIMULATION_INCOMPLETE",
                     "Fork state does not match committed snapshot",
                     503,
                 )
+            if self.chain.is_lfj:
+                from ..dex.lfj import LFJClient
+
+                route = LFJClient(w3).v1_route(c["block_number"])
+                if route != saved["dex_quote"]["route"]:
+                    raise PlaneError(
+                        "SIMULATION_INCOMPLETE", "LFJ fork route/reserves mismatch", 503
+                    )
             signer, relayer = Account.create(), Account.create()
             override = override_attestor(w3, b.vault_address, signer.address)
             if vault.functions.attestor().call() != signer.address:
@@ -169,9 +164,7 @@ class Simulator:
             rpc(w3, "anvil_setBalance", [relayer.address, hex(10**20)])
             # Root is a labelled simulation sentinel; the final evidence root is created after this run.
             approval = approval_for(b, content_hash({"simulation_only": b.build_id}))
-            signature = Account.sign_message(
-                message(domain_for(b), approval), signer.key
-            ).signature
+            signature = Account.sign_message(message(domain_for(b), approval), signer.key).signature
             encoded = vault.encode_abi(
                 "executeApprovedSwap",
                 args=[approval_tuple(approval), b.router_calldata, signature],
@@ -184,11 +177,13 @@ class Simulator:
             ]:
                 if scenario_id != "baseline":
                     if not rpc(w3, "evm_revert", [initial]):
-                        raise PlaneError(
-                            "SIMULATION_INCOMPLETE", "Snapshot restore failed", 503
-                        )
+                        raise PlaneError("SIMULATION_INCOMPLETE", "Snapshot restore failed", 503)
                     initial = rpc(w3, "evm_snapshot", [])
-                price = int(saved["output_per_usdc"]) * multiplier // 10000
+                price = (
+                    None
+                    if self.chain.is_lfj
+                    else int(saved["output_per_usdc"]) * multiplier // 10000
+                )
                 scenario = {
                     "scenario_id": scenario_id,
                     "price_multiplier_bps": multiplier,
@@ -196,7 +191,37 @@ class Simulator:
                     "output_per_usdc": str(price),
                     "seed": 1,
                 }
-                if scenario_id != "baseline":
+                if self.chain.is_lfj:
+                    scenario.pop("price_multiplier_bps")
+                    scenario.pop("output_per_usdc")
+                    scenario["kind"] = (
+                        "LFJ_ACTUAL_BASELINE"
+                        if scenario_id == "baseline"
+                        else "FORK_PRECEDING_AUTHORIZED_VAULT_SWAP"
+                    )
+                if self.chain.is_lfj and scenario_id != "baseline":
+                    from .lfj_stress import prepare_ordered_swap
+
+                    setup = prepare_ordered_swap(
+                        w3, vault, router, usdc, b, signer, relayer, scenario_id, c["timestamp"]
+                    )
+                    scenario.update(setup)
+                    if setup["status"] != "READY":
+                        complete = False
+                        refs.append(
+                            self.store.artifact({"scenario": scenario, "build": b.model_dump()})
+                        )
+                        scenarios.append(
+                            StressTest(
+                                scenario_id=scenario_id,
+                                status="INCONCLUSIVE",
+                                scenario_hash=content_hash(scenario),
+                                output_base_units=None,
+                                revert_reason=setup.get("reason", "STRESS_TARGET_NOT_REACHED"),
+                            )
+                        )
+                        continue
+                elif scenario_id != "baseline":
                     owner = router.functions.owner().call()
                     rpc(w3, "anvil_setBalance", [owner, hex(10**20)])
                     rpc(w3, "anvil_impersonateAccount", [owner])
@@ -209,17 +234,13 @@ class Simulator:
                             {
                                 "from": owner,
                                 "to": b.router,
-                                "data": router.encode_abi(
-                                    "setOutputPerUsdc", args=[price]
-                                ),
+                                "data": router.encode_abi("setOutputPerUsdc", args=[price]),
                                 "gas": hex(150000),
                             }
                         ],
                     )
                     if w3.eth.wait_for_transaction_receipt(tx).status != 1:
-                        raise PlaneError(
-                            "SIMULATION_INCOMPLETE", "Stress setup failed", 503
-                        )
+                        raise PlaneError("SIMULATION_INCOMPLETE", "Stress setup failed", 503)
                     rpc(w3, "anvil_stopImpersonatingAccount", [owner])
                 before = balances()
                 rpc(w3, "evm_setNextBlockTimestamp", [c["timestamp"] + 2])
@@ -248,6 +269,7 @@ class Simulator:
                     b.token_out,
                     int(b.amount_in_base_units),
                     int(b.min_amount_out_base_units),
+                    dex_route=self.chain.deployment.get("lfj_route"),
                 )
                 safe, rollback = assess(
                     receipt,
@@ -290,7 +312,9 @@ class Simulator:
                         "source_rpc_block_hash": c["block_hash"],
                         "state_override": override,
                         "simulation_relayer": relayer.address,
-                        "fidelity": "Pinned fork; signer and gas balances overridden; mock price stressed only in fork",
+                        "fidelity": "Pinned LFJ fork; signer/gas overridden; stress uses preceding treasury swaps, no pool/token storage edits"
+                        if self.chain.is_lfj
+                        else "Pinned fork; signer and gas balances overridden; mock price stressed only in fork",
                     },
                 }
                 refs.append(self.store.artifact(raw))
@@ -306,12 +330,10 @@ class Simulator:
                         if receipt.status == 0
                         else "INCONCLUSIVE",
                         token_in_delta_base_units=str(
-                            int(after["usdc_base_units"])
-                            - int(before["usdc_base_units"])
+                            int(after["usdc_base_units"]) - int(before["usdc_base_units"])
                         ),
                         token_out_delta_base_units=str(
-                            int(after["wavax_base_units"])
-                            - int(before["wavax_base_units"])
+                            int(after["wavax_base_units"]) - int(before["wavax_base_units"])
                         ),
                         unexpected_transfer=facts["unexpected_transfer"],
                         unauthorized_approval=facts["unauthorized_approval"],
@@ -324,17 +346,14 @@ class Simulator:
                             status=status,
                             scenario_hash=content_hash(scenario),
                             output_base_units=str(
-                                int(after["wavax_base_units"])
-                                - int(before["wavax_base_units"])
+                                int(after["wavax_base_units"]) - int(before["wavax_base_units"])
                             ),
                             revert_reason="MIN_OUTPUT_NOT_MET" if protected else None,
                         )
                     )
             bytecode_hash = keccak(w3.eth.get_code(b.vault_address))
         verification = (
-            "COMPLETE"
-            if complete and baseline.execution_status == "SUCCESS"
-            else "INCONCLUSIVE"
+            "COMPLETE" if complete and baseline.execution_status == "SUCCESS" else "INCONCLUSIVE"
         )
         manifest = {
             "schema_version": "1.1",
@@ -356,12 +375,11 @@ class Simulator:
             "baseline": baseline.model_dump(),
             "stress_tests": [x.model_dump() for x in scenarios],
             "simulation_mode": "LOCAL_TEST_ATTESTOR",
-            "source": "FORK_SIM"
-            if self.chain.settings.mode == "fuji"
-            else "REAL_LOCAL_SIM",
+            "source": "FORK_SIM" if self.chain.settings.mode == "fuji" else "REAL_LOCAL_SIM",
             "state_override": override,
             "created_at": int(time.time()),
             "timestamp": c["timestamp"],
+            "dex_quote": saved.get("dex_quote"),
         }
         manifest_ref = self.store.artifact(manifest)
         evidence = SimulationEvidence(

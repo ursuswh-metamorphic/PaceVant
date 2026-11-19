@@ -76,3 +76,9 @@ uv run --locked python scripts/fuji_wallet_read.py 0xYOUR_PUBLIC_FUJI_ADDRESS
 Run `uv run --locked python scripts/serve.py --fuji-readonly --port 8012` with `PACEVANT_OPERATOR_TOKEN` set locally (24+ characters), then open `http://127.0.0.1:8012/fuji-wallet`. No B service or private key is required. See the [observer guide](docs/FUJI_WALLET_MARKET_READONLY.md) and [live verification report](docs/FUJI_AVALANCHE_INTEGRATION_REPORT.md).
 
 **Important:** Fiat-looking testnet token quantities are not real assets; a real AVAX/USD feed is not sufficient to value a MockUSDC treasury. This reader is intentionally not in the approval path. Do not interpret legacy ERC-4337 Fuji receipts as deployments of the current PolicyVault.
+
+## Real LFJ route on Fuji (live-state fork verified)
+
+`npm run lfj:preflight` reads actual LFJ pools/quotes; `uv run --locked python scripts/lfj_preflight.py` binds the existing Chainlink reader to the same source block. `npm run test:lfj:fork` executes the real V1 route through LFJ LBRouter V2.2 on isolated Anvil forks. See the [LFJ guide](docs/LFJ_FUJI_INTEGRATION.md) and [verification report](docs/LFJ_FUJI_REPORT.md).
+
+`deploy:fuji` now defaults to **dry-run** and the Fuji relayer requires explicit broadcast authorization. LFJ faucet USDC has no verified USD valuation in this integration, so A's SDE keeps escalation and does not sign PDR. Public Fuji deployment/execution remains unverified; fork receipts represent fork execution only.

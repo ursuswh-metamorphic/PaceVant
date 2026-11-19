@@ -49,7 +49,8 @@ class Settings:
             )
         }
         if mode != "MOCK":
-            missing = [name for name, value in env.items() if not value and name != "DB"]
+            optional = {"DB", "ORACLE_FILE"} if mode == "FUJI" else {"DB"}
+            missing = [name for name, value in env.items() if not value and name not in optional]
             if missing:
                 raise RuntimeError("Missing PACEVANT settings: " + ", ".join(missing))
             url = urlsplit(env["B_URL"])

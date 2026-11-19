@@ -1,0 +1,428 @@
+{
+  "dry_run": true,
+  "broadcast": false,
+  "preflight": {
+    "schema_version": "lfj-preflight-v1",
+    "chain_id": 43113,
+    "broadcast": false,
+    "registry_url": "https://developers.lfj.gg/deployment-addresses/fuji",
+    "block_number": 61337012,
+    "block_hash": "0xb041ae2ae4422b935b62fc05b2a123b39da36ed1748cb330695c826efc17f412",
+    "block_timestamp": 1795102991,
+    "status": "QUOTE_VERIFIED_EXECUTION_NOT_YET_SIMULATED",
+    "tokens": [
+      {
+        "address": "0xB6076C93701D6a07266c31066B298AeC6dd65c2d",
+        "decimals": 6,
+        "symbol": "USDC",
+        "bytecode_hash": "0x425488675cf56e1e6b30b0eed78fe0211c0eb511093ce1b77214c5be1eb3ccd6"
+      },
+      {
+        "address": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
+        "decimals": 18,
+        "symbol": "WAVAX",
+        "bytecode_hash": "0xbe0979d9ff9e744b48d32e81fd67db0d32dfc74120989df9b7b1588e2aff8597"
+      }
+    ],
+    "discovered_lb_pairs": [
+      {
+        "version": 1,
+        "version_name": "V2",
+        "factory": "0x6b8e020098cd1b3ec9f811024bc24e51c660f768",
+        "pair": "0x8fd0ce712bddd0b37fac8133a4b23403ada08516",
+        "bin_step": 5,
+        "ignored_for_routing": false,
+        "bytecode_hash": "0x3f7f1c542ddb9c2570f0bf8a228a2ca3f865b90aeeaec2cd2a7bd6a98a094678",
+        "token_balances": {
+          "USDC": "76",
+          "WAVAX": "403298553552271211"
+        }
+      },
+      {
+        "version": 1,
+        "version_name": "V2",
+        "factory": "0x6b8e020098cd1b3ec9f811024bc24e51c660f768",
+        "pair": "0x3b66c7fc8d2689678f79fa1ecd772e83591b04ea",
+        "bin_step": 10,
+        "ignored_for_routing": false,
+        "bytecode_hash": "0x1c7ac4361f7bc39f73fafc097b68742c905f82fe5a37e81d52317366f3415761",
+        "token_balances": {
+          "USDC": "3377315",
+          "WAVAX": "62967940267387309561"
+        }
+      },
+      {
+        "version": 1,
+        "version_name": "V2",
+        "factory": "0x6b8e020098cd1b3ec9f811024bc24e51c660f768",
+        "pair": "0x8b1b20ccb675f5d221c701ec086dcadef1dbb517",
+        "bin_step": 15,
+        "ignored_for_routing": false,
+        "bytecode_hash": "0x3f7f1c542ddb9c2570f0bf8a228a2ca3f865b90aeeaec2cd2a7bd6a98a094678",
+        "token_balances": {
+          "USDC": "32560",
+          "WAVAX": "148936251841824132"
+        }
+      },
+      {
+        "version": 1,
+        "version_name": "V2",
+        "factory": "0x6b8e020098cd1b3ec9f811024bc24e51c660f768",
+        "pair": "0x88f36a6b0e37e78d0fb1d41b07a47bad3d995453",
+        "bin_step": 20,
+        "ignored_for_routing": false,
+        "bytecode_hash": "0x1c7ac4361f7bc39f73fafc097b68742c905f82fe5a37e81d52317366f3415761",
+        "token_balances": {
+          "USDC": "104445815",
+          "WAVAX": "1245505360383379840191"
+        }
+      },
+      {
+        "version": 2,
+        "version_name": "V2_1",
+        "factory": "0x8e42f2f4101563bf679975178e880fd87d3efd4e",
+        "pair": "0x0b16fd47cbf5350ebde20aa813db8e58846cd5d2",
+        "bin_step": 20,
+        "ignored_for_routing": false,
+        "bytecode_hash": "0x50786743e61a0f252083e17814eaf8511d075aa17c68e1fcd2b19b2afe22bc65",
+        "token_balances": {
+          "USDC": "11281125457",
+          "WAVAX": "164520151795380119610"
+        }
+      },
+      {
+        "version": 2,
+        "version_name": "V2_1",
+        "factory": "0x8e42f2f4101563bf679975178e880fd87d3efd4e",
+        "pair": "0xfc71ad9066d7837cfbfe025edc891914435f6046",
+        "bin_step": 100,
+        "ignored_for_routing": false,
+        "bytecode_hash": "0x4ff3235942d33be26ce2c331ada511fe653c6c870c6a32e3f312c27f37468e38",
+        "token_balances": {
+          "USDC": "987",
+          "WAVAX": "227470487496653908"
+        }
+      },
+      {
+        "version": 2,
+        "version_name": "V2_1",
+        "factory": "0x8e42f2f4101563bf679975178e880fd87d3efd4e",
+        "pair": "0xf3b245c1c3b56d63c14496dbfdb1ae6fcf3e8e58",
+        "bin_step": 25,
+        "ignored_for_routing": false,
+        "bytecode_hash": "0xfdd886069bc4b19d783337c6253ca53bae62db1ef50a4330ff55e78c1c933f4f",
+        "token_balances": {
+          "USDC": "0",
+          "WAVAX": "1100060115250420673"
+        }
+      },
+      {
+        "version": 2,
+        "version_name": "V2_1",
+        "factory": "0x8e42f2f4101563bf679975178e880fd87d3efd4e",
+        "pair": "0x7209e2c33d0b025aac7a707c8c1f365ddc3182e2",
+        "bin_step": 50,
+        "ignored_for_routing": false,
+        "bytecode_hash": "0x20cefaf6db32bcdc48c277b54b5105776a5186582323e1ffb0cffce7f843377a",
+        "token_balances": {
+          "USDC": "0",
+          "WAVAX": "0"
+        }
+      },
+      {
+        "version": 3,
+        "version_name": "V2_2",
+        "factory": "0xb43120c4745967fa9b93e79c149e66b0f2d6fe0c",
+        "pair": "0xbf462aa2d456ec51509a9c7f54db38e1ca11825f",
+        "bin_step": 10,
+        "ignored_for_routing": false,
+        "bytecode_hash": "0x9c638b24dc41df8ce31fcda3f12b68d492b0d5d4c238a3b7b3563785d4846319",
+        "token_balances": {
+          "USDC": "184977",
+          "WAVAX": "426032158549890191433"
+        }
+      }
+    ],
+    "quotes": [
+      {
+        "source": "LFJ_LBQUOTER_V2_2",
+        "router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+        "quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+        "token_path": [
+          "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+          "0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+        ],
+        "pairs": [
+          "0x9371619c8e2a487d57fb9f8e36bcb0317bff0529"
+        ],
+        "bin_steps": [
+          0
+        ],
+        "versions": [
+          0
+        ],
+        "version_names": [
+          "V1"
+        ],
+        "amounts": [
+          "100000",
+          "12194140979091525"
+        ],
+        "virtual_amounts_without_slippage": [
+          "100000",
+          "12194244445419786"
+        ],
+        "fees_e18": [
+          "3000000000000000"
+        ],
+        "amount_in_base_units": "100000",
+        "amount_out_base_units": "12194140979091525",
+        "block_number": 61337012,
+        "block_hash": "0xb041ae2ae4422b935b62fc05b2a123b39da36ed1748cb330695c826efc17f412",
+        "route": {
+          "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+          "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+          "pair": "0x9371619C8E2A487D57FB9F8E36Bcb0317Bff0529",
+          "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+          "version": 0,
+          "version_name": "V1",
+          "bin_step": 0,
+          "token_path": [
+            "0xB6076C93701D6a07266c31066B298AeC6dd65c2d",
+            "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+          ],
+          "token0": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+          "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "reserves": [
+            "11750256108",
+            "1437166452128775484365"
+          ],
+          "bytecode_hashes": {
+            "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+            "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+            "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+            "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+          }
+        },
+        "independent_usd_oracle": false
+      },
+      {
+        "source": "LFJ_LBQUOTER_V2_2",
+        "router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+        "quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+        "token_path": [
+          "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+          "0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+        ],
+        "pairs": [
+          "0x9371619c8e2a487d57fb9f8e36bcb0317bff0529"
+        ],
+        "bin_steps": [
+          0
+        ],
+        "versions": [
+          0
+        ],
+        "version_names": [
+          "V1"
+        ],
+        "amounts": [
+          "1000000",
+          "121932098611418076"
+        ],
+        "virtual_amounts_without_slippage": [
+          "1000000",
+          "121942444454197862"
+        ],
+        "fees_e18": [
+          "3000000000000000"
+        ],
+        "amount_in_base_units": "1000000",
+        "amount_out_base_units": "121932098611418076",
+        "block_number": 61337012,
+        "block_hash": "0xb041ae2ae4422b935b62fc05b2a123b39da36ed1748cb330695c826efc17f412",
+        "route": {
+          "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+          "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+          "pair": "0x9371619C8E2A487D57FB9F8E36Bcb0317Bff0529",
+          "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+          "version": 0,
+          "version_name": "V1",
+          "bin_step": 0,
+          "token_path": [
+            "0xB6076C93701D6a07266c31066B298AeC6dd65c2d",
+            "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+          ],
+          "token0": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+          "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "reserves": [
+            "11750256108",
+            "1437166452128775484365"
+          ],
+          "bytecode_hashes": {
+            "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+            "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+            "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+            "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+          }
+        },
+        "independent_usd_oracle": false
+      },
+      {
+        "source": "LFJ_LBQUOTER_V2_2",
+        "router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+        "quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+        "token_path": [
+          "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+          "0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+        ],
+        "pairs": [
+          "0x9371619c8e2a487d57fb9f8e36bcb0317bff0529"
+        ],
+        "bin_steps": [
+          0
+        ],
+        "versions": [
+          0
+        ],
+        "version_names": [
+          "V1"
+        ],
+        "amounts": [
+          "10000000",
+          "1218390649647183771"
+        ],
+        "virtual_amounts_without_slippage": [
+          "10000000",
+          "1219424444541978623"
+        ],
+        "fees_e18": [
+          "3000000000000000"
+        ],
+        "amount_in_base_units": "10000000",
+        "amount_out_base_units": "1218390649647183771",
+        "block_number": 61337012,
+        "block_hash": "0xb041ae2ae4422b935b62fc05b2a123b39da36ed1748cb330695c826efc17f412",
+        "route": {
+          "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+          "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+          "pair": "0x9371619C8E2A487D57FB9F8E36Bcb0317Bff0529",
+          "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+          "version": 0,
+          "version_name": "V1",
+          "bin_step": 0,
+          "token_path": [
+            "0xB6076C93701D6a07266c31066B298AeC6dd65c2d",
+            "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+          ],
+          "token0": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+          "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "reserves": [
+            "11750256108",
+            "1437166452128775484365"
+          ],
+          "bytecode_hashes": {
+            "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+            "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+            "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+            "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+          }
+        },
+        "independent_usd_oracle": false
+      }
+    ],
+    "risk_blockers": [
+      "ORACLE_TOKEN_IDENTITY_MISMATCH"
+    ],
+    "oracle_note": "LFJ faucet USDC is not Circle USDC and has no verified independently priced redemption/peg. Never assume $1.",
+    "selected_route": {
+      "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+      "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+      "pair": "0x9371619C8E2A487D57FB9F8E36Bcb0317Bff0529",
+      "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+      "version": 0,
+      "version_name": "V1",
+      "bin_step": 0,
+      "token_path": [
+        "0xB6076C93701D6a07266c31066B298AeC6dd65c2d",
+        "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+      ],
+      "token0": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+      "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+      "reserves": [
+        "11750256108",
+        "1437166452128775484365"
+      ],
+      "bytecode_hashes": {
+        "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+        "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+        "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+        "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+      }
+    }
+  },
+  "required_roles": [
+    "OWNER",
+    "A_SDE_ATTESTOR",
+    "RELAYER"
+  ],
+  "deployment_file_exists": false,
+  "risk_status": "BLOCKED_ORACLE_TOKEN_IDENTITY_MISMATCH",
+  "funding_checks": {
+    "owner": null,
+    "relayer": null,
+    "attestor": null,
+    "fund_amount_base_units": "0"
+  },
+  "oracle_observations": [
+    {
+      "provider": "CHAINLINK",
+      "pair": "AVAX/USD",
+      "network": "AVALANCHE_FUJI",
+      "contract": "0x5498BB86BC934c8D34FDA08E81D444153d0D06aD",
+      "source_url": "https://reference-data-directory.vercel.app/feeds-avalanche-fuji-testnet.json",
+      "explorer_url": "https://explorer-test.avax.network/c-chain/address/0x5498BB86BC934c8D34FDA08E81D444153d0D06aD",
+      "status": "WITHIN_HEARTBEAT",
+      "usable_for_decisions": false,
+      "freshness_limit_seconds": 600,
+      "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2",
+      "decimals": 8,
+      "answer_raw": "696602554",
+      "round_started_at": "1795102585",
+      "round_id": "55340232221128820923",
+      "answered_in_round": "55340232221128820923",
+      "updated_at": 1795102585,
+      "age_seconds": 431,
+      "price_usd_e8": "696602554"
+    },
+    {
+      "provider": "CHAINLINK",
+      "pair": "USDC/USD",
+      "network": "AVALANCHE_FUJI",
+      "contract": "0x97FE42a7E96640D932bbc0e1580c73E705A8EB73",
+      "source_url": "https://reference-data-directory.vercel.app/feeds-avalanche-fuji-testnet.json",
+      "explorer_url": "https://explorer-test.avax.network/c-chain/address/0x97FE42a7E96640D932bbc0e1580c73E705A8EB73",
+      "status": "WITHIN_HEARTBEAT",
+      "usable_for_decisions": false,
+      "freshness_limit_seconds": 86400,
+      "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2",
+      "decimals": 8,
+      "answer_raw": "99984374",
+      "round_started_at": "1795047222",
+      "round_id": "18446744073709552588",
+      "answered_in_round": "18446744073709552588",
+      "updated_at": 1795047222,
+      "age_seconds": 55794,
+      "price_usd_e8": "99984374"
+    }
+  ],
+  "oracle_binding": {
+    "block_number": 61337012,
+    "block_hash": "0xb041ae2ae4422b935b62fc05b2a123b39da36ed1748cb330695c826efc17f412",
+    "traded_token_usd_applicability": false,
+    "decision_max_price_age_seconds": 60,
+    "reason": "ORACLE_TOKEN_IDENTITY_MISMATCH",
+    "used_for_sde_or_attestation": false
+  },
+  "observation_hash": "0xbdf062667c671b4c26fb97823f278eead6d3e778f12c7ded9d1e9ac079ed139d"
+}

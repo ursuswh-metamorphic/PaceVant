@@ -1,0 +1,85 @@
+{
+  "scope": "LFJ_FUJI_INTEGRATION_PARTIAL_PUBLIC_EXECUTION_BLOCKED",
+  "verified_date_vietnam": "2026-11-19",
+  "branch": "codex/lfj-fuji-execution",
+  "checks": {
+    "solidity": {
+      "passed": 37,
+      "failed": 0
+    },
+    "control_plane": {
+      "windows": 59,
+      "linux": 59,
+      "failed": 0
+    },
+    "execution_plane": {
+      "passed": 51,
+      "failed": 0,
+      "live_fork_skipped_by_default": 2,
+      "includes_ab_tests": 4
+    },
+    "opt_in_fuji_fork": {
+      "passed": 2,
+      "failed": 0
+    },
+    "eip712_python_viem_solidity": "PASS",
+    "ruff": "PASS",
+    "artifact_hashes": "PASS"
+  },
+  "public_fuji": {
+    "reads_verified": true,
+    "pacevant_lfj_deployment_verified": false,
+    "pacevant_lfj_swap_verified": false,
+    "transactions_broadcast": 0
+  },
+  "fork": {
+    "router_version": "LBRouter V2.2",
+    "pool_version": "V1",
+    "pair": "0x9371619C8E2A487D57FB9F8E36Bcb0317Bff0529",
+    "source_block": 61337202,
+    "amount_in_base_units": "100000",
+    "amount_out_base_units": "12194140979091525",
+    "gas_used": "262169",
+    "gas_cost_wei": "262169001835183",
+    "effective_lfj_test_usdc_per_wavax_e8": "820065965",
+    "simulation_evidence_root": "0xde1bc41994e8699db4dad55d75b68605e3974efbedf0b82bff24ba153051642e",
+    "pdr_scope": "Fork-only contract-test signature with labelled sentinel root; not an A/SDE live approval",
+    "stress_complete_statuses": [
+      "SUCCESS_SAFE",
+      "PROTECTED_REVERT"
+    ],
+    "insufficient_stress_budget": "INCONCLUSIVE"
+  },
+  "artifacts": {
+    "lfj-fuji-preflight.json": {
+      "sha256": "5be8186638a08451451a15755a943c6a232a7f0c384701d29187f6a21900e893"
+    },
+    "lfj-fuji-oracle-preflight.json": {
+      "sha256": "c42f4489e0ce373efa4ea7604dd3c7b119460a8d3f52f14ecf06e92b1d2bbce1"
+    },
+    "lfj-fuji-fork-validation.json": {
+      "sha256": "33e4588c86b318e411c4f54463a1f302312823de110902066094f3333cba93bd"
+    },
+    "lfj-fuji-fork-validation-insufficient-stress-budget.json": {
+      "sha256": "297c61ce45d5b9bf81b4a1f5ee8de03c350c28590e468634d2dd2f947b7d36bd"
+    }
+  },
+  "blockers": [
+    "ORACLE_TOKEN_IDENTITY_MISMATCH",
+    "OPERATOR_ROLES_AND_FUNDING_NOT_CONFIGURED",
+    "PUBLIC_BROADCAST_NOT_AUTHORIZED",
+    "LIVE_FORK_LATENCY_AND_BLOCK_DRIFT_NOT_ACCEPTED"
+  ],
+  "user_wallet_supplied": false,
+  "remaining_mocks": [
+    "Local MockSwapAdapter/MockUSDC/MockWAVAX regression fixtures",
+    "ABI-compatible LFJ unit-test doubles"
+  ],
+  "fork_only_setup": [
+    "Ephemeral owner/attestor/relayer",
+    "LFJ faucet owner impersonated only on fork to mint treasury funds",
+    "Gas balances overridden",
+    "Fresh setup block mined locally",
+    "Simulation attestor overridden; no pool/token storage patches"
+  ]
+}

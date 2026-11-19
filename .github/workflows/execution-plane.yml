@@ -2,6 +2,12 @@ name: Execution Plane B
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      fuji_fork:
+        description: Read public Fuji and execute only on isolated Anvil forks
+        type: boolean
+        default: false
 jobs:
   control-plane:
     runs-on: ubuntu-latest
@@ -30,4 +36,33 @@ jobs:
           version: '0.12.10'
       - run: npm ci --ignore-scripts
       - run: npm run setup
-      - run: npm run check
+      - run: uv sync --locked
+      # test:python includes test_ab_integration.py. Use the prepared A environment.
+      - name: Contracts, B, A+B, signatures and secret scan
+        env:
+          PACEVANT_A_TEST_ENV: ${{ github.workspace }}/.venv
+        run: npm run check
+  fuji-fork:
+    if: github.event_name == 'workflow_dispatch' && inputs.fuji_fork
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.10'
+      - run: npm ci --ignore-scripts
+      - run: npm run setup
+      - run: npm run test:lfj:fork
+        env:
+          PACEVANT_LFJ_REPORT: data/ci-lfj-fork.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: isolated-fuji-fork-evidence
+          path: apps/execution-plane/data/ci-lfj-fork*.json
+          retention-days: 7

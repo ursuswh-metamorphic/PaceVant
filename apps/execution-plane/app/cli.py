@@ -35,6 +35,10 @@ def save(path, value):
 
 
 def send(w3, account, fn):
+    if w3.eth.chain_id not in {31337, 43113}:
+        raise PlaneError(
+            "CHAIN_MISMATCH", "Only local Anvil or Avalanche Fuji writes are permitted"
+        )
     tx = fn.build_transaction(
         {
             "from": account.address,
@@ -53,48 +57,28 @@ def send(w3, account, fn):
 
 
 def deploy(settings, fuji=False, write_env=True, env_file=None):
-    w3 = Web3(
-        Web3.HTTPProvider(
-            settings.rpc_url, request_kwargs={"timeout": settings.rpc_timeout}
-        )
-    )
     if fuji:
-        if settings.mode != "fuji" or w3.eth.chain_id != 43113:
-            raise RuntimeError("Fuji mode and chain 43113 required")
-        if (
-            not settings.owner_private_key.get_secret_value()
-            or not settings.attestor_address
-            or not settings.relayer_private_key.get_secret_value()
-        ):
-            raise RuntimeError(
-                "Configure B_FUJI_OWNER_PRIVATE_KEY, B_FUJI_ATTESTOR_ADDRESS (public address from A), and B_FUJI_RELAYER_PRIVATE_KEY in .env before Fuji deploy"
-            )
-        owner = Account.from_key(settings.owner_private_key.get_secret_value())
-        attestor = Web3.to_checksum_address(settings.attestor_address)
-        relayer = Account.from_key(settings.relayer_private_key.get_secret_value())
-        if len({owner.address.lower(), attestor.lower(), relayer.address.lower()}) != 3:
-            raise RuntimeError("Owner, A's attestor and relayer must differ")
-        # B never creates or loads A's Fuji attestor private key.
-    else:
-        if not w3.client_version.lower().startswith("anvil"):
-            raise RuntimeError("Local bootstrap is only allowed against Anvil")
-        from urllib.parse import urlparse
+        from .dex.deploy import deploy_lfj
 
-        if urlparse(settings.rpc_url).hostname not in {"127.0.0.1", "localhost", "::1"}:
-            raise RuntimeError("Local bootstrap requires loopback RPC")
-        owner, signer, relayer = Account.create(), Account.create(), Account.create()
-        attestor = signer.address
-        for account in (owner, relayer):
-            rpc(w3, "anvil_setBalance", [account.address, hex(100 * 10**18)])
+        return deploy_lfj(settings)  # Existing callers are dry-run by default.
+    w3 = Web3(Web3.HTTPProvider(settings.rpc_url, request_kwargs={"timeout": settings.rpc_timeout}))
+    if not w3.client_version.lower().startswith("anvil"):
+        raise RuntimeError("Local bootstrap is only allowed against Anvil")
+    from urllib.parse import urlparse
+
+    if urlparse(settings.rpc_url).hostname not in {"127.0.0.1", "localhost", "::1"}:
+        raise RuntimeError("Local bootstrap requires loopback RPC")
+    owner, signer, relayer = Account.create(), Account.create(), Account.create()
+    attestor = signer.address
+    for account in (owner, relayer):
+        rpc(w3, "anvil_setBalance", [account.address, hex(100 * 10**18)])
 
     def create(name, args):
         a = artifact(name)
         receipt = send(
             w3,
             owner,
-            w3.eth.contract(abi=a["abi"], bytecode=a["bytecode"]["object"]).constructor(
-                *args
-            ),
+            w3.eth.contract(abi=a["abi"], bytecode=a["bytecode"]["object"]).constructor(*args),
         )
         return w3.eth.contract(address=receipt.contractAddress, abi=a["abi"])
 
@@ -103,9 +87,7 @@ def deploy(settings, fuji=False, write_env=True, env_file=None):
         create("MockWAVAX", [owner.address]),
     )
     router = create("MockSwapAdapter", [owner.address, usdc.address, wavax.address])
-    vault = create(
-        "PolicyVault", [owner.address, attestor, usdc.address, wavax.address]
-    )
+    vault = create("PolicyVault", [owner.address, attestor, usdc.address, wavax.address])
     send(w3, owner, vault.functions.setRouter(router.address, True))
     send(
         w3,
@@ -169,8 +151,7 @@ def deploy(settings, fuji=False, write_env=True, env_file=None):
                     "B_LOCAL_RPC_URL": settings.rpc_url,
                     "B_LOCAL_DEPLOYMENT_FILE": portable_path(settings.deployment_file),
                     "B_LOCAL_DATA_DIR": portable_path(settings.data_dir),
-                    "B_API_KEY": settings.api_key.get_secret_value()
-                    or secrets.token_hex(32),
+                    "B_API_KEY": settings.api_key.get_secret_value() or secrets.token_hex(32),
                     "B_LOCAL_RELAYER_PRIVATE_KEY": relayer.key.hex(),
                 },
             )
@@ -184,9 +165,7 @@ def demo(settings):
         )
     chain, store = Chain(settings), Store(settings.data_dir)
     keys = json.loads((settings.data_dir / "local-keys.json").read_text())
-    settings = Settings(
-        **{**settings.model_dump(), "relayer_private_key": keys["relayer"]}
-    )
+    settings = Settings(**{**settings.model_dump(), "relayer_private_key": keys["relayer"]})
     chain.settings = settings
     rpc(chain.w3, "evm_mine", [])
     c = chain.context()
@@ -211,9 +190,7 @@ def demo(settings):
         evidence = Simulator(chain, store).simulate(built.build_id, built.policy_hash)
         approval = approval_for(built, evidence["evidence_root"])
         domain = domain_for(built)
-        signature = Account.sign_message(
-            message(domain, approval), keys["attestor"]
-        ).signature
+        signature = Account.sign_message(message(domain, approval), keys["attestor"]).signature
         pdr = SignedPDR(
             decision_id="LOCAL_TEST_ONLY_NO_SDE",
             build_id=built.build_id,
@@ -266,12 +243,30 @@ def main():
             "config",
             "migrate-env",
             "start-local",
+            "lfj-preflight",
+            "lfj-execute",
         ],
     )
     parser.add_argument("--env-file", type=Path)
     parser.add_argument("--network", choices=["local", "fuji"])
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8001)
+    parser.add_argument(
+        "--broadcast",
+        action="store_true",
+        help="Requires separate operator authorization setting for Fuji writes",
+    )
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--fund-amount",
+        type=int,
+        default=0,
+        help="LFJ test USDC base units to transfer from owner after authorized deploy",
+    )
+    parser.add_argument(
+        "--request-file", type=Path, help="ExecutionRequest JSON with Signed PDR from A"
+    )
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.command == "schemas":
         from . import models
@@ -316,27 +311,45 @@ def main():
         print(json.dumps(migrate_env(), indent=2))
     else:
         settings_type = (
-            DeploymentSettings
-            if args.command in {"deploy-fuji", "config"}
-            else Settings
+            DeploymentSettings if args.command in {"deploy-fuji", "config"} else Settings
         )
         env_file = (args.env_file or ROOT / ".env").resolve()
         required_mode = (
             "fuji"
-            if args.command == "deploy-fuji"
+            if args.command in {"deploy-fuji", "lfj-preflight", "lfj-execute"}
             else "local"
             if args.command in {"deploy-local", "demo", "start-local"}
             else None
         )
         if required_mode and args.network and args.network != required_mode:
             parser.error(f"{args.command} requires --network {required_mode}")
-        overrides = (
-            {"mode": required_mode or args.network}
-            if required_mode or args.network
-            else {}
-        )
+        overrides = {"mode": required_mode or args.network} if required_mode or args.network else {}
         settings = settings_type(_env_file=env_file, **overrides)
-        if args.command == "demo":
+        if args.command in {"lfj-preflight", "deploy-fuji"}:
+            from .dex.deploy import deploy_lfj
+
+            result = deploy_lfj(
+                settings_type(_env_file=env_file, **overrides)
+                if args.command == "deploy-fuji"
+                else DeploymentSettings(_env_file=env_file, **overrides),
+                broadcast=args.command == "deploy-fuji" and args.broadcast and not args.dry_run,
+                fund_amount=args.fund_amount,
+            )
+            if args.output:
+                save(args.output, result)
+            print(json.dumps(result, indent=2))
+        elif args.command == "lfj-execute":
+            if not args.request_file:
+                parser.error("lfj-execute requires --request-file from A's SDE")
+            request = ExecutionRequest.model_validate_json(args.request_file.read_bytes())
+            chain = Chain(settings)
+            store = Store(settings.data_dir)
+            with store.lock:
+                result = Relayer(chain, store).execute(
+                    request, dry_run=not args.broadcast or args.dry_run
+                )
+                print(json.dumps(result, indent=2))
+        elif args.command == "demo":
             demo(settings)
         elif args.command == "serve":
             serve(settings, args.host, args.port)
@@ -358,9 +371,7 @@ def main():
                             settings.relayer_private_key.get_secret_value()
                         ),
                         "attestor_address": settings.attestor_address or None,
-                        "owner_key_configured": bool(
-                            settings.owner_private_key.get_secret_value()
-                        ),
+                        "owner_key_configured": bool(settings.owner_private_key.get_secret_value()),
                     },
                     indent=2,
                 )
