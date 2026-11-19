@@ -219,6 +219,13 @@ class PGSProofEngine:
         for value in (b, e, policy, registry, oracle, session):
             type(value).model_validate(value.model_dump(mode="json"))
         assets = [a.address for a in registry.assets]
+        from .oracle import SOURCE_HASH, validate_rounds
+
+        if oracle.feeds or oracle.source_hash == SOURCE_HASH:
+            validate_rounds(
+                oracle.feeds, {p.asset: p.nominal_usd_e8 for p in oracle.prices},
+                now, oracle.timestamp, oracle.chain_id, oracle.source_hash,
+            )
         if type(now) is not int or b.chain_id not in (31337, 43113):
             raise ValueError("unsupported chain")
         if b.chain_id == 43113 and policy.authorization != "OWNER_APPROVED":

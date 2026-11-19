@@ -1,5 +1,7 @@
 # Tạo ví test Fuji từng bước trên Windows
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 Dự án đã hoàn tất local và deploy/demo Fuji thành công; xem [kết quả thực tế](TEST_RESULTS.md). Hướng dẫn này phục vụ tạo bộ ví test mới khi cần. Bạn tự thao tác phần tạo ví và khóa trên máy, không gửi secret vào chat.
 
 ## 1. Cài Core trên Chrome

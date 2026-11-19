@@ -1,5 +1,7 @@
 # Nghiên cứu chính thức — 12/11/2026 (giờ Việt Nam)
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 ## Kết quả xác nhận
 
 - [Team1](https://team1vn.xyz/) cho phép dự án chạy trên Fuji. Không bắt buộc tạo L1. Một phần sản phẩm cần tích hợp Avalanche thực sự; phần tích hợp chiếm 25/100 điểm. Deadline công bố: 23:59 ngày 21/11/2026, giờ Việt Nam. Cần repository, slides và video demo 2–3 phút có quyền truy cập cho giám khảo.

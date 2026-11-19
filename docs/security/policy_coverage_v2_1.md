@@ -13,7 +13,7 @@ Scope: controlled mock USDC6/WAVAX18, one owner-selected exact-input adapter, ch
 | Certified risk reservation | Independent rational upper corner, upward integer rounding, SMT risk query | Session + global UTC-day counters charged once and rolled back on revert | Bound proved; counter arithmetic deterministic | Conservative reservation, not actual PnL |
 | Owner sessions | Current pinned chain state; no agent rotation | Owner-only create/revoke; immutable IDs, policy, dates; global cap spans sessions | No SMT | Hard runtime guard |
 | WAVAX exposure | Existing projected portfolio calculation for both directions | **OFF**; no runtime oracle/exposure feature implemented | **Not implied by Phi** | **PRE-SIGN ONLY** |
-| Oracle truth | Allowlisted controlled test source, positive bands, age and context validation | Vault trusts isolated attestor's certified debit | No oracle-honesty proof | Explicit trust assumption |
+| Oracle truth | Allowlisted controlled test source, positive bands, age and context validation | Vault trusts the attestor module's certified debit (same process as relayer) | No oracle-honesty proof | Explicit trust assumption |
 | Fees/retries | Existing execution cost gate, maximum two replans, in-flight reservation; quarantine after two consecutive protected reverts under same policy | No gas debit from treasury risk budget | No | Operational control |
 | Reorg/finality | Confirmation count and canonical block checks; terminal workflow rereads receipt | Consensus | No | Pending/uncertain receipts hold signer reservation |
 

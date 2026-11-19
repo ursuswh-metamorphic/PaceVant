@@ -1,5 +1,17 @@
 # V2.1 migration progress
 
+## Latest — user-supplied wallet update and real Groq planner
+
+Verified all three supplied key/address pairs before updating private env. Names in `.env`, `.env.example` and ENV_DEFAULTS match; examples contain no real secrets. Groq GPT-OSS 20B strict-schema inference is live, with independently checked bounded goals, durable cache/rolling budgets/Retry-After cooldown and no fixture/rules fallback. Wallet keys never enter prompts; owner stays outside serving env. Actual Groq→LOCAL V2 proof/three UNSAT/signature/receipt CONFIRMED passed; full Python suite **182 passed, 1 LOCAL ablation skipped**. No Fuji transaction or hosting deployment. [Integration details](../integrations/GROQ_PLANNER_AND_ENV.md). Earlier unchanged-env/no-LLM checkpoints below are historical.
+
+## Latest — modular monolith audit, unified runtime and system design
+
+Current runtime is **one FastAPI/Uvicorn with direct in-process execution**, one root environment/lockfile. Attestor and relayer share the process; owner remains outside serving environments. Older sections below describe earlier checkpoints, including the superseded two-process packaging and separate key-process boundaries.
+
+The latest [system design](../AI_Treasury_Security_System_Design_v2.1.md) documents every module, data source, trust boundary, API, state flow, proof/vault assumptions and deployment. The [audit report](../audit/V2_1_READINESS_REVIEW.md) and [evidence summary](../audit/validation-summary.json) are authoritative for current validation: fixed duplicate terminal-event quarantine, unified submission recovery, primary npm entrypoints and misleading MOCK/skip documentation. Canonical V2 uses the current modules; explicit V1 consumer/baseline/MOCK compatibility remains labelled.
+
+LOCAL core is verified; Fuji deployment/normal/protected-revert receipts, Docker/hosting smoke and fresh remote CI remain unverified. Real oracle/DEX/LLM are not integrated. Read-only env validation passes without modifying the private env. This checkpoint does not mark all release gates complete or overwrite original requirements/benchmark history.
+
 ## Latest backend packaging update — Python launcher / Render / VPS
 
 Removed Node invocation from backend compile/startup: shared native Foundry resolver, `scripts/foundry.py`, direct Forge calls in operator/B CLI, native Anvil resolution and Python bootstrap of pinned/hash-verified OpenZeppelin 5.6.1 under `lib/`. Solidity contracts and browser JavaScript remain. npm/viem are optional developer compatibility/cross-language tooling; backend Docker contains neither Node nor npm.

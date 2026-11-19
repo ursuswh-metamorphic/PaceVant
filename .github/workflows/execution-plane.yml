@@ -1,9 +1,32 @@
-name: Execution Plane B
+name: Treasury modules
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      fuji_fork:
+        description: Run the LFJ V2 simulator against public Fuji state on Anvil
+        type: boolean
+        default: false
 jobs:
-  contracts-and-integration:
+  python-and-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.10'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - run: uv sync --locked
+      - run: uv run --locked python tools/contracts/bootstrap.py
+      - run: uv run --locked python tools/contracts/foundry.py forge build
+      - run: uv run --locked ruff check backend/src backend/tests tools
+      - run: uv run --locked python -m pytest -q
+      - run: uv run --locked python tools/contracts/foundry.py forge test -vv
+      - run: uv run --locked python tools/quality/scan_secrets.py
+  browser-and-wire-vectors:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -11,20 +34,31 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-      - uses: astral-sh/setup-uv@v6
-        with:
-          version: '0.12.10'
       - run: npm ci --ignore-scripts
-      - run: npm run setup
-      - run: uv sync --locked
-      - run: uv run --locked python scripts/bootstrap.py
-      - run: uv run --locked ruff check apps/control-plane tests scripts/treasury.py scripts/treasury_ops.py scripts/evaluate-protocol.py scripts/protocol_server.py scripts/container.py scripts/foundry.py scripts/bootstrap.py scripts/serve.py
-      - run: npm run check
-      - run: uv run --locked python -m pytest -q
-      - run: node --check apps/dashboard/app.js
-  backend-container:
+      - run: npm run test:integration
+      - run: node tools/quality/check_frontend.mjs
+  containers:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t treasury-backend .
-      - run: docker run --rm --entrypoint /bin/sh treasury-backend -c 'test -z "$(command -v node)" && test -z "$(command -v npm)" && test -z "$(command -v forge)" && anvil --version && python -c "import fastapi, treasury_contracts"'
+      - run: docker run --rm --entrypoint /bin/sh treasury-backend -c 'test -z "$(command -v node)" && test -z "$(command -v npm)" && test -z "$(command -v forge)" && anvil --version && python -c "import fastapi, treasury_contracts, treasury_backend"'
+      - run: docker build -f frontend/Dockerfile -t treasury-frontend .
+      - run: docker run --rm -e BACKEND_URL=http://127.0.0.1:10000 treasury-frontend nginx -t
+  lfj-fuji-fork:
+    if: github.event_name == 'workflow_dispatch' && inputs.fuji_fork
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.10'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+      - run: uv sync --locked
+      - run: uv run --locked python tools/contracts/bootstrap.py
+      - run: uv run --locked python tools/contracts/foundry.py forge build
+      - run: uv run --locked python -m pytest backend/tests/execution/test_lfj_v2_fuji_fork.py -q
+        env:
+          PACEVANT_LFJ_FORK: '1'

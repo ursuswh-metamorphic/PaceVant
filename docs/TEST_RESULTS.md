@@ -1,5 +1,7 @@
 # Kết quả kiểm thử thực tế
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 Ngày đánh giá: 12/11/2026 (Asia/Saigon). Timestamps JSON dùng UTC.
 
 ## Tổng quan
@@ -56,7 +58,7 @@ Tổng phí của **18 giao dịch Fuji** được lưu (gồm deploy, funding, 
 
 Local chain **31337**, E2E A–E: PASS. Receipt local ở evidence/deploy-local-*.json và e2e-local.json; không dùng làm bằng chứng Fuji.
 
-Danh sách unit tests: [unit-tests.txt](../evidence/unit-tests.txt). UI: [ui-results.json](../evidence/ui-results.json), [desktop](../evidence/dashboard-desktop.png), [mobile](../evidence/dashboard-mobile.png), [Fuji](../evidence/fuji-dashboard.png). UI đối chiếu storage Fuji trực tiếp với RPC, hiển thị hai địa chỉ contract và event ProposalExecuted; không dùng private key trong trình duyệt.
+Danh sách unit tests: `unit-tests.txt`. UI: `ui-results.json`, `desktop`, `mobile`, `Fuji`. UI đối chiếu storage Fuji trực tiếp với RPC, hiển thị hai địa chỉ contract và event ProposalExecuted; không dùng private key trong trình duyệt.
 
 ## Khó khăn đã xử lý
 

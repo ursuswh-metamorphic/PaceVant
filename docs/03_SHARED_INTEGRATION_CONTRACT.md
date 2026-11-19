@@ -1,5 +1,7 @@
 # AI Treasury Security — Shared Integration Contract & Runbook (A + B)
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 **Phiên bản:** Integration contract v1.1 — 16/11/2026  
 **Dùng cùng:** `01_GUIDE_PERSON_A_CONTROL_PLANE.md`, `02_GUIDE_PERSON_B_EXECUTION_PLANE.md` và `AI_Treasury_Security_System_Design_v1.0.md` (thiết kế nền).  
 **Ưu tiên:** Khi khác nhau về team ownership, **file integration này và hai guide A/B là quyết định nhóm mới nhất**; tài liệu System Design v1.0 chỉ làm kiến trúc tổng quan.

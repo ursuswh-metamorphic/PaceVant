@@ -1,5 +1,7 @@
 # Repository inventory (2026-11-19)
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](../AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](../audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 Baseline commit: `1b09bd8dd04fd74868f30634abeec93276522d36`, branch `feat/pgs-implement-paper`.
 Initial user files: untracked implementation plan and local PGS reference. No tracked edits.
 

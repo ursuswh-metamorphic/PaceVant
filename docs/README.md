@@ -1,6 +1,32 @@
 # Chỉ mục tài liệu
 
+Live update 2026-11-20: [Circle / Chainlink / full Fuji demo](demo/FUJI_LIVE_END_TO_END.md). Earlier faucet-USDC blockers and controlled/mock descriptions below belong to their historical profiles.
+
+
+## Nguồn đọc chính cho phiên bản hiện tại
+
+1. [System design V2.1 hiện tại](AI_Treasury_Security_System_Design_v2.1.md): toàn bộ kiến trúc/module, luồng, proof, dữ liệu, quyền, API, storage, env và triển khai.
+
+   Bản phản biện có 20 mục, 10 sơ đồ và [bộ hình SVG độc lập](architecture/diagrams/README.md), cùng threat model, invariants, tradeoffs và câu hỏi review.
+2. [Rà soát code và mức sẵn sàng](audit/V2_1_READINESS_REVIEW.md): đối chiếu plan, mock/legacy inventory, lỗi đã sửa, tests và phần chưa chạy thật. [Evidence JSON](audit/validation-summary.json).
+3. [Chạy LOCAL / demo Fuji](demo/AVALANCHE_FUJI_DEMO.md), [deploy backend/frontend](../deploy/README.md), [bản đồ module](../backend/MODULES.md).
+
+Thiết kế hiện tại là một FastAPI/Uvicorn, Python backend và Solidity vault; LOCAL có proof/giao dịch/receipt thật trên Anvil với token, adapter và giá demo. Chưa có actual V2 Fuji deployment/receipt hoặc hosted smoke evidence. Các báo cáo migration/validation cũ phía dưới là checkpoint lịch sử; ưu tiên báo cáo rà soát mới khi số test hoặc runtime khác nhau.
+
+## Kiến trúc module và phát triển nhóm
+
+- [Một FastAPI: workflow + execution, module mô phỏng](architecture/UNIFIED_BACKEND.md), [xác minh runtime gộp](architecture/UNIFIED_VALIDATION.md).
+
+- [Kiến trúc mới, đường dẫn trước/sau và luồng](architecture/MODULE_ARCHITECTURE.md).
+- [Bản đồ module](../backend/MODULES.md), [quy tắc đóng góp](../CONTRIBUTING.md), [backend](../backend/README.md), [frontend](../frontend/README.md).
+- [Deploy backend/frontend](../deploy/README.md), [test](../backend/tests/README.md), [kết quả refactor](architecture/REFACTOR_VALIDATION.md).
+
+README từng module nằm ngay trong folder code của module đó. Guide A/B v1.1 bên dưới là nền giao thức/phân vai lịch sử; cấu trúc mới là nguồn chỉ dẫn đường dẫn hiện tại.
+
 ## Vận hành V2.1 hiện tại
+
+- [Groq planner và đồng bộ env/ví](integrations/GROQ_PLANNER_AND_ENV.md): real strict-schema API, independent validation, durable quotas/cache/cooldown, test evidence và phần vẫn mock.
+- [Oracle Fuji và LFJ trên V2.1](integrations/FUJI_LFJ_V2_1.md) ghi luồng read-only, đường mô phỏng, phần được chuyển từ main và rào cản định giá trước khi ký.
 
 - [Backend Python trên Render/VPS, không cần Node.js](deployment/PYTHON_BACKEND_RENDER_VPS.md): native Forge/Anvil, Docker build/runtime, persistent storage và secrets không có owner key.
 
@@ -16,7 +42,7 @@
 
 Các guide/handoff v1.1 bên dưới giữ vai trò tài liệu nền và API legacy. Dùng `treasury:*` trong runbook demo để chạy full V2.1.
 
-## Đọc để implement và merge A/B
+## Tài liệu nền/compatibility A/B — không phải layout deploy hiện tại
 
 1. [Shared integration contract v1.1](03_SHARED_INTEGRATION_CONTRACT.md): API/units/EIP-712/ownership chuẩn.
 2. [Guide A](01_GUIDE_PERSON_A_CONTROL_PLANE.md) và [guide B](02_GUIDE_PERSON_B_EXECUTION_PLANE.md): phạm vi và acceptance tests từng người.
@@ -25,7 +51,7 @@ Các guide/handoff v1.1 bên dưới giữ vai trò tài liệu nền và API le
 5. [Compatibility audit](08_AB_COMPATIBILITY_AUDIT.md): bug/mismatch đã xử lý, bằng chứng và phần chưa thể xác nhận khi thiếu code A.
 6. [Machine-readable index](handoff/integration-manifest.json): file/route/model/commands cần giữ khi merge.
 
-## Chạy và vận hành B
+## Runbook/thiết kế V1 và B-only lịch sử
 
 - [Runbook B](04_PERSON_B_RUNBOOK.md): local/Fuji, một `.env`, API, cách lấy public attestor address.
 - [Cấu trúc repository](05_PROJECT_STRUCTURE.md): source mới, lệnh npm, quy tắc dọn PoC và tình trạng lịch sử Git cũ.

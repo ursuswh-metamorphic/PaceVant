@@ -1,5 +1,7 @@
 # Smart account ERC-4337 — Avalanche UniHack PoC
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 Tích hợp ngày 12/11/2026. Chỉ dùng local EVM và Fuji test AVAX. Phần demo EOA cũ vẫn hoạt động; phần smart account có manifest và treasury riêng.
 
 ## Thành phần đã triển khai
@@ -33,7 +35,7 @@ sequenceDiagram
 
 ## Địa chỉ Fuji
 
-Nguồn cấu hình công khai: [smart-account-fuji.json](../deployments/smart-account-fuji.json).
+Nguồn cấu hình công khai: `smart-account-fuji.json`.
 
 | Thành phần | Địa chỉ |
 |---|---|

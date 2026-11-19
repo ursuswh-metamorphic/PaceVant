@@ -1,0 +1,120 @@
+{
+  "baseline_commit": "1b09bd8dd04fd74868f30634abeec93276522d36",
+  "baseline_source_unmodified": true,
+  "network": "OWNED_ANVIL_31337_ONLY",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "python": "3.12.14",
+    "execution_python": "3.12.14",
+    "foundry": "forge Version: 1.7.1",
+    "z3": "4.15.4.0",
+    "rpc": "owned loopback Anvil; no Fuji or user dotenv",
+    "compiler": "0.8.38 viaIR optimizer200"
+  },
+  "summary": {
+    "FULL_V1_ORIGINAL": {
+      "rows": 7,
+      "p50_ms": 2317.6436999929138,
+      "p95_ms": 2342.6884000073187,
+      "p99_ms": 2342.6884000073187,
+      "worst_ms": 2342.6884000073187,
+      "normal_gas": 175861
+    },
+    "V2_1_FULL_PROTOCOL": {
+      "rows": 7,
+      "p50_ms": 5206.9604999851435,
+      "p95_ms": 5589.394900016487,
+      "p99_ms": 5589.394900016487,
+      "worst_ms": 5589.394900016487,
+      "normal_gas": 242552
+    }
+  },
+  "purpose": "Post-refactor local regression; 7 records per config, no Fuji transactions or load-test claim",
+  "outcomes": [
+    {
+      "config": "FULL_V1_ORIGINAL",
+      "attackFamily": "benign",
+      "tradeIndex": 0,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "FULL_V1_ORIGINAL",
+      "attackFamily": "benign_mild_drift",
+      "tradeIndex": 0,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "FULL_V1_ORIGINAL",
+      "attackFamily": "below_minout",
+      "tradeIndex": 0,
+      "actualResult": "protectedRevert"
+    },
+    {
+      "config": "FULL_V1_ORIGINAL",
+      "attackFamily": "above_minout_below_phi",
+      "tradeIndex": 0,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "FULL_V1_ORIGINAL",
+      "attackFamily": "cumulative_reservation",
+      "tradeIndex": 0,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "FULL_V1_ORIGINAL",
+      "attackFamily": "cumulative_reservation",
+      "tradeIndex": 1,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "FULL_V1_ORIGINAL",
+      "attackFamily": "cumulative_reservation",
+      "tradeIndex": 2,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "V2_1_FULL_PROTOCOL",
+      "attackFamily": "benign",
+      "tradeIndex": 0,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "V2_1_FULL_PROTOCOL",
+      "attackFamily": "benign_mild_drift",
+      "tradeIndex": 0,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "V2_1_FULL_PROTOCOL",
+      "attackFamily": "below_minout",
+      "tradeIndex": 0,
+      "actualResult": "protectedRevert"
+    },
+    {
+      "config": "V2_1_FULL_PROTOCOL",
+      "attackFamily": "above_minout_below_phi",
+      "tradeIndex": 0,
+      "actualResult": "protectedRevert"
+    },
+    {
+      "config": "V2_1_FULL_PROTOCOL",
+      "attackFamily": "cumulative_reservation",
+      "tradeIndex": 0,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "V2_1_FULL_PROTOCOL",
+      "attackFamily": "cumulative_reservation",
+      "tradeIndex": 1,
+      "actualResult": "confirmed"
+    },
+    {
+      "config": "V2_1_FULL_PROTOCOL",
+      "attackFamily": "cumulative_reservation",
+      "tradeIndex": 2,
+      "actualResult": "preSignRefuse"
+    }
+  ]
+}

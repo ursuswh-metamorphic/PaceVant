@@ -1,1 +1,434 @@
-{"$defs":{"AllowanceCap":{"additionalProperties":false,"properties":{"max_remaining":{"const":"0","default":"0","title":"Max Remaining","type":"string"},"spender":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Spender","type":"string"},"token":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Token","type":"string"}},"required":["token","spender"],"title":"AllowanceCap","type":"object"},"Approval":{"additionalProperties":false,"properties":{"amountIn":{"pattern":"^(0|[1-9][0-9]*)$","title":"Amountin","type":"string"},"calldataHash":{"pattern":"^0x[0-9a-f]{64}$","title":"Calldatahash","type":"string"},"deadline":{"pattern":"^(0|[1-9][0-9]*)$","title":"Deadline","type":"string"},"evidenceRoot":{"pattern":"^0x[0-9a-f]{64}$","title":"Evidenceroot","type":"string"},"minAmountOut":{"pattern":"^(0|[1-9][0-9]*)$","title":"Minamountout","type":"string"},"nonce":{"pattern":"^(0|[1-9][0-9]*)$","title":"Nonce","type":"string"},"policyHash":{"pattern":"^0x[0-9a-f]{64}$","title":"Policyhash","type":"string"},"router":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Router","type":"string"},"tokenIn":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Tokenin","type":"string"},"tokenOut":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Tokenout","type":"string"}},"required":["policyHash","evidenceRoot","router","tokenIn","tokenOut","amountIn","minAmountOut","calldataHash","nonce","deadline"],"title":"Approval","type":"object"},"ApprovalV2":{"additionalProperties":false,"properties":{"adapter":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Adapter","type":"string"},"amountIn":{"pattern":"^(0|[1-9][0-9]*)$","title":"Amountin","type":"string"},"calldataHash":{"pattern":"^0x[0-9a-f]{64}$","title":"Calldatahash","type":"string"},"deadline":{"pattern":"^(0|[1-9][0-9]*)$","title":"Deadline","type":"string"},"evidenceRoot":{"pattern":"^0x[0-9a-f]{64}$","title":"Evidenceroot","type":"string"},"intentHash":{"pattern":"^0x[0-9a-f]{64}$","title":"Intenthash","type":"string"},"minAmountOut":{"pattern":"^(0|[1-9][0-9]*)$","title":"Minamountout","type":"string"},"nonce":{"pattern":"^(0|[1-9][0-9]*)$","title":"Nonce","type":"string"},"policyHash":{"pattern":"^0x[0-9a-f]{64}$","title":"Policyhash","type":"string"},"postConditionsHash":{"pattern":"^0x[0-9a-f]{64}$","title":"Postconditionshash","type":"string"},"proofContextHash":{"pattern":"^0x[0-9a-f]{64}$","title":"Proofcontexthash","type":"string"},"riskDebitUsdE8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Riskdebitusde8","type":"string"},"sessionId":{"pattern":"^0x[0-9a-f]{64}$","title":"Sessionid","type":"string"},"tokenIn":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Tokenin","type":"string"},"tokenOut":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Tokenout","type":"string"}},"required":["intentHash","calldataHash","policyHash","evidenceRoot","proofContextHash","postConditionsHash","sessionId","riskDebitUsdE8","nonce","deadline","adapter","tokenIn","tokenOut","amountIn","minAmountOut"],"title":"ApprovalV2","type":"object"},"BalanceBound":{"additionalProperties":false,"properties":{"asset":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Asset","type":"string"},"min_delta":{"pattern":"^-?(0|[1-9][0-9]*)$","title":"Min Delta","type":"string"}},"required":["asset","min_delta"],"title":"BalanceBound","type":"object"},"Domain":{"additionalProperties":false,"properties":{"chainId":{"title":"Chainid","type":"integer"},"name":{"const":"TreasuryPolicyVault","title":"Name","type":"string"},"verifyingContract":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Verifyingcontract","type":"string"},"version":{"const":"1","title":"Version","type":"string"}},"required":["name","version","chainId","verifyingContract"],"title":"Domain","type":"object"},"DomainV2":{"additionalProperties":false,"properties":{"chainId":{"enum":[31337,43113],"title":"Chainid","type":"integer"},"name":{"const":"TreasuryPolicyVault","default":"TreasuryPolicyVault","title":"Name","type":"string"},"verifyingContract":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Verifyingcontract","type":"string"},"version":{"const":"2","default":"2","title":"Version","type":"string"}},"required":["chainId","verifyingContract"],"title":"DomainV2","type":"object"},"PostConditionsV2":{"additionalProperties":false,"properties":{"allowance_caps":{"maxItems":2,"minItems":2,"prefixItems":[{"$ref":"#/$defs/AllowanceCap"},{"$ref":"#/$defs/AllowanceCap"}],"title":"Allowance Caps","type":"array"},"balance_bounds":{"maxItems":2,"minItems":2,"prefixItems":[{"$ref":"#/$defs/BalanceBound"},{"$ref":"#/$defs/BalanceBound"}],"title":"Balance Bounds","type":"array"}},"required":["balance_bounds","allowance_caps"],"title":"PostConditionsV2","type":"object"},"SignedPDR":{"additionalProperties":false,"properties":{"approval":{"$ref":"#/$defs/Approval"},"build_id":{"title":"Build Id","type":"string"},"decision_id":{"minLength":1,"title":"Decision Id","type":"string"},"domain":{"$ref":"#/$defs/Domain"},"signature":{"pattern":"^0x[0-9a-f]{130}$","title":"Signature","type":"string"},"typed_data_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Typed Data Hash","type":"string"}},"required":["decision_id","build_id","domain","approval","signature","typed_data_hash"],"title":"SignedPDR","type":"object"},"SignedPDRV2":{"additionalProperties":false,"properties":{"approval":{"$ref":"#/$defs/ApprovalV2"},"build_id":{"title":"Build Id","type":"string"},"decision_id":{"title":"Decision Id","type":"string"},"domain":{"$ref":"#/$defs/DomainV2"},"phi":{"$ref":"#/$defs/PostConditionsV2"},"signature":{"pattern":"^0x[0-9a-f]{130}$","title":"Signature","type":"string"},"typed_data_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Typed Data Hash","type":"string"}},"required":["decision_id","build_id","domain","approval","phi","signature","typed_data_hash"],"title":"SignedPDRV2","type":"object"}},"additionalProperties":false,"properties":{"build_id":{"title":"Build Id","type":"string"},"signed_pdr":{"anyOf":[{"$ref":"#/$defs/SignedPDR"},{"$ref":"#/$defs/SignedPDRV2"}],"title":"Signed Pdr"}},"required":["build_id","signed_pdr"],"title":"ExecutionRequest","type":"object"}
+{
+  "$defs": {
+    "AllowanceCap": {
+      "additionalProperties": false,
+      "properties": {
+        "token": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Token",
+          "type": "string"
+        },
+        "spender": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Spender",
+          "type": "string"
+        },
+        "max_remaining": {
+          "const": "0",
+          "default": "0",
+          "title": "Max Remaining",
+          "type": "string"
+        }
+      },
+      "required": [
+        "token",
+        "spender"
+      ],
+      "title": "AllowanceCap",
+      "type": "object"
+    },
+    "Approval": {
+      "additionalProperties": false,
+      "properties": {
+        "policyHash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Policyhash",
+          "type": "string"
+        },
+        "evidenceRoot": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Evidenceroot",
+          "type": "string"
+        },
+        "router": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Router",
+          "type": "string"
+        },
+        "tokenIn": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Tokenin",
+          "type": "string"
+        },
+        "tokenOut": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Tokenout",
+          "type": "string"
+        },
+        "amountIn": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Amountin",
+          "type": "string"
+        },
+        "minAmountOut": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Minamountout",
+          "type": "string"
+        },
+        "calldataHash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Calldatahash",
+          "type": "string"
+        },
+        "nonce": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Nonce",
+          "type": "string"
+        },
+        "deadline": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Deadline",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policyHash",
+        "evidenceRoot",
+        "router",
+        "tokenIn",
+        "tokenOut",
+        "amountIn",
+        "minAmountOut",
+        "calldataHash",
+        "nonce",
+        "deadline"
+      ],
+      "title": "Approval",
+      "type": "object"
+    },
+    "ApprovalV2": {
+      "additionalProperties": false,
+      "properties": {
+        "intentHash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Intenthash",
+          "type": "string"
+        },
+        "calldataHash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Calldatahash",
+          "type": "string"
+        },
+        "policyHash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Policyhash",
+          "type": "string"
+        },
+        "evidenceRoot": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Evidenceroot",
+          "type": "string"
+        },
+        "proofContextHash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Proofcontexthash",
+          "type": "string"
+        },
+        "postConditionsHash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Postconditionshash",
+          "type": "string"
+        },
+        "sessionId": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Sessionid",
+          "type": "string"
+        },
+        "riskDebitUsdE8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Riskdebitusde8",
+          "type": "string"
+        },
+        "nonce": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Nonce",
+          "type": "string"
+        },
+        "deadline": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Deadline",
+          "type": "string"
+        },
+        "adapter": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Adapter",
+          "type": "string"
+        },
+        "tokenIn": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Tokenin",
+          "type": "string"
+        },
+        "tokenOut": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Tokenout",
+          "type": "string"
+        },
+        "amountIn": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Amountin",
+          "type": "string"
+        },
+        "minAmountOut": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Minamountout",
+          "type": "string"
+        }
+      },
+      "required": [
+        "intentHash",
+        "calldataHash",
+        "policyHash",
+        "evidenceRoot",
+        "proofContextHash",
+        "postConditionsHash",
+        "sessionId",
+        "riskDebitUsdE8",
+        "nonce",
+        "deadline",
+        "adapter",
+        "tokenIn",
+        "tokenOut",
+        "amountIn",
+        "minAmountOut"
+      ],
+      "title": "ApprovalV2",
+      "type": "object"
+    },
+    "BalanceBound": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Asset",
+          "type": "string"
+        },
+        "min_delta": {
+          "pattern": "^-?(0|[1-9][0-9]*)$",
+          "title": "Min Delta",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset",
+        "min_delta"
+      ],
+      "title": "BalanceBound",
+      "type": "object"
+    },
+    "Domain": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "TreasuryPolicyVault",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "1",
+          "title": "Version",
+          "type": "string"
+        },
+        "chainId": {
+          "title": "Chainid",
+          "type": "integer"
+        },
+        "verifyingContract": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Verifyingcontract",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "chainId",
+        "verifyingContract"
+      ],
+      "title": "Domain",
+      "type": "object"
+    },
+    "DomainV2": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "TreasuryPolicyVault",
+          "default": "TreasuryPolicyVault",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "2",
+          "default": "2",
+          "title": "Version",
+          "type": "string"
+        },
+        "chainId": {
+          "enum": [
+            31337,
+            43113
+          ],
+          "title": "Chainid",
+          "type": "integer"
+        },
+        "verifyingContract": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Verifyingcontract",
+          "type": "string"
+        }
+      },
+      "required": [
+        "chainId",
+        "verifyingContract"
+      ],
+      "title": "DomainV2",
+      "type": "object"
+    },
+    "PostConditionsV2": {
+      "additionalProperties": false,
+      "properties": {
+        "balance_bounds": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/BalanceBound"
+            },
+            {
+              "$ref": "#/$defs/BalanceBound"
+            }
+          ],
+          "title": "Balance Bounds",
+          "type": "array"
+        },
+        "allowance_caps": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/AllowanceCap"
+            },
+            {
+              "$ref": "#/$defs/AllowanceCap"
+            }
+          ],
+          "title": "Allowance Caps",
+          "type": "array"
+        }
+      },
+      "required": [
+        "balance_bounds",
+        "allowance_caps"
+      ],
+      "title": "PostConditionsV2",
+      "type": "object"
+    },
+    "SignedPDR": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_id": {
+          "minLength": 1,
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "build_id": {
+          "title": "Build Id",
+          "type": "string"
+        },
+        "domain": {
+          "$ref": "#/$defs/Domain"
+        },
+        "approval": {
+          "$ref": "#/$defs/Approval"
+        },
+        "signature": {
+          "pattern": "^0x[0-9a-f]{130}$",
+          "title": "Signature",
+          "type": "string"
+        },
+        "typed_data_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Typed Data Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "build_id",
+        "domain",
+        "approval",
+        "signature",
+        "typed_data_hash"
+      ],
+      "title": "SignedPDR",
+      "type": "object"
+    },
+    "SignedPDRV2": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_id": {
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "build_id": {
+          "title": "Build Id",
+          "type": "string"
+        },
+        "domain": {
+          "$ref": "#/$defs/DomainV2"
+        },
+        "approval": {
+          "$ref": "#/$defs/ApprovalV2"
+        },
+        "phi": {
+          "$ref": "#/$defs/PostConditionsV2"
+        },
+        "signature": {
+          "pattern": "^0x[0-9a-f]{130}$",
+          "title": "Signature",
+          "type": "string"
+        },
+        "typed_data_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Typed Data Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "build_id",
+        "domain",
+        "approval",
+        "phi",
+        "signature",
+        "typed_data_hash"
+      ],
+      "title": "SignedPDRV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "build_id": {
+      "title": "Build Id",
+      "type": "string"
+    },
+    "signed_pdr": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SignedPDR"
+        },
+        {
+          "$ref": "#/$defs/SignedPDRV2"
+        }
+      ],
+      "title": "Signed Pdr"
+    }
+  },
+  "required": [
+    "build_id",
+    "signed_pdr"
+  ],
+  "title": "ExecutionRequest",
+  "type": "object"
+}

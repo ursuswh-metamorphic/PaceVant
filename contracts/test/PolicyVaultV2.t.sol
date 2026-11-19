@@ -29,6 +29,16 @@ contract PolicyVaultV2Test {
     function configure() internal {
         vault.configurePolicy(keccak256("TEST_ONLY_mandate"),700e6,1000e6,100,block.timestamp+1 days);
     }
+    function testOwnerApprovalWindowRevokesPolicyAndHasBoundedRange() public {
+        bytes32 oldHash = vault.activePolicyHash();
+        vm.prank(address(0xbeef)); vm.expectRevert(); vault.setApprovalTtl(180);
+        vm.expectRevert(PolicyVault.InvalidConfiguration.selector); vault.setApprovalTtl(0);
+        vm.expectRevert(PolicyVault.InvalidConfiguration.selector); vault.setApprovalTtl(301);
+        vault.setApprovalTtl(180);
+        require(vault.maxApprovalTtl() == 180 && !vault.policyActive());
+        configure();
+        require(vault.policyActive() && vault.activePolicyHash() != oldHash);
+    }
     function make(uint256 nonce,uint256 debit,bool reverse) internal view returns(PolicyVault.ApprovalV2 memory a,bytes memory data,PolicyVault.PostConditionsV2 memory phi) {
         address input=reverse?address(w):address(u); address output=reverse?address(u):address(w);
         uint256 amount=reverse?1e18:100e6; uint256 minOut=router.quote(input,output,amount)*9900/10000;

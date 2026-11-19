@@ -1,0 +1,122 @@
+{
+  "checked_at_unix": 1795116597,
+  "rpc_host": "api.avax-test.network",
+  "chain_id": 43113,
+  "deployment": {
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "router": "0x497d967d003717FA49ce16ac6FFf73a399aFe5D4",
+    "token_in": "0x5425890298aed601595a70AB815c96711a31Bc65",
+    "token_out": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
+    "adapter_version": "lfj-v1-fuji-v1"
+  },
+  "deployed_code_and_route_verified": true,
+  "owner_config_matches_chain": true,
+  "oracle_source_matches": true,
+  "session": {
+    "active_flag": true,
+    "within_time": false,
+    "expires_at": 1795111420,
+    "policy_matches": true
+  },
+  "vault": {
+    "paused": false,
+    "policy_active": true,
+    "policy_expires_at": 1795712617,
+    "balances": {
+      "usdc_base_units": "603",
+      "wavax_base_units": "13192993554324",
+      "allowance_base_units": "0"
+    }
+  },
+  "wallets": {
+    "owner": {
+      "address": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+      "avax_wei": "38299998406141280"
+    },
+    "attestor": {
+      "address": "0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989",
+      "avax_wei": "499999924946240"
+    },
+    "relayer": {
+      "address": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C",
+      "avax_wei": "1999999937503840"
+    }
+  },
+  "feed_rounds": [
+    {
+      "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+      "description": "USDC/USD",
+      "answer_raw": "99984374",
+      "round_id": "18446744073709552588",
+      "updated_at": 1795047222,
+      "age_seconds": 69375,
+      "max_age_seconds": 86400,
+      "fresh": true
+    },
+    {
+      "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+      "description": "AVAX/USD",
+      "answer_raw": "703400000",
+      "round_id": "55340232221128820948",
+      "updated_at": 1795116266,
+      "age_seconds": 331,
+      "max_age_seconds": 600,
+      "fresh": true
+    }
+  ],
+  "broadcast": false,
+  "oracle_provider": {
+    "status": "OK",
+    "source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1"
+  },
+  "quote": {
+    "block": 61345272,
+    "amount_in": "1",
+    "amount_out": "13192899717724",
+    "pair": "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38",
+    "reserve_quote_matches": true
+  },
+  "previous_receipt": {
+    "hash": "0x956caf670aa366d86f7950322b0c5781bed77809749bbcfe227b08fb4c4b8182",
+    "status": 1,
+    "block": 61340481,
+    "canonical": true,
+    "relayer_matches": true
+  },
+  "env": {
+    "names_equal": true,
+    "count": 74
+  },
+  "health": {
+    "status": "ok",
+    "mode": "FUJI",
+    "execution_enabled": true,
+    "execution_transport": "in-process",
+    "planner_provider": "groq",
+    "planner_model": "openai/gpt-oss-20b"
+  },
+  "unauthorized_status": 401,
+  "api_treasury_issues": [],
+  "runtime_source_and_key_separation": {
+    "PolicyVault": {
+      "runtime_matches_current_compilation_excluding_verified_immutables": true
+    },
+    "LFJSwapAdapter": {
+      "runtime_matches_current_compilation_excluding_verified_immutables": true
+    },
+    "serving_env": {
+      "owner_key_excluded": true,
+      "demo_user_key_excluded": true
+    }
+  },
+  "validation_scope": {
+    "fresh_public_reads": true,
+    "new_swap_broadcast": false,
+    "new_groq_request": false,
+    "python_targeted_tests_passed": 58,
+    "solidity_targeted_tests_passed": 4,
+    "ruff": "PASS",
+    "frontend_js_syntax": "PASS",
+    "secret_scan": "PASS"
+  }
+}

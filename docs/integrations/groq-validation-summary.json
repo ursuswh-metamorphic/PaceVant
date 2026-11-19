@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-19",
+  "wallets": {
+    "owner_key_address_match": true,
+    "attestor_key_address_match": true,
+    "relayer_key_address_match": true,
+    "distinct_roles": true,
+    "actual_credentials_published": false
+  },
+  "environment": {
+    "root_env_variable_count": 71,
+    "env_template_initializer_names_equal": true,
+    "duplicate_variable_names": [],
+    "read_only_operator_config_ready": true,
+    "planner_provider_in_private_env": "groq",
+    "chain_mode_in_private_env": "FUJI",
+    "private_env_updated_with_user_authorization": true
+  },
+  "provider": {
+    "model": "openai/gpt-oss-20b",
+    "live_inference": "PASS",
+    "repeat_plan_uses_cache": true,
+    "strict_schema": true,
+    "independent_bounded_goal_validation": true,
+    "wallet_keys_sent_to_model": false,
+    "automatic_model_or_rule_fallback": false,
+    "automatic_http_retry": false,
+    "persistent_local_budget_and_cooldown": true,
+    "organization_wide_zero_429_guarantee": false
+  },
+  "real_groq_and_local_evm_workflow": {
+    "status": "CONFIRMED",
+    "chain_id": 31337,
+    "proof": "VERIFIED",
+    "obligations": ["UNSAT", "UNSAT", "UNSAT"],
+    "actual_local_receipt": true,
+    "fuji_transactions_sent": false
+  },
+  "regressions": {
+    "full_python_before_final_schema_budget_hardening": {
+      "passed": 182,
+      "skipped": 1,
+      "warnings": 2,
+      "elapsed_seconds": 249.77,
+      "skip_reason": "LOCAL ablation opt-in"
+    },
+    "focused_after_final_schema_budget_hardening": {
+      "passed": 26,
+      "provider_cases": 21,
+      "configuration_workflow_cases": 5
+    },
+    "ruff": "PASS",
+    "frontend_js_syntax": "PASS",
+    "v1_v2_cross_language_vectors": "PASS",
+    "configured_secret_scan": "PASS"
+  },
+  "remaining_mock_or_unverified": [
+    "controlled demo oracle, real external feed not merged",
+    "MockUSDC, MockWAVAX, mock liquidity and MockSwapAdapter",
+    "open-ended natural-language agent and semantic verifier",
+    "actual V2 Fuji deployment/normal/protected-revert receipts",
+    "Docker/hosting smoke"
+  ]
+}

@@ -1,1 +1,44 @@
-{"$defs":{"ErrorDetail":{"additionalProperties":false,"properties":{"code":{"title":"Code","type":"string"},"correlation_id":{"title":"Correlation Id","type":"string"},"message":{"title":"Message","type":"string"},"retryable":{"title":"Retryable","type":"boolean"}},"required":["code","message","retryable","correlation_id"],"title":"ErrorDetail","type":"object"}},"additionalProperties":false,"properties":{"error":{"$ref":"#/$defs/ErrorDetail"}},"required":["error"],"title":"ErrorEnvelope","type":"object"}
+{
+  "$defs": {
+    "ErrorDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable",
+        "correlation_id"
+      ],
+      "title": "ErrorDetail",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "error": {
+      "$ref": "#/$defs/ErrorDetail"
+    }
+  },
+  "required": [
+    "error"
+  ],
+  "title": "ErrorEnvelope",
+  "type": "object"
+}

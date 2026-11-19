@@ -6,6 +6,7 @@ from pathlib import Path
 from web3 import Web3
 
 from .v2 import ZERO_HASH, Asset, ProofPolicy, Registry, SessionContext
+from .rpc import read_functions
 
 
 def read_v2_context(w3, vault_address, session_id=ZERO_HASH, block="latest", required=False):
@@ -25,7 +26,11 @@ def read_v2_context(w3, vault_address, session_id=ZERO_HASH, block="latest", req
         if required:
             raise ValueError("proof enforcement disabled")
         return {}
-    p = vault.functions.proofPolicy().call(block_identifier=n)
+    p, usdc, wavax, config_hash, registry_hash, s, global_used = read_functions(w3, [
+        vault.functions.proofPolicy(), vault.functions.usdc(), vault.functions.wavax(),
+        vault.functions.v2ConfigHash(), vault.functions.trackedRegistryHash(),
+        vault.functions.sessions(session_id), vault.functions.globalDailyRiskUsedUsdE8(header.timestamp // 86400),
+    ], n)
     policy = ProofPolicy(
         max_wavax_per_swap=str(p[0]),
         max_relative_loss_bps=p[1],
@@ -39,8 +44,7 @@ def read_v2_context(w3, vault_address, session_id=ZERO_HASH, block="latest", req
         authorization="OWNER_APPROVED" if p[9] else "TEST_ONLY",
     )
     assets = []
-    for name, decimals in (("usdc", 6), ("wavax", 18)):
-        address = getattr(vault.functions, name)().call(block_identifier=n)
+    for address, decimals in ((usdc, 6), (wavax, 18)):
         token = w3.eth.contract(
             address=address,
             abi=[
@@ -57,11 +61,10 @@ def read_v2_context(w3, vault_address, session_id=ZERO_HASH, block="latest", req
             raise ValueError("registry decimals mismatch")
         assets.append(Asset(address=address, decimals=decimals))
     registry = Registry(assets=tuple(sorted(assets, key=lambda a: a.address)))
-    if policy.hash != Web3.to_hex(vault.functions.v2ConfigHash().call(block_identifier=n)):
+    if policy.hash != Web3.to_hex(config_hash):
         raise ValueError("proof config hash mismatch")
-    if registry.hash != Web3.to_hex(vault.functions.trackedRegistryHash().call(block_identifier=n)):
+    if registry.hash != Web3.to_hex(registry_hash):
         raise ValueError("registry hash mismatch")
-    s = vault.functions.sessions(session_id).call(block_identifier=n)
     session = SessionContext(
         session_id=session_id,
         policy_hash=Web3.to_hex(s[0]),
@@ -71,11 +74,7 @@ def read_v2_context(w3, vault_address, session_id=ZERO_HASH, block="latest", req
         used_usd_e8=str(s[4]),
         active=s[5],
         global_limit_usd_e8=policy.global_daily_risk_usd_e8,
-        global_used_usd_e8=str(
-            vault.functions.globalDailyRiskUsedUsdE8(header.timestamp // 86400).call(
-                block_identifier=n
-            )
-        ),
+        global_used_usd_e8=str(global_used),
         block_number=n,
         block_hash=Web3.to_hex(header.hash),
         timestamp=header.timestamp,

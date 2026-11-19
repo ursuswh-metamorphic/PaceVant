@@ -1,10 +1,12 @@
 # Đối chiếu chức năng V2.1 và phần còn lại trước tích hợp thực tế
 
+> Đây là review chỉ đọc ở checkpoint trước. [Rà soát mới có chạy tests và sửa lỗi](../audit/V2_1_READINESS_REVIEW.md), [system design hiện tại](../AI_Treasury_Security_System_Design_v2.1.md) được ưu tiên. File design hiện tại mới được viết từ source; design bên ngoài mà plan ban đầu tham chiếu vẫn chưa được cung cấp.
+
 Ngày đối chiếu: 19/11/2026. Chỉ đọc mã, tests và kết quả đã lưu; không chạy lại test, khởi động dịch vụ, gọi RPC hoặc gửi giao dịch trong lượt review này.
 
 ## Cơ sở đánh giá
 
-Target có trong repository là [IMPLEMENTATION_PLAN_V1_TO_V2_1.md](../IMPLEMENTATION_PLAN_V1_TO_V2_1.md). File riêng `AI_Treasury_Security_System_Design_v2.1.md` được plan nhắc tới **không có trong repository hiện tại**; điều này cũng đã ghi trong [inventory](v2_1_repository_inventory.md). Vì vậy kết luận dưới đây áp dụng cho MVP và release gates của implementation plan được cung cấp, không khẳng định đã đối chiếu một bản thiết kế ngoài repository hoặc phiên bản mới hơn chưa được cung cấp.
+Target tại checkpoint này là [IMPLEMENTATION_PLAN_V1_TO_V2_1.md](../IMPLEMENTATION_PLAN_V1_TO_V2_1.md). Khi đó chưa có file design V2.1 riêng; điều này đã ghi trong [inventory](v2_1_repository_inventory.md). Sau này đã thêm system design as-built từ code hiện tại. Kết luận review này áp dụng cho MVP/release gates của plan được cung cấp, không khẳng định đã đối chiếu bản thiết kế ngoài repository.
 
 **Kết luận:** đủ thành phần của lõi bảo mật proof-gated swap để demo local V2.1; chưa phải toàn bộ tích hợp thực tế/production. Đủ `.env` là readiness cấu hình, không phải bằng chứng đã deploy hoặc mọi thành phần đã kết nối nguồn thật.
 
@@ -12,21 +14,21 @@ Target có trong repository là [IMPLEMENTATION_PLAN_V1_TO_V2_1.md](../IMPLEMENT
 
 | Thành phần/chức năng | Bằng chứng mã chính | Hiện trạng và giới hạn |
 |---|---|---|
-| Owner mandate, allowlist, caps, policy/session lifecycle | `apps/control-plane/app/models.py`, `scripts/treasury_ops.py`, `contracts/src/PolicyVault.sol` | Đã có. Owner deploy/configure/renew; không tự reset global/day counters. Chưa áp dụng lên deployment Fuji V2 |
-| Planner/typed intent | `apps/control-plane/app/planner/__init__.py` | Có, `rules-v1`, parser cho buy/sell templates. Chưa có LLM API hoặc agent suy luận mở |
-| Task Alignment/Shield | `apps/control-plane/app/alignment/__init__.py` | Có kiểm tra mandate/recipient/token/chain/slippage và injection patterns. Dùng luật/regex, không phải semantic LLM verifier hoặc chứng minh chống mọi prompt injection |
-| Deterministic transaction builder | `apps/execution-plane/app/transaction/builder.py` | Đã có; exact calldata, policy/deadline/nonce và directional caps |
-| Simulation/stress/effect extraction | `apps/execution-plane/app/simulation/runner.py`, `evidence/extractor.py` | Đã chạy guarded entrypoint thật trên pinned Anvil fork, đọc balances/allowances và fixed stresses. Adapter/token vẫn là mock |
-| Economic risk | `apps/control-plane/app/economic_risk/__init__.py` | Đã có size/day/slippage/exposure/gas/freshness/value checks. Hiện dùng controlled demo prices, chưa dùng oracle của bạn |
-| SMT Check, Phi compiler, SMT Compile, certified debit | `packages/contracts-api/treasury_contracts/proof.py`, `apps/control-plane/app/proof` | Đã có Z3/exact arithmetic, typed artifacts, source/query commitments, refusal cho SAT/UNKNOWN/error. Bảo đảm có điều kiện trong modeled price domain |
-| SDE duy nhất và immutable approval | `apps/control-plane/app/sde`, `storage`, `orchestration/service.py` | Đã có; APPROVE cần các gate đạt; revalidation và final compiled-Phi guarded preflight trước ký |
-| Attestor/ApprovalV2 | `apps/control-plane/app/attestor`, shared `v2.py` | Đã có EIP-712 và key riêng, recheck immutable decision. Là module trong A, chưa tách HSM/process signer riêng |
-| Relayer và idempotency | `apps/execution-plane/app/execution/relayer.py`, `store.py` | Đã có immutable payload checks và raw-tx journal trước broadcast; retry cùng bytes |
+| Owner mandate, allowlist, caps, policy/session lifecycle | `backend/src/treasury_backend/core/models.py`, `backend/src/treasury_backend/operations/`, `contracts/src/PolicyVault.sol` | Đã có. Owner deploy/configure/renew; không tự reset global/day counters. Chưa áp dụng lên deployment Fuji V2 |
+| Planner/typed intent | `backend/src/treasury_backend/modules/planning/__init__.py` | Có, `rules-v1`, parser cho buy/sell templates. Chưa có LLM API hoặc agent suy luận mở |
+| Task Alignment/Shield | `backend/src/treasury_backend/modules/alignment/__init__.py` | Có kiểm tra mandate/recipient/token/chain/slippage và injection patterns. Dùng luật/regex, không phải semantic LLM verifier hoặc chứng minh chống mọi prompt injection |
+| Deterministic transaction builder | `backend/src/treasury_backend/modules/execution/transaction/builder.py` | Đã có; exact calldata, policy/deadline/nonce và directional caps |
+| Simulation/stress/effect extraction | `backend/src/treasury_backend/modules/execution/simulation/runner.py`, `evidence/extractor.py` | Đã chạy guarded entrypoint thật trên pinned Anvil fork, đọc balances/allowances và fixed stresses. Adapter/token vẫn là mock |
+| Economic risk | `backend/src/treasury_backend/modules/risk/__init__.py` | Đã có size/day/slippage/exposure/gas/freshness/value checks. Hiện dùng controlled demo prices, chưa dùng oracle của bạn |
+| SMT Check, Phi compiler, SMT Compile, certified debit | `packages/contracts-api/treasury_contracts/proof.py`, `backend/src/treasury_backend/modules/proof` | Đã có Z3/exact arithmetic, typed artifacts, source/query commitments, refusal cho SAT/UNKNOWN/error. Bảo đảm có điều kiện trong modeled price domain |
+| SDE duy nhất và immutable approval | `backend/src/treasury_backend/modules/decision`, `storage`, `backend/src/treasury_backend/modules/workflows/service.py` | Đã có; APPROVE cần các gate đạt; revalidation và final compiled-Phi guarded preflight trước ký |
+| Attestor/ApprovalV2 | `backend/src/treasury_backend/modules/signing`, shared `v2.py` | Đã có EIP-712 và key riêng, recheck immutable decision. Là module trong A, chưa tách HSM/process signer riêng |
+| Relayer và idempotency | `backend/src/treasury_backend/modules/execution/relaying/relayer.py`, `store.py` | Đã có immutable payload checks và raw-tx journal trước broadcast; retry cùng bytes |
 | On-chain guard/Phi/budgets/rollback | `contracts/src/PolicyVault.sol` | Đã có nonce/policy/domain checks, two-asset/two-allowance Phi, session/global/day accounting atomic; V2 khóa entrypoint V1. Đã kiểm tra local, chưa deploy Fuji V2 |
 | Hai chiều swap | Vault, builder, simulation/risk và V2 tests | Có mã và tests cho cả hai chiều. Cấu hình hiện tại reverse cap bằng 0 nên WAVAX→USDC bị khóa có chủ đích |
-| Replan/Experience | `apps/control-plane/app/experience/__init__.py`, orchestration | Có history, giảm amount theo rule, tránh lặp amount, tối đa hai replans. Chưa có mô hình học máy/tự học; không cần giả định một learning engine để claim MVP này |
+| Replan/Experience | `backend/src/treasury_backend/modules/experience/__init__.py`, orchestration | Có history, giảm amount theo rule, tránh lặp amount, tối đa hai replans. Chưa có mô hình học máy/tự học; không cần giả định một learning engine để claim MVP này |
 | Outcome monitor/reorg/reconciliation | B relayer monitor, A orchestration/storage | Đã có receipt/actual delta/canonical block/confirmation checks, in-flight reservation và quarantine. Được gọi qua API/polling, không phải dịch vụ observer độc lập |
-| Dashboard/audit/persistence | `apps/dashboard`, A storage, B store | Đã có timeline, proof/Phi, budget/gas/actual deltas, authenticated API và SQLite/content-addressed artifacts |
+| Dashboard/audit/persistence | `frontend`, A storage, B store | Đã có timeline, proof/Phi, budget/gas/actual deltas, authenticated API và SQLite/content-addressed artifacts |
 | Oracle thực tế | Hiện A đọc oracle JSON; `refresh_oracle()` tạo nguồn demo | **Chờ merge.** Chưa review code của người cộng tác nên chưa xác nhận tương thích |
 | DEX/token thật | Hiện `MockSwapAdapter`, `MockUSDC`, `MockWAVAX` | **Chưa tích hợp và không thuộc MVP của implementation plan.** Oracle thật không tự biến adapter thành DEX thật |
 | Exposure runtime on-chain | Hiện economic evaluator pre-sign only | **Chưa có; optional trong plan.** Phi không bảo đảm allocation 25% tại inclusion |
@@ -37,11 +39,11 @@ Target có trong repository là [IMPLEMENTATION_PLAN_V1_TO_V2_1.md](../IMPLEMENT
 
 Oracle không phải một biến `.env` còn thiếu. Đây là tích hợp mã/data contract cần review. Các điểm hiện đang gắn với `TRUSTED_TEST_ORACLE`:
 
-- `apps/control-plane/app/models.py`: `OraclePrice.price_source` là literal nguồn test; giá USDC/WAVAX dùng USD-e8, scope chain/vault và `price_timestamp`.
-- `apps/control-plane/app/economic_risk/__init__.py`: từ chối source không phải nguồn test hiện tại.
-- `apps/control-plane/app/proof/__init__.py`: ràng buộc source/hash và chuyển giá sang interval cho proof.
-- `scripts/treasury_ops.py`: `owner_config()` commit hash nguồn test; `refresh_oracle()` ghi giá nominal từ env và timestamp demo.
-- `orchestration/service.py`: A hiện đọc oracle file từ đường dẫn cấu hình, chưa trực tiếp gọi feed/provider thật.
+- `backend/src/treasury_backend/modules/oracle/models.py`: `OraclePrice.price_source` là literal nguồn test; giá USDC/WAVAX dùng USD-e8, scope chain/vault và `price_timestamp`.
+- `backend/src/treasury_backend/modules/risk/__init__.py`: từ chối source không phải nguồn test hiện tại.
+- `backend/src/treasury_backend/modules/proof/__init__.py`: ràng buộc source/hash và chuyển giá sang interval cho proof.
+- `backend/src/treasury_backend/operations/`: `owner_config()` commit hash nguồn test; `refresh_oracle()` ghi giá nominal từ env và timestamp demo.
+- `backend/src/treasury_backend/modules/workflows/service.py`: A hiện đọc oracle file từ đường dẫn cấu hình, chưa trực tiếp gọi feed/provider thật.
 
 Các điều kiện trước khi đánh dấu oracle đã tích hợp:
 

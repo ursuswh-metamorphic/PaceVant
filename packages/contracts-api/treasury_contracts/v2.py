@@ -113,6 +113,7 @@ class DeploymentProofConfig(Wire):
     proof_policy: ProofPolicy
     session_limit_usd_e8: UInt
     session_duration_seconds: int = Field(gt=30, le=86400 * 7)
+    approval_ttl_seconds: int = Field(default=30, gt=0, le=300)
 
     @model_validator(mode="after")
     def valid_session_limit(self):
@@ -134,6 +135,20 @@ class Price(Wire):
         return self
 
 
+class FeedObservation(Wire):
+    asset: Addr
+    feed: Addr
+    description: str = Field(min_length=1, max_length=32)
+    decimals: int = Field(ge=0, le=18)
+    answer_raw: UInt
+    round_id: UInt
+    answered_in_round: UInt
+    started_at: int = Field(gt=0)
+    updated_at: int = Field(gt=0)
+    max_age_seconds: int = Field(gt=0, le=86400)
+    bytecode_hash: Hash
+
+
 class OracleEvidence(Wire):
     chain_id: Literal[31337, 43113]
     vault: Addr
@@ -143,10 +158,11 @@ class OracleEvidence(Wire):
     block_hash: Hash
     prices: tuple[Price, Price]
     controlled: Literal[True] = True
+    feeds: tuple[FeedObservation, ...] = Field(default=(), max_length=2)
 
     @property
     def hash(self):
-        return keccak(
+        legacy = keccak(
             encode(
                 [
                     "uint256",
@@ -171,6 +187,14 @@ class OracleEvidence(Wire):
                 ],
             )
         )
+        if not self.feeds:
+            return legacy
+        import json
+
+        return keccak(bytes.fromhex(legacy[2:]) + json.dumps(
+            [f.model_dump(mode="json") for f in self.feeds],
+            sort_keys=True, separators=(",", ":"),
+        ).encode())
 
 
 class BalanceRead(Wire):
@@ -205,7 +229,7 @@ class EffectEvidenceV2(Wire):
     unexpected_transfer: bool
     unauthorized_approval: bool
     simulator_version: Literal["guarded-v2.1"] = "guarded-v2.1"
-    adapter_version: Literal["mock-swap-v1"] = "mock-swap-v1"
+    adapter_version: Literal["mock-swap-v1", "lfj-v1-fuji-v1"] = "mock-swap-v1"
 
     @property
     def hash(self):

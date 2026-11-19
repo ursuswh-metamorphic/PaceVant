@@ -1,5 +1,7 @@
 # V2.1 changed files
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](../AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](../audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 101 repository files changed/added for migration, operator tooling and Python backend packaging. The user-supplied implementation plan is retained unchanged and excluded. No local PGS reference, secrets or runtime data is included. Nothing has been staged, committed or pushed.
 
 - [.dockerignore](../../.dockerignore)
@@ -8,39 +10,39 @@
 - [.gitignore](../../.gitignore)
 - [Dockerfile](../../Dockerfile)
 - [README.md](../../README.md)
-- [apps/control-plane/app/alignment/__init__.py](../../apps/control-plane/app/alignment/__init__.py)
-- [apps/control-plane/app/api/__init__.py](../../apps/control-plane/app/api/__init__.py)
-- [apps/control-plane/app/attestor/__init__.py](../../apps/control-plane/app/attestor/__init__.py)
-- [apps/control-plane/app/domain.py](../../apps/control-plane/app/domain.py)
-- [apps/control-plane/app/economic_risk/__init__.py](../../apps/control-plane/app/economic_risk/__init__.py)
-- [apps/control-plane/app/models.py](../../apps/control-plane/app/models.py)
-- [apps/control-plane/app/orchestration/client.py](../../apps/control-plane/app/orchestration/client.py)
-- [apps/control-plane/app/orchestration/evidence.py](../../apps/control-plane/app/orchestration/evidence.py)
-- [apps/control-plane/app/orchestration/fuji.py](../../apps/control-plane/app/orchestration/fuji.py)
-- [apps/control-plane/app/orchestration/service.py](../../apps/control-plane/app/orchestration/service.py)
-- [apps/control-plane/app/planner/__init__.py](../../apps/control-plane/app/planner/__init__.py)
-- [apps/control-plane/app/portfolio/__init__.py](../../apps/control-plane/app/portfolio/__init__.py)
-- [apps/control-plane/app/proof/__init__.py](../../apps/control-plane/app/proof/__init__.py)
-- [apps/control-plane/app/sde/__init__.py](../../apps/control-plane/app/sde/__init__.py)
-- [apps/control-plane/app/settings.py](../../apps/control-plane/app/settings.py)
-- [apps/control-plane/app/storage/__init__.py](../../apps/control-plane/app/storage/__init__.py)
-- [apps/control-plane/tests/test_operator_settings.py](../../apps/control-plane/tests/test_operator_settings.py)
-- [apps/control-plane/tests/test_v2_gates.py](../../apps/control-plane/tests/test_v2_gates.py)
-- [apps/dashboard/app.js](../../apps/dashboard/app.js)
-- [apps/dashboard/index.html](../../apps/dashboard/index.html)
-- [apps/dashboard/style.css](../../apps/dashboard/style.css)
-- [apps/execution-plane/app/api/main.py](../../apps/execution-plane/app/api/main.py)
-- [apps/execution-plane/app/chain/__init__.py](../../apps/execution-plane/app/chain/__init__.py)
-- [apps/execution-plane/app/cli.py](../../apps/execution-plane/app/cli.py)
-- [apps/execution-plane/app/execution/relayer.py](../../apps/execution-plane/app/execution/relayer.py)
-- [apps/execution-plane/app/settings.py](../../apps/execution-plane/app/settings.py)
-- [apps/execution-plane/app/simulation/runner.py](../../apps/execution-plane/app/simulation/runner.py)
-- [apps/execution-plane/app/transaction/builder.py](../../apps/execution-plane/app/transaction/builder.py)
-- [apps/execution-plane/tests/test_ab_integration.py](../../apps/execution-plane/tests/test_ab_integration.py)
-- [apps/execution-plane/tests/test_v2_ablation.py](../../apps/execution-plane/tests/test_v2_ablation.py)
-- [apps/execution-plane/tests/test_v2_execution.py](../../apps/execution-plane/tests/test_v2_execution.py)
-- [apps/execution-plane/tests/v2_setup.py](../../apps/execution-plane/tests/v2_setup.py)
-- [apps/execution-plane/uv.lock](../../apps/execution-plane/uv.lock)
+- `apps/control-plane/app/alignment/__init__.py`
+- `apps/control-plane/app/api/__init__.py`
+- `apps/control-plane/app/attestor/__init__.py`
+- `apps/control-plane/app/domain.py`
+- `apps/control-plane/app/economic_risk/__init__.py`
+- `apps/control-plane/app/models.py`
+- `apps/control-plane/app/orchestration/client.py`
+- `apps/control-plane/app/orchestration/evidence.py`
+- `apps/control-plane/app/orchestration/fuji.py`
+- `apps/control-plane/app/orchestration/service.py`
+- `apps/control-plane/app/planner/__init__.py`
+- `apps/control-plane/app/portfolio/__init__.py`
+- `apps/control-plane/app/proof/__init__.py`
+- `apps/control-plane/app/sde/__init__.py`
+- `apps/control-plane/app/settings.py`
+- `apps/control-plane/app/storage/__init__.py`
+- `apps/control-plane/tests/test_operator_settings.py`
+- `apps/control-plane/tests/test_v2_gates.py`
+- `apps/dashboard/app.js`
+- `apps/dashboard/index.html`
+- `apps/dashboard/style.css`
+- `apps/execution-plane/app/api/main.py`
+- `apps/execution-plane/app/chain/__init__.py`
+- `apps/execution-plane/app/cli.py`
+- `apps/execution-plane/app/execution/relayer.py`
+- `apps/execution-plane/app/settings.py`
+- `apps/execution-plane/app/simulation/runner.py`
+- `apps/execution-plane/app/transaction/builder.py`
+- `apps/execution-plane/tests/test_ab_integration.py`
+- `apps/execution-plane/tests/test_v2_ablation.py`
+- `apps/execution-plane/tests/test_v2_execution.py`
+- `apps/execution-plane/tests/v2_setup.py`
+- `apps/execution-plane/uv.lock`
 - [contracts/src/PolicyVault.sol](../../contracts/src/PolicyVault.sol)
 - [contracts/src/adapters/MockSwapAdapter.sol](../../contracts/src/adapters/MockSwapAdapter.sol)
 - [contracts/test/PolicyVaultV2.t.sol](../../contracts/test/PolicyVaultV2.t.sol)
@@ -97,9 +99,9 @@
 - [scripts/serve.py](../../scripts/serve.py)
 - [scripts/treasury.py](../../scripts/treasury.py)
 - [scripts/treasury_ops.py](../../scripts/treasury_ops.py)
-- [tests/integration/eip712-v2-golden.mjs](../../tests/integration/eip712-v2-golden.mjs)
-- [tests/integration/test_container_config.py](../../tests/integration/test_container_config.py)
-- [tests/integration/test_proof_v2.py](../../tests/integration/test_proof_v2.py)
-- [tests/integration/test_treasury_ops.py](../../tests/integration/test_treasury_ops.py)
-- [tests/integration/test_v2_limits.py](../../tests/integration/test_v2_limits.py)
+- `tests/integration/eip712-v2-golden.mjs`
+- `tests/integration/test_container_config.py`
+- `tests/integration/test_proof_v2.py`
+- `tests/integration/test_treasury_ops.py`
+- `tests/integration/test_v2_limits.py`
 - [uv.lock](../../uv.lock)

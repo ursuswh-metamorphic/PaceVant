@@ -1,5 +1,7 @@
 # AI Treasury Security — System Design v1.0
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 **Ngày:** 16/11/2026
 
 **Trạng thái:** Thiết kế triển khai MVP; chưa phải hệ thống đã kiểm toán

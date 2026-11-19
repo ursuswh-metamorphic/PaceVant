@@ -1,5 +1,7 @@
 # Báo cáo khả thi — Avalanche UniHack Integration PoC
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 Ngày đánh giá: 12/11/2026, giờ Việt Nam. Phạm vi: PoC kỹ thuật, không production.
 
 ## 1. Mục tiêu
@@ -19,20 +21,20 @@ Windows, Node 24.21.0, npm 11.19.0, Git 2.56.0, Hardhat 3.21.2, Solidity 0.8.38/
 | Hạng mục | Trạng thái | Bằng chứng |
 |---|---|---|
 | Nghiên cứu Team1, starter code và Avalanche | PASS | [RESEARCH.md](RESEARCH.md) |
-| Fuji RPC chain/block/balance/latency | PASS | [network.json](../evidence/network.json), chain 43113 |
+| Fuji RPC chain/block/balance/latency | PASS | `network.json`, chain 43113 |
 | Compile Solidity Cancun | PASS | `npm run compile` |
-| Unit tests chức năng và bảo mật | PASS | 41 pass, 0 fail, gồm 14 tests ERC-4337; [unit-results.json](../evidence/unit-results.json) |
+| Unit tests chức năng và bảo mật | PASS | 41 pass, 0 fail, gồm 14 tests ERC-4337; `unit-results.json` |
 | Deploy hai contract lên local EVM | PASS | Receipt và runtime bytecode khớp artifact |
-| Local E2E A–E | PASS | [e2e-local.json](../evidence/e2e-local.json), chain 31337 |
-| Deploy hai contract lên Fuji | PASS | [fuji.json](../deployments/fuji.json); chain 43113, receipt success và bytecode khớp artifact |
-| Fuji E2E A–E | PASS | [e2e-fuji.json](../evidence/e2e-fuji.json); giao dịch success/reverted thực tế |
-| Smart account ERC-4337 và AA1–AA7 trên Fuji | PASS | [aa-e2e-fuji.json](../evidence/aa-e2e-fuji.json), [aa-verify-fuji.json](../evidence/aa-verify-fuji.json); nonce 3, storage 1, proposal Executed |
-| Đọc lại độc lập receipt/code/state/log Fuji | PASS | [verify-fuji.json](../evidence/verify-fuji.json); storage 2, proposal #0 Executed |
-| UI desktop/mobile và luồng owner/agent | PASS | 4 tests gồm EOA, Fuji và AA EIP-712/relay; [ui-results.json](../evidence/ui-results.json), wallet adapter local |
-| UI đọc Fuji thật | PASS | [TEST_RESULTS.md](TEST_RESULTS.md), [ui-results.json](../evidence/ui-results.json); storage, địa chỉ và ProposalExecuted |
+| Local E2E A–E | PASS | `e2e-local.json`, chain 31337 |
+| Deploy hai contract lên Fuji | PASS | `fuji.json`; chain 43113, receipt success và bytecode khớp artifact |
+| Fuji E2E A–E | PASS | `e2e-fuji.json`; giao dịch success/reverted thực tế |
+| Smart account ERC-4337 và AA1–AA7 trên Fuji | PASS | `aa-e2e-fuji.json`, `aa-verify-fuji.json`; nonce 3, storage 1, proposal Executed |
+| Đọc lại độc lập receipt/code/state/log Fuji | PASS | `verify-fuji.json`; storage 2, proposal #0 Executed |
+| UI desktop/mobile và luồng owner/agent | PASS | 4 tests gồm EOA, Fuji và AA EIP-712/relay; `ui-results.json`, wallet adapter local |
+| UI đọc Fuji thật | PASS | [TEST_RESULTS.md](TEST_RESULTS.md), `ui-results.json`; storage, địa chỉ và ProposalExecuted |
 | Build frontend và typecheck | PASS | Đã chạy, exit code 0 |
-| UI bản build qua preview đọc Fuji | PASS | [production-ui.json](../evidence/production-ui.json), EOA storage 2, AA storage 1/nonce 3, relay kết nối, không có page error |
-| Khóa không lọt source/bundle | PASS | [secret-scan.json](../evidence/secret-scan.json); .env Git ignore, số file và thời điểm trong JSON |
+| UI bản build qua preview đọc Fuji | PASS | `production-ui.json`, EOA storage 2, AA storage 1/nonce 3, relay kết nối, không có page error |
+| Khóa không lọt source/bundle | PASS | `secret-scan.json`; .env Git ignore, số file và thời điểm trong JSON |
 
 ## 5. Chưa hoàn thành
 

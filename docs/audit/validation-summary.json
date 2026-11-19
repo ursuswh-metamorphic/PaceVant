@@ -1,0 +1,121 @@
+{
+  "review_date": "2026-11-19",
+  "timezone": "Asia/Saigon",
+  "scope": "AS_BUILT_LOCAL_V2_1_REVIEW_NOT_INDEPENDENT_SECURITY_AUDIT",
+  "branch": "refactor/modular-backend-frontend",
+  "pre_refactor_checkpoint": "19aa935",
+  "revision_scope": "uncommitted working tree, including modular refactor and unified backend",
+  "runtime": "ONE_FASTAPI_UVICORN_WITH_IN_PROCESS_EXECUTION",
+  "fresh_validation": {
+    "python_default_suite": {
+      "passed": 157,
+      "skipped": 1,
+      "failed": 0,
+      "warnings": 2,
+      "elapsed_seconds": 144.10,
+      "skip_reason": "LOCAL ablation is opt-in via RUN_V2_ABLATION; executed separately below",
+      "private_log": ".control-data-v2/audit-all-tests-final.log"
+    },
+    "forge": {
+      "passed": 49,
+      "failed": 0,
+      "skipped": 0,
+      "private_log": ".control-data-v2/audit-forge.log"
+    },
+    "cross_language_vectors": {
+      "v1": "PASS",
+      "v2_phi_eip712_version_isolation": "PASS"
+    },
+    "frontend_syntax": {
+      "status": "PASS",
+      "files": 8
+    },
+    "actual_local_browser_workflow": {
+      "network": "OWNED_ANVIL_31337_ONLY",
+      "api_processes": 1,
+      "amount_usdc": "200",
+      "status": "CONFIRMED",
+      "simulation_source": "REAL_LOCAL_SIM",
+      "proof": "VERIFIED",
+      "obligations": ["UNSAT", "UNSAT", "UNSAT"],
+      "certified_risk_reservation_usd_e8": "479200000",
+      "receipt_block": 16,
+      "viewport_checks": ["1440x1100", "390x844"],
+      "horizontal_overflow": false,
+      "uncaught_javascript_errors": 0,
+      "browser": "disposable headless Chrome; in-app browser bootstrap unavailable",
+      "private_result": ".control-data-v2/audit-local-ui.json"
+    },
+    "local_opt_in_ablation": {
+      "passed_tests": 1,
+      "records": 28,
+      "modes": {
+        "FULL_V1": {"confirmed": 6, "protectedRevert": 1},
+        "PGS_CORE": {"confirmed": 5, "protectedRevert": 2},
+        "V1_PLUS_PHI": {"confirmed": 5, "protectedRevert": 2},
+        "V2_1_CORE": {"confirmed": 4, "protectedRevert": 2, "preSignRefuse": 1}
+      },
+      "scope": "bounded guard-level scenarios, not real-market acceptance or full-protocol throughput",
+      "private_result": ".control-data-v2/audit-ablation-results.json"
+    },
+    "proof_parameter_sweep": {
+      "cases": 128,
+      "verified": 80,
+      "refusals": 48,
+      "unknown": 0,
+      "p50_ms": 8.394350006710738,
+      "p95_ms": 12.887799995951355,
+      "p99_ms": 14.576199988368899,
+      "worst_ms": 15.93900000443682,
+      "scope": "nominal local parameter grid; refusals are not classified as real-world false positives",
+      "private_result": ".control-data-v2/audit-proof-sweep.json"
+    },
+    "ruff_configured_scope": "PASS",
+    "scoped_format_check": "PASS",
+    "configured_secret_scan": "PASS",
+    "markdown_local_file_links": {
+      "checked": 406,
+      "missing": 0,
+      "scope": "existing tracked/unignored Markdown files, excluding fenced blocks and remote URLs; file existence only, not anchor validation"
+    },
+    "diff_whitespace": "PASS",
+    "reference_folder": "present, ignored, untracked; not a runtime import",
+    "private_env_bytes_preserved": true
+  },
+  "prior_evidence_not_rerun_this_audit": {
+    "full_protocol_comparison": "../architecture/unified-protocol-summary.json",
+    "outcomes_matched": 14,
+    "v1_baseline_commit": "1b09bd8dd04fd74868f30634abeec93276522d36"
+  },
+  "read_only_environment_check": {
+    "rpc_called": false,
+    "configuration_ready": true,
+    "missing_or_invalid": [],
+    "v2_fuji_manifest_present": false,
+    "private_runtime_env_present": false,
+    "compose_manifest_present": false,
+    "current_funding_verified": false
+  },
+  "remaining_mock_or_limited_components": [
+    "MOCK mode is V1 fixtures with synthetic state/calldata/receipts and no V2 proof",
+    "LOCAL/FUJI deployment uses MockUSDC, MockWAVAX and MockSwapAdapter",
+    "controlled nominal demo prices and bounded fork stress scenarios",
+    "rule/template planner, regex alignment and heuristic replanning",
+    "external JSON oracle interface exists; real market feed not merged",
+    "some baseline mandate limits are operator-code constants",
+    "final preflight replays pinned build block with caching; latest checks are separate",
+    "poll-driven monitoring; no autonomous watcher or fee replacement",
+    "single-instance SQLite/journal; signer and relayer share one process"
+  ],
+  "not_verified": [
+    "public Fuji V2 deployment and normal/protected-revert receipts",
+    "Docker image build/runtime, Compose, Render or VPS smoke",
+    "remote CI/fresh-clone run for this working tree",
+    "real oracle/DEX integration or general LLM planning",
+    "full-protocol B/C performance, production load/HA or HSM integration",
+    "independent security audit or dependency CVE review"
+  ],
+  "fuji_transactions_sent_in_this_review": false,
+  "hosting_created_in_this_review": false,
+  "all_release_gates_complete": false
+}

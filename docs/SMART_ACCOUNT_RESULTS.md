@@ -1,5 +1,7 @@
 # Kết quả tích hợp smart account ERC-4337
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 Ngày đánh giá 12/11/2026, Asia/Saigon. Dữ liệu đo lấy từ JSON evidence, không giả lập blockchain.
 
 | Hạng mục | Trạng thái | Bằng chứng |

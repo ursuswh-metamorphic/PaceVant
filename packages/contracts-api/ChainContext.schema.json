@@ -1,1 +1,372 @@
-{"$defs":{"Asset":{"additionalProperties":false,"properties":{"address":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Address","type":"string"},"decimals":{"maximum":18,"minimum":0,"title":"Decimals","type":"integer"}},"required":["address","decimals"],"title":"Asset","type":"object"},"ProofPolicy":{"additionalProperties":false,"properties":{"authorization":{"enum":["TEST_ONLY","OWNER_APPROVED"],"title":"Authorization","type":"string"},"fixed_loss_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Fixed Loss Usd E8","type":"string"},"global_daily_risk_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Global Daily Risk Usd E8","type":"string"},"max_oracle_age":{"exclusiveMinimum":0,"maximum":3600,"title":"Max Oracle Age","type":"integer"},"max_relative_loss_bps":{"exclusiveMaximum":10000,"minimum":0,"title":"Max Relative Loss Bps","type":"integer"},"max_session_risk_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Max Session Risk Usd E8","type":"string"},"max_wavax_per_swap":{"pattern":"^(0|[1-9][0-9]*)$","title":"Max Wavax Per Swap","type":"string"},"oracle_band_bps":{"exclusiveMaximum":10000,"minimum":0,"title":"Oracle Band Bps","type":"integer"},"oracle_source_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Oracle Source Hash","type":"string"},"tolerance_bps":{"exclusiveMaximum":10000,"minimum":0,"title":"Tolerance Bps","type":"integer"}},"required":["max_wavax_per_swap","max_relative_loss_bps","fixed_loss_usd_e8","oracle_band_bps","tolerance_bps","max_oracle_age","max_session_risk_usd_e8","global_daily_risk_usd_e8","oracle_source_hash","authorization"],"title":"ProofPolicy","type":"object"},"Registry":{"additionalProperties":false,"properties":{"assets":{"maxItems":2,"minItems":2,"prefixItems":[{"$ref":"#/$defs/Asset"},{"$ref":"#/$defs/Asset"}],"title":"Assets","type":"array"},"version":{"const":1,"default":1,"title":"Version","type":"integer"}},"required":["assets"],"title":"Registry","type":"object"},"SessionContext":{"additionalProperties":false,"properties":{"active":{"title":"Active","type":"boolean"},"block_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Block Hash","type":"string"},"block_number":{"minimum":0,"title":"Block Number","type":"integer"},"expires_at":{"minimum":0,"title":"Expires At","type":"integer"},"global_limit_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Global Limit Usd E8","type":"string"},"global_used_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Global Used Usd E8","type":"string"},"limit_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Limit Usd E8","type":"string"},"policy_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Policy Hash","type":"string"},"session_id":{"pattern":"^0x[0-9a-f]{64}$","title":"Session Id","type":"string"},"starts_at":{"minimum":0,"title":"Starts At","type":"integer"},"timestamp":{"minimum":0,"title":"Timestamp","type":"integer"},"used_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Used Usd E8","type":"string"}},"required":["session_id","policy_hash","starts_at","expires_at","active","limit_usd_e8","used_usd_e8","global_limit_usd_e8","global_used_usd_e8","block_number","block_hash","timestamp"],"title":"SessionContext","type":"object"}},"additionalProperties":false,"properties":{"attestor":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Attestor","type":"string"},"block_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Block Hash","type":"string"},"block_number":{"title":"Block Number","type":"integer"},"chain_id":{"title":"Chain Id","type":"integer"},"max_approval_ttl":{"title":"Max Approval Ttl","type":"integer"},"max_per_swap_base_units":{"pattern":"^(0|[1-9][0-9]*)$","title":"Max Per Swap Base Units","type":"string"},"max_slippage_bps":{"title":"Max Slippage Bps","type":"integer"},"max_spend_per_day_base_units":{"pattern":"^(0|[1-9][0-9]*)$","title":"Max Spend Per Day Base Units","type":"string"},"mode":{"enum":["local","fuji"],"title":"Mode","type":"string"},"owner":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Owner","type":"string"},"paused":{"title":"Paused","type":"boolean"},"policy_active":{"title":"Policy Active","type":"boolean"},"policy_expires_at":{"title":"Policy Expires At","type":"integer"},"policy_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Policy Hash","type":"string"},"policy_version":{"title":"Policy Version","type":"integer"},"proof_policy":{"anyOf":[{"$ref":"#/$defs/ProofPolicy"},{"type":"null"}],"default":null},"proof_session":{"anyOf":[{"$ref":"#/$defs/SessionContext"},{"type":"null"}],"default":null},"registry":{"anyOf":[{"$ref":"#/$defs/Registry"},{"type":"null"}],"default":null},"router":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Router","type":"string"},"supported_action":{"const":"SWAP_EXACT_INPUT","title":"Supported Action","type":"string"},"timestamp":{"title":"Timestamp","type":"integer"},"token_in":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Token In","type":"string"},"token_out":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Token Out","type":"string"},"vault_address":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Vault Address","type":"string"}},"required":["chain_id","vault_address","router","token_in","token_out","policy_hash","policy_active","policy_version","policy_expires_at","attestor","owner","paused","max_per_swap_base_units","max_spend_per_day_base_units","max_slippage_bps","max_approval_ttl","block_number","block_hash","timestamp","mode","supported_action"],"title":"ChainContext","type":"object"}
+{
+  "$defs": {
+    "Asset": {
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "title": "Address",
+          "type": "string"
+        },
+        "decimals": {
+          "maximum": 18,
+          "minimum": 0,
+          "title": "Decimals",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "address",
+        "decimals"
+      ],
+      "title": "Asset",
+      "type": "object"
+    },
+    "ProofPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "max_wavax_per_swap": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Max Wavax Per Swap",
+          "type": "string"
+        },
+        "max_relative_loss_bps": {
+          "exclusiveMaximum": 10000,
+          "minimum": 0,
+          "title": "Max Relative Loss Bps",
+          "type": "integer"
+        },
+        "fixed_loss_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Fixed Loss Usd E8",
+          "type": "string"
+        },
+        "oracle_band_bps": {
+          "exclusiveMaximum": 10000,
+          "minimum": 0,
+          "title": "Oracle Band Bps",
+          "type": "integer"
+        },
+        "tolerance_bps": {
+          "exclusiveMaximum": 10000,
+          "minimum": 0,
+          "title": "Tolerance Bps",
+          "type": "integer"
+        },
+        "max_oracle_age": {
+          "exclusiveMinimum": 0,
+          "maximum": 3600,
+          "title": "Max Oracle Age",
+          "type": "integer"
+        },
+        "max_session_risk_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Max Session Risk Usd E8",
+          "type": "string"
+        },
+        "global_daily_risk_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Global Daily Risk Usd E8",
+          "type": "string"
+        },
+        "oracle_source_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Oracle Source Hash",
+          "type": "string"
+        },
+        "authorization": {
+          "enum": [
+            "TEST_ONLY",
+            "OWNER_APPROVED"
+          ],
+          "title": "Authorization",
+          "type": "string"
+        }
+      },
+      "required": [
+        "max_wavax_per_swap",
+        "max_relative_loss_bps",
+        "fixed_loss_usd_e8",
+        "oracle_band_bps",
+        "tolerance_bps",
+        "max_oracle_age",
+        "max_session_risk_usd_e8",
+        "global_daily_risk_usd_e8",
+        "oracle_source_hash",
+        "authorization"
+      ],
+      "title": "ProofPolicy",
+      "type": "object"
+    },
+    "Registry": {
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1,
+          "default": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "assets": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/Asset"
+            },
+            {
+              "$ref": "#/$defs/Asset"
+            }
+          ],
+          "title": "Assets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "assets"
+      ],
+      "title": "Registry",
+      "type": "object"
+    },
+    "SessionContext": {
+      "additionalProperties": false,
+      "properties": {
+        "session_id": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "policy_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Policy Hash",
+          "type": "string"
+        },
+        "starts_at": {
+          "minimum": 0,
+          "title": "Starts At",
+          "type": "integer"
+        },
+        "expires_at": {
+          "minimum": 0,
+          "title": "Expires At",
+          "type": "integer"
+        },
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "limit_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Limit Usd E8",
+          "type": "string"
+        },
+        "used_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Used Usd E8",
+          "type": "string"
+        },
+        "global_limit_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Global Limit Usd E8",
+          "type": "string"
+        },
+        "global_used_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Global Used Usd E8",
+          "type": "string"
+        },
+        "block_number": {
+          "minimum": 0,
+          "title": "Block Number",
+          "type": "integer"
+        },
+        "block_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Block Hash",
+          "type": "string"
+        },
+        "timestamp": {
+          "minimum": 0,
+          "title": "Timestamp",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "session_id",
+        "policy_hash",
+        "starts_at",
+        "expires_at",
+        "active",
+        "limit_usd_e8",
+        "used_usd_e8",
+        "global_limit_usd_e8",
+        "global_used_usd_e8",
+        "block_number",
+        "block_hash",
+        "timestamp"
+      ],
+      "title": "SessionContext",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "proof_policy": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ProofPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "registry": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Registry"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "proof_session": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SessionContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "chain_id": {
+      "title": "Chain Id",
+      "type": "integer"
+    },
+    "vault_address": {
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "title": "Vault Address",
+      "type": "string"
+    },
+    "router": {
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "title": "Router",
+      "type": "string"
+    },
+    "token_in": {
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "title": "Token In",
+      "type": "string"
+    },
+    "token_out": {
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "title": "Token Out",
+      "type": "string"
+    },
+    "policy_hash": {
+      "pattern": "^0x[0-9a-f]{64}$",
+      "title": "Policy Hash",
+      "type": "string"
+    },
+    "policy_active": {
+      "title": "Policy Active",
+      "type": "boolean"
+    },
+    "policy_version": {
+      "title": "Policy Version",
+      "type": "integer"
+    },
+    "policy_expires_at": {
+      "title": "Policy Expires At",
+      "type": "integer"
+    },
+    "attestor": {
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "title": "Attestor",
+      "type": "string"
+    },
+    "owner": {
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "title": "Owner",
+      "type": "string"
+    },
+    "paused": {
+      "title": "Paused",
+      "type": "boolean"
+    },
+    "max_per_swap_base_units": {
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "title": "Max Per Swap Base Units",
+      "type": "string"
+    },
+    "max_spend_per_day_base_units": {
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "title": "Max Spend Per Day Base Units",
+      "type": "string"
+    },
+    "max_slippage_bps": {
+      "title": "Max Slippage Bps",
+      "type": "integer"
+    },
+    "max_approval_ttl": {
+      "title": "Max Approval Ttl",
+      "type": "integer"
+    },
+    "block_number": {
+      "title": "Block Number",
+      "type": "integer"
+    },
+    "block_hash": {
+      "pattern": "^0x[0-9a-f]{64}$",
+      "title": "Block Hash",
+      "type": "string"
+    },
+    "timestamp": {
+      "title": "Timestamp",
+      "type": "integer"
+    },
+    "mode": {
+      "enum": [
+        "local",
+        "fuji"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "supported_action": {
+      "const": "SWAP_EXACT_INPUT",
+      "title": "Supported Action",
+      "type": "string"
+    }
+  },
+  "required": [
+    "chain_id",
+    "vault_address",
+    "router",
+    "token_in",
+    "token_out",
+    "policy_hash",
+    "policy_active",
+    "policy_version",
+    "policy_expires_at",
+    "attestor",
+    "owner",
+    "paused",
+    "max_per_swap_base_units",
+    "max_spend_per_day_base_units",
+    "max_slippage_bps",
+    "max_approval_ttl",
+    "block_number",
+    "block_hash",
+    "timestamp",
+    "mode",
+    "supported_action"
+  ],
+  "title": "ChainContext",
+  "type": "object"
+}

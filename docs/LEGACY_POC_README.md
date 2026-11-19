@@ -1,10 +1,12 @@
 # Lưu trữ tài liệu README của PoC trước khi dọn dự án
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 Tài liệu lịch sử. Source PoC đã được loại khỏi working tree; xem `05_PROJECT_STRUCTURE.md` về khả năng khôi phục nếu còn clone/backup Git cũ. Các lệnh và đường dẫn PoC bên dưới không thuộc dự án hiện tại.
 
 Phần B mới theo kế hoạch ngày 16/11/2026: `PolicyVault`, swap mock USDC → WAVAX, builder deterministic, simulation/stress trên pinned Anvil fork, evidence RFC 8785, relayer EIP-712 và FastAPI tại port 8001.
 
-**Bắt đầu tại [Runbook B & hướng dẫn bàn giao cho A](docs/04_PERSON_B_RUNBOOK.md).** Interface chung: [Integration contract v1.1](docs/03_SHARED_INTEGRATION_CONTRACT.md), [shared Python SDK và JSON Schema](packages/contracts-api/README.md). Fuji đang chờ địa chỉ public của attestor do A quản lý; cách lấy và cấu hình nằm trong mục 5 của runbook.
+**Bắt đầu tại [Runbook B & hướng dẫn bàn giao cho A](04_PERSON_B_RUNBOOK.md).** Interface chung: [Integration contract v1.1](03_SHARED_INTEGRATION_CONTRACT.md), [shared Python SDK và JSON Schema](../packages/contracts-api/README.md). Fuji đang chờ địa chỉ public của attestor do A quản lý; cách lấy và cấu hình nằm trong mục 5 của runbook.
 
 ```powershell
 npm ci --ignore-scripts
@@ -18,15 +20,15 @@ npm run b:demo
 npm run b:api
 ```
 
-Demo local thực hiện swap qua Vault và xuất [evidence](evidence/execution-plane-local.json). API sử dụng `X-API-Key` trong `.env.b.local`; mutation cần `Idempotency-Key`. Các lệnh `b:*` là workflow mới. Code cũ bên dưới vẫn được giữ để tham khảo thử nghiệm Avalanche; không thuộc luồng v1.1.
+Demo local thực hiện swap qua Vault và xuất [evidence](../evidence/execution-plane-local.json). API sử dụng `X-API-Key` trong `.env.b.local`; mutation cần `Idempotency-Key`. Các lệnh `b:*` là workflow mới. Code cũ bên dưới vẫn được giữ để tham khảo thử nghiệm Avalanche; không thuộc luồng v1.1.
 
 ## Legacy: Avalanche UniHack Integration PoC
 
 PoC Solidity + Hardhat 3 + viem + React/Vite cho AI Agent Security. **Chỉ Fuji Testnet và local EVM; không mainnet.**
 
-Đã bổ sung **smart account ERC-4337 v0.8**, EIP-712, relay cục bộ và batch approve+execute. Account Fuji: `0x12a399c202d4090e7cbcda3aa9e281ea5a47930f`. [Cách chạy và phạm vi](docs/SMART_ACCOUNTS.md), [kết quả đo smart account](docs/SMART_ACCOUNT_RESULTS.md). Bộ unit tests hiện có **41 tests**, gồm 14 tests Account Abstraction. Smart account dùng treasury/storage mới; hai contract EOA cũ bên dưới vẫn hoạt động riêng.
+Đã bổ sung **smart account ERC-4337 v0.8**, EIP-712, relay cục bộ và batch approve+execute. Account Fuji: `0x12a399c202d4090e7cbcda3aa9e281ea5a47930f`. [Cách chạy và phạm vi](SMART_ACCOUNTS.md), [kết quả đo smart account](SMART_ACCOUNT_RESULTS.md). Bộ unit tests hiện có **41 tests**, gồm 14 tests Account Abstraction. Smart account dùng treasury/storage mới; hai contract EOA cũ bên dưới vẫn hoạt động riêng.
 
-Kết quả nền tảng EOA: compile, TypeScript, local deploy và E2E A–E đã chạy thành công. **Hai contract đã deploy và E2E A–E đã PASS trên Fuji chain 43113**, có receipt thực, bytecode khớp artifact và lần đọc lại độc lập. Manifest: [deployments/fuji.json](deployments/fuji.json). Storage: `0xd3361fb2c1547f1fec5f9d877d63e5a3346e4489`; guard: `0x487f648a58f93164b39ddce8db48ae57684c4c65`. Ví UI trong test là adapter cho node local; ký bằng extension thật vẫn chưa kiểm chứng. Xem [test results](docs/TEST_RESULTS.md), [báo cáo khả thi](docs/FEASIBILITY_REPORT.md), [nghiên cứu](docs/RESEARCH.md), [kiến trúc](docs/ARCHITECTURE.md).
+Kết quả nền tảng EOA: compile, TypeScript, local deploy và E2E A–E đã chạy thành công. **Hai contract đã deploy và E2E A–E đã PASS trên Fuji chain 43113**, có receipt thực, bytecode khớp artifact và lần đọc lại độc lập. Manifest: `deployments/fuji.json`. Storage: `0xd3361fb2c1547f1fec5f9d877d63e5a3346e4489`; guard: `0x487f648a58f93164b39ddce8db48ae57684c4c65`. Ví UI trong test là adapter cho node local; ký bằng extension thật vẫn chưa kiểm chứng. Xem [test results](TEST_RESULTS.md), [báo cáo khả thi](FEASIBILITY_REPORT.md), [nghiên cứu](RESEARCH.md), [kiến trúc](ARCHITECTURE.md).
 
 ## Cài và kiểm tra
 
@@ -64,7 +66,7 @@ Mở http://127.0.0.1:5173. Kết quả deploy lưu ở `deployments/local.json`
 
 ## Chuẩn bị ví Fuji — thao tác cục bộ cần người dùng
 
-Nếu chưa từng tạo ví, xem [hướng dẫn từng bước bằng tiếng Việt](docs/WALLET_SETUP.md).
+Nếu chưa từng tạo ví, xem [hướng dẫn từng bước bằng tiếng Việt](WALLET_SETUP.md).
 
 1. Tạo **hai ví test riêng** trong Core hoặc MetaMask: owner/deployer và agent. Không dùng ví tài sản thật; không dùng tài khoản Hardhat công khai.
 2. Chọn/thêm Avalanche Fuji C-Chain: chain ID **43113**, RPC `https://api.avax-test.network/ext/bc/C/rpc`, token test AVAX, [explorer](https://explorer-test.avax.network/c-chain).

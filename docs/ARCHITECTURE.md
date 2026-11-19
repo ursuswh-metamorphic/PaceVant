@@ -1,5 +1,7 @@
 # Kiến trúc Avalanche UniHack Integration PoC
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 ## Lớp smart account bổ sung
 
 Hệ thống có hai luồng song song: demo EOA ban đầu ở dưới và smart account ERC-4337 mới. `UniHackSmartAccount` (OpenZeppelin Account + SignerECDSA + ERC-7821) xác thực UserOperation EIP-712 qua EntryPoint v0.8. Treasury/storage mới có owner là account. Agent chỉ propose; owner ký batch approve+execute, gửi qua relay loopback và EntryPoint. Frontend đối chiếu UserOperationEvent từ RPC, không chỉ outer receipt. [Chi tiết kiến trúc, lệnh chạy và giới hạn](SMART_ACCOUNTS.md).

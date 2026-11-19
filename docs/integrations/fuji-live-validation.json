@@ -1,0 +1,268 @@
+{
+  "schema_version": "fuji-live-evidence-v1",
+  "workflow_id": "workflow_58cd85d5d8a246a0b96a3e20fc20d199",
+  "status": "CONFIRMED",
+  "chain_id": 43113,
+  "public_chain": true,
+  "planner": {
+    "planner_version": "groq-bounded-v1",
+    "planner_provider": "groq",
+    "planner_model": "openai/gpt-oss-20b"
+  },
+  "wallets": {
+    "owner": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+    "attestor": "0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989",
+    "relayer": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C"
+  },
+  "contracts": {
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "router": "0x497d967d003717FA49ce16ac6FFf73a399aFe5D4",
+    "token_in": "0x5425890298aed601595a70AB815c96711a31Bc65",
+    "token_out": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+  },
+  "transaction": {
+    "hash": "0x956caf670aa366d86f7950322b0c5781bed77809749bbcfe227b08fb4c4b8182",
+    "block": 61340481,
+    "block_hash": "0xe89f32f3b13a09dfb81c0657c3157e2f5cb407e9dd23220b32542138e5e10748",
+    "gas_used": "390601",
+    "explorer": "https://testnet.snowtrace.io/tx/0x956caf670aa366d86f7950322b0c5781bed77809749bbcfe227b08fb4c4b8182"
+  },
+  "token_deltas_base_units": [
+    "-1",
+    "13192993554324"
+  ],
+  "checks": {
+    "chain_43113": true,
+    "successful_receipt": true,
+    "relayer_is_configured_wallet": true,
+    "recipient_is_vault": true,
+    "calldata_is_exact_signed_call": true,
+    "signer_is_attestor": true,
+    "nonce_consumed": true,
+    "exact_input_delta": true,
+    "output_at_least_minimum": true,
+    "vault_allowance_cleared": true,
+    "adapter_allowance_cleared": true,
+    "session_debit_matches_proof": true,
+    "global_debit_matches_proof": true,
+    "three_unsat_obligations": true
+  },
+  "negative_eth_calls": [
+    {
+      "case": "replay",
+      "block_number": 61340481,
+      "expected_error": "NonceReplay()",
+      "selector": "0x6aa319b1",
+      "passed": true,
+      "broadcast": false
+    },
+    {
+      "case": "tampered_router_calldata",
+      "block_number": 61340480,
+      "expected_error": "HashMismatch()",
+      "selector": "0x3f4d6053",
+      "passed": true,
+      "broadcast": false
+    },
+    {
+      "case": "unauthorized_signer",
+      "block_number": 61340480,
+      "expected_error": "BadSignature()",
+      "selector": "0x5cd5d233",
+      "passed": true,
+      "broadcast": false
+    }
+  ],
+  "all_checks_passed": true,
+  "proof": {
+    "status": "VERIFIED",
+    "reason": "PROOF_VERIFIED",
+    "check_mode": "UNSAT",
+    "compile_mode": "UNSAT",
+    "risk_bound": "UNSAT",
+    "assumptions_satisfiable": true,
+    "compiled_region_satisfiable": true,
+    "phi": {
+      "balance_bounds": [
+        {
+          "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "min_delta": "-1"
+        },
+        {
+          "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "min_delta": "13140221580106"
+        }
+      ],
+      "allowance_caps": [
+        {
+          "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "max_remaining": "0"
+        },
+        {
+          "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "max_remaining": "0"
+        }
+      ]
+    },
+    "risk_debit_usd_e8": "0",
+    "query_hashes": [
+      "0xd8846106ea3eb4c06682da28e89ebbd8ba0ef64f759522c4b820260766a73ce8",
+      "0xcd76bb21c4b2fdc83c8c52df1f9809ccf4dcc88c88179e34ef55467c99ea78cc",
+      "0xb60e073742fe7a76d29820434bba007c04f55e14124e44af518e5c23e5b167f9",
+      "0xd97c720865a8143cbe39d118fa5ec3e46f9fdf4c03cd35bd7b2f21c0b1c0b05e",
+      "0xcb6ff296aa231068f0e4fc9003d4d68e574a3000cce74716d315e7cda857c8a6"
+    ],
+    "encoder_version": "pgs-treasury-2.1.0",
+    "solver_version": "4.15.4",
+    "source_hash": "0x5cdc2805d0ba5cfa31d5d0be05cdbb81fd012e03cdf4767bac7d2cfa66f2623b",
+    "policy_hash": "0x43bfd4a32aacdb460181608493eed1328e946a71f6bec7c5e85607ba9c529558",
+    "policy_config_hash": "0xfef8728bc4b992bf41bf1b4840115a39756fd7f399bbb8ecebeb676ba14160ba",
+    "registry_hash": "0x30a36da3cece29c71519f120726a10668285d1964ec51d81cd347895bf3a9a20",
+    "oracle_hash": "0x273c0a9f353bb592e9299eaabc48a54a5ef63a78431fbcddfe94314fafca52bd",
+    "exact_call_hash": "0xd2e099b2cc556de56b8b25750779ab6b0552c21f371061ce3a703fadc0f86a7e",
+    "evidence_root": "0xd97ccfafcfaf59636fa629373872d9a0052a8a441ad7e56ea6b55d1f0fcc887a",
+    "session_context_hash": "0xefccf3054cfb41c9edbce0469ad01caee8d7163252bbaacc03b3966bf9557d02",
+    "fallback_tau_zero": false,
+    "witness": null
+  },
+  "oracle_snapshot": {
+    "snapshot_id": "snapshot_b5c96866c160451cacf2d188ecd20395",
+    "chain_id": 43113,
+    "vault_address": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+    "block_number": 61340451,
+    "usdc_base_units": "604",
+    "wavax_base_units": "0",
+    "price_usdc_usd_e8": "99984374",
+    "price_wavax_usd_e8": "691826000",
+    "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+    "price_timestamp": 1795047222,
+    "history_version": 0,
+    "oracle_observed_at": 1795108674,
+    "oracle_block_number": 61340422,
+    "oracle_block_hash": "0xe4d6e5fec31b84fea1b1402dbe2192a4dd71351742eabfd182e86dd66cd5f736",
+    "oracle_feeds": [
+      {
+        "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+        "description": "USDC/USD",
+        "decimals": 8,
+        "answer_raw": "99984374",
+        "round_id": "18446744073709552588",
+        "answered_in_round": "18446744073709552588",
+        "started_at": 1795047222,
+        "updated_at": 1795047222,
+        "max_age_seconds": 86400,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      },
+      {
+        "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+        "description": "AVAX/USD",
+        "decimals": 8,
+        "answer_raw": "691826000",
+        "round_id": "55340232221128820935",
+        "answered_in_round": "55340232221128820935",
+        "started_at": 1795108525,
+        "updated_at": 1795108525,
+        "max_age_seconds": 600,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      }
+    ]
+  },
+  "simulation": {
+    "effects_v2": {
+      "chain_id": 43113,
+      "vault": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+      "intent_hash": "0xa7b809eae047cf834c40f8b62306e63b2e774c8ea41472cd211c8e5a2006dcda",
+      "policy_hash": "0x43bfd4a32aacdb460181608493eed1328e946a71f6bec7c5e85607ba9c529558",
+      "calldata_hash": "0x233fdc5ecdb948e4fccbb99c466b71542f5361ed537f56cb5799c210e72aefb3",
+      "block_number": 61340422,
+      "block_hash": "0xe4d6e5fec31b84fea1b1402dbe2192a4dd71351742eabfd182e86dd66cd5f736",
+      "timestamp": 1795108674,
+      "registry_hash": "0x30a36da3cece29c71519f120726a10668285d1964ec51d81cd347895bf3a9a20",
+      "balances": [
+        {
+          "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "before": "604",
+          "after": "603"
+        },
+        {
+          "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "before": "0",
+          "after": "13192993554324"
+        }
+      ],
+      "allowances": [
+        {
+          "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "before": "0",
+          "after": "0"
+        }
+      ],
+      "unexpected_transfer": false,
+      "unauthorized_approval": false,
+      "simulator_version": "guarded-v2.1",
+      "adapter_version": "lfj-v1-fuji-v1"
+    },
+    "schema_version": "1.1",
+    "intent_id": "intent_0dc48bad24374994a2d8b5738cf16394",
+    "build_id": "build_947a8ecbcfa20e1077d976642bf8e4b2aa2681668907b47d8e094fc7922a17a6",
+    "chain_id": 43113,
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "policy_hash": "0x43bfd4a32aacdb460181608493eed1328e946a71f6bec7c5e85607ba9c529558",
+    "calldata_hash": "0x233fdc5ecdb948e4fccbb99c466b71542f5361ed537f56cb5799c210e72aefb3",
+    "nonce": "1004",
+    "deadline": 1795108848,
+    "fork_block": 61340422,
+    "bytecode_hash": "0x893bef38ed64d6d4d347d5b4911a73ba497ecaab88a0d00726903538eb2685f0",
+    "simulation_mode": "LOCAL_TEST_ATTESTOR",
+    "baseline": {
+      "execution_status": "SUCCESS",
+      "token_in_delta_base_units": "-1",
+      "token_out_delta_base_units": "13192993554324",
+      "unexpected_transfer": false,
+      "unauthorized_approval": false,
+      "gas_used": "322489"
+    },
+    "stress_tests": [
+      {
+        "scenario_id": "reserve_shift_mild",
+        "status": "SUCCESS_SAFE",
+        "scenario_hash": "0x2569cd66531a912a493d6c4dfa243b147bdf94b182c2f6d3fc84ab166b2dbca7",
+        "output_base_units": "13166758358981",
+        "revert_reason": null
+      },
+      {
+        "scenario_id": "reserve_shift_adverse",
+        "status": "PROTECTED_REVERT",
+        "scenario_hash": "0xd5c7777c5c339081dd0f6969d94a7329f02f340f631ada57f494c0de33ddf557",
+        "output_base_units": "0",
+        "revert_reason": "MIN_OUTPUT_NOT_MET"
+      }
+    ],
+    "verification_status": "COMPLETE",
+    "parser_version": "extractor-v1",
+    "source": "FORK_SIM",
+    "artifact_refs": [
+      "/v1/artifacts/9a90bb5c836dce6f9b59c03ba3c665822ebc18fa30f5f29e7f8d56bc558da232",
+      "/v1/artifacts/8116d93d8f48ae810e2fc5d9f3aaaa5b9b17543660c54ba50011a4d73e4ee84e",
+      "/v1/artifacts/11d792199287fb58c78a834e930e3d8e9701b16dc26756886ab08591fb238284"
+    ],
+    "evidence_manifest_ref": "/v1/artifacts/f56ef6111c12a8dec34bf57a4258ae63576a0c16c78c5495709d5e958ba4b906",
+    "evidence_root": "0xf56ef6111c12a8dec34bf57a4258ae63576a0c16c78c5495709d5e958ba4b906"
+  },
+  "limitations": [
+    "Testnet reference USD valuations; no redemption or real-dollar claim.",
+    "Stress uses hypothetical external actor funding and attestor overrides ONLY on isolated Anvil forks.",
+    "Bounded SMT model plus concrete EVM tests; not a complete security audit."
+  ]
+}

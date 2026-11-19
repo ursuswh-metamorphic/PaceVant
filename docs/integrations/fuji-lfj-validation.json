@@ -1,0 +1,54 @@
+{
+  "date": "2026-11-19",
+  "source_main": "8e833d3",
+  "target": "refactor/modular-backend-frontend working tree",
+  "public_preflight": {
+    "chain_id": 43113,
+    "block_number": 61338502,
+    "block_hash": "0x25b667c966bbb8bb088dfc2566875e552ae3a2e24787a6359f88421d952a1a36",
+    "route": "LFJ_V1_DIRECT_VIA_LB_ROUTER_V2_2",
+    "input_lfj_usdc_base_units": ["100000", "1000000", "10000000"],
+    "output_wavax_base_units": ["12194140979091525", "121932098611418076", "1218390649647183771"],
+    "chainlink_status": ["WITHIN_HEARTBEAT", "WITHIN_HEARTBEAT"],
+    "usable_for_signing": false
+  },
+  "public_observer_through_unified_app": {
+    "block_number": 61338774,
+    "wallet_snapshot_status": "COMPLETE",
+    "verified_balance_types": ["NATIVE_TEST_AVAX", "CIRCLE_FUJI_TEST_USDC", "LFJ_FAUCET_USDC", "FUJI_TEST_WAVAX"],
+    "chainlink_status": ["WITHIN_HEARTBEAT", "WITHIN_HEARTBEAT"],
+    "witnet_status": "UNVERIFIED",
+    "pyth_status": "STALE",
+    "operator_auth_enforced": true,
+    "cached_request_preserved_block": true,
+    "used_for_sde_or_attestation": false
+  },
+  "anvil_fork": {
+    "source": "FUJI_43113",
+    "test": "backend/tests/execution/test_lfj_v2_fuji_fork.py",
+    "passed": 1,
+    "scenario_statuses": ["SUCCESS_SAFE", "SUCCESS_SAFE", "PROTECTED_REVERT"],
+    "v2_effect_evidence": "COMPLETE",
+    "final_phi_preflight": "PASS_WITH_ASSUMED_PRICES_IN_TEST_ONLY",
+    "source_writes": false
+  },
+  "tests": {
+    "python_full_checkpoint": {"passed": 219, "skipped_opt_in": 2},
+    "focused_after_observer_route_test": {"passed": 44},
+    "focused_oracle_and_sde_gates": {"passed": 43},
+    "solidity": {"passed": 59},
+    "frontend_syntax_files_passed": 9,
+    "eip712_cross_language_vectors": "PASS",
+    "configured_secret_scan": "PASS"
+  },
+  "existing_groq_local_pipeline": {
+    "provider": "groq",
+    "model": "openai/gpt-oss-20b",
+    "chain_id": 31337,
+    "proof": "VERIFIED",
+    "workflow_status": "CONFIRMED",
+    "actual_local_receipt": true
+  },
+  "public_lfj_signing": "ORACLE_TOKEN_IDENTITY_MISMATCH",
+  "public_deployment_or_swap_sent": false
+}

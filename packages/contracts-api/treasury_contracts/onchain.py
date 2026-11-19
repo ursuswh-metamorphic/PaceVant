@@ -7,6 +7,7 @@ from web3 import Web3
 
 from .crypto import keccak
 from .models import ApprovalChainState, BuiltTransaction
+from .rpc import read_functions
 
 
 def vault_abi():
@@ -31,8 +32,13 @@ def read_approval_state(
         address=Web3.to_checksum_address(build.vault_address), abi=vault_abi()
     )
 
+    names = ["activePolicyHash", "policyActive", "policyExpiresAt", "paused", "attestor", "usedNonce"]
+    values = read_functions(w3, [getattr(vault.functions, name)(*([int(build.nonce)] if name == "usedNonce" else []))
+        for name in names], block.number)
+    facts = dict(zip(names, values, strict=True))
+
     def call(name, *args):
-        return getattr(vault.functions, name)(*args).call(block_identifier=block.number)
+        return facts[name]
 
     return ApprovalChainState(
         chain_id=build.chain_id,

@@ -128,6 +128,12 @@ contract PolicyVault is Ownable, Pausable, ReentrancyGuard, EIP712 {
         allowedTokens[input] = true; allowedTokens[output] = true;
     }
     function _invalidate() internal { policyActive = false; emit PolicyUpdated(activePolicyHash, ++policyVersion); }
+    /// @notice Owner-reviewed RPC/simulation window. Changing it revokes existing policy/signatures.
+    function setApprovalTtl(uint256 seconds_) external onlyOwner {
+        if (seconds_ == 0 || seconds_ > 300) revert InvalidConfiguration();
+        maxApprovalTtl = seconds_;
+        _invalidate();
+    }
     function configurePolicy(bytes32 commitment, uint256 perSwap, uint256 perDay, uint256 slippageBps, uint256 expiresAt)
         external onlyOwner
     {
@@ -137,7 +143,7 @@ contract PolicyVault is Ownable, Pausable, ReentrancyGuard, EIP712 {
         ++policyVersion;
         if (v2Enabled) commitment = keccak256(abi.encode(commitment, v2ConfigHash, proofAdapter, trackedRegistryHash()));
         activePolicyHash = keccak256(abi.encode(commitment, policyVersion, address(this), block.chainid,
-            attestor, perSwap, perDay, slippageBps, expiresAt));
+            attestor, perSwap, perDay, slippageBps, expiresAt, maxApprovalTtl));
         maxPerSwap = perSwap; maxSpendPerDay = perDay; maxSlippageBps = slippageBps;
         policyExpiresAt = expiresAt; policyActive = true; emit PolicyUpdated(activePolicyHash, policyVersion);
     }

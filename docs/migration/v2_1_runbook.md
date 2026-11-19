@@ -1,24 +1,23 @@
 # V2.1 local use and explicit Fuji cutover
 
-**Current operator entrypoint:** [complete local/Fuji demo runbook](../demo/AVALANCHE_FUJI_DEMO.md). The `treasury:*` commands automate the deployment-derived mandate, controlled oracle heartbeat, separated service environments and real A/B workflow described below. See [environment status](../demo/ENVIRONMENT_STATUS.md) for missing owner inputs. Manual commands below remain useful for low-level integration; use isolated manifests/data directories.
+**Current operator entrypoint:** [complete local/Fuji demo runbook](../demo/AVALANCHE_FUJI_DEMO.md). The current runtime is one FastAPI with an injected execution module; see [single-app architecture](../architecture/UNIFIED_BACKEND.md). The `treasury:*` commands automate the deployment-derived mandate, controlled oracle heartbeat, separated service environments and real A/B workflow described below. See [environment status](../demo/ENVIRONMENT_STATUS.md) for missing owner inputs. Manual commands below remain useful for low-level integration; use isolated manifests/data directories.
 
 Install existing pinned dependencies and run checks:
 
 ```powershell
-npm ci --ignore-scripts
-npm run setup
 uv sync --locked
-npm run check
+uv run --locked python tools/contracts/bootstrap.py
+uv run --locked python tools/contracts/foundry.py forge test -vv
 uv run --locked python -m pytest -q
 ```
 
-For a new **local-only** V2 deployment, start Anvil with `npm run anvil`, then use an isolated `.env` profile/deployment path to preserve any existing V1 test deployment:
+For a new **local-only** V2 deployment, start Anvil with `uv run --locked python tools/contracts/foundry.py anvil --host 127.0.0.1 --chain-id 31337 --hardfork cancun`, then use an isolated `.env` profile/deployment path to preserve any existing V1 test deployment:
 
 ```powershell
-uv run --directory apps/execution-plane python -m app.cli deploy-local --v2-config ../../fixtures/v2_1/TEST_ONLY_policy.json
+uv run --locked python -m treasury_backend.operations.execution deploy-local --v2-config fixtures/v2_1/TEST_ONLY_policy.json
 ```
 
-The explicit file is mandatory to activate V2; normal V1 commands retain V1 behavior. The CLI creates a new ordinary immutable vault, configures proof policy, creates an owner-bound session and records actual session transaction/block in the deployment manifest. Local ephemeral keys remain under ignored execution data, and no secret is printed. For a different config path, it is resolved relative to the command's working directory (`apps/execution-plane` when using the above uv command).
+The explicit file is mandatory to activate V2; normal V1 commands retain V1 behavior. The CLI creates a new ordinary immutable vault, configures proof policy, creates an owner-bound session and records actual session transaction/block in the deployment manifest. Local ephemeral keys remain under ignored execution data, and no secret is printed. For a different config path, it is resolved relative to the command's working directory (repository root with the command above).
 
 Read `/v1/chain/context` from B, then update A's owner mandate with the actual new chain/vault/policy fields plus `proof_policy`, `registry` and `session_id`. All three must match independently verified chain state; missing or partial V2 config yields NO SIGN. Preserve existing owner exposure, daily spend, gas, TTL, stress and replan settings. Configure A's controlled oracle file with `TRUSTED_TEST_ORACLE`, the actual chain/vault, positive USD-e8 prices and a fresh timestamp. Follow the existing A/B credential runbook; owner, attestor and relayer must differ.
 
@@ -37,4 +36,4 @@ Database migration is idempotent and additive: existing workflows/decisions/atte
 
 Current Fuji status: **CONFIGURATION_READY / NOT_DEPLOYED**. The user subsequently delegated local preparation of demo settings; the dedicated attestor and six risk values are now filled, and the read-only doctor passes. See [current environment status](../demo/ENVIRONMENT_STATUS.md) for the exact demo values and external actions only if gas/RPC later proves insufficient. No V2 deployment/smoke transaction was sent during this preparation. `TEST_ONLY` configurations remain rejected both in proof generation for chain 43113 and by vault configuration on that chain.
 
-The prepared operator path is `npm run treasury:deploy:fuji`, followed by `npm run treasury:fuji` and `npm run treasury:demo:fuji` in another terminal. It creates an OWNER_APPROVED config from the delegated env values and uses a separate V2 manifest. These are actual fee-paying testnet transactions, unlike doctor or env initialization. Verify resulting addresses/config/session and retain actual receipts before claiming Fuji success. Low-level integration can still use `deploy-fuji --v2-config <owner-config.json>` with an explicit isolated profile. Do not reuse a V1 immutable address or migrate real funds.
+The prepared operator path is `uv run --locked treasury deploy --network fuji`, followed by `uv run --locked treasury serve --network fuji` and `uv run --locked treasury demo --network fuji` in another terminal. It creates an OWNER_APPROVED config from the delegated env values and uses a separate V2 manifest. These are actual fee-paying testnet transactions, unlike doctor or env initialization. Verify resulting addresses/config/session and retain actual receipts before claiming Fuji success. Low-level integration can still use `deploy-fuji --v2-config <owner-config.json>` with an explicit isolated profile. Do not reuse a V1 immutable address or migrate real funds.

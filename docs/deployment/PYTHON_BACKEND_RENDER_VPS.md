@@ -1,6 +1,6 @@
 # Backend Python trên Render hoặc VPS, không cần Node.js
 
-Backend A/B, CLI vận hành và build launcher hiện chạy bằng Python. Solidity giữ nguyên. Node/npm chỉ còn là lựa chọn cho các lệnh development cũ và golden tests đối chiếu `viem`; Docker backend không cài hoặc gọi Node.js/npm.
+Backend FastAPI thống nhất, CLI vận hành và build launcher hiện chạy bằng Python. Solidity giữ nguyên. Node/npm chỉ còn là lựa chọn cho các lệnh development cũ và golden tests đối chiếu `viem`; Docker backend không cài hoặc gọi Node.js/npm.
 
 ## Compile Solidity ở đâu?
 
@@ -19,10 +19,9 @@ Yêu cầu Python 3.12, `uv` và native Foundry **v1.7.1**. [Foundry installatio
 
 ```powershell
 uv sync --locked
-uv sync --project apps/execution-plane --locked
-uv run --locked python scripts/bootstrap.py
-uv run --locked python scripts/foundry.py forge build
-uv run --locked python scripts/treasury.py local
+uv run --locked python tools/contracts/bootstrap.py
+uv run --locked python tools/contracts/foundry.py forge build
+uv run --locked treasury local
 ```
 
 `bootstrap.py` tải OpenZeppelin 5.6.1 trực tiếp từ source commit `5fd1781b1454fd1ef8e722282f86f9293cacf256`, kiểm SHA-256 archive rồi cài vào ignored `lib/openzeppelin-contracts/`. Không cần `npm install`. Existing unrecognized source directories không bị ghi đè. Native binary resolver ưu tiên cấu hình explicit, PATH, `.tools/foundry`; có fallback tới native binaries trong node_modules cũ để máy development hiện tại tiếp tục hoạt động mà không gọi Node.
@@ -35,22 +34,22 @@ Một container, một instance:
 
 ```text
 Internet / HTTPS của Render hoặc reverse proxy VPS
-    → API A: 0.0.0.0:$PORT (mặc định 10000)
-       → API B: 127.0.0.1:8001
-          → Anvil fork: các cổng loopback tạm thời
-          → Fuji RPC và PolicyVault đã deploy
+    → Một FastAPI: 0.0.0.0:$PORT (mặc định 10000)
+       → Workflow -> execution bằng lời gọi module Python
+       → Anvil fork: các cổng loopback tạm thời
+       → Fuji RPC và PolicyVault đã deploy
 
 /var/data/control/fuji   : SQLite, proof queries, mandate/oracle, logs
 /var/data/execution     : B artifacts, SQLite và raw-transaction journal
 ```
 
-A/B vẫn là hai process Python có trách nhiệm riêng; entrypoint Python quản lý vòng đời và dừng stack khi một process thoát. Chỉ A public, B và Anvil không public. `SIGTERM` được xử lý để cleanup process con. API `/healthz` là health check; readiness không bảo đảm mọi swap sẽ vượt qua policy/session/exposure gates.
+Chỉ một process Uvicorn phục vụ workflow và execution modules; launcher Python quản lý heartbeat/vòng đời. Một cổng API public, Anvil fork chỉ loopback. Endpoint execution nằm dưới `/execution` và có auth riêng. `SIGTERM` được xử lý để cleanup process con. API `/healthz` là health check; readiness không bảo đảm mọi swap sẽ vượt qua policy/session/exposure gates.
 
 Trong runtime container chỉ cung cấp private key **attestor và relayer**, không cung cấp owner/deployer private key. Public owner lấy từ manifest và được kiểm tra lại với vault on-chain. Container từ chối khởi động nếu nhận owner private key qua các biến đã biết. Owner deploy/renew policy/session từ máy quản trị riêng; giữ nguyên giới hạn quyền owner của vault.
 
 ## Chuẩn bị trước khi deploy backend
 
-1. Trên máy quản trị, deploy V2 Fuji bằng `uv run --locked python scripts/treasury.py deploy --network fuji`. Đây là giao dịch testnet có phí. Các lần thay đổi backend thông thường không cần deploy contract mới.
+1. Trên máy quản trị, deploy V2 Fuji bằng `uv run --locked treasury deploy --network fuji`. Đây là giao dịch testnet có phí. Các lần thay đổi backend thông thường không cần deploy contract mới.
 2. Giữ manifest thật `deployments/treasury-fuji-v2.json`. Hiện workspace **chưa deploy V2 Fuji**, nên chưa có manifest này để chạy server Fuji.
 3. Tạo file env runtime riêng từ [deploy/runtime.env.example](../../deploy/runtime.env.example). Điền actual attestor/relayer keys, ba service tokens và các nonsecret risk settings khớp policy đã deploy. **Không upload nguyên root `.env`**, vì file đó chứa owner key và các alias `${...}` chỉ được xử lý trong local dotenv.
 4. Cấp persistent storage. SQLite, proof/audit và raw-tx journal phải còn sau restart/redeploy. Không xóa chúng để giải quyết pending/reorg hoặc policy quarantine.
@@ -71,7 +70,7 @@ Entrypoint không deploy hợp đồng, không tự tạo session mới và khô
 
 ## Render
 
-Render có [Docker Web Services](https://render.com/docs/docker) và hỗ trợ [FastAPI](https://render.com/docs/deploy-fastapi). Docker phù hợp với dự án này vì có thể đóng gói native Anvil và artifacts cùng hai Python environments. Native Python runtime cũng có thể cài các binary tương tự, nhưng Docker giúp giữ toolchain thống nhất.
+Render có [Docker Web Services](https://render.com/docs/docker) và hỗ trợ [FastAPI](https://render.com/docs/deploy-fastapi). Docker phù hợp với dự án này vì có thể đóng gói native Anvil và artifacts một Python environment dùng chung. Native Python runtime cũng có thể cài các binary tương tự, nhưng Docker giúp giữ toolchain thống nhất.
 
 Cấu hình dịch vụ:
 
@@ -79,9 +78,9 @@ Cấu hình dịch vụ:
 |---|---|
 | Service | Web Service, Docker runtime, repo root |
 | Dockerfile | `Dockerfile` |
-| Docker command | Giữ CMD mặc định: `python scripts/container.py` |
+| Docker command | Giữ CMD mặc định: `python -m treasury_backend.operations.container` |
 | Health check | `/healthz` |
-| Public port | Render cấp `$PORT`; entrypoint bind A lên `0.0.0.0` |
+| Public port | Render cấp `$PORT`; entrypoint bind backend lên `0.0.0.0` |
 | Persistent disk | Mount `/var/data` |
 | Instances | **1**, không autoscale với SQLite/journal hiện tại |
 | Manifest | [Secret file](https://render.com/docs/configure-environment-variables#secret-files) tên `treasury-fuji-v2.json`; `TREASURY_FUJI_DEPLOYMENT_FILE=/etc/secrets/treasury-fuji-v2.json` |
@@ -110,11 +109,11 @@ docker run -d --name pacevant-backend --restart unless-stopped \
   pacevant-backend
 ```
 
-Dùng reverse proxy HTTPS trên VPS trỏ đến `127.0.0.1:10000`. Không mở B/Anvil ra Internet. Runtime không cần cài Node, npm, Rust compiler hoặc Solidity compiler trên host; Docker image đã mang Python, Anvil và precompiled artifacts.
+Dùng reverse proxy HTTPS trên VPS trỏ đến `127.0.0.1:10000`. Không mở Anvil fork ra Internet; không còn B API server riêng. Runtime không cần cài Node, npm, Rust compiler hoặc Solidity compiler trên host; Docker image đã mang Python, Anvil và precompiled artifacts.
 
 ## Vận hành sau deployment
 
-- Session mặc định chỉ 1 giờ. Owner chọn thời hạn phù hợp trước deploy hoặc gia hạn từ máy quản trị: `uv run --locked python scripts/treasury.py renew-session --network fuji`. Cập nhật manifest mới trên host/Render và restart backend vì B cache session lúc startup. Global/day counters không reset khi đổi session.
+- Session mặc định chỉ 1 giờ. Owner chọn thời hạn phù hợp trước deploy hoặc gia hạn từ máy quản trị: `uv run --locked treasury renew-session --network fuji`. Cập nhật manifest mới trên host/Render và restart backend vì execution module cache session lúc startup. Global/day counters không reset khi đổi session.
 - Khi đổi policy/source oracle, owner thực hiện cấu hình phù hợp rồi đồng bộ manifest/mandate/server settings. Không đưa owner key lên web service để tự gia hạn.
 - Oracle trong entrypoint vẫn là controlled demo heartbeat. Sau khi merge oracle thực tế, thay writer/interface theo [oracle merge review](../migration/v2_1_readiness_review.md); không để demo writer ghi đè dữ liệu thật.
 - Backup volume bằng phương thức phù hợp SQLite và giữ raw journal/audit. Kiến trúc này chưa có shared PostgreSQL hoặc multi-instance locking để chạy HA/autoscaling.
@@ -122,3 +121,5 @@ Dùng reverse proxy HTTPS trên VPS trỏ đến `127.0.0.1:10000`. Không mở 
 ## Trạng thái xác minh
 
 Native compile và kiểm thử Python/local đã chạy trên máy development. Full operator smoke có test chạy khi PATH không có Node. Dockerfile và container preflight tests đã được chuẩn bị; **Docker Desktop Linux engine trên máy này chưa chạy, nên chưa build/run được image local hoặc xác minh một deployment Render thật**. CI có job build image và kiểm tra không có Node/npm/Forge ở runtime; job này chỉ có kết quả sau khi chạy trên CI. Không có giao dịch Fuji hay thay đổi dịch vụ hosting trong lần chuyển toolchain này.
+
+Frontend hi?n deploy ri?ng: xem [h??ng d?n backend/frontend](../../deploy/README.md) v? [frontend](../../frontend/README.md). Backend image kh?ng ch?a dashboard; d?ng Compose/Nginx ho?c static hosting + explicit CORS.

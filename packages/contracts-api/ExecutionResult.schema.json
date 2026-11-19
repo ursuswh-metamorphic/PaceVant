@@ -1,1 +1,239 @@
-{"$defs":{"SessionContext":{"additionalProperties":false,"properties":{"active":{"title":"Active","type":"boolean"},"block_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Block Hash","type":"string"},"block_number":{"minimum":0,"title":"Block Number","type":"integer"},"expires_at":{"minimum":0,"title":"Expires At","type":"integer"},"global_limit_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Global Limit Usd E8","type":"string"},"global_used_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Global Used Usd E8","type":"string"},"limit_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Limit Usd E8","type":"string"},"policy_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Policy Hash","type":"string"},"session_id":{"pattern":"^0x[0-9a-f]{64}$","title":"Session Id","type":"string"},"starts_at":{"minimum":0,"title":"Starts At","type":"integer"},"timestamp":{"minimum":0,"title":"Timestamp","type":"integer"},"used_usd_e8":{"pattern":"^(0|[1-9][0-9]*)$","title":"Used Usd E8","type":"string"}},"required":["session_id","policy_hash","starts_at","expires_at","active","limit_usd_e8","used_usd_e8","global_limit_usd_e8","global_used_usd_e8","block_number","block_hash","timestamp"],"title":"SessionContext","type":"object"}},"additionalProperties":false,"properties":{"actual_token_in_delta_base_units":{"anyOf":[{"pattern":"^-?(0|[1-9][0-9]*)$","type":"string"},{"type":"null"}],"default":null,"title":"Actual Token In Delta Base Units"},"actual_token_out_delta_base_units":{"anyOf":[{"pattern":"^-?(0|[1-9][0-9]*)$","type":"string"},{"type":"null"}],"default":null,"title":"Actual Token Out Delta Base Units"},"artifact_refs":{"items":{"type":"string"},"title":"Artifact Refs","type":"array"},"block_hash":{"anyOf":[{"pattern":"^0x[0-9a-f]{64}$","type":"string"},{"type":"null"}],"default":null,"title":"Block Hash"},"block_number":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":null,"title":"Block Number"},"build_id":{"title":"Build Id","type":"string"},"chain_id":{"title":"Chain Id","type":"integer"},"confirmations":{"anyOf":[{"minimum":0,"type":"integer"},{"type":"null"}],"default":null,"title":"Confirmations"},"decision_id":{"title":"Decision Id","type":"string"},"event_refs":{"items":{"type":"string"},"title":"Event Refs","type":"array"},"gas_used":{"anyOf":[{"pattern":"^(0|[1-9][0-9]*)$","type":"string"},{"type":"null"}],"default":null,"title":"Gas Used"},"proof_session":{"anyOf":[{"$ref":"#/$defs/SessionContext"},{"type":"null"}],"default":null},"revert_reason":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"title":"Revert Reason"},"status":{"enum":["SUBMITTED","PENDING","CONFIRMED","REVERTED","FAILED_TO_SUBMIT","STALE_REQUIRES_REEVALUATION"],"title":"Status","type":"string"},"tx_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Tx Hash","type":"string"}},"required":["build_id","decision_id","chain_id","tx_hash","status"],"title":"ExecutionResult","type":"object"}
+{
+  "$defs": {
+    "SessionContext": {
+      "additionalProperties": false,
+      "properties": {
+        "session_id": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "policy_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Policy Hash",
+          "type": "string"
+        },
+        "starts_at": {
+          "minimum": 0,
+          "title": "Starts At",
+          "type": "integer"
+        },
+        "expires_at": {
+          "minimum": 0,
+          "title": "Expires At",
+          "type": "integer"
+        },
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "limit_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Limit Usd E8",
+          "type": "string"
+        },
+        "used_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Used Usd E8",
+          "type": "string"
+        },
+        "global_limit_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Global Limit Usd E8",
+          "type": "string"
+        },
+        "global_used_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Global Used Usd E8",
+          "type": "string"
+        },
+        "block_number": {
+          "minimum": 0,
+          "title": "Block Number",
+          "type": "integer"
+        },
+        "block_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Block Hash",
+          "type": "string"
+        },
+        "timestamp": {
+          "minimum": 0,
+          "title": "Timestamp",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "session_id",
+        "policy_hash",
+        "starts_at",
+        "expires_at",
+        "active",
+        "limit_usd_e8",
+        "used_usd_e8",
+        "global_limit_usd_e8",
+        "global_used_usd_e8",
+        "block_number",
+        "block_hash",
+        "timestamp"
+      ],
+      "title": "SessionContext",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "block_hash": {
+      "anyOf": [
+        {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Block Hash"
+    },
+    "confirmations": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confirmations"
+    },
+    "proof_session": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SessionContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "build_id": {
+      "title": "Build Id",
+      "type": "string"
+    },
+    "decision_id": {
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "chain_id": {
+      "title": "Chain Id",
+      "type": "integer"
+    },
+    "tx_hash": {
+      "pattern": "^0x[0-9a-f]{64}$",
+      "title": "Tx Hash",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "SUBMITTED",
+        "PENDING",
+        "CONFIRMED",
+        "REVERTED",
+        "FAILED_TO_SUBMIT",
+        "STALE_REQUIRES_REEVALUATION"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "block_number": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Block Number"
+    },
+    "gas_used": {
+      "anyOf": [
+        {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Gas Used"
+    },
+    "actual_token_in_delta_base_units": {
+      "anyOf": [
+        {
+          "pattern": "^-?(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Actual Token In Delta Base Units"
+    },
+    "actual_token_out_delta_base_units": {
+      "anyOf": [
+        {
+          "pattern": "^-?(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Actual Token Out Delta Base Units"
+    },
+    "revert_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revert Reason"
+    },
+    "event_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Event Refs",
+      "type": "array"
+    },
+    "artifact_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Artifact Refs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "build_id",
+    "decision_id",
+    "chain_id",
+    "tx_hash",
+    "status"
+  ],
+  "title": "ExecutionResult",
+  "type": "object"
+}

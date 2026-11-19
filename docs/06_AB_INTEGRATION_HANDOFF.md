@@ -1,5 +1,7 @@
 # Bàn giao Execution Plane B cho Control Plane A
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 Phiên bản interface: **1.1**. Ngày rà soát: **16/11/2026**. Đối tượng: người A và AI hỗ trợ merge/implement phần A.
 
 Tài liệu này mô tả **hành vi code hiện tại**, các bước ghép và tiêu chí nghiệm thu. Nguồn chuẩn vẫn là [03_SHARED_INTEGRATION_CONTRACT.md](03_SHARED_INTEGRATION_CONTRACT.md); ownership và yêu cầu A/B nằm trong guide 01/02. System Design v1.0 là nền kiến trúc. Không dùng tài liệu PoC lịch sử làm API hiện hành.

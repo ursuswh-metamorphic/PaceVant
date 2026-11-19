@@ -1,6 +1,6 @@
 {
   "contract_version": "1.1",
-  "status": "B_AND_SDK_PROTOCOL_READY_A_IMPLEMENTATION_PENDING",
+  "status": "LOCAL_A_B_V2_1_INTEGRATED_FUJI_RECEIPT_PENDING",
   "read_first": [
     "docs/03_SHARED_INTEGRATION_CONTRACT.md",
     "docs/01_GUIDE_PERSON_A_CONTROL_PLANE.md",
@@ -14,31 +14,84 @@
     "version": "1.1.0",
     "import_namespace": "treasury_contracts",
     "project": "packages/contracts-api",
-    "install_from_a_project": "uv add ../../packages/contracts-api",
+    "install_from_a_project": "uv sync --locked (repository root)",
     "client": "treasury_contracts.client.ExecutionClient",
     "error": "treasury_contracts.client.ExecutionAPIError",
     "readonly_preflight": "treasury_contracts.onchain.read_approval_state",
-    "do_not_import": "apps/execution-plane/app from the A interpreter"
+    "do_not_import": "treasury_backend.modules.execution from control business modules"
   },
   "ownership": {
-    "A": ["apps/control-plane", "apps/dashboard"],
-    "B": ["apps/execution-plane", "contracts"],
-    "shared": ["packages/contracts-api", "fixtures", "tests/integration", "package.json", "package-lock.json", ".env.example", ".github/workflows"]
+    "control": [
+      "backend/src/treasury_backend/modules",
+      "backend/src/treasury_backend/api/control"
+    ],
+    "execution": [
+      "backend/src/treasury_backend/modules/execution",
+      "backend/src/treasury_backend/api/execution.py"
+    ],
+    "frontend": [
+      "frontend"
+    ],
+    "shared": [
+      "packages/contracts-api",
+      "contracts",
+      "backend/src/treasury_backend/core",
+      "backend/src/treasury_backend/config",
+      "backend/src/treasury_backend/operations",
+      "backend/tests/integration",
+      "fixtures",
+      "pyproject.toml",
+      "uv.lock",
+      ".github/workflows"
+    ]
   },
   "network": {
     "local_chain_id": 31337,
     "fuji_chain_id": 43113,
     "a_base_url": "http://127.0.0.1:8000",
-    "b_base_url": "http://127.0.0.1:8001"
+    "b_base_url": "http://127.0.0.1:8001",
+    "backend_base_url": "http://127.0.0.1:8000",
+    "execution_base_url": "http://127.0.0.1:8000/execution"
   },
   "routes": [
-    {"method":"GET", "path":"/v1/chain/context", "response_model":"ChainContext"},
-    {"method":"GET", "path":"/v1/portfolio/onchain-snapshot", "response_model":"OnchainSnapshot"},
-    {"method":"POST", "path":"/v1/build", "request_model":"TransactionProposal", "response_model":"BuiltTransaction"},
-    {"method":"POST", "path":"/v1/simulations", "request_model":"SimulationRequest", "response_model":"SimulationEvidence"},
-    {"method":"POST", "path":"/v1/executions", "request_model":"ExecutionRequest", "response_model":"ExecutionSubmission"},
-    {"method":"GET", "path":"/v1/executions/{tx_hash}", "response_model":"ExecutionResult"},
-    {"method":"GET", "path":"/v1/artifacts/{content_hash}", "response_format":"RFC_8785_CANONICAL_JSON_BYTES"}
+    {
+      "method": "GET",
+      "path": "/v1/chain/context",
+      "response_model": "ChainContext"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/portfolio/onchain-snapshot",
+      "response_model": "OnchainSnapshot"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/build",
+      "request_model": "TransactionProposal",
+      "response_model": "BuiltTransaction"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/simulations",
+      "request_model": "SimulationRequest",
+      "response_model": "SimulationEvidence"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/executions",
+      "request_model": "ExecutionRequest",
+      "response_model": "ExecutionSubmission"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/executions/{tx_hash}",
+      "response_model": "ExecutionResult"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/artifacts/{content_hash}",
+      "response_format": "RFC_8785_CANONICAL_JSON_BYTES"
+    }
   ],
   "headers": {
     "auth": "X-API-Key",
@@ -76,7 +129,7 @@
     "max_replans_a_owned": 2
   },
   "important_semantics": [
-    "A and B run as separate processes; only the shared SDK crosses the import boundary",
+    "Canonical backend has one FastAPI/Uvicorn; workflow calls injected execution module directly. Separate factories are retained only for legacy protocol consumers/tests.",
     "OnchainSnapshot has no prices or exposure; A adds trusted pricing/history",
     "Mandate version is not the same counter as Vault policyVersion",
     "Build nonce is allocated by B, not the relayer transaction count",
@@ -86,8 +139,8 @@
     "consumer probe is a local protocol test, not A SDE authorization"
   ],
   "required_paths": [
-    "apps/execution-plane/pyproject.toml",
-    "apps/execution-plane/uv.lock",
+    "pyproject.toml",
+    "uv.lock",
     "contracts/src/PolicyVault.sol",
     "contracts/test/PolicyVault.t.sol",
     "contracts/test/PDRGoldenVector.t.sol",
@@ -102,22 +155,33 @@
     "packages/contracts-api/openapi.json",
     "fixtures/eip712_golden/vector.json",
     "fixtures/eip712_golden/manifest.canonical.json",
-    "tests/integration/eip712-golden.mjs",
-    "tests/integration/a_consumer_probe.py",
+    "backend/tests/integration/eip712-golden.mjs",
+    "backend/tests/integration/a_consumer_probe.py",
     ".env.example",
     "docs/06_AB_INTEGRATION_HANDOFF.md",
     "docs/07_AI_MERGE_PLAYBOOK.md",
     "docs/08_AB_COMPATIBILITY_AUDIT.md"
   ],
-  "future_a_paths_not_implemented_by_b": ["apps/control-plane", "apps/dashboard"],
   "commands": {
-    "install_node": "npm ci --ignore-scripts",
-    "setup_b": "npm run setup",
-    "all_b_checks": "npm run check",
-    "consumer_contract": "npm run test:consumer",
-    "local_stack": "npm run local",
-    "schema_openapi_abi_export": "npm run schemas",
-    "a_tests_after_merge": "uv run --directory apps/control-plane pytest -q"
+    "setup_backend": "uv sync --locked",
+    "compile": "uv run --locked python tools/contracts/foundry.py forge build",
+    "tests": "uv run --locked python -m pytest -q",
+    "consumer_contract": "uv run --locked python -m pytest backend/tests/execution/test_consumer_contract.py -q",
+    "local_stack": "uv run --locked treasury local",
+    "schema_openapi_abi_export": "uv run --locked python -m treasury_backend.operations.execution schemas",
+    "optional_vectors": "npm ci --ignore-scripts && npm run test:integration"
   },
-  "pending_gates": ["A_SHARED_REVIEW", "A_SDE_SHIELD_RISK_TESTS", "REAL_A_ATTESTOR_INTEGRATION", "FULL_A_B_WORKFLOW", "FUJI_FORK_AND_TRANSACTION_RECEIPT"]
+  "pending_gates": [
+    "REAL_ORACLE_INTEGRATION",
+    "FUJI_FORK_AND_TRANSACTION_RECEIPT",
+    "HOSTED_DEPLOYMENT_SMOKE"
+  ],
+  "scope": "V1 wire compatibility manifest; V2.1 models and proof protocol are additionally defined in treasury_contracts.v2",
+  "runtime": {
+    "entrypoint": "treasury_backend.api.app:create_app",
+    "api_processes": 1,
+    "internal_transport": "IN_PROCESS_MODULE_CALL",
+    "execution_prefix": "/execution",
+    "legacy_standalone_contract_retained": true
+  }
 }

@@ -1,12 +1,12 @@
 # Shared integration contract v1.1
 
+SDK 1.2.0 accepts `adapter_version=lfj-v1-fuji-v1` alongside `mock-swap-v1`. Existing approvals, EIP-712 domains and evidence schema retain their wire encoding. Consumers that validate the adapter enum need SDK 1.2.0 for LFJ builds.
+
 Schema and EIP-712 follow `docs/03_SHARED_INTEGRATION_CONTRACT.md`. This directory is shared ownership: A and B must review changes before merging.
 
-Install from A's Python project:
+The monorepo backend installs this package automatically with root `uv sync --locked`. An independent consumer can install the package directory/wheel without importing backend internals. See [backend module boundaries](../../backend/MODULES.md).
 
-```powershell
-uv add ../../packages/contracts-api
-```
+`proof.py` is the single pure V2.1 proof engine; `v2.py` contains additive V2 models/hashes, `onchain_v2.py` read-only state helpers and `toolchain.py` native binary discovery. Keep this library independent of `treasury_backend`. The v1.1 package version is retained for wire compatibility; ApprovalV2 uses EIP-712 domain version 2.
 
 ```python
 from treasury_contracts import TransactionProposal, SignedPDR

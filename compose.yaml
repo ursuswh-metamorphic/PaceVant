@@ -1,0 +1,31 @@
+services:
+  backend:
+    build: .
+    env_file: deploy/runtime.env
+    environment:
+      PORT: "10000"
+      PACEVANT_SERVE_FRONTEND: "false"
+    volumes:
+      - treasury-data:/var/data
+      - ./deploy/treasury-fuji-v2.json:/etc/secrets/treasury-fuji-v2.json:ro
+    expose: ["10000"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/app/.venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:10000/healthz', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      BACKEND_URL: http://backend:10000
+    ports: ["127.0.0.1:8080:80"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  treasury-data:

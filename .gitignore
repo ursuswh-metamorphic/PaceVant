@@ -19,6 +19,7 @@ data/
 
 # Upstream PGS research/reference repository; local-only, never push
 /Proof-Gated-Signing/
+Proof-Gated-Signing
 /cache/
 deployments/treasury-local-v2.json
 /.tools/

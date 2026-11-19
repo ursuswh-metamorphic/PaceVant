@@ -1,1 +1,89 @@
-{"additionalProperties":false,"description":"B's chain facts; A adds trusted prices/history to its PortfolioSnapshot.","properties":{"allowance_base_units":{"pattern":"^(0|[1-9][0-9]*)$","title":"Allowance Base Units","type":"string"},"block_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Block Hash","type":"string"},"block_number":{"title":"Block Number","type":"integer"},"chain_id":{"title":"Chain Id","type":"integer"},"daily_spent_usdc_base_units":{"pattern":"^(0|[1-9][0-9]*)$","title":"Daily Spent Usdc Base Units","type":"string"},"max_spend_per_day_base_units":{"pattern":"^(0|[1-9][0-9]*)$","title":"Max Spend Per Day Base Units","type":"string"},"policy_hash":{"pattern":"^0x[0-9a-f]{64}$","title":"Policy Hash","type":"string"},"provenance":{"const":"CHAIN_READS_NO_PRICE_OR_EXPOSURE_ASSERTION","title":"Provenance","type":"string"},"snapshot_id":{"title":"Snapshot Id","type":"string"},"timestamp":{"title":"Timestamp","type":"integer"},"usdc_base_units":{"pattern":"^(0|[1-9][0-9]*)$","title":"Usdc Base Units","type":"string"},"utc_day":{"title":"Utc Day","type":"integer"},"vault_address":{"pattern":"^0x[0-9a-fA-F]{40}$","title":"Vault Address","type":"string"},"wavax_base_units":{"pattern":"^(0|[1-9][0-9]*)$","title":"Wavax Base Units","type":"string"}},"required":["snapshot_id","chain_id","vault_address","block_number","block_hash","timestamp","policy_hash","usdc_base_units","wavax_base_units","allowance_base_units","utc_day","daily_spent_usdc_base_units","max_spend_per_day_base_units","provenance"],"title":"OnchainSnapshot","type":"object"}
+{
+  "additionalProperties": false,
+  "description": "B's chain facts; A adds trusted prices/history to its PortfolioSnapshot.",
+  "properties": {
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "chain_id": {
+      "title": "Chain Id",
+      "type": "integer"
+    },
+    "vault_address": {
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "title": "Vault Address",
+      "type": "string"
+    },
+    "block_number": {
+      "title": "Block Number",
+      "type": "integer"
+    },
+    "block_hash": {
+      "pattern": "^0x[0-9a-f]{64}$",
+      "title": "Block Hash",
+      "type": "string"
+    },
+    "timestamp": {
+      "title": "Timestamp",
+      "type": "integer"
+    },
+    "policy_hash": {
+      "pattern": "^0x[0-9a-f]{64}$",
+      "title": "Policy Hash",
+      "type": "string"
+    },
+    "usdc_base_units": {
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "title": "Usdc Base Units",
+      "type": "string"
+    },
+    "wavax_base_units": {
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "title": "Wavax Base Units",
+      "type": "string"
+    },
+    "allowance_base_units": {
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "title": "Allowance Base Units",
+      "type": "string"
+    },
+    "utc_day": {
+      "title": "Utc Day",
+      "type": "integer"
+    },
+    "daily_spent_usdc_base_units": {
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "title": "Daily Spent Usdc Base Units",
+      "type": "string"
+    },
+    "max_spend_per_day_base_units": {
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "title": "Max Spend Per Day Base Units",
+      "type": "string"
+    },
+    "provenance": {
+      "const": "CHAIN_READS_NO_PRICE_OR_EXPOSURE_ASSERTION",
+      "title": "Provenance",
+      "type": "string"
+    }
+  },
+  "required": [
+    "snapshot_id",
+    "chain_id",
+    "vault_address",
+    "block_number",
+    "block_hash",
+    "timestamp",
+    "policy_hash",
+    "usdc_base_units",
+    "wavax_base_units",
+    "allowance_base_units",
+    "utc_day",
+    "daily_spent_usdc_base_units",
+    "max_spend_per_day_base_units",
+    "provenance"
+  ],
+  "title": "OnchainSnapshot",
+  "type": "object"
+}

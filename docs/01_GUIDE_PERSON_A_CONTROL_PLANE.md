@@ -1,5 +1,7 @@
 # AI Treasury Security — Hướng dẫn triển khai cho Người A
 
+> Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
+
 **Vai trò:** AI & Security Control Plane (chủ sở hữu logic quyết định)  
 **Phiên bản:** Team split v1.1 — 16/11/2026  
 **Deadline demo:** 20/11/2026 (21/11 dự phòng/submission)  

@@ -11,7 +11,7 @@ A gọi B qua HTTP bằng SDK `treasury_contracts` v1.1. B dùng chain ID `31337
 5. Tạo oracle local đúng chain và Vault trong `PACEVANT_ORACLE_FILE`. JSON gồm `chain_id`, `vault_address`, `price_usdc_usd_e8`, `price_wavax_usd_e8`, `price_source` và `price_timestamp`. Fixture địa phương dùng `"TRUSTED_TEST_ORACLE"`, `"100000000"` USDC, `"2000000000"` WAVAX và Unix timestamp giây lúc cập nhật giá. A chặn giá cũ hơn 60 giây. Cập nhật giá ngay trước khi gọi workflow.
 6. Chạy `uv run --locked --env-file .env.local python scripts/serve.py`. Gọi `POST /v1/workflows/start` với Bearer operator token, `goal` là `Buy WAVAX with 500 USDC` và `mandate_id` là `mandate_demo`. Dùng `GET /v1/workflows/{id}` để xem timeline và đối chiếu receipt. Dashboard trên cổng 8000 dùng profile `MOCK`. Với profile `LOCAL`, dùng API hoặc Swagger.
 
-`npm run test:ab` khởi tạo deployment tạm, hai tiến trình API và credential ngắn hạn tự động. Bộ test chạy swap hợp lệ, replan từ 500 xuống 200 USDC, từ chối oracle cũ và chặn ký lần hai khi receipt đang chờ. [Ca kiểm thử A+B](../apps/execution-plane/tests/test_ab_integration.py)
+`npm run test:ab` khởi tạo deployment tạm, hai tiến trình API và credential ngắn hạn tự động. Bộ test chạy swap hợp lệ, replan từ 500 xuống 200 USDC, từ chối oracle cũ và chặn ký lần hai khi receipt đang chờ. [Ca kiểm thử A+B](../backend/tests/execution/test_ab_integration.py)
 
 ## Điều kiện ký và xác nhận
 

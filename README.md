@@ -1,75 +1,72 @@
-# PaceVant · AI Treasury Security V2.1
+# PaceVant — AI Treasury Security V2.1
 
-A lập kế hoạch, kiểm tra alignment/economic risk, chứng minh Check/Compile và ký ApprovalV2. B dựng calldata, mô phỏng exact guarded path trên Anvil fork, gửi giao dịch qua `PolicyVault` và theo dõi receipt. Vault enforce signed Phi và ngân sách rủi ro phiên/ngày atomically. Hai dịch vụ dùng chung SDK/schema v1.1 với các model V2 bổ sung; EIP-712 domain của ApprovalV2 là version **2**.
+Cập nhật 20/11/2026: [demo toàn hệ thống trên Fuji thật](docs/demo/FUJI_LIVE_END_TO_END.md) dùng Circle USDC/WAVAX, direct Chainlink và ba ví đã cấu hình. [Report nghiệm thu](docs/integrations/fuji-live-validation.json) có receipt public, proof và các phép kiểm âm.
 
-**Bắt đầu tại [hướng dẫn chạy local và Avalanche Fuji](docs/demo/AVALANCHE_FUJI_DEMO.md).** Xem [trạng thái `.env`](docs/demo/ENVIRONMENT_STATUS.md) và [luồng xử lý, ví, vai trò Python/Node.js](docs/CURRENT_SYSTEM_FLOW.md). Máy hiện tại đã được điền đủ cấu hình demo theo ủy quyền người dùng, doctor báo ready; chưa deploy V2.1 lên Fuji. Đây là hệ thống mock testnet/research chưa audit.
 
-Backend/build launcher hiện dùng Python và native Foundry, không cần Node.js để deploy/chạy backend. [Render/VPS và Docker không Node.js](docs/deployment/PYTHON_BACKEND_RENDER_VPS.md) giải thích build-time Solidity compiler, runtime Anvil, persistent disk và env riêng cho server. npm/viem được giữ cho công cụ development và cross-language tests.
+Đọc trước: [System design V2.1 hiện tại](docs/AI_Treasury_Security_System_Design_v2.1.md). Live Fuji đã xác nhận workflow đầy đủ; MOCK/LOCAL còn để regression. [Audit cũ](docs/audit/V2_1_READINESS_REVIEW.md) giữ checkpoint trước live cutover. Production/hosting vẫn cần kiểm chứng riêng.
 
-## Chạy toàn bộ V2.1
+Hệ thống treasury dùng Python để lập kế hoạch, kiểm tra alignment/risk, chứng minh điều kiện an toàn, ký và gửi giao dịch qua Solidity `PolicyVault`. Frontend là HTML/CSS/JavaScript chạy trong trình duyệt. Backend không cần Node.js.
 
-Python 3.12, `uv` và native Foundry v1.7.1. Chạy tại root:
+Repository được chia theo năng lực nghiệp vụ để nhiều người phát triển song song. Các module **control/workflow** và **execution** chạy trong **một ứng dụng FastAPI, một process Uvicorn, một cổng API**, dùng chung một package Python, `pyproject.toml`, `uv.lock` và `.venv`. Luồng nội bộ gọi module trực tiếp, không chạy execution server riêng.
+
+## Bắt đầu
+
+Máy phát triển cần Python 3.12, uv và native Foundry v1.7.1. Chạy từ root:
 
 ```powershell
 uv sync --locked
-uv sync --project apps/execution-plane --locked
-uv run --locked python scripts/bootstrap.py
-uv run --locked python scripts/treasury.py init-env
-uv run --locked python scripts/treasury.py local --once
+uv run --locked python tools/contracts/bootstrap.py
+uv run --locked treasury init-env
+uv run --locked treasury local --once
 ```
 
-Smoke tự compile/deploy Anvil, chạy A+B+oracle, thực hiện workflow qua proof/attestor thật đến receipt và dừng các tiến trình do nó tạo. Không dùng khóa Fuji. Cài native Foundry qua release binaries/foundryup hoặc dùng Docker theo runbook hosting. Máy development đã cài npm trước đây vẫn có thể dùng trực tiếp native binaries sẵn có mà không chạy Node.
+Lệnh cuối chạy toàn bộ workflow trên Anvil local tới receipt rồi dừng các process do nó tạo. Dùng `uv run --locked treasury local` để giữ dashboard tại http://127.0.0.1:8000. Nhập `PACEVANT_OPERATOR_TOKEN` của máy vào form kết nối; token chỉ nằm trong bộ nhớ tab. Goal mẫu: `Buy WAVAX with 200 USDC`.
 
-Để giữ dashboard hoạt động:
+Xem UI/logic ở MOCK, không cần chain: `uv run --locked python -m treasury_backend.api.serve`. MOCK dùng fixture V1, không chạy proof/Phi/session V2.1. Dùng LOCAL để kiểm chứng đầy đủ lõi V2.1.
 
-```powershell
-uv run --locked python scripts/treasury.py local
+## Cấu trúc để phát triển
+
+```text
+backend/
+  src/treasury_backend/
+    modules/         planning, alignment, portfolio, oracle, risk, proof,
+                     decision, signing, persistence, experience, workflows,
+                     execution/{chain,transaction,simulation,evidence,relaying}
+    core/            DTO ứng dụng, lỗi, JSON nghiêm ngặt
+    config/          đọc và kiểm tra settings
+    api/             HTTP, auth, lifecycle
+    operations/      CLI, profile, deploy, quản lý process
+  tests/             control, execution, integration, architecture
+frontend/            assets + src/{api,shared,features}
+contracts/           Solidity source, tests, deploy helper
+packages/contracts-api/  protocol SDK, schemas, hashes, proof engine dùng chung
+tools/               contracts, quality, evaluation, operations
+deploy/              cấu hình runtime mẫu; compose.yaml ở root
+docs/                kiến trúc, luồng, demo, bảo mật, vận hành
+scripts/             entrypoint tương thích lệnh cũ
 ```
 
-Mở [dashboard](http://127.0.0.1:8000), nhập `PACEVANT_OPERATOR_TOKEN` từ `.env` trên máy. Token được giữ trong bộ nhớ tab. Goal mẫu: `Buy WAVAX with 200 USDC`. Chiều bán cần owner cho phép cap WAVAX riêng. Ctrl+C dừng stack. Service token thiếu được init sinh cục bộ; khóa ví hiện có được giữ nguyên.
+Mỗi module/thành phần có README riêng. Đọc [bản đồ module](backend/MODULES.md), [kiến trúc một backend](docs/architecture/UNIFIED_BACKEND.md), [quy tắc đóng góp](CONTRIBUTING.md), [backend](backend/README.md) và [frontend](frontend/README.md). Tính năng thường chỉ sửa trong module sở hữu; thay đổi ABI/schema/chữ ký cần phối hợp các phần dùng chung.
 
-## Demo Fuji
+## Demo Fuji và triển khai
 
-Cần ba ví test khác nhau (owner/attestor/relayer), test AVAX cho owner và relayer, RPC Fuji C-Chain 43113 và sáu thông số risk/session trong `.env`. Máy hiện tại đã có đủ các biến này; không cần nối MetaMask vào dashboard. Mock token được mint khi deploy; không cần USDC thật hoặc LLM API key. Xem đơn vị, biến, faucet, gia hạn và xử lý lỗi trong [runbook demo](docs/demo/AVALANCHE_FUJI_DEMO.md).
+Đường LFJ và oracle đọc thật đã vào FastAPI gộp. Dashboard có trang **Ví và oracle Fuji**. `uv run --locked treasury lfj-preflight` đọc quote và Chainlink tại cùng block. Public LFJ signing đang bị chặn bởi định danh tài sản. [Tích hợp Fuji/LFJ V2.1](docs/integrations/FUJI_LFJ_V2_1.md).
 
-```powershell
-# Sau khi điền khóa attestor và owner risk settings:
-uv run --locked python scripts/treasury.py doctor --network fuji --live
-uv run --locked python scripts/treasury.py deploy --network fuji
-uv run --locked python scripts/treasury.py serve --network fuji
-# Terminal khác, khi stack đã READY:
-uv run --locked python scripts/treasury.py demo --network fuji
-```
+Theo [runbook local/Fuji](docs/demo/AVALANCHE_FUJI_DEMO.md). Cần ba ví test khác nhau: owner, attestor và relayer; owner/relayer có test AVAX. Không cần kết nối Core/MetaMask vào dashboard hoặc USDC thật. [Groq/env integration](docs/integrations/GROQ_PLANNER_AND_ENV.md) đã có real bounded LLM planner; chọn `groq` cần API key, `rules` là offline option. Private env đã cập nhật theo ba ví người dùng cấp và bật Groq, không ghi secret vào template/source; xem [trạng thái môi trường](docs/demo/ENVIRONMENT_STATUS.md).
 
-`doctor` chỉ đọc, không gửi giao dịch. `deploy:fuji` gửi giao dịch testnet thật, tạo manifest V2 mới và không ghi đè manifest cũ. Signer từ chối cấu hình `TEST_ONLY` trên Fuji. V2 activation khóa vĩnh viễn entrypoint V1 của deployment đó; không thể nâng một địa chỉ immutable bằng việc thay file ABI.
+Backend Dockerfile ở root; frontend Dockerfile riêng trong `frontend/`. [Hướng dẫn deploy](deploy/README.md) có Compose cho VPS và cấu hình frontend/API khác origin. [Runbook Render/VPS](docs/deployment/PYTHON_BACKEND_RENDER_VPS.md) giải thích compile Solidity trong build, runtime Python/Anvil, persistent storage và runtime env không chứa owner key.
+
+Hiện chưa deploy V2 lên Fuji hoặc hosting. Oracle vẫn là controlled demo; module [oracle](backend/src/treasury_backend/modules/oracle/README.md) có hướng dẫn tích hợp nguồn thực. Planner là template/regex; DEX thực chưa tích hợp. Đây là mock treasury phục vụ testnet/research, chưa audit.
 
 ## Kiểm tra
 
 ```powershell
-npm run check
 uv run --locked python -m pytest -q
-npm run benchmark:protocol
+uv run --locked python tools/contracts/foundry.py forge test -vv
+uv run --locked ruff check backend/src backend/tests tools
+uv run --locked python tools/quality/scan_secrets.py
 ```
 
-`check` chạy Forge, execution Python, V1/V2 Python↔viem golden vectors và secret scan. Root pytest chạy A, proof/resource tests và full operator smoke. Benchmark là opt-in, chạy source V1 từ commit gốc và V2.1 qua hai tiến trình A/B thật trên Anvil riêng; không đọc `.env` của bạn hoặc gửi Fuji.
+Module [mô phỏng](backend/src/treasury_backend/modules/execution/simulation/README.md) đã có Anvil fork, baseline/stress và final Phi preflight. Node/viem chỉ cần khi chạy đối chiếu chữ ký bằng ngôn ngữ khác hoặc kiểm tra cú pháp frontend: `npm ci --ignore-scripts`, `npm run test:integration`, `npm run check:frontend`. [Chi tiết kiểm thử](backend/tests/README.md), [chỉ mục docs](docs/README.md), [giả định proof](docs/security/proof_assumptions_v2_1.md).
 
-## Mã và tài liệu
-
-```text
-apps/control-plane/       A: planner, alignment, risk, proof adapter, SDE, attestor, monitor
-apps/execution-plane/     B: builder, fork simulation, extraction, durable relayer
-apps/dashboard/           Dashboard của A, MOCK/LOCAL/FUJI
-contracts/src/            PolicyVault, allowlisted mock adapter, mock tokens
-contracts/test/           Foundry security, atomic rollback, golden/fuzz tests
-packages/contracts-api/   Shared SDK, V1/V2 DTO, proof engine, ABI/schema
-fixtures/v2_1/            TEST_ONLY local policy và cross-language vectors
-scripts/treasury*.py      Profile, doctor, deploy/prepare/serve/demo/renew
-```
-
-- [Docs index](docs/README.md), [migration progress và test evidence](docs/migration/v2_1_progress.md), [file thay đổi](docs/migration/v2_1_changed_files.md).
-- [Proof assumptions](docs/security/proof_assumptions_v2_1.md), [policy coverage](docs/security/policy_coverage_v2_1.md), [ABI/hash vectors](docs/security/abi_hash_vectors_v2_1.md), [evaluation có phạm vi và denominator](docs/evaluation/v1_vs_v2_1_ablation.md).
-- [Migration/rollback](docs/migration/v2_1_runbook.md), [shared integration contract](docs/03_SHARED_INTEGRATION_CONTRACT.md), [shared SDK](packages/contracts-api/README.md), [A/B handoff](docs/06_AB_INTEGRATION_HANDOFF.md).
-
-Các lệnh `local`, `deploy:local`, `deploy:fuji`, `demo`, `dev:*`, `config:*` và alias `b:*` giữ tương thích công cụ **B/legacy**. Chúng không thay thế `treasury:*` khi chạy đầy đủ V2.1. Chi tiết legacy: [runbook B](docs/04_PERSON_B_RUNBOOK.md).
-
-Chỉ commit `.env.example`, không commit `.env`, key files, SQL/journal hoặc thư mục `Proof-Gated-Signing/` tham khảo local. Proof có điều kiện trong modeled price domain; exposure 25% vẫn là pre-sign gate, không phải on-chain allocation guarantee.
+Code trước refactor được lưu ở commit `19aa935`. Không commit `.env`, khóa ví, SQL/journal, artifacts runtime hay thư mục tham khảo local `Proof-Gated-Signing/`.

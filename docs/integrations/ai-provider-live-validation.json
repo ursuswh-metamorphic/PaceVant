@@ -1,0 +1,33 @@
+{
+  "checks": [
+    {
+      "provider": "gemini",
+      "model": "gemma-4-26b-a4b-it",
+      "status": "VALIDATED",
+      "amount_base_units": "1",
+      "attempts": [
+        {
+          "provider": "gemini",
+          "model": "gemma-4-26b-a4b-it",
+          "status": "VALIDATED"
+        }
+      ]
+    },
+    {
+      "provider": "xingchi",
+      "model": "gpt-6.1-sol",
+      "status": "VALIDATED",
+      "amount_base_units": "1",
+      "attempts": [
+        {
+          "provider": "xingchi",
+          "model": "gpt-6.1-sol",
+          "status": "VALIDATED"
+        }
+      ]
+    }
+  ],
+  "swap_broadcast": false,
+  "wallet_data_sent": false,
+  "keys_printed": false
+}
