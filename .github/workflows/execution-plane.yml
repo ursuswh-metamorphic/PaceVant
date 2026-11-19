@@ -23,6 +23,7 @@ jobs:
       - run: uv run --locked python -m pytest -q
       - run: uv run --locked ruff check .
       - run: uv run --locked ruff format --check .
+      - run: uv run --locked python scripts/evaluate_itag.py --output "${{ runner.temp }}/itag-benchmark-results.json"
   contracts-and-integration:
     runs-on: ubuntu-latest
     steps:

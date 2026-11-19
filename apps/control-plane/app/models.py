@@ -3,6 +3,7 @@ from typing import Annotated, Literal
 from pydantic import Field, StringConstraints
 
 from app.domain import Address, ArtifactRef, Bps, Counter, Id, Source, Timestamp
+from app.temporal.models import IntentSelection
 from treasury_contracts.models import Baseline, Hash, StressTest, UInt, Wire
 
 Mode = Literal["MOCK", "LOCAL", "FUJI"]
@@ -14,6 +15,7 @@ class WorkflowRequest(Wire):
     goal: Goal
     mandate_id: Id
     scenario: Scenario | None = None
+    temporal_intent: IntentSelection | None = None
 
 
 class Mandate(Wire):

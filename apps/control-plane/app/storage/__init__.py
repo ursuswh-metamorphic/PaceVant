@@ -5,6 +5,7 @@ from pathlib import Path
 
 from app.errors import ControlError
 from app.storage.portfolio import SCHEMA_V2, PortfolioStore
+from app.temporal import storage as temporal
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS workflows (
@@ -58,6 +59,7 @@ class Store(PortfolioStore):
             conn.execute("PRAGMA journal_mode = WAL")
             conn.executescript(SCHEMA)
             conn.executescript(SCHEMA_V2)
+            conn.executescript(temporal.SCHEMA)
 
     @contextmanager
     def connection(self, *, write=False):
@@ -75,9 +77,19 @@ class Store(PortfolioStore):
         finally:
             conn.close()
 
-    def start(self, id_, metadata):
+    def start(self, id_, metadata, temporal_intent=None):
         with self.connection(write=True) as conn:
             conn.execute("INSERT INTO workflows VALUES (?, 'STARTED', ?)", (id_, dump(metadata)))
+            if temporal_intent:
+                conn.execute(
+                    "INSERT INTO itag_workflows VALUES (?,?,?,?)",
+                    (
+                        id_,
+                        temporal_intent.spec_id,
+                        temporal_intent.revision,
+                        temporal_intent.step_id,
+                    ),
+                )
 
     @staticmethod
     def _event(conn, id_, stage, now, data):
@@ -223,6 +235,7 @@ class Store(PortfolioStore):
 
     def reserve_signature(self, *, id_, workflow_id, scope, nonce, now, expires_at, sign):
         with self.connection(write=True) as conn:
+            temporal.check_approval(conn, workflow_id, id_, now)
             issued = conn.execute(
                 "SELECT 1 FROM attestations WHERE decision_id=?", (id_,)
             ).fetchone()
@@ -271,6 +284,7 @@ class Store(PortfolioStore):
         with self.connection(write=True) as conn:
             # Linearize task cancellation against the transition that starts a financial submission.
             if state == "SUBMITTING" and expected == "ATTESTED":
+                temporal.check_approval(conn, workflow_id, decision_id, now, submitting=True)
                 record = conn.execute(
                     "SELECT body FROM decisions WHERE id=?", (decision_id,)
                 ).fetchone()

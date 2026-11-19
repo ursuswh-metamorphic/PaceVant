@@ -17,7 +17,24 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         payload = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         data = json.loads(payload["messages"][1]["content"])
-        if "subject" in data:
+        if "graph" in data:
+            candidate = data["candidate_action_id"]
+            task = data["active_task_ids"][0]
+            values = {
+                "candidate_action_id": candidate,
+                "referenced_task_ids": [task],
+                "referenced_graph_node_ids": [candidate, task],
+                "semantic_verdict": "ALIGNED",
+                "contribution_assessments": [
+                    {"task_id": task, "relationship": "DIRECT", "explanation": "Scripted fixture."}
+                ],
+                "detected_goal_drift": False,
+                "claimed_instruction_source": "USER",
+                "reasoning_summary": "Scripted trajectory response for protocol testing.",
+                "supporting_evidence_refs": [candidate, task],
+                "uncertainty_reasons": [],
+            }
+        elif "subject" in data:
             message = data["message"]
             values = (
                 ["Buy WAVAX with 200 USDC"]

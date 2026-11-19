@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PaceVant Intent Graph</title>
+  <link rel="stylesheet" href="/itag-viewer.css">
+  <script defer src="/itag-viewer.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Intent graph</h1>
+    <form>
+      <label>Assessment hash <input name="assessment" required pattern="0x[0-9a-f]{64}"></label>
+      <label>Operator token <input name="token" type="password" required autocomplete="off"></label>
+      <button>Load assessment</button>
+    </form>
+    <p id="status" role="status"></p>
+    <div class="columns">
+      <section><h2>Nodes and relationships</h2><div id="graph"></div></section>
+      <section><h2>Selected evidence</h2><pre id="details" tabindex="0"></pre></section>
+    </div>
+  </main>
+</body>
+</html>
