@@ -1,0 +1,44 @@
+{
+  "schema_version": "task-shield-validation-v1",
+  "source_main": "53180f7b1af3202bba24dfbfd871612cd4c4d786",
+  "branch": "codex/task-shield-paper",
+  "implementation": "task-shield-acl2025-v1",
+  "paper": "https://aclanthology.org/2025.acl-long.1435/",
+  "epsilon_default": "0",
+  "temperature_default": 0,
+  "experiment_model_default": "gpt-4o-2024-05-13",
+  "real_llm_evaluation": {
+    "status": "NOT_RUN_USER_SELECTED_DEFERRED",
+    "agentdojo_asr": null,
+    "real_model_utility": null,
+    "false_positive_rate": null,
+    "false_negative_rate": null,
+    "llm_latency_ms": null,
+    "real_llm_calls": 0,
+    "estimated_cost_usd": null
+  },
+  "deterministic_tests": {
+    "root_a_and_shared_passed": 152,
+    "root_public_fuji_read_skipped": 1,
+    "task_shield_scripted_provider_passed": 59,
+    "execution_plane_passed": 67,
+    "execution_fuji_fork_skipped": 2,
+    "ab_scenarios": 6,
+    "active_shield_ab_http_case": "SCRIPTED_LOOPBACK_PROTOCOL_PROVIDER_NOT_LLM",
+    "forge_passed": 37,
+    "eip712_golden": "PASS",
+    "ruff": "PASS",
+    "secret_scan": "PASS"
+  },
+  "public_fuji_broadcasts": 0,
+  "pdr_or_contract_migration": false,
+  "lfj_oracle_bypass": false,
+  "limitations": [
+    "Scripted scores verify enforcement and integration, not semantic detection accuracy",
+    "No actual model extraction/scoring evaluation or AgentDojo benchmark was run",
+    "Real model latency may exceed the unchanged 30-second approval TTL",
+    "Oversized external outputs halt instead of being silently truncated",
+    "Constrained existing wallet rules planner, not a general conversational agent",
+    "LFJ faucet USDC USD valuation remains unresolved"
+  ]
+}

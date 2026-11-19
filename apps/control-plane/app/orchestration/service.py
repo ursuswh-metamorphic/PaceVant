@@ -10,6 +10,9 @@ from eth_keys.constants import SECPK1_N
 from pydantic import ValidationError
 
 from app import alignment, economic_risk, experience, planner, portfolio, sde
+from app.alignment.engine import TaskShield
+from app.alignment.runtime import ShieldBlocked, ShieldRuntime
+from app.alignment.types import TaskUpdate
 from app.attestor import Attestor
 from app.domain import EconomicRiskAssessment, PortfolioSnapshot, SecurityDecision
 from app.errors import ControlError
@@ -53,6 +56,8 @@ class ControlPlane:
         self.settings = settings
         self.clock = clock
         self.store = Store(settings.db)
+        self.shield = TaskShield(self.store, settings.shield, clock=clock)
+        self.shield_runtimes = {}
         if settings.mode == "MOCK":
             key_bytes = (1 + randbelow(SECPK1_N - 1)).to_bytes(32, "big")
         else:
@@ -77,6 +82,7 @@ class ControlPlane:
             self.fuji_http = httpx.Client(timeout=3, trust_env=False, follow_redirects=False)
 
     def close(self):
+        self.shield.close()
         if self.http:
             self.http.close()
         if self.fuji_http:
@@ -124,8 +130,22 @@ class ControlPlane:
             )
         return observation
 
-    def verify_evidence(self, client, built, evidence, context):
-        issues = evidence_issues(client, self.settings.mode, built, evidence, context, self.clock())
+    def verify_evidence(self, client, built, evidence, context, workflow_id=None):
+        gate = (
+            (
+                lambda ref, read: self._tool(
+                    workflow_id, "read_simulation_artifact", {"reference": ref}, read
+                )
+            )
+            if workflow_id in self.shield_runtimes
+            else None
+        )
+        issues = evidence_issues(
+            client, self.settings.mode, built, evidence, context, self.clock(), artifact_gate=gate
+        )
+        runtime = self.shield_runtimes.get(workflow_id)
+        if runtime and runtime.last_feedback and self.settings.shield.mode == "wallet_hardened":
+            issues.append(runtime.last_feedback.code)
         if not issues and self.fuji_http is not None:
             try:
                 FujiVerifier(self.fuji_http).verify(context, self.clock())
@@ -164,6 +184,113 @@ class ControlPlane:
         return MockExecutionClient(
             mandate, self.attestor.address, self.fixture(scenario), self.clock
         )
+
+    def _tool(self, workflow_id, name, arguments, execute):
+        runtime = self.shield_runtimes.get(workflow_id)
+        return runtime.invoke(name, arguments, execute) if runtime else execute()
+
+    def check_alignment(self, mandate, proposal, goal, tool_output=""):
+        if not self.shield.active:
+            return (
+                alignment.check(mandate, proposal, goal, tool_output)
+                if self.settings.shield.mode == "legacy_fixture"
+                else alignment.wallet_constraints(mandate, proposal, goal)
+            )
+        session_id = "session_" + uuid4().hex
+        self.shield.state.create(session_id, mandate, self.clock())
+        try:
+            self.shield.update_user(
+                session_id,
+                TaskUpdate(message_id="user_" + uuid4().hex, content=goal, expected_revision=0),
+                authenticated=True,
+            )
+            runtime = ShieldRuntime(self.shield, session_id)
+            if tool_output:
+                runtime.output(
+                    "external_tool",
+                    "inspection",
+                    {"tool_name": "external_tool", "arguments": {}},
+                    tool_output,
+                )
+            runtime.assistant(proposal.user_goal_reason)
+            runtime.before("build_swap", proposal.model_dump(), proposal.user_goal_reason)
+            value = alignment.wallet_constraints(mandate, proposal, goal)
+            return value.model_copy(update={"shield_model_version": "task-shield-acl2025-v1"})
+        except ShieldBlocked as error:
+            return Alignment(
+                verdict="MISALIGNED" if error.report.status == "MISALIGNED" else "UNCERTAIN",
+                reason_codes=[error.code],
+                shield_model_version="task-shield-acl2025-v1",
+                evidence_refs=[error.report.candidate_hash],
+            )
+        except ControlError:
+            return Alignment(
+                verdict="UNCERTAIN",
+                reason_codes=["TASK_SHIELD_UNAVAILABLE"],
+                shield_model_version="task-shield-acl2025-v1",
+                evidence_refs=[],
+            )
+
+    def _shield_plan(self, workflow_id, mandate, client, goal, proposal, amount, deadline, fixture):
+        runtime = self.shield_runtimes.get(workflow_id)
+        if runtime is None:
+            value = (
+                alignment.check(mandate, proposal, goal, fixture.get("tool_output", ""))
+                if self.settings.shield.mode == "legacy_fixture"
+                else alignment.wallet_constraints(mandate, proposal, goal)
+            )
+            return proposal, value
+        for attempt in range(self.settings.shield.max_replans + 1):
+            try:
+                if attempt == 0 and fixture.get("tool_output"):
+                    runtime.output(
+                        "external_market_data",
+                        "fixture_call",
+                        {"tool_name": "external_market_data", "arguments": {}},
+                        fixture["tool_output"],
+                    )
+                # Input-Shield feedback is delivered even in paper mode, which retains the raw output.
+                if runtime.last_feedback:
+                    proposal = planner.revise(mandate, amount, deadline, runtime.last_feedback)
+                    self.shield.state.event(
+                        runtime.session_id,
+                        "REPLAN_AFTER_INPUT",
+                        self.clock(),
+                        {
+                            "feedback": runtime.last_feedback.model_dump(mode="json"),
+                            "new_intent_id": proposal.intent_id,
+                        },
+                    )
+                    runtime.last_feedback = None
+                runtime.assistant(proposal.user_goal_reason)
+                runtime.before("build_swap", proposal.model_dump(), proposal.user_goal_reason)
+                constraints = alignment.wallet_constraints(mandate, proposal, goal)
+                value = constraints.model_copy(
+                    update={"shield_model_version": "task-shield-acl2025-v1"}
+                )
+                return proposal, value
+            except ShieldBlocked as error:
+                self.shield.state.event(
+                    runtime.session_id,
+                    "REPLAN_REQUESTED",
+                    self.clock(),
+                    {"attempt": attempt, "feedback": error.report.feedback.model_dump(mode="json")},
+                )
+                if (
+                    error.report.status == "UNAVAILABLE"
+                    or attempt >= self.settings.shield.max_replans
+                ):
+                    return proposal, Alignment(
+                        verdict="UNCERTAIN"
+                        if error.report.status == "UNAVAILABLE"
+                        else "MISALIGNED",
+                        reason_codes=[error.code],
+                        evidence_refs=[],
+                        shield_model_version="task-shield-acl2025-v1",
+                    )
+                proposal = planner.revise(mandate, amount, deadline, error.report.feedback)
+                runtime.last_feedback = None
+        raise ControlError("TASK_SHIELD_RETRY_LIMIT")
 
     def price(self, client: ExecutionClient):
         if isinstance(client, MockExecutionClient):
@@ -259,6 +386,17 @@ class ControlPlane:
             },
         )
         try:
+            if self.shield.active:
+                session_id = "session_" + uuid4().hex
+                self.shield.state.create(session_id, mandate, self.clock(), workflow_id)
+                self.shield.update_user(
+                    session_id,
+                    TaskUpdate(
+                        message_id="user_" + uuid4().hex, content=payload.goal, expected_revision=0
+                    ),
+                    authenticated=True,
+                )
+                self.shield_runtimes[workflow_id] = ShieldRuntime(self.shield, session_id)
             self._run_attempts(workflow_id, mandate, client, payload.goal)
         except ControlError as error:
             self.store.event(workflow_id, "ESCALATED", self.clock(), reason_codes=[error.code])
@@ -266,6 +404,7 @@ class ControlPlane:
             status = self.store.workflow(workflow_id)["status"]
             if status not in {"SUBMITTING", "SUBMITTED"}:
                 self.mock_clients.pop(workflow_id, None)
+                self.shield_runtimes.pop(workflow_id, None)
         return {"workflow_id": workflow_id, "status": status}
 
     def _run_attempts(self, workflow_id, mandate, client, goal):
@@ -273,7 +412,11 @@ class ControlPlane:
         fixture = client.fixture if isinstance(client, MockExecutionClient) else {}
         for index in range(mandate.max_replans + 1):
             now = self.clock()
-            context = client.context() if isinstance(client, RestExecutionClient) else None
+            context = (
+                self._tool(workflow_id, "read_chain_context", {}, client.context)
+                if isinstance(client, RestExecutionClient)
+                else None
+            )
             deadline = self._deadline(mandate, now, context)
             proposed = planner.propose(
                 mandate,
@@ -284,11 +427,59 @@ class ControlPlane:
             self.store.event(
                 workflow_id, "PROPOSED", now, attempt=index + 1, proposal=proposed.model_dump()
             )
-            aligned = alignment.check(mandate, proposed, goal, fixture.get("tool_output", ""))
+            proposed, aligned = self._shield_plan(
+                workflow_id, mandate, client, goal, proposed, amount, deadline, fixture
+            )
             self.store.event(
                 workflow_id, aligned.verdict, self.clock(), alignment=aligned.model_dump()
             )
             decision = self._evaluate(workflow_id, mandate, client, proposed, aligned, context)
+            runtime = self.shield_runtimes.get(workflow_id)
+            if runtime:
+                for shield_retry in range(self.settings.shield.max_replans):
+                    feedback = runtime.last_feedback
+                    if feedback is None or feedback.code == "TASK_SHIELD_UNAVAILABLE":
+                        break
+                    self.shield.state.event(
+                        runtime.session_id,
+                        "REPLAN_AFTER_TOOL_OUTPUT",
+                        self.clock(),
+                        {
+                            "retry": shield_retry + 1,
+                            "feedback": feedback.model_dump(mode="json"),
+                            "previous_decision_id": decision.decision_id,
+                        },
+                    )
+                    # The original candidate and rejected tool output are never reused as executable instructions.
+                    proposed = planner.revise(
+                        mandate, amount, self._deadline(mandate, self.clock(), context), feedback
+                    )
+                    runtime.last_feedback = None
+                    proposed, aligned = self._shield_plan(
+                        workflow_id, mandate, client, goal, proposed, amount, proposed.deadline, {}
+                    )
+                    decision = self._evaluate(
+                        workflow_id, mandate, client, proposed, aligned, context
+                    )
+                if runtime.last_feedback:
+                    self.shield.state.event(
+                        runtime.session_id,
+                        "SHIELD_STOPPED",
+                        self.clock(),
+                        {
+                            "feedback": runtime.last_feedback.model_dump(mode="json"),
+                            "decision_id": decision.decision_id,
+                        },
+                    )
+                    if decision.verdict == "APPROVE":
+                        self.store.event(
+                            workflow_id,
+                            "ESCALATED",
+                            self.clock(),
+                            reason_codes=["TASK_SHIELD_FEEDBACK_PENDING"],
+                            decision_id=decision.decision_id,
+                        )
+                    return
             if decision.verdict == "APPROVE":
                 signed = self.attest(decision.decision_id)
                 self._submit(workflow_id, decision, signed)
@@ -304,28 +495,45 @@ class ControlPlane:
         built = sim = evaluation = balances = snapshot = observation = None
         issues = []
         try:
-            context = context or client.context()
+            context = context or self._tool(workflow_id, "read_chain_context", {}, client.context)
             issues = portfolio.policy_issues(mandate, context, self.clock())
             if aligned.verdict == "ALIGNED" and not issues:
                 if int(proposal.amount_in_base_units) > int(mandate.max_usdc_per_swap_base_units):
                     # The builder may enforce the same cap before simulation.
                     issues.append("TRADE_SIZE_LIMIT")
                     raise ControlError("TRADE_SIZE_LIMIT")
-                built = client.build(proposal)
+                built = self._tool(
+                    workflow_id, "build_swap", proposal.model_dump(), lambda: client.build(proposal)
+                )
                 verify_build(mandate, proposal, built)
                 self.store.event(workflow_id, "BUILT", self.clock(), build=built.model_dump())
-                sim = client.simulate(built)
-                balances = client.balances()
-                context = client.context(built=built, fork_block=sim.fork_block)
-                issues = self.verify_evidence(client, built, sim, context)
-                observation = self.observe(
-                    client,
-                    mandate,
-                    balances,
-                    context,
-                    workflow_id=workflow_id,
-                    built=built,
-                    phase="PRE",
+                sim = self._tool(
+                    workflow_id,
+                    "simulate_swap",
+                    {"build": built.model_dump()},
+                    lambda: client.simulate(built),
+                )
+                balances = self._tool(workflow_id, "read_portfolio", {}, client.balances)
+                context = self._tool(
+                    workflow_id,
+                    "read_chain_context",
+                    {"build_id": built.build_id, "fork_block": sim.fork_block},
+                    lambda: client.context(built=built, fork_block=sim.fork_block),
+                )
+                issues = self.verify_evidence(client, built, sim, context, workflow_id)
+                observation = self._tool(
+                    workflow_id,
+                    "observe_portfolio",
+                    {"vault_address": mandate.vault_address, "block_number": balances.block_number},
+                    lambda: self.observe(
+                        client,
+                        mandate,
+                        balances,
+                        context,
+                        workflow_id=workflow_id,
+                        built=built,
+                        phase="PRE",
+                    ),
                 )
                 self.store.event(
                     workflow_id,
@@ -403,6 +611,9 @@ class ControlPlane:
                 "suggested_amount": suggested,
                 "chain_context": context.model_dump() if context else None,
                 "pre_snapshot_id": observation.snapshot_id if observation else None,
+                "task_shield_proof": self.shield_runtimes[workflow_id].proof(proposal)
+                if workflow_id in self.shield_runtimes
+                else None,
                 **evidence,
             },
             suggested,
@@ -469,6 +680,24 @@ class ControlPlane:
 
     def _verify_approval(self, approved: ApprovedAttempt):
         mandate, built, sim = approved.mandate, approved.built, approved.evidence
+        _, bundle = self.store.decision(decision_id=approved.decision.decision_id)
+        proof = bundle.get("task_shield_proof")
+        if self.shield.active or proof:
+            if not proof or not proof.get("check_ids") or proof.get("unresolved_feedback"):
+                raise ControlError("TASK_SHIELD_APPROVAL_PROOF_REQUIRED")
+            from app.alignment.provider import safe_value
+
+            if proof["proposal"] != safe_value(approved.proposal):
+                raise ControlError("TASK_SHIELD_PROPOSAL_MISMATCH")
+            self.shield.validate(proof["session_id"], proof["check_ids"], proof["revision"])
+            from app.portfolio.observations import content_hash
+
+            session = self.shield.state.session(proof["session_id"])
+            if (
+                session["mandate_hash"] != content_hash(mandate.model_dump())
+                or session["workflow_id"] != approved.workflow_id
+            ):
+                raise ControlError("TASK_SHIELD_MANDATE_MISMATCH")
         snapshot = approved.snapshot
         if hasattr(snapshot, "observation_snapshot_id"):
             from app.domain import ObservedPortfolioSnapshot
@@ -587,6 +816,31 @@ class ControlPlane:
             )
             return
         built = approved.built
+        # No LLM calls inside the attestor's SQLite reservation. The final write check is here,
+        # before SUBMITTING and before client.execute, while deterministic verification remains intact.
+        runtime = self.shield_runtimes.get(workflow_id)
+        execute_call = None
+        if self.shield.active:
+            if runtime is None:
+                session = self.shield.state.for_workflow(workflow_id)
+                if not session:
+                    raise ControlError("TASK_SHIELD_SESSION_NOT_FOUND")
+                runtime = ShieldRuntime(self.shield, session["id"])
+            try:
+                execute_call = runtime.before(
+                    "execute_approved_swap",
+                    {"build": built.model_dump(), "decision_id": id_},
+                    approved.proposal.user_goal_reason,
+                )
+                # A concurrent user cancellation invalidates the saved approval even if the model said yes.
+                _, saved = self.store.decision(decision_id=id_)
+                proof = saved["task_shield_proof"]
+                self.shield.validate(proof["session_id"], proof["check_ids"], proof["revision"])
+            except ControlError as error:
+                self.store.transition(
+                    workflow_id, id_, "ATTESTED", "EXPIRED", self.clock(), reason_codes=[error.code]
+                )
+                return
         if not self.store.transition(workflow_id, id_, "ATTESTED", "SUBMITTING", self.clock()):
             raise ControlError("SUBMISSION_ALREADY_STARTED")
         self.store.track_execution(workflow_id, id_, self.settings.mode, built, self.clock())
@@ -624,6 +878,20 @@ class ControlPlane:
                 self.clock(),
                 tx_hash=submission.tx_hash,
             )
+            if execute_call:
+                try:
+                    runtime.output(
+                        "execute_approved_swap", execute_call[0], execute_call[1], submission
+                    )
+                except ControlError as error:
+                    # Broadcast has already happened. Preserve its hash and monitoring reservation;
+                    # a shield failure after submission must never cause a replacement/retry write.
+                    self.shield.state.event(
+                        runtime.session_id,
+                        "POST_SUBMISSION_FEEDBACK",
+                        self.clock(),
+                        {"code": error.code, "decision_id": id_},
+                    )
             self._reconcile(workflow_id, id_, built, client, submission.tx_hash)
         elif submission.status in {"STALE_REQUIRES_REEVALUATION", "FAILED_TO_SUBMIT"}:
             self.store.transition(

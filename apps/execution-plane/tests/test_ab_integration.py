@@ -8,7 +8,7 @@ import sqlite3
 import subprocess
 import sys
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 
 import httpx
 import pytest
@@ -52,17 +52,18 @@ def process_ready(command, url, env, output, *, cwd):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("amount", "price_age", "verdicts", "hold_receipt"),
+    ("amount", "price_age", "verdicts", "hold_receipt", "shielded"),
     [
-        (200, 0, ["APPROVE"], False),
-        (500, 0, ["REPLAN", "APPROVE"], False),
-        (200, 120, ["ESCALATE"], False),
-        (200, 0, ["APPROVE"], True),
-        (200, 0, ["APPROVE"], "revert"),
+        (200, 0, ["APPROVE"], False,False),
+        (500, 0, ["REPLAN", "APPROVE"], False,False),
+        (200, 120, ["ESCALATE"], False,False),
+        (200, 0, ["APPROVE"], True,False),
+        (200, 0, ["APPROVE"], "revert",False),
+        (200, 0, ["APPROVE"], False,True),
     ],
-    ids=["normal", "exposure-replan", "stale-oracle", "pending-reservation", "protected-revert"],
+    ids=["normal", "exposure-replan", "stale-oracle", "pending-reservation", "protected-revert", "shield-http-protocol-fixture"],
 )
-def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verdicts, hold_receipt):
+def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verdicts, hold_receipt,shielded):
     _, chain, keys, _ = plane
     a_port, b_port = open_port(), open_port()
     a_url, b_url = f"http://127.0.0.1:{a_port}", f"http://127.0.0.1:{b_port}"
@@ -102,6 +103,7 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
     a_env.update(
         UV_PROJECT_ENVIRONMENT=a_test_env,
         PACEVANT_MODE="LOCAL",
+        PACEVANT_SHIELD_MODE="legacy_fixture",
         PACEVANT_DB=str(tmp_path / "control.sqlite3"),
         PACEVANT_B_URL=b_url,
         PACEVANT_B_TOKEN=execution_key,
@@ -113,9 +115,17 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
         PACEVANT_MANDATE_FILE=str(mandate_path),
         PACEVANT_ORACLE_FILE=str(oracle_path),
     )
+    shield_port=open_port()
+    if shielded:
+        a_env.update(PACEVANT_SHIELD_MODE="wallet_hardened",PACEVANT_SHIELD_PROVIDER="openai_compatible",
+            PACEVANT_SHIELD_MODEL="pacevant-scripted-protocol-fixture-not-llm",
+            PACEVANT_SHIELD_BASE_URL=f"http://127.0.0.1:{shield_port}/v1",PACEVANT_SHIELD_API_KEY=secrets.token_hex(24),
+            PACEVANT_SHIELD_CONTEXT_CHARS="100000")
     before = chain.balances()
     before_spend = int(chain.snapshot()["daily_spent_usdc_base_units"])
     with (
+        process_ready([sys.executable,str(ROOT/"tests/integration/task_shield_provider_fixture.py"),"--port",str(shield_port)],
+            f"http://127.0.0.1:{shield_port}/health",b_env,tmp_path/"shield-fixture.log",cwd=ROOT) if shielded else nullcontext(),
         process_ready(
             [
                 sys.executable,
@@ -223,6 +233,13 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
 
         assert workflow["status"] == ("REVERTED" if hold_receipt == "revert" else "CONFIRMED"), workflow
         reconciliation = workflow["reconciliation"]
+        if shielded:
+            assert any(e.get("alignment",{}).get("shield_model_version")=="task-shield-acl2025-v1" for e in events)
+            with sqlite3.connect(tmp_path/"control.sqlite3") as db:
+                reports=[json.loads(row[0]) for row in db.execute("SELECT body FROM shield_checks")]
+                assert any(r["kind"]=="TOOL_CALL" for r in reports)
+                assert any(r["source"]=="TOOL" for r in reports)
+                assert all(r["status"]=="ALIGNED" for r in reports)
         assert reconciliation["verification"]["verification_status"] == "VERIFIED"
         assert reconciliation["attribution_status"] == "EXACT_SNAPSHOT_AND_TRANSACTION_LOGS"
         assert reconciliation["pre_snapshot_id"] != reconciliation["post_snapshot_id"]

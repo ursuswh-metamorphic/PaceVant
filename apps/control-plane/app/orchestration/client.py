@@ -245,8 +245,15 @@ class RestExecutionClient:
     def simulate(self, built):
         return self._call(self.sdk.simulate, built, f"simulate-{built.build_id}")
 
-    def verify_evidence(self, built, evidence):
-        return self.sdk.verify_evidence(built, evidence)
+    def verify_evidence(self, built, evidence, artifact_gate=None):
+        if artifact_gate is None:
+            return self.sdk.verify_evidence(built, evidence)
+        original = self.sdk.artifact
+        self.sdk.artifact = lambda ref: artifact_gate(ref, lambda: original(ref))
+        try:
+            return self.sdk.verify_evidence(built, evidence)
+        finally:
+            self.sdk.artifact = original
 
     def execute(self, built, pdr):
         key = f"execute-{pdr.decision_id}"

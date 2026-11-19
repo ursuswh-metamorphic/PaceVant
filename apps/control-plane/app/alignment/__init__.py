@@ -50,3 +50,8 @@ def check(
             verdict="MISALIGNED", reason_codes=["TASK_MISALIGNED"], evidence_refs=evidence
         )
     return Alignment(verdict="ALIGNED", reason_codes=[], evidence_refs=evidence)
+
+
+def wallet_constraints(mandate, proposal, goal):
+    """Deterministic mandate/amount boundary; never substitutes for ContributesTo."""
+    return check(mandate, proposal, goal, "")

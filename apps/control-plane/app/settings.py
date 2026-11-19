@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 
 from pydantic import TypeAdapter
 
+from app.alignment.provider import ShieldConfig
 from app.domain import Address
 from app.models import Mode
 
@@ -27,6 +28,7 @@ class Settings:
     attestor_key: str | None = None
     chain_rpc_url: str | None = None
     relayer_address: str | None = None
+    shield: ShieldConfig = ShieldConfig()
 
     @classmethod
     def from_env(cls):
@@ -97,4 +99,5 @@ class Settings:
             attestor_key=env["ATTESTOR_KEY"],
             chain_rpc_url=env["CHAIN_RPC_URL"],
             relayer_address=env["RELAYER_ADDRESS"],
+            shield=ShieldConfig.from_env(mode),
         )

@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import StringConstraints
 from starlette.exceptions import HTTPException
 
-from app.alignment import check
+from app.alignment.api import install_shield_routes
 from app.domain import EconomicRiskAssessment, Id, SecurityDecision
 from app.errors import ControlError
 from app.fuji_api import install_fuji_routes
@@ -126,11 +126,19 @@ def create_app(settings=None, clock=utc_now):
             raise ControlError("AUTH_REQUIRED", 401)
 
     def operator(request: Request):
-        if settings.mode != "MOCK" or settings.operator_token is not None:
+        if (
+            settings.mode != "MOCK"
+            or settings.operator_token is not None
+            or settings.shield.mode in {"paper", "wallet_hardened"}
+        ):
             auth(request, settings.operator_token)
 
     def internal(request: Request):
         auth(request, settings.internal_token)
+
+    def shield_operator(request: Request):
+        # New mutable user-objective APIs always require an actual operator credential, even in MOCK.
+        auth(request, settings.operator_token)
 
     def json_post(request: Request):
         if request.headers.get("Content-Type", "").split(";")[0].lower() != "application/json":
@@ -154,12 +162,14 @@ def create_app(settings=None, clock=utc_now):
 
     @app.post("/v1/alignment/check", dependencies=[Depends(operator)], response_model=Alignment)
     def align(payload: AlignmentRequest, service: Service):
-        return check(
+        return service.check_alignment(
             service.mandate(payload.proposal.mandate_id),
             payload.proposal,
             payload.goal,
             payload.tool_output,
         )
+
+    install_shield_routes(app, [Depends(shield_operator)])
 
     @app.post(
         "/v1/risk/evaluate", dependencies=[Depends(operator)], response_model=EconomicRiskAssessment
