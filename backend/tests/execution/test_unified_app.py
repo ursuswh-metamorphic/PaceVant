@@ -39,12 +39,17 @@ def test_unified_routes_and_internal_client_share_one_execution_runtime(plane, t
         paths = client.get("/openapi.json").json()["paths"]
         assert "/v1/workflows/start" in paths and "/execution/v1/simulations" in paths
         assert "/execution/v2/simulations/preflight" in paths
+        assert "/execution/v1/executions/{tx_hash}/reconciliation" in paths
+        assert "/v1/portfolio/history" in paths
+        assert "/v1/task-shield/sessions" in paths
         assert app.state.control.http is None
         internal = app.state.control.client("workflow-test", None)
         assert isinstance(internal, VerifiedExecutionClient)
         assert isinstance(internal.sdk, LocalExecutionSDK)
         assert internal.sdk.service is app.state.execution is runtime
         assert internal.context().chain_id == 31337
+        n = chain.w3.eth.block_number
+        assert internal.sdk.snapshot(n)["block_number"] == n
 
         typed = TransactionProposal.model_validate(proposal(chain))
         first = internal.build(typed)

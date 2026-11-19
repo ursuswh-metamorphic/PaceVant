@@ -1,5 +1,7 @@
 # Shared integration contract v1.1
 
+Current SDK package version: **1.3.1**, pinned consistently by the root project. Added `ExecutionReconciliation`, `outcomes.py`/`outcomes_v2.py` (read-only V1/V2 receipt/build/PDR/proof verification), `readonly.py` (bounded read-only RPC) and `token_facts.py` (shared receipt parser). `ExecutionClient.snapshot(block_number)`, `.reconciliation(tx_hash)` and `.submission_for_build(build_id)` serve portfolio/outcome monitoring. V2 signed domain and existing proof-engine hashes are unchanged. The unified remote base URL is `http://127.0.0.1:8000/execution`; normal backend workflows use an in-process adapter. The v1.1/1.2 notes below describe the original wire/LFJ additions, not the current package version.
+
 SDK 1.2.0 accepts `adapter_version=lfj-v1-fuji-v1` alongside `mock-swap-v1`. Existing approvals, EIP-712 domains and evidence schema retain their wire encoding. Consumers that validate the adapter enum need SDK 1.2.0 for LFJ builds.
 
 Schema and EIP-712 follow `docs/03_SHARED_INTEGRATION_CONTRACT.md`. This directory is shared ownership: A and B must review changes before merging.

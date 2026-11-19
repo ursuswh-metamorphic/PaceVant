@@ -33,7 +33,11 @@ class EvaluationPipeline:
         fixture = client.fixture if isinstance(client, MockExecutionClient) else {}
         for index in range(mandate.max_replans + 1):
             now = self.clock()
-            context = client.context() if isinstance(client, VerifiedExecutionClient) else None
+            context = (
+                self._tool(workflow_id, "read_chain_context", {}, client.context)
+                if isinstance(client, VerifiedExecutionClient)
+                else None
+            )
             deadline = self._deadline(mandate, now, context)
             proposed = planner.propose(
                 mandate,
@@ -45,11 +49,60 @@ class EvaluationPipeline:
             self.store.event(
                 workflow_id, "PROPOSED", now, attempt=index + 1, proposal=proposed.model_dump()
             )
-            aligned = alignment.check(mandate, proposed, goal, fixture.get("tool_output", ""))
+            proposed, aligned = self._shield_plan(
+                workflow_id, mandate, client, goal, proposed, amount, deadline, fixture
+            )
             self.store.event(
                 workflow_id, aligned.verdict, self.clock(), alignment=aligned.model_dump()
             )
             decision = self._evaluate(workflow_id, mandate, client, proposed, aligned, context)
+            runtime = self.shield_runtimes.get(workflow_id)
+            if runtime:
+                for shield_retry in range(self.settings.shield.max_replans):
+                    feedback = runtime.last_feedback
+                    if feedback is None or feedback.code == "TASK_SHIELD_UNAVAILABLE":
+                        break
+                    self.shield.state.event(
+                        runtime.session_id,
+                        "REPLAN_AFTER_TOOL_OUTPUT",
+                        self.clock(),
+                        {
+                            "retry": shield_retry + 1,
+                            "feedback": feedback.model_dump(mode="json"),
+                            "previous_decision_id": decision.decision_id,
+                        },
+                    )
+                    # The original candidate and rejected tool output are never reused as executable instructions.
+                    proposed = planner.revise(
+                        mandate, amount, self._deadline(mandate, self.clock(), context), feedback,
+                        reverse=proposed.token_in == mandate.token_out,
+                    )
+                    runtime.last_feedback = None
+                    proposed, aligned = self._shield_plan(
+                        workflow_id, mandate, client, goal, proposed, amount, proposed.deadline, {}
+                    )
+                    decision = self._evaluate(
+                        workflow_id, mandate, client, proposed, aligned, context
+                    )
+                if runtime.last_feedback:
+                    self.shield.state.event(
+                        runtime.session_id,
+                        "SHIELD_STOPPED",
+                        self.clock(),
+                        {
+                            "feedback": runtime.last_feedback.model_dump(mode="json"),
+                            "decision_id": decision.decision_id,
+                        },
+                    )
+                    if decision.verdict == "APPROVE":
+                        self.store.event(
+                            workflow_id,
+                            "ESCALATED",
+                            self.clock(),
+                            reason_codes=["TASK_SHIELD_FEEDBACK_PENDING"],
+                            decision_id=decision.decision_id,
+                        )
+                    return
             if decision.verdict == "APPROVE":
                 signed = self.attest(decision.decision_id)
                 self._submit(workflow_id, decision, signed)
@@ -62,13 +115,14 @@ class EvaluationPipeline:
             amount = replacement
 
     def _evaluate(self, workflow_id, mandate, client, proposal, aligned, context=None):
-        built = sim = evaluation = balances = snapshot = None
+        built = sim = evaluation = balances = snapshot = observation = None
         proof = None
         issues = []
         try:
-            context = context or client.context()
+            context = context or self._tool(workflow_id, "read_chain_context", {}, client.context)
             issues = portfolio.policy_issues(mandate, context, self.clock())
             if aligned.verdict == "ALIGNED" and not issues:
+                self.require_priced_assets(mandate)
                 reverse = proposal.token_in.lower() == mandate.token_out
                 cap = (
                     mandate.proof_policy.max_wavax_per_swap
@@ -79,13 +133,39 @@ class EvaluationPipeline:
                     # The builder may enforce the same cap before simulation.
                     issues.append("TRADE_SIZE_LIMIT")
                     raise ControlError("TRADE_SIZE_LIMIT")
-                built = client.build(proposal)
+                built = self._tool(
+                    workflow_id, "build_swap", proposal.model_dump(), lambda: client.build(proposal)
+                )
                 verify_build(mandate, proposal, built)
                 self.store.event(workflow_id, "BUILT", self.clock(), build=built.model_dump())
-                sim = client.simulate(built)
-                balances = client.balances()
-                context = client.context(built=built, fork_block=sim.fork_block)
-                issues = self.verify_evidence(client, built, sim, context)
+                sim = self._tool(
+                    workflow_id,
+                    "simulate_swap",
+                    {"build": built.model_dump()},
+                    lambda: client.simulate(built),
+                )
+                balances = self._tool(workflow_id, "read_portfolio", {}, client.balances)
+                context = self._tool(
+                    workflow_id,
+                    "read_chain_context",
+                    {"build_id": built.build_id, "fork_block": sim.fork_block},
+                    lambda: client.context(built=built, fork_block=sim.fork_block),
+                )
+                issues = self.verify_evidence(client, built, sim, context, workflow_id)
+                observation = self._tool(
+                    workflow_id,
+                    "observe_portfolio",
+                    {"vault_address": mandate.vault_address, "block_number": balances.block_number},
+                    lambda: self.observe(
+                        client,
+                        mandate,
+                        balances,
+                        context,
+                        workflow_id=workflow_id,
+                        built=built,
+                        phase="PRE",
+                    ),
+                )
                 self.store.event(
                     workflow_id,
                     "SIMULATED",
@@ -95,8 +175,8 @@ class EvaluationPipeline:
                 )
                 if not issues:
                     self.require_priced_assets(mandate)
-                    snapshot = portfolio.snapshot(
-                        balances, self.price(client, sim.fork_block), self.store.history_version()
+                    snapshot = portfolio.decision_snapshot(
+                        observation, balances, self.price(client, sim.fork_block), context, built, self.clock()
                     )
                     evaluation = economic_risk.evaluate(
                         mandate, proposal, built, sim, snapshot, balances, context, self.clock()
@@ -179,9 +259,22 @@ class EvaluationPipeline:
                 "simulation": sim.model_dump() if sim else None,
                 "suggested_amount": suggested,
                 **({"proof": proof.model_dump(mode="json")} if proof else {}),
+                "chain_context": context.model_dump() if context else None,
+                "pre_snapshot_id": observation.snapshot_id if observation else None,
+                "task_shield_proof": self.shield_runtimes[workflow_id].proof(proposal)
+                if workflow_id in self.shield_runtimes
+                else None,
                 **evidence,
             },
             suggested,
             evidence,
         )
+        if observation:
+            self.store.save_snapshot(
+                observation,
+                phase="PRE",
+                workflow_id=workflow_id,
+                decision_id=decision.decision_id,
+                build_id=built.build_id if built else None,
+            )
         return decision

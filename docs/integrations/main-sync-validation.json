@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-20",
+  "branch": "refactor/modular-backend-frontend",
+  "checkpoint_commit": "f503169",
+  "backup_branch": "backup/pre-main-sync-20261120-f503169",
+  "upstream_main": "08c35df",
+  "integration": "ancestry merge with selective feature port into the canonical modular backend",
+  "locked_dependency_install": {
+    "status": "PASS",
+    "environment": ".control-data-v2/main-sync-venv",
+    "sdk_version": "1.3.1",
+    "reason": "Isolated clean install avoids the treasury.exe file held by the already-running backend"
+  },
+  "pytest": {
+    "status": "PASS",
+    "command": ".control-data-v2/main-sync-venv/Scripts/python.exe -m pytest -q --tb=short --junitxml=.control-data-v2/main-sync-tests.xml",
+    "tests": 371,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 4,
+    "passed": 367,
+    "duration_seconds": 199.5,
+    "skipped_cases": [
+      "test_real_fuji_lfj_token_observation_without_wallet_or_keys",
+      "test_circle_chainlink_pipeline_confirms_on_isolated_fuji_fork",
+      "test_v2_simulator_executes_verified_lfj_route_on_fuji_fork",
+      "test_measured_matched_ablation"
+    ]
+  },
+  "static_checks": {
+    "ruff": "PASS",
+    "git_diff_check": "PASS",
+    "frontend_javascript_files": 9,
+    "frontend_syntax": "PASS",
+    "configured_secret_scan": "PASS"
+  },
+  "fuji_reads": {
+    "existing_v2_receipt": "VERIFIED",
+    "receipt_block": 61340481,
+    "gas_verified": true,
+    "proof_session_verified": true,
+    "current_vault_portfolio": "VERIFIED",
+    "portfolio_block": 61348783,
+    "portfolio_hash_verified": true,
+    "public_broadcasts": 0
+  },
+  "environment": {
+    "variable_names_match": true,
+    "variable_count": 93,
+    "private_env_committed": false,
+    "shield_mode": "disabled",
+    "xingchi_key_reuse_available": true
+  },
+  "task_shield_live_llm_evaluation": {
+    "executed_in_this_merge": false,
+    "reason": "Explicit opt-in; full swap latency and artifact budgets must be measured before enabling live LLM interception",
+    "scripted_tests_are_model_accuracy_evidence": false
+  },
+  "preserved": {
+    "single_python_fastapi_backend": true,
+    "in_process_execution": true,
+    "existing_planner_provider_rotation": true,
+    "v2_proof_engine_unchanged": true,
+    "solidity_unchanged": true,
+    "legacy_app_trees_restored": false
+  },
+  "runtime": {
+    "already_running_backend_restarted": false,
+    "session_renewed": false,
+    "new_contracts_deployed": false
+  },
+  "limits": [
+    "Live Task Shield is opt-in and was not evaluated with real model calls in this merge.",
+    "Existing backend process needs restart to load new code/configuration; stop it before syncing the default Windows virtual environment.",
+    "Expired Fuji session needs explicit renewal before a new demo transaction.",
+    "History and shield-management APIs are implemented; dedicated frontend screens are not added."
+  ]
+}

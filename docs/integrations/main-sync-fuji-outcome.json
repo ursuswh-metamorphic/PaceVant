@@ -1,0 +1,114 @@
+{
+  "scope": "PUBLIC_FUJI_READ_ONLY_EXISTING_V2_RECEIPT",
+  "public_broadcasts": 0,
+  "report": {
+    "schema_version": "1.0",
+    "chain_id": 43113,
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "build_id": "build_947a8ecbcfa20e1077d976642bf8e4b2aa2681668907b47d8e094fc7922a17a6",
+    "decision_id": "decision_c785bd41cb5343d095d69367cd579a70",
+    "tx_hash": "0x956caf670aa366d86f7950322b0c5781bed77809749bbcfe227b08fb4c4b8182",
+    "typed_data_hash": "0x82d1e4bdd82ca16dc5d75f05db3ed5f3b964ad3e9bc9cf77df5ab580d2896a01",
+    "verification_status": "VERIFIED",
+    "receipt_status": "SUCCESS",
+    "reason_codes": [],
+    "canonical": true,
+    "block_number": 61340481,
+    "block_hash": "0xe89f32f3b13a09dfb81c0657c3157e2f5cb407e9dd23220b32542138e5e10748",
+    "block_timestamp": 1795108782,
+    "observed_at": 1795123201,
+    "head_block": 61348869,
+    "confirmations": 8389,
+    "finality_confidence": "DEPTH_CONFIRMED",
+    "gas_used": "390601",
+    "effective_gas_price_wei": "160",
+    "gas_cost_wei": "62496160",
+    "gas_payer": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C",
+    "gas_verified": true,
+    "gas_payer_role": "RELAYER",
+    "token_in_delta_base_units": "-1",
+    "token_out_delta_base_units": "13192993554324",
+    "nonce_used": true,
+    "allowances": {
+      "vault_to_adapter": "0",
+      "adapter_to_dex": "0"
+    },
+    "swap_events": [
+      {
+        "nonce": "1004",
+        "policy_hash": "0x43bfd4a32aacdb460181608493eed1328e946a71f6bec7c5e85607ba9c529558",
+        "evidence_root": "0xf56ef6111c12a8dec34bf57a4258ae63576a0c16c78c5495709d5e958ba4b906",
+        "token_in": "0x5425890298aed601595a70AB815c96711a31Bc65",
+        "token_out": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
+        "amount_in_base_units": "1",
+        "amount_out_base_units": "13192993554324",
+        "log_index": 9
+      }
+    ],
+    "transfers": [
+      {
+        "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "from": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+        "to": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+        "value": "1"
+      },
+      {
+        "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "from": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+        "to": "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38",
+        "value": "1"
+      },
+      {
+        "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "from": "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38",
+        "to": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+        "value": "13192993554324"
+      }
+    ],
+    "approvals": [
+      {
+        "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "from": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+        "to": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+        "value": "1"
+      },
+      {
+        "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "from": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+        "to": "0x18556da13313f3532c54711497a8fedac273220e",
+        "value": "1"
+      },
+      {
+        "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "from": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+        "to": "0x18556da13313f3532c54711497a8fedac273220e",
+        "value": "0"
+      },
+      {
+        "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "from": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+        "to": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+        "value": "0"
+      }
+    ],
+    "dex_route": {
+      "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+      "pair": "0x8436B8c75ed2F015a80b8472526dd1A79BF54E38"
+    },
+    "artifact_refs": [],
+    "proof_session": {
+      "session_id": "0x64aad0f98d2370ffa1c2f483b4ad4cbf598938969ec39b7417e93b37df798aec",
+      "policy_hash": "0x43bfd4a32aacdb460181608493eed1328e946a71f6bec7c5e85607ba9c529558",
+      "starts_at": 1795107820,
+      "expires_at": 1795111420,
+      "active": true,
+      "limit_usd_e8": "1000000000",
+      "used_usd_e8": "0",
+      "global_limit_usd_e8": "2000000000",
+      "global_used_usd_e8": "0",
+      "block_number": 61340481,
+      "block_hash": "0xe89f32f3b13a09dfb81c0657c3157e2f5cb407e9dd23220b32542138e5e10748",
+      "timestamp": 1795108782
+    }
+  }
+}

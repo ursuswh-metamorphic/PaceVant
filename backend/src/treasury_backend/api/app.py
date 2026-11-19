@@ -11,6 +11,7 @@ from treasury_backend.config.control import Settings
 from treasury_backend.config.execution import Settings as ExecutionSettings
 from treasury_backend.modules.execution.errors import PlaneError
 from treasury_backend.modules.execution.service import ExecutionService
+from treasury_backend.modules.monitoring.worker import start_monitor
 from treasury_backend.modules.workflows.client import VerifiedExecutionClient
 from treasury_backend.modules.workflows.service import utc_now
 
@@ -47,7 +48,13 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
         if runtime is not None:
             runtime.start()
         async with control_lifespan(application):
-            yield
+            worker = start_monitor(application.state.control.monitor) if runtime is not None else None
+            try:
+                yield
+            finally:
+                if worker:
+                    worker[0].set()
+                    worker[1].join(timeout=45)
 
     app.router.lifespan_context = lifespan
     if runtime is not None:
@@ -77,6 +84,7 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
             "execution_enabled": runtime is not None,
             "execution_transport": "in-process" if runtime is not None else "mock",
             "planner_provider": settings.planning.provider,
+            "task_shield_mode": settings.shield.mode,
             "planner_model": settings.planning.model
             if settings.planning.provider == "groq"
             else None,

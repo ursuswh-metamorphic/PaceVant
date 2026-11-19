@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from treasury_backend.core.errors import ControlError
+from treasury_backend.modules.persistence.portfolio import SCHEMA_V2, PortfolioStore
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS workflows (
@@ -65,7 +66,7 @@ def dump(value):
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
 
-class Store:
+class Store(PortfolioStore):
     def proof(self, context_hash):
         with self.connection() as conn:
             row = conn.execute(
@@ -93,6 +94,7 @@ class Store:
         with self.connection() as conn:
             conn.execute("PRAGMA journal_mode = WAL")
             conn.executescript(SCHEMA)
+            conn.executescript(SCHEMA_V2)
 
     @contextmanager
     def connection(self, *, write=False):
@@ -144,23 +146,52 @@ class Store:
             ],
         }
 
-    def execution_gas_spent(self, chain_id: int, vault_address: str, utc_day: int) -> int:
+    def execution_gas_spent(
+        self, chain_id: int, vault_address: str, utc_day: int, mode=None
+    ) -> int:
+        # One active canonical projection per transaction; legacy events stay auditable.
         with self.connection() as conn:
-            rows = conn.execute(
-                """
-                SELECT json_extract(body, '$.execution_fee.gas_cost_wei')
-                FROM events WHERE stage IN ('CONFIRMED', 'REVERTED')
-                  AND json_extract(body, '$.execution_fee.chain_id') = ?
-                  AND json_extract(body, '$.execution_fee.vault_address') = ?
-                  AND json_extract(body, '$.execution_fee.utc_day') = ?
-                  AND sequence IN (
-                    SELECT MAX(sequence) FROM events WHERE stage IN ('CONFIRMED','REVERTED')
-                    GROUP BY COALESCE(json_extract(body, '$.receipt.tx_hash'), 'event_' || sequence)
-                  )
-                """,
-                (chain_id, vault_address, utc_day),
+            projected = conn.execute(
+                "SELECT tx_hash,body FROM outcome_projections WHERE chain_id=? AND vault=?"
+                + (" AND mode=?" if mode else ""),
+                (chain_id, vault_address.lower(), mode)
+                if mode
+                else (chain_id, vault_address.lower()),
             ).fetchall()
-        return sum(int(row[0]) for row in rows)
+            legacy = conn.execute(
+                "SELECT e.sequence,e.body FROM events e JOIN workflows w ON w.id=e.workflow_id WHERE e.stage IN ('CONFIRMED','REVERTED')"
+                + (" AND json_extract(w.body,'$.mode')=?" if mode else ""),
+                (mode,) if mode else (),
+            ).fetchall()
+        covered = {r["tx_hash"] for r in projected if r["tx_hash"]}
+        total = 0
+        for row in projected:
+            report = json.loads(row["body"])["verification"]
+            if (
+                report.get("canonical")
+                and report.get("gas_verified")
+                and report.get("block_timestamp", 0) // 86400 == utc_day
+            ):
+                total += int(report["gas_cost_wei"])
+        seen = set()
+        for row in legacy:
+            event = json.loads(row["body"])
+            fee = event.get("execution_fee")
+            if not fee or (
+                fee.get("chain_id"),
+                fee.get("vault_address", "").lower(),
+                fee.get("utc_day"),
+            ) != (chain_id, vault_address.lower(), utc_day):
+                continue
+            tx = (
+                fee.get("tx_hash")
+                or (event.get("receipt") or {}).get("tx_hash")
+                or str(row["sequence"])
+            )
+            if tx not in covered and tx not in seen:
+                total += int(fee["gas_cost_wei"])
+                seen.add(tx)
+        return total
 
     def record(self, workflow_id, stage, decision, bundle, suggested_amount, evaluation):
         with self.connection(write=True) as conn:
@@ -231,8 +262,14 @@ class Store:
             raise ControlError("DECISION_NOT_FOUND", 404)
         return row["workflow_id"], json.loads(row["body"])
 
-    def history_version(self):
+    def history_version(self, chain_id=None, vault_address=None, mode=None):
         with self.connection() as conn:
+            if chain_id is not None and vault_address is not None:
+                row = conn.execute(
+                    "SELECT version FROM treasury_versions WHERE mode=? AND chain_id=? AND vault=?",
+                    (mode or "FUJI", chain_id, vault_address.lower()),
+                ).fetchone()
+                return row[0] if row else 0
             row = conn.execute(
                 "SELECT COALESCE(MAX(sequence), 0) FROM events WHERE stage='CONFIRMED'"
             ).fetchone()
@@ -323,6 +360,18 @@ class Store:
 
     def transition(self, workflow_id, decision_id, expected, state, now, **details):
         with self.connection(write=True) as conn:
+            # Linearize task cancellation against the transition that starts a financial submission.
+            if state == "SUBMITTING" and expected == "ATTESTED":
+                record = conn.execute(
+                    "SELECT body FROM decisions WHERE id=?", (decision_id,)
+                ).fetchone()
+                proof = json.loads(record[0]).get("task_shield_proof") if record else None
+                if proof:
+                    session = conn.execute(
+                        "SELECT revision FROM shield_sessions WHERE id=?", (proof["session_id"],)
+                    ).fetchone()
+                    if not session or session[0] != proof["revision"]:
+                        raise ControlError("TASK_SHIELD_STALE_TASKS")
             cursor = conn.execute(
                 "UPDATE attestations SET state=? WHERE decision_id=? AND state=?",
                 (state, decision_id, expected),

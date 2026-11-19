@@ -71,7 +71,11 @@ class LocalExecutionSDK(ExecutionClient):
             if path == "/v1/chain/context":
                 return service.chain.context(), False
             if path == "/v1/portfolio/onchain-snapshot":
-                return service.chain.snapshot(), False
+                return service.chain.snapshot(block_number=options.get("params", {}).get("block_number")), False
+            if path.startswith("/v1/submissions/by-build/"):
+                return service.relayer.submission_for_build(path.removeprefix("/v1/submissions/by-build/")), False
+            if path.startswith("/v1/executions/") and path.endswith("/reconciliation"):
+                return service.relayer.reconciliation(path.removeprefix("/v1/executions/").removesuffix("/reconciliation")), False
             if path.startswith("/v1/artifacts/"):
                 return service.store.read_artifact(path.removeprefix("/v1/artifacts/")), True
             if path.startswith("/v1/executions/"):

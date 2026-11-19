@@ -8,6 +8,7 @@ from pydantic import TypeAdapter
 from treasury_backend.config.planning import PlanningSettings
 from treasury_backend.core.domain import Address
 from treasury_backend.core.models import Mode
+from treasury_backend.modules.alignment.provider import ShieldConfig
 from treasury_backend.paths import ROOT
 
 FIXTURES = ROOT / "fixtures" / "mock"
@@ -18,6 +19,7 @@ LOOPBACK = {"127.0.0.1", "::1", "localhost"}
 @dataclass(frozen=True, repr=False)
 class Settings:
     planning: PlanningSettings = field(default_factory=PlanningSettings)
+    shield: ShieldConfig = field(default_factory=ShieldConfig)
     mode: Mode = "MOCK"
     db: Path = ROOT / "data" / "control-plane-mock.sqlite3"
     mandate_file: Path = FIXTURES / "mandate.json"
@@ -139,6 +141,7 @@ class Settings:
             raise RuntimeError("PACEVANT_FUJI_VERIFICATION_RPC must use HTTPS or loopback HTTP")
         return cls(
             planning=PlanningSettings.from_values(os.environ),
+            shield=ShieldConfig.from_env(mode),
             cors_origins=origins,
             serve_frontend=serve_frontend == "true",
             max_block_drift=max_drift,

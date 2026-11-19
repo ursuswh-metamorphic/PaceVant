@@ -19,12 +19,12 @@ def vault_abi():
 
 
 def read_approval_state(
-    rpc_url: str, build: BuiltTransaction, timeout: int = 10
+    rpc_url: str, build: BuiltTransaction, timeout: int = 10, block_number: int | None = None
 ) -> ApprovalChainState:
     w3 = Web3(Web3.HTTPProvider(rpc_url, request_kwargs={"timeout": timeout}))
     if w3.eth.chain_id != build.chain_id:
         raise ValueError("RPC chain does not match build")
-    block = w3.eth.get_block("latest")
+    block = w3.eth.get_block(block_number if block_number is not None else "latest")
     code = w3.eth.get_code(Web3.to_checksum_address(build.vault_address), block.number)
     if not code:
         raise ValueError("Vault is not deployed on this RPC")

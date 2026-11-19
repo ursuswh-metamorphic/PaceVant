@@ -93,7 +93,7 @@ class ChainBalances(Wire):
 class Alignment(Wire):
     verdict: Literal["ALIGNED", "MISALIGNED", "UNCERTAIN"]
     reason_codes: list[Id]
-    shield_model_version: Literal["rules-v1"] = "rules-v1"
+    shield_model_version: Literal["rules-v1", "task-shield-acl2025-v1", "disabled"] = "rules-v1"
     evidence_refs: list[Hash]
 
 

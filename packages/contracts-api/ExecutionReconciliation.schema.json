@@ -1,0 +1,402 @@
+{
+  "additionalProperties": false,
+  "description": "Read-only report v1.0; separate from legacy receipt inclusion status.",
+  "properties": {
+    "allowances": {
+      "additionalProperties": {
+        "pattern": "^(0|[1-9][0-9]*)$",
+        "type": "string"
+      },
+      "title": "Allowances",
+      "type": "object"
+    },
+    "approvals": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Approvals",
+      "type": "array"
+    },
+    "artifact_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Artifact Refs",
+      "type": "array"
+    },
+    "block_hash": {
+      "anyOf": [
+        {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Block Hash"
+    },
+    "block_number": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Block Number"
+    },
+    "block_timestamp": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Block Timestamp"
+    },
+    "build_id": {
+      "title": "Build Id",
+      "type": "string"
+    },
+    "canonical": {
+      "default": false,
+      "title": "Canonical",
+      "type": "boolean"
+    },
+    "chain_id": {
+      "title": "Chain Id",
+      "type": "integer"
+    },
+    "confirmations": {
+      "default": 0,
+      "title": "Confirmations",
+      "type": "integer"
+    },
+    "decision_id": {
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "dex_route": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dex Route"
+    },
+    "effective_gas_price_wei": {
+      "anyOf": [
+        {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Effective Gas Price Wei"
+    },
+    "finality_confidence": {
+      "default": "UNESTABLISHED",
+      "enum": [
+        "UNESTABLISHED",
+        "INCLUDED",
+        "DEPTH_CONFIRMED"
+      ],
+      "title": "Finality Confidence",
+      "type": "string"
+    },
+    "gas_cost_wei": {
+      "anyOf": [
+        {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Gas Cost Wei"
+    },
+    "gas_payer": {
+      "anyOf": [
+        {
+          "pattern": "^0x[0-9a-fA-F]{40}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Gas Payer"
+    },
+    "gas_payer_role": {
+      "default": "UNKNOWN",
+      "enum": [
+        "RELAYER",
+        "UNKNOWN"
+      ],
+      "title": "Gas Payer Role",
+      "type": "string"
+    },
+    "gas_used": {
+      "anyOf": [
+        {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Gas Used"
+    },
+    "gas_verified": {
+      "default": false,
+      "title": "Gas Verified",
+      "type": "boolean"
+    },
+    "head_block": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Head Block"
+    },
+    "nonce_used": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Nonce Used"
+    },
+    "observed_at": {
+      "title": "Observed At",
+      "type": "integer"
+    },
+    "reason_codes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reason Codes",
+      "type": "array"
+    },
+    "receipt_status": {
+      "enum": [
+        "SUCCESS",
+        "REVERTED",
+        "PENDING",
+        "UNKNOWN"
+      ],
+      "title": "Receipt Status",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "swap_events": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Swap Events",
+      "type": "array"
+    },
+    "token_in_delta_base_units": {
+      "anyOf": [
+        {
+          "pattern": "^-?(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Token In Delta Base Units"
+    },
+    "token_out_delta_base_units": {
+      "anyOf": [
+        {
+          "pattern": "^-?(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Token Out Delta Base Units"
+    },
+    "transfers": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Transfers",
+      "type": "array"
+    },
+    "tx_hash": {
+      "pattern": "^0x[0-9a-f]{64}$",
+      "title": "Tx Hash",
+      "type": "string"
+    },
+    "typed_data_hash": {
+      "pattern": "^0x[0-9a-f]{64}$",
+      "title": "Typed Data Hash",
+      "type": "string"
+    },
+    "vault_address": {
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "title": "Vault Address",
+      "type": "string"
+    },
+    "verification_status": {
+      "enum": [
+        "VERIFIED",
+        "PENDING",
+        "UNAVAILABLE",
+        "MISMATCH",
+        "REORGED"
+      ],
+      "title": "Verification Status",
+      "type": "string"
+    },
+    "proof_session": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SessionContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "chain_id",
+    "vault_address",
+    "build_id",
+    "decision_id",
+    "tx_hash",
+    "typed_data_hash",
+    "verification_status",
+    "receipt_status",
+    "observed_at"
+  ],
+  "title": "ExecutionReconciliation",
+  "type": "object",
+  "$defs": {
+    "SessionContext": {
+      "additionalProperties": false,
+      "properties": {
+        "session_id": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "policy_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Policy Hash",
+          "type": "string"
+        },
+        "starts_at": {
+          "minimum": 0,
+          "title": "Starts At",
+          "type": "integer"
+        },
+        "expires_at": {
+          "minimum": 0,
+          "title": "Expires At",
+          "type": "integer"
+        },
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "limit_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Limit Usd E8",
+          "type": "string"
+        },
+        "used_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Used Usd E8",
+          "type": "string"
+        },
+        "global_limit_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Global Limit Usd E8",
+          "type": "string"
+        },
+        "global_used_usd_e8": {
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "title": "Global Used Usd E8",
+          "type": "string"
+        },
+        "block_number": {
+          "minimum": 0,
+          "title": "Block Number",
+          "type": "integer"
+        },
+        "block_hash": {
+          "pattern": "^0x[0-9a-f]{64}$",
+          "title": "Block Hash",
+          "type": "string"
+        },
+        "timestamp": {
+          "minimum": 0,
+          "title": "Timestamp",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "session_id",
+        "policy_hash",
+        "starts_at",
+        "expires_at",
+        "active",
+        "limit_usd_e8",
+        "used_usd_e8",
+        "global_limit_usd_e8",
+        "global_used_usd_e8",
+        "block_number",
+        "block_hash",
+        "timestamp"
+      ],
+      "title": "SessionContext",
+      "type": "object"
+    }
+  }
+}

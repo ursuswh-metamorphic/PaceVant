@@ -1,5 +1,7 @@
 # Operator commands and composition
 
+`observe.py` / `observer.py` provide the optional key-free portfolio/outcome observer ported from main. Normal serving already runs `modules.monitoring.worker` inside the single backend. For the optional separate observer, `PACEVANT_B_URL` may point to `http://127.0.0.1:8000/execution`. `a_environment` explicitly forwards `PACEVANT_SHIELD_*`; execution/deployment environments exclude model credentials. See [main integration configuration](../../../../docs/integrations/MAIN_SYNC_2026_11_20.md).
+
 `fuji-demo --setup` is the bounded owner bootstrap (deploy, up to 0.008 test AVAX token purchase and 0.002 gas transfer, gas additional). `fuji-demo` reuses deployment/funding, selects a tiny exposure-safe goal, starts one backend, runs the workflow and exports public receipt checks. It retries fresh evidence at most twice only before attestation/submission. `fuji-evidence --workflow-id ...` rechecks a confirmed receipt and three negative eth_calls without broadcasting. Owner deployment/setup steps journal signed bytes before send; preserve journals on timeout. Deployment journal names include the selected manifest path scope.
 
 Live Chainlink profiles read feeds directly; the launcher does not compete with a periodic oracle writer during fork calls. Independent contract reads are batched at an explicit block, with hash/reorg and policy checks retained. On Windows, owned Popen subtrees are stopped together so a venv interpreter child cannot remain after launcher shutdown.

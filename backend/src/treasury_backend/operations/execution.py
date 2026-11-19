@@ -379,6 +379,7 @@ def main():
             "SimulationEvidence",
             "SignedPDR",
             "ExecutionResult",
+            "ExecutionReconciliation",
             "SimulationRequest",
             "ExecutionRequest",
             "ExecutionSubmission",

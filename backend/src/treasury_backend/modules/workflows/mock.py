@@ -25,6 +25,8 @@ BYTECODE = hash_bytes(b"pacevant mock vault placeholder")
 
 
 class MockExecutionClient:
+    fixture_mode = True
+
     def __init__(self, mandate, signer, fixture, clock):
         self.mandate = mandate
         self.signer = signer

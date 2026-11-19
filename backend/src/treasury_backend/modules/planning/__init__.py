@@ -1,7 +1,7 @@
 """Public interface; implementation lives in service.py."""
 
 from .provider import GoalPlanner
-from .service import GOAL, REVERSE_GOAL, VERSION, propose, requested_amount, reverse_goal
+from .service import GOAL, REVERSE_GOAL, VERSION, propose, requested_amount, reverse_goal, revise
 
 __all__ = [
     "VERSION",
@@ -11,4 +11,5 @@ __all__ = [
     "requested_amount",
     "propose",
     "GoalPlanner",
+    "revise",
 ]

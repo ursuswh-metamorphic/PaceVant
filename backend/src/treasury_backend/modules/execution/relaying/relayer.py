@@ -373,3 +373,45 @@ class Relayer:
                 "artifact_refs": [ref["ref"]],
             }
         ).model_dump()
+
+    def reconciliation(self, tx_hash):
+        from treasury_contracts.outcomes import verify_outcome
+        from treasury_contracts.outcomes_v2 import parse_pdr
+        from treasury_contracts.readonly import readonly_web3
+
+        base = self.store.get("execution", tx_hash)
+        built = BuiltTransaction.model_validate(self.store.get("build", base["build_id"]))
+        pdr = parse_pdr(self.store.get("submitted-pdr", tx_hash))
+        saved = self.store.get("build-context", built.build_id)
+        evidence = self.store.get("evidence", built.build_id)
+        reader = readonly_web3(self.chain.settings.rpc_url, built.chain_id)
+        try:
+            report = verify_outcome(
+                reader, built, pdr, tx_hash,
+                expected_relayer=self.chain.deployment["relayer"],
+                expected_attestor=saved["context"]["attestor"],
+                bytecode_hash=evidence["bytecode_hash"],
+                evidence_root=evidence["evidence_root"],
+            )
+        finally:
+            reader.provider.close()
+        if (
+            report.verification_status == "VERIFIED"
+            and report.confirmations < self.chain.settings.required_confirmations
+        ):
+            report = report.model_copy(update={
+                "verification_status": "PENDING",
+                "reason_codes": ["INSUFFICIENT_CONFIRMATIONS"],
+            })
+        ref = self.store.artifact(report.model_dump())
+        return report.model_copy(update={"artifact_refs": [ref["ref"]]}).model_dump()
+
+    def submission_for_build(self, build_id):
+        with self.store.db() as db:
+            row = db.execute(
+                "SELECT tx_hash FROM submissions WHERE build_id=?", (build_id,)
+            ).fetchone()
+        if row is None:
+            raise PlaneError("NOT_FOUND", "No durable submission is known for this build", 404)
+        value = self.store.get("execution", row[0])
+        return {"tx_hash": row[0], "status": value["status"]}

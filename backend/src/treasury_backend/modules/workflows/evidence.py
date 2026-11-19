@@ -71,12 +71,17 @@ def evidence_issues(
     sim: SimulationEvidence,
     context: ChainContext,
     now: int,
+    artifact_gate=None,
 ) -> list[str]:
     if sim.source != SOURCES[mode] or context.deployment != mode:
         return ["UNVERIFIED_SIMULATION_SOURCE"]
     if mode != "MOCK":
         try:
-            manifest = client.verify_evidence(built, sim)
+            manifest = (
+                client.verify_evidence(built, sim, artifact_gate=artifact_gate)
+                if artifact_gate
+                else client.verify_evidence(built, sim)
+            )
             timestamp = manifest["timestamp"]
             if (
                 context.fork_block != sim.fork_block
@@ -104,7 +109,13 @@ def evidence_issues(
     if any(getattr(sim, field) != getattr(built, field) for field in fields):
         return ["HASH_MISMATCH"]
     try:
-        raw_manifest = json_object(client.artifact(sim.evidence_manifest_ref))
+        raw_manifest = json_object(
+            artifact_gate(
+                sim.evidence_manifest_ref, lambda: client.artifact(sim.evidence_manifest_ref)
+            )
+            if artifact_gate
+            else client.artifact(sim.evidence_manifest_ref)
+        )
         manifest = Manifest.model_validate(raw_manifest)
         if (
             hash_bytes(rfc8785.dumps(raw_manifest)) != sim.evidence_root
@@ -123,7 +134,11 @@ def evidence_issues(
         # The first artifact is the normalized evidence report. Auxiliary artifacts are
         # also content-addressed, so the manifest commits to the data SDE actually reads.
         for index, (ref) in enumerate(sim.artifact_refs):
-            artifact = client.artifact(ref)
+            artifact = (
+                artifact_gate(ref, lambda ref=ref: client.artifact(ref))
+                if artifact_gate
+                else client.artifact(ref)
+            )
             if hash_bytes(artifact) != manifest.artifact_hashes[ref]:
                 return ["HASH_MISMATCH"]
             if index == 0:

@@ -107,7 +107,23 @@ def test_v2_guarded_simulation_proof_relayer_and_counters(plane, tmp_path, rever
     assert chain.snapshot()["daily_spent_usdc_base_units"] == (
         "0" if reverse else b.amount_in_base_units
     )
+    report = app.state.relayer.reconciliation(result["tx_hash"])
+    assert report["verification_status"] == "VERIFIED", report
+    assert report["gas_verified"] and report["nonce_used"]
+    assert report["token_in_delta_base_units"] == f"-{b.amount_in_base_units}"
+    assert report["token_out_delta_base_units"] == receipt["actual_token_out_delta_base_units"]
+    original_settings = chain.settings
+    chain.settings = original_settings.model_copy(update={"required_confirmations": report["confirmations"] + 1})
+    try:
+        waiting = app.state.relayer.reconciliation(result["tx_hash"])
+        assert waiting["verification_status"] == "PENDING"
+        assert waiting["reason_codes"] == ["INSUFFICIENT_CONFIRMATIONS"]
+        rpc(chain.w3, "evm_mine", [])
+        assert app.state.relayer.reconciliation(result["tx_hash"])["verification_status"] == "VERIFIED"
+    finally:
+        chain.settings = original_settings
     # Receipt is no longer canonical after a real local-chain rollback.
     assert rpc(chain.w3, "evm_revert", [prior])
     assert app.state.relayer.monitor(result["tx_hash"])["status"] == "PENDING"
+    assert app.state.relayer.reconciliation(result["tx_hash"])["verification_status"] == "PENDING"
     assert not chain.vault.functions.usedNonce(int(b.nonce)).call()

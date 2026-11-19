@@ -5,8 +5,9 @@ This is a modular monolith served by one FastAPI/Uvicorn process. Folders are di
 | Capability | Folder | Public interface / output |
 | --- | --- | --- |
 | Planning | `modules/planning` | `GoalPlanner.parse` (real Groq / explicit rules), then `propose` -> checked proposal |
-| Alignment | `modules/alignment` | `check` -> alignment |
-| Portfolio | `modules/portfolio` | `snapshot` -> economic snapshot |
+| Alignment / Task Shield | `modules/alignment` | deterministic constraints; `TaskShield` / `ShieldRuntime`, objective revisions and tool interception |
+| Portfolio | `modules/portfolio` | `PortfolioReader.collect`, `decision_snapshot` -> observed / authorization snapshots |
+| Outcome reconciliation | `modules/monitoring` | `OutcomeMonitor`, read-only worker and authenticated history APIs |
 | Pricing | `modules/oracle` | `PriceProvider.read` -> `OraclePrice` |
 | Economic risk | `modules/risk` | `evaluate` -> risk assessment |
 | Proof mapping | `modules/proof` | `prove` -> shared proof evidence |

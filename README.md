@@ -1,5 +1,7 @@
 # PaceVant — AI Treasury Security V2.1
 
+Đã tích hợp tính năng mới từ `main@08c35df` vào cấu trúc module: Task Shield, portfolio history và outcome reconciliation có hỗ trợ PDR V2. [Chi tiết thay đổi, cấu hình và kiểm chứng](docs/integrations/MAIN_SYNC_2026_11_20.md). Task Shield LLM hiện **chưa bật** trong `.env`; các gate deterministic/proof/on-chain vẫn giữ nguyên.
+
 Cập nhật 20/11/2026: [demo toàn hệ thống trên Fuji thật](docs/demo/FUJI_LIVE_END_TO_END.md) dùng Circle USDC/WAVAX, direct Chainlink và ba ví đã cấu hình. [Report nghiệm thu](docs/integrations/fuji-live-validation.json) có receipt public, proof và các phép kiểm âm.
 
 

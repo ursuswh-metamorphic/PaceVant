@@ -1,0 +1,134 @@
+{
+  "scope": "PUBLIC_FUJI_READ_ONLY_CURRENT_VAULT_PORTFOLIO",
+  "public_broadcasts": 0,
+  "snapshot_hash_verified": true,
+  "snapshot": {
+    "schema_version": "2.0",
+    "snapshot_id": "observed_cfcded9a91c256fb8731500fbd0c1f5e6ec679edad077755c29c562497075ffa",
+    "content_hash": "0xcfcded9a91c256fb8731500fbd0c1f5e6ec679edad077755c29c562497075ffa",
+    "mode": "FUJI",
+    "chain_id": 43113,
+    "vault_address": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+    "block_number": 61348783,
+    "block_hash": "0x0956175a1418347c0e0d993422338960987de2db3f8dc7f2cc68c30651f89093",
+    "block_timestamp": 1795123050,
+    "observed_at": 1795123052,
+    "source_rpc_id": "https://api.avax-test.network#path-1a53b3eb4c9a8999",
+    "policy_hash": "0x43bfd4a32aacdb460181608493eed1328e946a71f6bec7c5e85607ba9c529558",
+    "policy_version": 4,
+    "policy_state": {
+      "owner": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+      "attestor": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+      "active": true,
+      "paused": false,
+      "bytecode_hash": "0x893bef38ed64d6d4d347d5b4911a73ba497ecaab88a0d00726903538eb2685f0"
+    },
+    "assets": [
+      {
+        "asset_id": "43113:native",
+        "contract": null,
+        "symbol": "AVAX",
+        "decimals": 18,
+        "balance_base_units": "0",
+        "verification_status": "VERIFIED",
+        "bytecode_hash": null,
+        "reason_codes": []
+      },
+      {
+        "asset_id": "43113:erc20:0x5425890298aed601595a70ab815c96711a31bc65",
+        "contract": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "symbol": "USDC",
+        "decimals": 6,
+        "balance_base_units": "603",
+        "verification_status": "VERIFIED",
+        "bytecode_hash": "0x7140a935aa3bb55d334d6d325fea277e47674770b10823feefa6f8b2c58af5fc",
+        "reason_codes": []
+      },
+      {
+        "asset_id": "43113:erc20:0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "contract": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "symbol": "WAVAX",
+        "decimals": 18,
+        "balance_base_units": "13192993554324",
+        "verification_status": "VERIFIED",
+        "bytecode_hash": "0xbe0979d9ff9e744b48d32e81fd67db0d32dfc74120989df9b7b1588e2aff8597",
+        "reason_codes": []
+      }
+    ],
+    "price_observations": [
+      {
+        "provider": "CHAINLINK",
+        "feed_contract": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+        "represented_pair": "AVAX/USD",
+        "price_usd_e8": "690438908",
+        "decimals": 8,
+        "updated_at": 1795123015,
+        "round_id": "55340232221128820959",
+        "status": "WITHIN_HEARTBEAT",
+        "display_eligible": true,
+        "valuation_eligible": false,
+        "authorization_eligible": false,
+        "source_ref": "https://reference-data-directory.vercel.app/feeds-avalanche-fuji-testnet.json",
+        "reason_codes": []
+      },
+      {
+        "provider": "CHAINLINK",
+        "feed_contract": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+        "represented_pair": "USDC/USD",
+        "price_usd_e8": "99981087",
+        "decimals": 8,
+        "updated_at": 1795121325,
+        "round_id": "18446744073709552589",
+        "status": "WITHIN_HEARTBEAT",
+        "display_eligible": true,
+        "valuation_eligible": false,
+        "authorization_eligible": false,
+        "source_ref": "https://reference-data-directory.vercel.app/feeds-avalanche-fuji-testnet.json",
+        "reason_codes": []
+      },
+      {
+        "provider": "WITNET",
+        "feed_contract": "0x1111aba2164acdc6d291b08dfb374280035e1111",
+        "represented_pair": "AVAX/USD",
+        "price_usd_e8": null,
+        "decimals": 6,
+        "updated_at": 0,
+        "round_id": null,
+        "status": "UNVERIFIED",
+        "display_eligible": false,
+        "valuation_eligible": false,
+        "authorization_eligible": false,
+        "source_ref": "0x356ba62f72df54463d38fa6850079d4ca77a035bd8f193f17b10e40d67638d57",
+        "reason_codes": [
+          "ORACLE_NO_VALID_UPDATE",
+          "PRICE_NOT_FRESH_FOR_RISK"
+        ]
+      },
+      {
+        "provider": "PYTH",
+        "feed_contract": "0x23f0e8faee7bbb405e7a7c3d60138fcfd43d7509",
+        "represented_pair": "AVAX/USD",
+        "price_usd_e8": "887482253",
+        "decimals": null,
+        "updated_at": 1772947952,
+        "round_id": null,
+        "status": "STALE",
+        "display_eligible": true,
+        "valuation_eligible": false,
+        "authorization_eligible": false,
+        "source_ref": "0x93da3352f9f1d105fdfe4971cfa80e9dd777bfc5d0f683ebb6e1294b92137bb7",
+        "reason_codes": [
+          "PRICE_NOT_FRESH_FOR_RISK"
+        ]
+      }
+    ],
+    "history_version": 0,
+    "verification_status": "VERIFIED",
+    "authorization_eligible": false,
+    "reason_codes": [],
+    "source_refs": [
+      "0x0956175a1418347c0e0d993422338960987de2db3f8dc7f2cc68c30651f89093"
+    ],
+    "independent_balance_check": "NOT_AVAILABLE"
+  }
+}

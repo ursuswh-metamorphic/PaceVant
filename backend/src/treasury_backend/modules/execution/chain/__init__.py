@@ -171,8 +171,8 @@ class Chain:
                 raise PlaneError("HASH_MISMATCH", "Adapter immutable configuration mismatch", 503)
         return route
 
-    def context(self):
-        b = self.w3.eth.get_block("latest")
+    def context(self, block_identifier="latest"):
+        b = self.w3.eth.get_block(block_identifier)
         n = b.number
 
         from treasury_contracts.rpc import read_functions
@@ -234,10 +234,10 @@ class Chain:
             ),
         }
 
-    def snapshot(self, context=None):
+    def snapshot(self, context=None, *, block_number=None):
         from treasury_backend.modules.execution.crypto import content_hash
 
-        c = context or self.context()
+        c = context or self.context(block_number if block_number is not None else "latest")
         result = {
             "chain_id": self.chain_id,
             "vault_address": self.vault.address,

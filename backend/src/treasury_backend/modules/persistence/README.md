@@ -1,5 +1,7 @@
 # persistence
 
+`portfolio.py` adds idempotent SQLite tables for immutable observed snapshots/events/links, per-treasury history versions, monitor jobs/leases, outcome observations and replaceable current projections. Existing workflows, proof records and attestations stay intact. Gas accounting uses canonical outcome projections with deduplicated legacy-event fallback. Reorgs invalidate observations instead of rewriting history. Objective revision is checked in the same write transaction that transitions an attestation from ATTESTED to SUBMITTING; Task Shield owns its additive `shield_*` tables.
+
 Persist control workflows, attempts, decisions, proof records, spend reservations and audit history.
 
 ## Interface and files

@@ -16,7 +16,8 @@ from treasury_backend.config.control import DASHBOARD, Settings
 from treasury_backend.core.domain import EconomicRiskAssessment, Id, SecurityDecision
 from treasury_backend.core.errors import ControlError
 from treasury_backend.core.models import Alignment, Goal, WorkflowRequest
-from treasury_backend.modules.alignment import check
+from treasury_backend.modules.alignment.api import install_shield_routes
+from treasury_backend.modules.monitoring.api import install_history_routes
 from treasury_backend.modules.oracle.fuji.fuji_service import FujiService
 from treasury_backend.modules.workflows.service import ControlPlane, utc_now
 from treasury_contracts.http_limits import RequestSizeLimit
@@ -139,7 +140,8 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
             raise ControlError("AUTH_REQUIRED", 401)
 
     def operator(request: Request):
-        if settings.mode != "MOCK" or settings.operator_token is not None:
+        if (settings.mode != "MOCK" or settings.operator_token is not None
+                or settings.shield.mode in {"paper", "wallet_hardened"}):
             auth(request, settings.operator_token)
 
     def observer_operator(request: Request):
@@ -149,6 +151,8 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
 
     def internal(request: Request):
         auth(request, settings.internal_token)
+
+    install_shield_routes(app, [Depends(observer_operator)])
 
     def json_post(request: Request):
         if request.headers.get("Content-Type", "").split(";")[0].lower() != "application/json":
@@ -172,7 +176,7 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
 
     @app.post("/v1/alignment/check", dependencies=[Depends(operator)], response_model=Alignment)
     def align(payload: AlignmentRequest, service: Service):
-        return check(
+        return service.check_alignment(
             service.mandate(payload.proposal.mandate_id),
             payload.proposal,
             payload.goal,
@@ -208,6 +212,17 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
     @app.get("/v1/treasury", dependencies=[Depends(operator)])
     def treasury(request: Request, service: Service):
         return service.treasury(request.state.request_id)
+
+    def refresh_portfolio(request, vault):
+        value = request.app.state.control.treasury(request.state.request_id)
+        if value["mandate"].vault_address != vault:
+            raise ControlError("MANDATE_SCOPE_MISMATCH", 400)
+        return value["observed_portfolio"].model_dump()
+
+    install_history_routes(
+        app, [Depends(operator)], mode=settings.mode,
+        store=lambda r: r.app.state.control.store, refresh=refresh_portfolio,
+    )
 
     @app.get("/v2/proofs/{context_hash}", dependencies=[Depends(operator)])
     def proof(context_hash: Hash, service: Service):

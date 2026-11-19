@@ -1,13 +1,15 @@
 from pydantic import ValidationError
 
-from treasury_backend.core.domain import EconomicRiskAssessment, PortfolioSnapshot, SecurityDecision
+from treasury_backend.core.domain import EconomicRiskAssessment, SecurityDecision
 from treasury_backend.core.errors import ControlError
 from treasury_backend.core.models import Alignment, ChainBalances, Mandate
 from treasury_backend.modules import decision as sde
 from treasury_backend.modules import portfolio as portfolio
 from treasury_backend.modules import proof as proof_service
 from treasury_backend.modules import risk as economic_risk
+from treasury_backend.modules.alignment.runtime import ShieldRuntime
 from treasury_backend.modules.workflows.evidence import verify_build
+from treasury_backend.modules.workflows.mock import MockExecutionClient
 from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 from treasury_contracts.v2 import ProofArtifactV2
 
@@ -31,7 +33,7 @@ class AuthorizationPipeline:
             built = BuiltTransaction.model_validate(bundle["build"])
             sim = SimulationEvidence.model_validate(bundle["simulation"])
             risk = EconomicRiskAssessment.model_validate(bundle["risk"])
-            snapshot = PortfolioSnapshot.model_validate(bundle["portfolio"])
+            snapshot = portfolio.parse_decision_snapshot(bundle["portfolio"])
             balances = ChainBalances.model_validate(bundle["chain_balances"])
         except (ValidationError, KeyError):
             raise ControlError("INVALID_APPROVAL_RECORD") from None
@@ -77,14 +79,68 @@ class AuthorizationPipeline:
 
     def _verify_approval(self, approved: ApprovedAttempt):
         mandate, built, sim = approved.mandate, approved.built, approved.evidence
+        _, bundle = self.store.decision(decision_id=approved.decision.decision_id)
+        proof = bundle.get("task_shield_proof")
+        if self.shield.active or proof:
+            if not proof or not proof.get("check_ids") or proof.get("unresolved_feedback"):
+                raise ControlError("TASK_SHIELD_APPROVAL_PROOF_REQUIRED")
+            from treasury_backend.modules.alignment.provider import safe_value
+
+            if proof["proposal"] != safe_value(approved.proposal):
+                raise ControlError("TASK_SHIELD_PROPOSAL_MISMATCH")
+            self.shield.validate(proof["session_id"], proof["check_ids"], proof["revision"])
+            from treasury_backend.modules.portfolio.observations import content_hash
+
+            session = self.shield.state.session(proof["session_id"])
+            if (
+                session["mandate_hash"] != content_hash(mandate.model_dump())
+                or session["workflow_id"] != approved.workflow_id
+            ):
+                raise ControlError("TASK_SHIELD_MANDATE_MISMATCH")
         snapshot = approved.snapshot
         self.require_priced_assets(mandate)
+        if hasattr(snapshot, "observation_snapshot_id"):
+            from treasury_backend.core.domain import ObservedPortfolioSnapshot
+            from treasury_backend.modules.portfolio.observations import verify_snapshot_hash
+
+            original = ObservedPortfolioSnapshot.model_validate(
+                self.store.snapshot_record(snapshot.observation_snapshot_id)["snapshot"]
+            )
+            if (
+                not verify_snapshot_hash(original)
+                or original.content_hash != snapshot.observation_hash
+            ):
+                raise ControlError("SNAPSHOT_HASH_MISMATCH")
+            if (
+                self.store.history_version(
+                    mandate.chain_id, mandate.vault_address, self.settings.mode
+                )
+                != snapshot.history_version
+            ):
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
         if self.mandate(mandate.mandate_id) != mandate:
             raise ControlError("POLICY_REVOKED")
         client = self.client(approved.workflow_id, mandate)
         verify_build(mandate, approved.proposal, built)
         balances = client.balances()
         context = client.context(built=built, fork_block=sim.fork_block)
+        fresh_observed = self.observe(
+            client,
+            mandate,
+            balances,
+            context,
+            workflow_id=approved.workflow_id,
+            built=built,
+            decision_id=approved.decision.decision_id,
+            phase="REVALIDATION",
+            persist=False,
+        )
+        if hasattr(snapshot, "observation_snapshot_id") and not isinstance(
+            client, MockExecutionClient
+        ):
+            header = client.rpc.eth.get_block(snapshot.block_number)
+            if "0x" + header.hash.hex().removeprefix("0x") != snapshot.block_hash:
+                raise ControlError("BLOCK_HASH_MISMATCH")
         if portfolio.policy_issues(mandate, context, self.clock()):
             raise ControlError("STALE_REQUIRES_REEVALUATION")
         if (
@@ -115,7 +171,9 @@ class AuthorizationPipeline:
             price.price_wavax_usd_e8,
         ):
             raise ControlError("STALE_REQUIRES_REEVALUATION")
-        fresh_snapshot = portfolio.snapshot(balances, price, 0)
+        fresh_snapshot = portfolio.decision_snapshot(
+            fresh_observed, balances, price, context, built, self.clock()
+        )
         now = self.clock()
         if not portfolio.price_fresh(snapshot, now, portfolio.state_age(context)):
             raise ControlError("STALE_PRICE")
@@ -202,8 +260,34 @@ class AuthorizationPipeline:
             )
             return
         built = approved.built
+        # No LLM calls inside the attestor's SQLite reservation. The final write check is here,
+        # before SUBMITTING and before client.execute, while deterministic verification remains intact.
+        runtime = self.shield_runtimes.get(workflow_id)
+        execute_call = None
+        if self.shield.active:
+            if runtime is None:
+                session = self.shield.state.for_workflow(workflow_id)
+                if not session:
+                    raise ControlError("TASK_SHIELD_SESSION_NOT_FOUND")
+                runtime = ShieldRuntime(self.shield, session["id"])
+            try:
+                execute_call = runtime.before(
+                    "execute_approved_swap",
+                    {"build": built.model_dump(), "decision_id": id_},
+                    approved.proposal.user_goal_reason,
+                )
+                # A concurrent user cancellation invalidates the saved approval even if the model said yes.
+                _, saved = self.store.decision(decision_id=id_)
+                proof = saved["task_shield_proof"]
+                self.shield.validate(proof["session_id"], proof["check_ids"], proof["revision"])
+            except ControlError as error:
+                self.store.transition(
+                    workflow_id, id_, "ATTESTED", "EXPIRED", self.clock(), reason_codes=[error.code]
+                )
+                return
         if not self.store.transition(workflow_id, id_, "ATTESTED", "SUBMITTING", self.clock()):
             raise ControlError("SUBMISSION_ALREADY_STARTED")
+        self.store.track_execution(workflow_id, id_, self.settings.mode, built, self.clock())
         if self.clock() >= decision.expires_at:
             self.store.transition(
                 workflow_id,
@@ -227,6 +311,9 @@ class AuthorizationPipeline:
             )
             return
         if submission.tx_hash:
+            self.store.track_execution(
+                workflow_id, id_, self.settings.mode, built, self.clock(), submission.tx_hash
+            )
             self.store.transition(
                 workflow_id,
                 id_,
@@ -235,6 +322,20 @@ class AuthorizationPipeline:
                 self.clock(),
                 tx_hash=submission.tx_hash,
             )
+            if execute_call:
+                try:
+                    runtime.output(
+                        "execute_approved_swap", execute_call[0], execute_call[1], submission
+                    )
+                except ControlError as error:
+                    # Broadcast has already happened. Preserve its hash and monitoring reservation;
+                    # a shield failure after submission must never cause a replacement/retry write.
+                    self.shield.state.event(
+                        runtime.session_id,
+                        "POST_SUBMISSION_FEEDBACK",
+                        self.clock(),
+                        {"code": error.code, "decision_id": id_},
+                    )
             self._reconcile(workflow_id, id_, built, client, submission.tx_hash)
         elif submission.status in {"STALE_REQUIRES_REEVALUATION", "FAILED_TO_SUBMIT"}:
             self.store.transition(

@@ -1,7 +1,8 @@
 import secrets
 import uuid
 from contextlib import asynccontextmanager
-from fastapi import APIRouter, Depends, FastAPI, Header
+from fastapi import APIRouter, Depends, FastAPI, Header, Query
+from treasury_contracts.models import ExecutionReconciliation
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException
@@ -124,8 +125,16 @@ def create_router(runtime, settings):
         response_model=OnchainSnapshot,
         dependencies=[Depends(auth)],
     )
-    def snapshot():
-        return runtime.chain.snapshot()
+    def snapshot(block_number: int | None = Query(default=None, ge=0)):
+        return runtime.chain.snapshot(block_number=block_number)
+
+    @app.get("/v1/submissions/by-build/{build_id}", response_model=ExecutionSubmission, dependencies=[Depends(auth)])
+    def submission(build_id: str):
+        return runtime.relayer.submission_for_build(build_id)
+
+    @app.get("/v1/executions/{tx_hash}/reconciliation", response_model=ExecutionReconciliation, dependencies=[Depends(auth)])
+    def reconciliation(tx_hash: str):
+        return runtime.relayer.reconciliation(tx_hash)
 
     @app.post("/v1/build", response_model=BuiltTransaction, dependencies=[Depends(auth)])
     def build(p: TransactionProposal, idempotency_key: str | None = Header(default=None)):
