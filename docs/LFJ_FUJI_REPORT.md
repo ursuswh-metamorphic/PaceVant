@@ -50,7 +50,7 @@ Tests retain wrong-chain/token/router/calldata/signature, expired PDR, replay, r
 
 ## Delivery and next decision
 
-See [setup and operation guide](LFJ_FUJI_INTEGRATION.md) and [machine-readable summary](../evidence/lfj-validation-summary.json). The branch is based on the latest integrated oracle branch and intended as a stacked draft PR; no merge is performed. Wallet information is not needed to review/run the read-only deliverables. Live deployment/execution is a later, separately authorized step after valuation and funding blockers are resolved.
+See [setup and operation guide](LFJ_FUJI_INTEGRATION.md) and [machine-readable summary](../evidence/lfj-validation-summary.json). PRs #1 and #2 have now been merged into `main` at the user's request; `main` is the default integration branch. Historical evidence retains its original source-branch metadata. See [main integration status](MAIN_INTEGRATION.md). Wallet information is not needed to review/run the read-only deliverables. Live deployment/execution is a later, separately authorized step after valuation and funding blockers are resolved.
 
 ## Changed files
 
