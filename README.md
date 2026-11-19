@@ -2,7 +2,7 @@
 
 `main` là nhánh tích hợp và nhánh mặc định, gồm Control Plane A, Execution Plane B, Fuji Observatory và LFJ. Hai PR [#1](https://github.com/ursuswh-metamorphic/PaceVant/pull/1) / [#2](https://github.com/ursuswh-metamorphic/PaceVant/pull/2) đã được merge, giữ nguyên lịch sử. Xem [trạng thái tích hợp](docs/MAIN_INTEGRATION.md) cho cách chạy và các điều kiện live còn thiếu.
 
-A lập kế hoạch, kiểm tra chính sách và ký EIP-712 khi SDE cấp quyền. B dựng calldata, mô phỏng trên fork, gửi giao dịch qua `PolicyVault` và trả receipt. Hai dịch vụ dùng chung SDK 1.2.0 và schema evidence v1.1. [Hợp đồng tích hợp](docs/03_SHARED_INTEGRATION_CONTRACT.md)
+A lập kế hoạch, kiểm tra chính sách và ký EIP-712 khi SDE cấp quyền. B dựng calldata, mô phỏng trên fork, gửi giao dịch qua `PolicyVault` và trả receipt. Hai dịch vụ dùng chung SDK 1.3.0 và schema evidence v1.1. [Hợp đồng tích hợp](docs/03_SHARED_INTEGRATION_CONTRACT.md)
 
 ```text
 apps/execution-plane/     FastAPI B, builder, simulation, evidence, relayer, chain
@@ -68,6 +68,8 @@ API: `http://127.0.0.1:8001/docs`; dùng `B_API_KEY` trong **`.env` duy nhất**
 `npm test` chạy Forge, pytest và golden signature test. `npm run check` thêm secret scan. Các alias `b:*` vẫn dùng được. Kiểm thử Fuji cần triển khai riêng với ví test và chứng cứ fork tương ứng.
 
 ## Fuji Wallet + Oracle (read-only, testnet-only)
+
+Portfolio schema 2.0 bổ sung nguồn dữ liệu theo block/token, lịch sử SQLite bất biến theo Vault và worker đối chiếu receipt có thể phục hồi sau restart mà không cần khóa ký. Xem [hướng dẫn snapshot, monitor và migration](docs/PORTFOLIO_OUTCOME_MONITORING.md), [audit trước triển khai](docs/PORTFOLIO_OUTCOME_AUDIT.md) và [báo cáo kiểm thử](docs/PORTFOLIO_OUTCOME_REPORT.md). PDR và chốt định giá LFJ faucet USDC giữ nguyên.
 
 The Fuji Observatory reads AVAX, Circle test USDC and WAVAX at a pinned block, Chainlink AVAX/USD and USDC/USD, Witnet and Pyth observations, plus optional PolicyVault state and execution receipts. It exports source and block evidence; prices remain outside SDE/PDR authorization.
 

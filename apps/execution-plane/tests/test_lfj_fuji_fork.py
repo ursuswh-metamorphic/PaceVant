@@ -183,6 +183,22 @@ def test_real_lfj_on_isolated_fuji_fork(
             ),
         )
         after = chain.balances()
+        from treasury_contracts.models import SignedPDR
+        from treasury_contracts.crypto import digest
+        from treasury_contracts.outcomes import verify_outcome
+        from treasury_contracts.readonly import readonly_web3
+
+        fork_pdr = SignedPDR(decision_id="LFJ_FORK_PROTOCOL_TEST_NOT_SDE", build_id=built.build_id,
+                             domain=domain_for(built), approval=approval, signature=Web3.to_hex(signature),
+                             typed_data_hash=digest(domain_for(built), approval))
+        reader = readonly_web3(w3.provider.endpoint_uri, 43113)
+        try:
+            reconciliation = verify_outcome(reader, built, fork_pdr, Web3.to_hex(receipt.transactionHash),
+                                            expected_relayer=relayer.address, expected_attestor=attestor.address,
+                                            evidence_root=approval.evidenceRoot)
+        finally:
+            reader.provider.close()
+        assert reconciliation.verification_status == "VERIFIED", reconciliation
         facts = token_facts(
             receipt,
             vault.address,
@@ -238,6 +254,7 @@ def test_real_lfj_on_isolated_fuji_fork(
             },
             "fork_deployment": manifest,
             "fork_receipt": plain(receipt),
+            "readonly_reconciliation": reconciliation.model_dump(),
             "facts": facts,
             "before": before,
             "after": after,

@@ -11,6 +11,9 @@
 
 ## Chạy và vận hành B
 
+- [Portfolio / Outcome Monitor v2](PORTFOLIO_OUTCOME_MONITORING.md): snapshot, worker chỉ đọc không cần khóa ký, API và migration SQLite.
+- [Báo cáo triển khai và kiểm thử Portfolio/Outcome](PORTFOLIO_OUTCOME_REPORT.md).
+
 - [Runbook B](04_PERSON_B_RUNBOOK.md): local/Fuji, một `.env`, API, cách lấy public attestor address.
 - [Cấu trúc repository](05_PROJECT_STRUCTURE.md): source mới, lệnh npm, quy tắc dọn PoC và tình trạng lịch sử Git cũ.
 - [System Design v1.0](AI_Treasury_Security_System_Design_v1.0.md): kiến trúc nền; guide/team split v1.1 ưu tiên khi khác nhau.

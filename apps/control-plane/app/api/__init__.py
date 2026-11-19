@@ -16,6 +16,7 @@ from app.errors import ControlError
 from app.fuji_api import install_fuji_routes
 from app.fuji_service import FujiService
 from app.models import Alignment, Goal, WorkflowRequest
+from app.monitoring.api import install_history_routes
 from app.orchestration.service import ControlPlane, utc_now
 from app.settings import DASHBOARD, Settings
 from treasury_contracts.models import Hash, SignedPDR, SimulationEvidence, TransactionProposal, Wire
@@ -181,6 +182,21 @@ def create_app(settings=None, clock=utc_now):
     @app.get("/v1/treasury", dependencies=[Depends(operator)])
     def treasury(request: Request, service: Service):
         return service.treasury(request.state.request_id)
+
+    def refresh_portfolio(request, vault):
+        service = request.app.state.control
+        value = service.treasury(request.state.request_id)
+        if value["mandate"].vault_address != vault:
+            raise ControlError("MANDATE_SCOPE_MISMATCH", 400)
+        return value["observed_portfolio"].model_dump()
+
+    install_history_routes(
+        app,
+        [Depends(operator)],
+        mode=settings.mode,
+        store=lambda r: r.app.state.control.store,
+        refresh=refresh_portfolio,
+    )
 
     if settings.mode == "FUJI":
         app.mount("/assets", StaticFiles(directory=DASHBOARD), name="assets")

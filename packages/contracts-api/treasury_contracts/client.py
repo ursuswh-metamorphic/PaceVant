@@ -14,6 +14,7 @@ from .models import (
     ExecutionSubmission,
     ErrorDetail,
     ErrorEnvelope,
+    ExecutionReconciliation,
 )
 
 
@@ -84,10 +85,20 @@ class ExecutionClient:
             self._request("GET", "/v1/chain/context").json()
         ).model_dump()
 
-    def snapshot(self):
+    def snapshot(self, block_number=None):
         return OnchainSnapshot.model_validate(
-            self._request("GET", "/v1/portfolio/onchain-snapshot").json()
+            self._request("GET", "/v1/portfolio/onchain-snapshot", params={"block_number":block_number} if block_number is not None else {}).json()
         ).model_dump()
+
+    def reconciliation(self, tx_hash):
+        if not re.fullmatch(r"0x[0-9a-f]{64}", tx_hash):
+            raise ValueError("Invalid transaction hash")
+        return ExecutionReconciliation.model_validate(self._request("GET",f"/v1/executions/{tx_hash}/reconciliation").json())
+
+    def submission_for_build(self, build_id):
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}",build_id):
+            raise ValueError("Invalid build reference")
+        return ExecutionSubmission.model_validate(self._request("GET",f"/v1/submissions/by-build/{build_id}").json())
 
     def build(
         self, proposal: TransactionProposal, idempotency_key: str

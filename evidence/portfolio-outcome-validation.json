@@ -1,0 +1,441 @@
+{
+  "schema_version": "portfolio-outcome-validation-1.0",
+  "public_fuji_broadcasts": 0,
+  "public_observation": {
+    "scope": "PUBLIC_FUJI_READ_ONLY_LFJ_POOL_NOT_USER_TREASURY",
+    "public_broadcasts": 0,
+    "observation": {
+      "schema_version": "2.0",
+      "snapshot_id": "observed_86d1a863d957f2ef14fab431782198a35fc147f6954ac02f05ce1174876d7808",
+      "content_hash": "0x86d1a863d957f2ef14fab431782198a35fc147f6954ac02f05ce1174876d7808",
+      "mode": "FUJI",
+      "chain_id": 43113,
+      "vault_address": "0x9371619c8e2a487d57fb9f8e36bcb0317bff0529",
+      "block_number": 61341096,
+      "block_hash": "0x586544fe4988e2a951b45bfa0c42316a053265c1364808f2a9df31bbd1933fad",
+      "block_timestamp": 1795109673,
+      "observed_at": 1795109673,
+      "source_rpc_id": "https://api.avax-test.network#path-1a53b3eb4c9a8999",
+      "policy_hash": null,
+      "policy_version": null,
+      "policy_state": {},
+      "assets": [
+        {
+          "asset_id": "43113:native",
+          "contract": null,
+          "symbol": "AVAX",
+          "decimals": 18,
+          "balance_base_units": "0",
+          "verification_status": "VERIFIED",
+          "bytecode_hash": null,
+          "reason_codes": []
+        },
+        {
+          "asset_id": "43113:erc20:0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+          "contract": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+          "symbol": "USDC",
+          "decimals": 6,
+          "balance_base_units": "11750256108",
+          "verification_status": "VERIFIED",
+          "bytecode_hash": "0x425488675cf56e1e6b30b0eed78fe0211c0eb511093ce1b77214c5be1eb3ccd6",
+          "reason_codes": []
+        },
+        {
+          "asset_id": "43113:erc20:0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "contract": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "symbol": "WAVAX",
+          "decimals": 18,
+          "balance_base_units": "1437166452128775484365",
+          "verification_status": "VERIFIED",
+          "bytecode_hash": "0xbe0979d9ff9e744b48d32e81fd67db0d32dfc74120989df9b7b1588e2aff8597",
+          "reason_codes": []
+        }
+      ],
+      "price_observations": [
+        {
+          "provider": "CHAINLINK",
+          "feed_contract": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+          "represented_pair": "AVAX/USD",
+          "price_usd_e8": "705959875",
+          "decimals": 8,
+          "updated_at": 1795109605,
+          "round_id": "55340232221128820937",
+          "status": "WITHIN_HEARTBEAT",
+          "display_eligible": true,
+          "valuation_eligible": false,
+          "authorization_eligible": false,
+          "source_ref": "https://reference-data-directory.vercel.app/feeds-avalanche-fuji-testnet.json",
+          "reason_codes": [
+            "PRICE_NOT_FRESH_FOR_RISK"
+          ]
+        },
+        {
+          "provider": "CHAINLINK",
+          "feed_contract": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+          "represented_pair": "USDC/USD",
+          "price_usd_e8": "99984374",
+          "decimals": 8,
+          "updated_at": 1795047222,
+          "round_id": "18446744073709552588",
+          "status": "WITHIN_HEARTBEAT",
+          "display_eligible": true,
+          "valuation_eligible": false,
+          "authorization_eligible": false,
+          "source_ref": "https://reference-data-directory.vercel.app/feeds-avalanche-fuji-testnet.json",
+          "reason_codes": [
+            "ORACLE_TOKEN_IDENTITY_MISMATCH",
+            "PRICE_NOT_FRESH_FOR_RISK"
+          ]
+        },
+        {
+          "provider": "WITNET",
+          "feed_contract": "0x1111aba2164acdc6d291b08dfb374280035e1111",
+          "represented_pair": "AVAX/USD",
+          "price_usd_e8": null,
+          "decimals": 6,
+          "updated_at": 0,
+          "round_id": null,
+          "status": "UNVERIFIED",
+          "display_eligible": false,
+          "valuation_eligible": false,
+          "authorization_eligible": false,
+          "source_ref": "0x356ba62f72df54463d38fa6850079d4ca77a035bd8f193f17b10e40d67638d57",
+          "reason_codes": [
+            "ORACLE_NO_VALID_UPDATE",
+            "PRICE_NOT_FRESH_FOR_RISK"
+          ]
+        },
+        {
+          "provider": "PYTH",
+          "feed_contract": "0x23f0e8faee7bbb405e7a7c3d60138fcfd43d7509",
+          "represented_pair": "AVAX/USD",
+          "price_usd_e8": "887482253",
+          "decimals": null,
+          "updated_at": 1772947952,
+          "round_id": null,
+          "status": "STALE",
+          "display_eligible": true,
+          "valuation_eligible": false,
+          "authorization_eligible": false,
+          "source_ref": "0x93da3352f9f1d105fdfe4971cfa80e9dd777bfc5d0f683ebb6e1294b92137bb7",
+          "reason_codes": [
+            "PRICE_NOT_FRESH_FOR_RISK"
+          ]
+        }
+      ],
+      "history_version": 0,
+      "verification_status": "INCOMPLETE",
+      "authorization_eligible": false,
+      "reason_codes": [
+        "VAULT_POLICY_UNAVAILABLE"
+      ],
+      "source_refs": [
+        "0x586544fe4988e2a951b45bfa0c42316a053265c1364808f2a9df31bbd1933fad"
+      ],
+      "independent_balance_check": "NOT_AVAILABLE"
+    }
+  },
+  "isolated_forks": [
+    {
+      "scope": "ISOLATED_FUJI_FORK_NOT_PUBLIC_DEPLOYMENT_OR_SDE_APPROVAL",
+      "public_fuji_broadcast": false,
+      "local_report": "data/portfolio-lfj-fork-insufficient-stress-budget.json",
+      "sha256": "fe406bf8becfcd82b11ef592cd44a87f0125c51b17f7d63343b28bc797ced2dd",
+      "source_fuji_block": 61340790,
+      "fork_receipt": {
+        "transactionHash": "0x1dc62fd7430efb283e41c3b5758ed93d811f80a79a0db45e68e84adb92654fa8",
+        "blockHash": "0x8ab26baf5373ab014e19a3eab7729ffde29a34f0f75706f4521f43b21d5ad6d8",
+        "blockNumber": 61340797,
+        "status": 1,
+        "gasUsed": 262169,
+        "effectiveGasPrice": 1000000007
+      },
+      "reconciliation": {
+        "schema_version": "1.0",
+        "chain_id": 43113,
+        "vault_address": "0xBccA4610Ee173BfDE3b008a9Ee209905B6E7D0f9",
+        "build_id": "build_170317264c58fb1faaa1112bd8e57422c61e4124988cc0146a9d1f6261ffc74b",
+        "decision_id": "LFJ_FORK_PROTOCOL_TEST_NOT_SDE",
+        "tx_hash": "0x1dc62fd7430efb283e41c3b5758ed93d811f80a79a0db45e68e84adb92654fa8",
+        "typed_data_hash": "0x2b47900d20e2718cc4e4c678a6d437f2e8ec3f14050fb333e4019bc7b5e026be",
+        "verification_status": "VERIFIED",
+        "receipt_status": "SUCCESS",
+        "reason_codes": [],
+        "canonical": true,
+        "block_number": 61340797,
+        "block_hash": "0x8ab26baf5373ab014e19a3eab7729ffde29a34f0f75706f4521f43b21d5ad6d8",
+        "block_timestamp": 1795109299,
+        "observed_at": 1795109299,
+        "head_block": 61340797,
+        "confirmations": 1,
+        "finality_confidence": "INCLUDED",
+        "gas_used": "262169",
+        "effective_gas_price_wei": "1000000007",
+        "gas_cost_wei": "262169001835183",
+        "gas_payer": "0x103D40d858D02B93Ab73961103176cC4b7778061",
+        "gas_verified": true,
+        "gas_payer_role": "RELAYER",
+        "token_in_delta_base_units": "-100000",
+        "token_out_delta_base_units": "12194140979091525",
+        "nonce_used": true,
+        "allowances": {
+          "vault_to_adapter": "0",
+          "adapter_to_dex": "0"
+        },
+        "swap_events": [
+          {
+            "nonce": "1001",
+            "policy_hash": "0x4cd47e1b806edd0cc2cb5f8a20fff977a633a2b46f0f5ad2caacdd5f0c48d332",
+            "evidence_root": "0x4dfa9db5afec27590855b4170aedc0aa1f2f2232e1898345ef753e83aed0cf51",
+            "token_in": "0xB6076C93701D6a07266c31066B298AeC6dd65c2d",
+            "token_out": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
+            "amount_in_base_units": "100000",
+            "amount_out_base_units": "12194140979091525",
+            "log_index": 11
+          }
+        ],
+        "transfers": [
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xbcca4610ee173bfde3b008a9ee209905b6e7d0f9",
+            "to": "0x17e18d26732a42563b4f411fe5674b36c753e5bf",
+            "value": "100000"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0x17e18d26732a42563b4f411fe5674b36c753e5bf",
+            "to": "0x9371619c8e2a487d57fb9f8e36bcb0317bff0529",
+            "value": "100000"
+          },
+          {
+            "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+            "from": "0x9371619c8e2a487d57fb9f8e36bcb0317bff0529",
+            "to": "0xbcca4610ee173bfde3b008a9ee209905b6e7d0f9",
+            "value": "12194140979091525"
+          }
+        ],
+        "approvals": [
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xbcca4610ee173bfde3b008a9ee209905b6e7d0f9",
+            "to": "0x17e18d26732a42563b4f411fe5674b36c753e5bf",
+            "value": "100000"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xbcca4610ee173bfde3b008a9ee209905b6e7d0f9",
+            "to": "0x17e18d26732a42563b4f411fe5674b36c753e5bf",
+            "value": "0"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0x17e18d26732a42563b4f411fe5674b36c753e5bf",
+            "to": "0x18556da13313f3532c54711497a8fedac273220e",
+            "value": "100000"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0x17e18d26732a42563b4f411fe5674b36c753e5bf",
+            "to": "0x18556da13313f3532c54711497a8fedac273220e",
+            "value": "0"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0x17e18d26732a42563b4f411fe5674b36c753e5bf",
+            "to": "0x18556da13313f3532c54711497a8fedac273220e",
+            "value": "0"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xbcca4610ee173bfde3b008a9ee209905b6e7d0f9",
+            "to": "0x17e18d26732a42563b4f411fe5674b36c753e5bf",
+            "value": "0"
+          }
+        ],
+        "dex_route": {
+          "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+          "pair": "0x9371619C8E2A487D57FB9F8E36Bcb0317Bff0529"
+        },
+        "artifact_refs": []
+      },
+      "simulation_verification": "INCONCLUSIVE",
+      "stress_results": [
+        {
+          "scenario_id": "reserve_shift_mild",
+          "status": "SUCCESS_SAFE"
+        },
+        {
+          "scenario_id": "reserve_shift_adverse",
+          "status": "INCONCLUSIVE"
+        }
+      ],
+      "before": {
+        "usdc_base_units": "100000000",
+        "wavax_base_units": "0",
+        "allowance_base_units": "0"
+      },
+      "after": {
+        "usdc_base_units": "99900000",
+        "wavax_base_units": "12194140979091525",
+        "allowance_base_units": "0"
+      },
+      "nonce_consumed": true
+    },
+    {
+      "scope": "ISOLATED_FUJI_FORK_NOT_PUBLIC_DEPLOYMENT_OR_SDE_APPROVAL",
+      "public_fuji_broadcast": false,
+      "local_report": "data/portfolio-lfj-fork.json",
+      "sha256": "345aa67775f13e8b8d7d5af8b1ef36dc427024c6c18021212de475d38ae4437d",
+      "source_fuji_block": 61340826,
+      "fork_receipt": {
+        "transactionHash": "0x6eafb9aecf80f4959c581c00771712fcff64d9351d496a9faaed6180ca771d29",
+        "blockHash": "0x49f6c27e29c4e91b05bba7cf038b367f6e3c863016caad093ee4bac03ef6999e",
+        "blockNumber": 61340833,
+        "status": 1,
+        "gasUsed": 262169,
+        "effectiveGasPrice": 1000000007
+      },
+      "reconciliation": {
+        "schema_version": "1.0",
+        "chain_id": 43113,
+        "vault_address": "0xdF51627fc1A6A74bBfAa089B27716a813ad68Af6",
+        "build_id": "build_c0c76e1808ecfd576b1df2abad825797ec55440adca5eeca15d3839baa904645",
+        "decision_id": "LFJ_FORK_PROTOCOL_TEST_NOT_SDE",
+        "tx_hash": "0x6eafb9aecf80f4959c581c00771712fcff64d9351d496a9faaed6180ca771d29",
+        "typed_data_hash": "0xbce963c839b1c27d12f040978dc5b1de3ed34ceb1e379cbd7bec240ffc557b3f",
+        "verification_status": "VERIFIED",
+        "receipt_status": "SUCCESS",
+        "reason_codes": [],
+        "canonical": true,
+        "block_number": 61340833,
+        "block_hash": "0x49f6c27e29c4e91b05bba7cf038b367f6e3c863016caad093ee4bac03ef6999e",
+        "block_timestamp": 1795109348,
+        "observed_at": 1795109349,
+        "head_block": 61340833,
+        "confirmations": 1,
+        "finality_confidence": "INCLUDED",
+        "gas_used": "262169",
+        "effective_gas_price_wei": "1000000007",
+        "gas_cost_wei": "262169001835183",
+        "gas_payer": "0xB06bcc168a0384Ce19800d211880bb2ef40b5569",
+        "gas_verified": true,
+        "gas_payer_role": "RELAYER",
+        "token_in_delta_base_units": "-100000",
+        "token_out_delta_base_units": "12194140979091525",
+        "nonce_used": true,
+        "allowances": {
+          "vault_to_adapter": "0",
+          "adapter_to_dex": "0"
+        },
+        "swap_events": [
+          {
+            "nonce": "1001",
+            "policy_hash": "0x69a493cf98d5e3ae240a2861599f5c78baba1d1d84e38830593b3d9c5a3a90ce",
+            "evidence_root": "0x4dfa9db5afec27590855b4170aedc0aa1f2f2232e1898345ef753e83aed0cf51",
+            "token_in": "0xB6076C93701D6a07266c31066B298AeC6dd65c2d",
+            "token_out": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
+            "amount_in_base_units": "100000",
+            "amount_out_base_units": "12194140979091525",
+            "log_index": 11
+          }
+        ],
+        "transfers": [
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xdf51627fc1a6a74bbfaa089b27716a813ad68af6",
+            "to": "0xbf46160dbd641ba42432349d932ff9e029b4be51",
+            "value": "100000"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xbf46160dbd641ba42432349d932ff9e029b4be51",
+            "to": "0x9371619c8e2a487d57fb9f8e36bcb0317bff0529",
+            "value": "100000"
+          },
+          {
+            "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+            "from": "0x9371619c8e2a487d57fb9f8e36bcb0317bff0529",
+            "to": "0xdf51627fc1a6a74bbfaa089b27716a813ad68af6",
+            "value": "12194140979091525"
+          }
+        ],
+        "approvals": [
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xdf51627fc1a6a74bbfaa089b27716a813ad68af6",
+            "to": "0xbf46160dbd641ba42432349d932ff9e029b4be51",
+            "value": "100000"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xdf51627fc1a6a74bbfaa089b27716a813ad68af6",
+            "to": "0xbf46160dbd641ba42432349d932ff9e029b4be51",
+            "value": "0"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xbf46160dbd641ba42432349d932ff9e029b4be51",
+            "to": "0x18556da13313f3532c54711497a8fedac273220e",
+            "value": "100000"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xbf46160dbd641ba42432349d932ff9e029b4be51",
+            "to": "0x18556da13313f3532c54711497a8fedac273220e",
+            "value": "0"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xbf46160dbd641ba42432349d932ff9e029b4be51",
+            "to": "0x18556da13313f3532c54711497a8fedac273220e",
+            "value": "0"
+          },
+          {
+            "token": "0xb6076c93701d6a07266c31066b298aec6dd65c2d",
+            "from": "0xdf51627fc1a6a74bbfaa089b27716a813ad68af6",
+            "to": "0xbf46160dbd641ba42432349d932ff9e029b4be51",
+            "value": "0"
+          }
+        ],
+        "dex_route": {
+          "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+          "pair": "0x9371619C8E2A487D57FB9F8E36Bcb0317Bff0529"
+        },
+        "artifact_refs": []
+      },
+      "simulation_verification": "COMPLETE",
+      "stress_results": [
+        {
+          "scenario_id": "reserve_shift_mild",
+          "status": "SUCCESS_SAFE"
+        },
+        {
+          "scenario_id": "reserve_shift_adverse",
+          "status": "PROTECTED_REVERT"
+        }
+      ],
+      "before": {
+        "usdc_base_units": "1000000000",
+        "wavax_base_units": "0",
+        "allowance_base_units": "0"
+      },
+      "after": {
+        "usdc_base_units": "999900000",
+        "wavax_base_units": "12194140979091525",
+        "allowance_base_units": "0"
+      },
+      "nonce_consumed": true
+    }
+  ],
+  "tests": {
+    "control_and_contracts_api": 93,
+    "execution_including_ab": 66,
+    "ab_scenarios": 5,
+    "forge": 37,
+    "opt_in_fuji_fork": 2,
+    "eip712_python_viem": "PASS",
+    "ruff": "PASS",
+    "secret_scan": "PASS"
+  },
+  "authorization_dependency": "ORACLE_TOKEN_IDENTITY_MISMATCH: LFJ faucet USDC USD valuation is unresolved"
+}
