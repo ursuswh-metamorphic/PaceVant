@@ -14,6 +14,7 @@ from app.attestor import Attestor
 from app.domain import EconomicRiskAssessment, PortfolioSnapshot, SecurityDecision
 from app.errors import ControlError
 from app.models import Alignment, ChainBalances, Mandate, OraclePrice
+from app.monitoring.service import OutcomeMonitor
 from app.orchestration.client import ExecutionClient, RestExecutionClient
 from app.orchestration.evidence import evidence_issues, json_object, verify_build
 from app.orchestration.fuji import FujiVerifier
@@ -63,6 +64,7 @@ class ControlPlane:
         self.mock_clients = {}
         self.http = None
         self.fuji_http = None
+        self.monitor = OutcomeMonitor(self.store, settings.mode, self._monitor_client, clock)
         if settings.mode != "MOCK":
             self.http = httpx.Client(
                 base_url=settings.execution_url,
@@ -79,6 +81,48 @@ class ControlPlane:
             self.http.close()
         if self.fuji_http:
             self.fuji_http.close()
+
+    def _monitor_client(self, workflow_id, mandate):
+        if self.settings.mode == "MOCK":
+            if workflow_id not in self.mock_clients:
+                raise ControlError("MOCK_MONITOR_RUNTIME_UNAVAILABLE", 503)
+            return self.mock_clients[workflow_id]
+        return self.client(workflow_id, mandate)
+
+    def observe(
+        self,
+        client,
+        mandate,
+        balances,
+        context,
+        *,
+        workflow_id=None,
+        built=None,
+        decision_id=None,
+        phase="OBSERVED",
+        persist=True,
+    ):
+        version = self.store.history_version(
+            mandate.chain_id, mandate.vault_address, self.settings.mode
+        )
+        if isinstance(client, MockExecutionClient):
+            observation = portfolio.fixture_observation(balances, context, version, self.clock())
+        else:
+            observation = client.observe(
+                mandate,
+                block_number=balances.block_number,
+                history_version=version,
+                include_oracles=self.settings.mode == "FUJI",
+            )
+        if persist:
+            self.store.save_snapshot(
+                observation,
+                phase=phase,
+                workflow_id=workflow_id,
+                decision_id=decision_id,
+                build_id=built.build_id if built else None,
+            )
+        return observation
 
     def verify_evidence(self, client, built, evidence, context):
         issues = evidence_issues(client, self.settings.mode, built, evidence, context, self.clock())
@@ -168,6 +212,7 @@ class ControlPlane:
             mandate.policy_hash,
         ):
             issues.append("HASH_MISMATCH")
+        observation = self.observe(client, mandate, balances, context)
         snapshot = None
         try:
             price = self.price(client)
@@ -176,13 +221,21 @@ class ControlPlane:
             if (price.chain_id, price.vault_address) != (mandate.chain_id, mandate.vault_address):
                 issues.append("UNVERIFIED_PRICE")
             else:
-                snapshot = portfolio.snapshot(balances, price, self.store.history_version())
+                snapshot = portfolio.snapshot(
+                    balances,
+                    price,
+                    self.store.history_version(
+                        mandate.chain_id, mandate.vault_address, self.settings.mode
+                    ),
+                )
         except ControlError as error:
             issues.append(error.code)
         return {
             "mode": self.settings.mode,
             "mandate": mandate,
             "portfolio": snapshot,
+            "observed_portfolio": observation,
+            "decision_eligible": False,
             "chain_balances": balances,
             "issues": list(dict.fromkeys(issues)),
         }
@@ -248,7 +301,7 @@ class ControlPlane:
             amount = replacement
 
     def _evaluate(self, workflow_id, mandate, client, proposal, aligned, context=None):
-        built = sim = evaluation = balances = snapshot = None
+        built = sim = evaluation = balances = snapshot = observation = None
         issues = []
         try:
             context = context or client.context()
@@ -265,6 +318,15 @@ class ControlPlane:
                 balances = client.balances()
                 context = client.context(built=built, fork_block=sim.fork_block)
                 issues = self.verify_evidence(client, built, sim, context)
+                observation = self.observe(
+                    client,
+                    mandate,
+                    balances,
+                    context,
+                    workflow_id=workflow_id,
+                    built=built,
+                    phase="PRE",
+                )
                 self.store.event(
                     workflow_id,
                     "SIMULATED",
@@ -273,8 +335,8 @@ class ControlPlane:
                     provenance="UNVERIFIED" if issues else "VERIFIED",
                 )
                 if not issues:
-                    snapshot = portfolio.snapshot(
-                        balances, self.price(client), self.store.history_version()
+                    snapshot = portfolio.decision_snapshot(
+                        observation, balances, self.price(client), context, built, self.clock()
                     )
                     evaluation = economic_risk.evaluate(
                         mandate, proposal, built, sim, snapshot, balances, context, self.clock()
@@ -339,11 +401,21 @@ class ControlPlane:
                 "build": built.model_dump() if built else None,
                 "simulation": sim.model_dump() if sim else None,
                 "suggested_amount": suggested,
+                "chain_context": context.model_dump() if context else None,
+                "pre_snapshot_id": observation.snapshot_id if observation else None,
                 **evidence,
             },
             suggested,
             evidence,
         )
+        if observation:
+            self.store.save_snapshot(
+                observation,
+                phase="PRE",
+                workflow_id=workflow_id,
+                decision_id=decision.decision_id,
+                build_id=built.build_id if built else None,
+            )
         return decision
 
     def _approved(self, id_) -> ApprovedAttempt:
@@ -362,7 +434,7 @@ class ControlPlane:
             built = BuiltTransaction.model_validate(bundle["build"])
             sim = SimulationEvidence.model_validate(bundle["simulation"])
             risk = EconomicRiskAssessment.model_validate(bundle["risk"])
-            snapshot = PortfolioSnapshot.model_validate(bundle["portfolio"])
+            snapshot = portfolio.parse_decision_snapshot(bundle["portfolio"])
             balances = ChainBalances.model_validate(bundle["chain_balances"])
         except (ValidationError, KeyError):
             raise ControlError("INVALID_APPROVAL_RECORD") from None
@@ -398,12 +470,48 @@ class ControlPlane:
     def _verify_approval(self, approved: ApprovedAttempt):
         mandate, built, sim = approved.mandate, approved.built, approved.evidence
         snapshot = approved.snapshot
+        if hasattr(snapshot, "observation_snapshot_id"):
+            from app.domain import ObservedPortfolioSnapshot
+            from app.portfolio.observations import verify_snapshot_hash
+
+            original = ObservedPortfolioSnapshot.model_validate(
+                self.store.snapshot_record(snapshot.observation_snapshot_id)["snapshot"]
+            )
+            if (
+                not verify_snapshot_hash(original)
+                or original.content_hash != snapshot.observation_hash
+            ):
+                raise ControlError("SNAPSHOT_HASH_MISMATCH")
+            if (
+                self.store.history_version(
+                    mandate.chain_id, mandate.vault_address, self.settings.mode
+                )
+                != snapshot.history_version
+            ):
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
         if self.mandate(mandate.mandate_id) != mandate:
             raise ControlError("POLICY_REVOKED")
         client = self.client(approved.workflow_id, mandate)
         verify_build(mandate, approved.proposal, built)
         balances = client.balances()
         context = client.context(built=built, fork_block=sim.fork_block)
+        fresh_observed = self.observe(
+            client,
+            mandate,
+            balances,
+            context,
+            workflow_id=approved.workflow_id,
+            built=built,
+            decision_id=approved.decision.decision_id,
+            phase="REVALIDATION",
+            persist=False,
+        )
+        if hasattr(snapshot, "observation_snapshot_id") and not isinstance(
+            client, MockExecutionClient
+        ):
+            header = client.rpc.eth.get_block(snapshot.block_number)
+            if "0x" + header.hash.hex().removeprefix("0x") != snapshot.block_hash:
+                raise ControlError("BLOCK_HASH_MISMATCH")
         if portfolio.policy_issues(mandate, context, self.clock()):
             raise ControlError("STALE_REQUIRES_REEVALUATION")
         if (
@@ -429,7 +537,9 @@ class ControlPlane:
             price.price_wavax_usd_e8,
         ):
             raise ControlError("STALE_REQUIRES_REEVALUATION")
-        fresh_snapshot = portfolio.snapshot(balances, price, 0)
+        fresh_snapshot = portfolio.decision_snapshot(
+            fresh_observed, balances, price, context, built, self.clock()
+        )
         now = self.clock()
         if not portfolio.fresh(snapshot.price_timestamp, now):
             raise ControlError("STALE_PRICE")
@@ -479,6 +589,7 @@ class ControlPlane:
         built = approved.built
         if not self.store.transition(workflow_id, id_, "ATTESTED", "SUBMITTING", self.clock()):
             raise ControlError("SUBMISSION_ALREADY_STARTED")
+        self.store.track_execution(workflow_id, id_, self.settings.mode, built, self.clock())
         if self.clock() >= decision.expires_at:
             self.store.transition(
                 workflow_id,
@@ -502,6 +613,9 @@ class ControlPlane:
             )
             return
         if submission.tx_hash:
+            self.store.track_execution(
+                workflow_id, id_, self.settings.mode, built, self.clock(), submission.tx_hash
+            )
             self.store.transition(
                 workflow_id,
                 id_,
@@ -531,80 +645,51 @@ class ControlPlane:
             )
 
     def _reconcile(self, workflow_id, id_, built, client, tx_hash, receipt=None):
-        try:
-            receipt = receipt or client.execution(tx_hash)
-        except ControlError:
-            return
-        if receipt.status in {"SUBMITTED", "PENDING"}:
-            return
-        details = {"receipt": receipt.model_dump()}
-        state = receipt.status
-        if (
-            (receipt.tx_hash, receipt.decision_id, receipt.build_id, receipt.chain_id)
-            != (tx_hash, id_, built.build_id, built.chain_id)
-            or receipt.block_number is None
-            or receipt.gas_used is None
-        ):
-            state = "RECEIPT_MISMATCH"
-        elif state == "CONFIRMED":
-            if (
-                receipt.actual_token_in_delta_base_units != f"-{built.amount_in_base_units}"
-                or int(receipt.actual_token_out_delta_base_units or "0")
-                < int(built.min_amount_out_base_units)
-                or not receipt.event_refs
-                or receipt.revert_reason
-            ):
-                state = "RECEIPT_MISMATCH"
-            else:
-                try:
-                    updated = client.balances()
-                    if (updated.chain_id, updated.vault_address) == (
-                        built.chain_id,
-                        built.vault_address.lower(),
-                    ) and updated.block_number >= receipt.block_number:
-                        details["post_execution_balances"] = updated.model_dump()
-                except ControlError:
-                    pass
-        elif state == "REVERTED" and (
-            receipt.actual_token_in_delta_base_units
-            == receipt.actual_token_out_delta_base_units
-            == "0"
-        ):
-            if receipt.revert_reason == "MIN_OUTPUT_NOT_MET":
-                details["reason_codes"] = ["PROTECTED_REVERT"]
-        else:
-            state = "RECEIPT_MISMATCH"
-        if state in {"CONFIRMED", "REVERTED"} and isinstance(client, RestExecutionClient):
-            try:
-                utc_day, gas_cost_wei = client.execution_fee(receipt)
-                details["execution_fee"] = {
-                    "chain_id": built.chain_id,
-                    "vault_address": built.vault_address.lower(),
-                    "utc_day": utc_day,
-                    "gas_cost_wei": gas_cost_wei,
-                }
-            except ControlError as error:
-                if error.code != "RECEIPT_MISMATCH":
-                    return
-                state = "RECEIPT_MISMATCH"
-        self.store.transition(workflow_id, id_, "SUBMITTED", state, self.clock(), **details)
+        self.store.track_execution(
+            workflow_id, id_, self.settings.mode, built, self.clock(), tx_hash
+        )
+        return self.monitor.process(id_, force=True, client=client, receipt=receipt)
 
     def workflow(self, id_):
         workflow = self.store.workflow(id_)
         if workflow["mode"] != self.settings.mode:
             return workflow
-        if workflow["status"] in {"SUBMITTED", "SUBMITTING"}:
-            event = workflow["timeline"][-1]
-            _, bundle = self.store.decision(decision_id=event["decision_id"])
-            mandate = Mandate.model_validate(bundle["mandate"])
-            built = BuiltTransaction.model_validate(bundle["build"])
-            client = self.client(id_, mandate)
-            if workflow["status"] == "SUBMITTED":
-                self._reconcile(id_, event["decision_id"], built, client, event["tx_hash"])
-            elif self.clock() > built.deadline:
-                self._expire_unknown_submission(id_, event["decision_id"], built, client)
+        candidates = [e for e in reversed(workflow["timeline"]) if e.get("decision_id")]
+        if candidates and workflow["status"] in {
+            "SUBMITTING",
+            "SUBMITTED",
+            "CONFIRMED",
+            "REVERTED",
+            "RECEIPT_MISMATCH",
+        }:
+            id_decision = candidates[0]["decision_id"]
+            job = self.store.monitor_job(id_decision)
+            if job is None:
+                self.monitor.bootstrap()
+                job = self.store.monitor_job(id_decision)
+            if job and (self.settings.mode != "MOCK" or id_ in self.mock_clients):
+                self.monitor.process(id_decision, force=True)
             workflow = self.store.workflow(id_)
-            if workflow["status"] not in {"SUBMITTED", "SUBMITTING"}:
+            if workflow["status"] == "SUBMITTING":
+                _, bundle = self.store.decision(decision_id=id_decision)
+                built = BuiltTransaction.model_validate(bundle["build"])
+                if self.clock() > built.deadline:
+                    try:
+                        mandate = Mandate.model_validate(bundle["mandate"])
+                        self._expire_unknown_submission(
+                            id_, id_decision, built, self._monitor_client(id_, mandate)
+                        )
+                    except ControlError:
+                        pass
+            workflow = self.store.workflow(id_)
+            job = self.store.monitor_job(id_decision)
+            workflow["reconciliation"] = self.store.outcome_projection(id_decision)
+            workflow["monitoring"] = (
+                {"state": job["state"], "next_poll_at": job["next_at"], "attempts": job["attempts"]}
+                if job
+                else None
+            )
+            if workflow["status"] not in {"SUBMITTING", "SUBMITTED"}:
                 self.mock_clients.pop(id_, None)
         return workflow
 

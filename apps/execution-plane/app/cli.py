@@ -285,6 +285,7 @@ def main():
             "ErrorDetail",
             "ErrorEnvelope",
             "ApprovalChainState",
+            "ExecutionReconciliation",
         ]:
             save(
                 ROOT / f"packages/contracts-api/{name}.schema.json",

@@ -21,6 +21,7 @@ from treasury_contracts.models import (
     ChainContext as WireContext,
 )
 from treasury_contracts.onchain import read_approval_state
+from treasury_contracts.readonly import ReadError, readonly_web3
 
 DOMAIN_ERRORS = {
     "TOKEN_NOT_ALLOWED",
@@ -101,7 +102,9 @@ class RestExecutionClient:
         self.sdk = WorkflowSDK(http, request_id)
         self.settings = settings
         self.store = store
-        self.rpc = Web3(Web3.HTTPProvider(settings.chain_rpc_url, request_kwargs={"timeout": 3}))
+        self.rpc = readonly_web3(
+            settings.chain_rpc_url, 31337 if settings.mode == "LOCAL" else 43113, seconds=180
+        )
 
     @staticmethod
     def _call(fn, *args):
@@ -128,11 +131,32 @@ class RestExecutionClient:
             code = self.rpc.eth.get_code(vault, block_identifier=remote.block_number)
             if not code:
                 raise ControlError("HASH_MISMATCH")
+            from app.portfolio.observations import OracleBridge
+
+            bridge = OracleBridge(self.rpc, {"number": remote.block_number}, remote.timestamp)
+            try:
+                decimals = [
+                    bridge.eth_call(token, "decimals()", returns=("uint8",))[0]
+                    for token in (remote.token_in, remote.token_out)
+                ]
+                actual_tokens = [
+                    bridge.eth_call(vault, name, returns=("address",))[0].lower()
+                    for name in ("usdc()", "wavax()")
+                ]
+            except Exception:
+                raise ControlError("TOKEN_METADATA_UNAVAILABLE", 503) from None
+            if decimals != [6, 18] or actual_tokens != [
+                remote.token_in.lower(),
+                remote.token_out.lower(),
+            ]:
+                raise ControlError("TOKEN_DECIMALS_OR_IDENTITY_MISMATCH")
             state = None
             if built is not None:
                 if built.vault_address.lower() != remote.vault_address.lower():
                     raise ControlError("HASH_MISMATCH")
-                state = read_approval_state(self.settings.chain_rpc_url, built, timeout=3)
+                state = read_approval_state(
+                    self.settings.chain_rpc_url, built, timeout=3, block_number=remote.block_number
+                )
                 if (
                     state.policy_hash != remote.policy_hash
                     or state.policy_active != remote.policy_active
@@ -147,7 +171,7 @@ class RestExecutionClient:
                 fork_code = self.rpc.eth.get_code(vault, block_identifier=fork.number)
                 if fork_code != code:
                     raise ControlError("HASH_MISMATCH")
-        except (Web3Exception, OSError, ValueError):
+        except (Web3Exception, OSError, ValueError, ReadError):
             raise ControlError("CHAIN_RPC_UNAVAILABLE", 503, retryable=True) from None
         return ChainContext(
             deployment=self.settings.mode,
@@ -157,8 +181,8 @@ class RestExecutionClient:
             router=remote.router,
             token_in=remote.token_in,
             token_out=remote.token_out,
-            token_in_decimals=6,
-            token_out_decimals=18,
+            token_in_decimals=decimals[0],
+            token_out_decimals=decimals[1],
             policy_hash=remote.policy_hash,
             policy_version=remote.policy_version,
             policy_active=remote.policy_active,
@@ -189,7 +213,7 @@ class RestExecutionClient:
             ):
                 raise ControlError("HASH_MISMATCH")
             price = self.rpc.eth.gas_price
-        except (Web3Exception, OSError, ValueError):
+        except (Web3Exception, OSError, ValueError, ReadError):
             raise ControlError("CHAIN_RPC_UNAVAILABLE", 503, retryable=True) from None
         fields = (
             "chain_id",
@@ -202,7 +226,10 @@ class RestExecutionClient:
             "daily_spent_usdc_base_units",
         )
         spent_wei = self.store.execution_gas_spent(
-            remote["chain_id"], remote["vault_address"].lower(), remote["utc_day"]
+            remote["chain_id"],
+            remote["vault_address"].lower(),
+            remote["utc_day"],
+            self.settings.mode,
         )
         return ChainBalances(
             **{field: remote[field] for field in fields},
@@ -229,6 +256,73 @@ class RestExecutionClient:
     def execution(self, tx_hash):
         return self._call(self.sdk.result, tx_hash)
 
+    def submission_for_build(self, build_id):
+        try:
+            return self.sdk.submission_for_build(build_id)
+        except ExecutionAPIError as error:
+            if error.status_code == 404:
+                return None
+            raise ControlError("EXECUTION_PLANE_UNAVAILABLE", 503, retryable=True) from None
+
+    def observe(self, mandate, *, block_number=None, history_version=0, include_oracles=False):
+        from app.portfolio.observations import PortfolioReader
+
+        return PortfolioReader(self.settings.mode, self.settings.chain_rpc_url).collect(
+            mandate.vault_address,
+            mandate=mandate,
+            block_number=block_number,
+            history_version=history_version,
+            independent_reader=lambda n: self._call(self.sdk.snapshot, n),
+            include_oracles=include_oracles,
+        )
+
+    def reconciliation(self, built, pdr, tx_hash, *, context=None, evidence=None):
+        from treasury_contracts.outcomes import verify_outcome
+        from treasury_contracts.readonly import readonly_web3
+
+        reader = readonly_web3(self.settings.chain_rpc_url, built.chain_id)
+        try:
+            local = verify_outcome(
+                reader,
+                built,
+                pdr,
+                tx_hash,
+                expected_relayer=self.settings.relayer_address,
+                expected_attestor=context.attestor if context else None,
+                bytecode_hash=evidence.bytecode_hash if evidence else None,
+                evidence_root=evidence.evidence_root if evidence else None,
+            )
+        finally:
+            reader.provider.close()
+        # Compare two independently read reports; confirmation depth/observation time can differ.
+        remote = self._call(self.sdk.reconciliation, tx_hash)
+        keys = (
+            "chain_id",
+            "vault_address",
+            "build_id",
+            "decision_id",
+            "tx_hash",
+            "receipt_status",
+            "canonical",
+            "block_hash",
+            "gas_used",
+            "effective_gas_price_wei",
+            "token_in_delta_base_units",
+            "token_out_delta_base_units",
+            "nonce_used",
+            "allowances",
+        )
+        if local.verification_status == "VERIFIED" and any(
+            getattr(local, k) != getattr(remote, k) for k in keys
+        ):
+            return local.model_copy(
+                update={
+                    "verification_status": "MISMATCH",
+                    "reason_codes": ["INDEPENDENT_OUTCOME_MISMATCH"],
+                }
+            )
+        return local
+
     def execution_fee(self, receipt):
         try:
             raw = self.rpc.eth.get_transaction_receipt(receipt.tx_hash)
@@ -242,5 +336,5 @@ class RestExecutionClient:
             ):
                 raise ControlError("RECEIPT_MISMATCH")
             return block.timestamp // 86400, str(raw.gasUsed * raw.effectiveGasPrice)
-        except (Web3Exception, OSError, ValueError):
+        except (Web3Exception, OSError, ValueError, ReadError):
             raise ControlError("CHAIN_RPC_UNAVAILABLE", 503, retryable=True) from None

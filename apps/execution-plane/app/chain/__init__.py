@@ -161,8 +161,8 @@ class Chain:
                 raise PlaneError("HASH_MISMATCH", "Adapter immutable configuration mismatch", 503)
         return route
 
-    def context(self):
-        b = self.w3.eth.get_block("latest")
+    def context(self, block_identifier="latest"):
+        b = self.w3.eth.get_block(block_identifier)
         n = b.number
 
         def call(name):

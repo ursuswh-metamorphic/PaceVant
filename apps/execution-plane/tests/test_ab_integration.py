@@ -4,6 +4,7 @@ import json
 import os
 import secrets
 import socket
+import sqlite3
 import subprocess
 import sys
 import time
@@ -13,6 +14,7 @@ import httpx
 import pytest
 
 from app.settings import ROOT
+from app.chain import artifact
 from app.simulation.runner import rpc
 from conftest import mine_current_block
 
@@ -56,8 +58,9 @@ def process_ready(command, url, env, output, *, cwd):
         (500, 0, ["REPLAN", "APPROVE"], False),
         (200, 120, ["ESCALATE"], False),
         (200, 0, ["APPROVE"], True),
+        (200, 0, ["APPROVE"], "revert"),
     ],
-    ids=["normal", "exposure-replan", "stale-oracle", "pending-reservation"],
+    ids=["normal", "exposure-replan", "stale-oracle", "pending-reservation", "protected-revert"],
 )
 def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verdicts, hold_receipt):
     _, chain, keys, _ = plane
@@ -174,7 +177,23 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
                 assert blocked["timeline"][-1]["reason_codes"] == ["VAULT_APPROVAL_IN_FLIGHT"]
                 assert not any(event["stage"] == "ATTESTED" for event in blocked["timeline"])
                 assert chain.balances() == before
+                # A new key-free worker process opens the existing DB while pending.
+                observer_env = {k: v for k, v in a_env.items() if k not in {"PACEVANT_ATTESTOR_KEY", "PACEVANT_INTERNAL_TOKEN", "PACEVANT_ORACLE_FILE"}}
+                observer_env["PYTHONPATH"] = str(ROOT / "apps/control-plane")
+                time.sleep(2.1)
+                recovered = subprocess.run(["uv", "run", "--locked", "python", "-m", "app.monitoring", "--once"], cwd=ROOT, env=observer_env, capture_output=True, text=True, timeout=40)
+                assert recovered.returncode == 0, recovered.stderr
+                assert json.loads(recovered.stdout)["read_only"]
+                if hold_receipt == "revert":
+                    slot = next(x for x in artifact("MockSwapAdapter")["storageLayout"]["storage"] if x["label"] == "outputPerUsdc")["slot"]
+                    rpc(chain.w3,"anvil_setStorageAt",[chain.router.address,hex(int(slot)),"0x"+(49*10**15).to_bytes(32,"big").hex()])
                 rpc(chain.w3, "evm_mine", [])
+                with sqlite3.connect(tmp_path / "control.sqlite3") as db:
+                    next_poll = db.execute("SELECT MIN(next_at) FROM monitor_jobs").fetchone()[0]
+                time.sleep(max(0,next_poll-time.time())+0.2)
+                recovered = subprocess.run(["uv", "run", "--locked", "python", "-m", "app.monitoring", "--once"], cwd=ROOT, env=observer_env, capture_output=True, text=True, timeout=40)
+                assert recovered.returncode == 0,recovered.stderr
+                assert json.loads(recovered.stdout)["states"] == ["REVERTED" if hold_receipt == "revert" else "CONFIRMED"],recovered.stdout
         finally:
             if hold_receipt:
                 rpc(chain.w3, "evm_setAutomine", [True])
@@ -202,7 +221,24 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
             assert chain.balances() == before
             return
 
-        assert workflow["status"] == "CONFIRMED", workflow
+        assert workflow["status"] == ("REVERTED" if hold_receipt == "revert" else "CONFIRMED"), workflow
+        reconciliation = workflow["reconciliation"]
+        assert reconciliation["verification"]["verification_status"] == "VERIFIED"
+        assert reconciliation["attribution_status"] == "EXACT_SNAPSHOT_AND_TRANSACTION_LOGS"
+        assert reconciliation["pre_snapshot_id"] != reconciliation["post_snapshot_id"]
+        params = {"chain_id": chain.context()["chain_id"], "vault_address": chain.vault.address}
+        history = a.get("/v1/history/transactions", params=params).raise_for_status().json()["transactions"]
+        assert len(history) == 1 and history[0]["post_snapshot_id"] == reconciliation["post_snapshot_id"]
+        snapshot = a.get("/v1/portfolio/snapshots/" + reconciliation["post_snapshot_id"]).raise_for_status().json()
+        assert snapshot["snapshot"]["assets"][1]["balance_base_units"] == chain.balances()["usdc_base_units"]
+        assert a.get("/v1/portfolio/current", params=params).raise_for_status().json()["history_version"] == 1
+        if hold_receipt == "revert":
+            assert reconciliation["verification"]["token_in_delta_base_units"] == "0"
+            assert reconciliation["verification"]["token_out_delta_base_units"] == "0"
+            assert int(reconciliation["verification"]["gas_cost_wei"]) > 0
+            assert chain.balances() == before
+            assert not chain.vault.functions.usedNonce(int(simulations[-1]["nonce"])).call()
+            return
         attested = [e for e in events if e["stage"] == "ATTESTED"]
         assert len(attested) == 1
         if amount == 500:

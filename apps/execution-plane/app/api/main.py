@@ -1,7 +1,7 @@
 import secrets
 import uuid
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI, Header
+from fastapi import Depends, FastAPI, Header, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException
@@ -19,6 +19,7 @@ from ..models import (
     OnchainSnapshot,
     ExecutionSubmission,
     ErrorEnvelope,
+    ExecutionReconciliation,
 )
 from ..settings import Settings
 from ..simulation.runner import Simulator
@@ -139,8 +140,19 @@ def create_app(settings=None, chain=None):
         response_model=OnchainSnapshot,
         dependencies=[Depends(auth)],
     )
-    def snapshot():
-        return app.state.chain.snapshot()
+    def snapshot(block_number: int | None = Query(default=None, ge=0)):
+        context = app.state.chain.context(block_number) if block_number is not None else None
+        return app.state.chain.snapshot(context)
+
+    @app.get("/v1/executions/{tx_hash}/reconciliation", response_model=ExecutionReconciliation,
+             dependencies=[Depends(auth)])
+    def reconciliation(tx_hash: str):
+        return app.state.relayer.reconciliation(tx_hash)
+
+    @app.get("/v1/submissions/by-build/{build_id}", response_model=ExecutionSubmission,
+             dependencies=[Depends(auth)])
+    def submission_by_build(build_id: str):
+        return app.state.relayer.submission_for_build(build_id)
 
     @app.post(
         "/v1/build", response_model=BuiltTransaction, dependencies=[Depends(auth)]

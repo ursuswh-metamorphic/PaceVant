@@ -1,5 +1,7 @@
 # Shared integration contract v1.1
 
+SDK **1.3.0** adds `ExecutionReconciliation`, `ExecutionClient.reconciliation(tx_hash)`, `submission_for_build(build_id)` and optional pinned `snapshot(block_number)`. These are read-only additions; all previous DTO shapes and EIP-712 vectors remain unchanged. Upgrade B before enabling A's v2 monitor. The legacy `ExecutionResult.status` describes inclusion: verify the detailed report before asserting safe execution. See [Portfolio/Outcome v2](../../docs/PORTFOLIO_OUTCOME_MONITORING.md) for trust boundaries, status mapping and SQLite migration. `treasury_contracts.outcomes.verify_outcome` and the allowlisted `readonly` provider can be used without any wallet key.
+
 SDK **1.2.0** adds `BuiltTransaction.adapter_version=lfj-v1-fuji-v1` alongside `mock-swap-v1`. Upgrade A and B together for LFJ messages; strict 1.1 clients reject the new enum. Existing message shapes, evidence wire schema 1.1, adapter calldata and EIP-712 Approval/domain remain unchanged. See [LFJ integration](../../docs/LFJ_FUJI_INTEGRATION.md).
 
 Schema and EIP-712 follow `docs/03_SHARED_INTEGRATION_CONTRACT.md`. This directory is shared ownership: A and B must review changes before merging.

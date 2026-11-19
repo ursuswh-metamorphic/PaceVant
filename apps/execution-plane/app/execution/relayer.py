@@ -1,10 +1,8 @@
 import json
 import time
-import warnings
 from eth_account import Account
 from web3 import Web3
 from web3.exceptions import TransactionNotFound
-from ..chain import plain
 from ..crypto import (
     approval_for,
     approval_tuple,
@@ -15,7 +13,6 @@ from ..crypto import (
     recover,
 )
 from ..errors import PlaneError
-from ..evidence.extractor import token_facts
 from ..models import (
     BuiltTransaction,
     ExecutionRequest,
@@ -200,91 +197,46 @@ class Relayer:
             return {"tx_hash": tx_hash, "status": "PENDING"}
         return {"tx_hash": tx_hash, "status": "SUBMITTED"}
 
-    def monitor(self, tx_hash):
+    def reconciliation(self, tx_hash):
+        from treasury_contracts.models import SignedPDR
+        from treasury_contracts.outcomes import verify_outcome
+        from treasury_contracts.readonly import readonly_web3
+
         base = self.store.get("execution", tx_hash)
+        built = BuiltTransaction.model_validate(self.store.get("build", base["build_id"]))
+        pdr = SignedPDR.model_validate(self.store.get("submitted-pdr", tx_hash))
+        saved = self.store.get("build-context", built.build_id)
+        evidence = self.store.get("evidence", built.build_id)
+        reader = readonly_web3(self.chain.settings.rpc_url, built.chain_id)
         try:
-            receipt = self.chain.w3.eth.get_transaction_receipt(tx_hash)
-        except TransactionNotFound:
-            return {**base, "status": "PENDING"}
-        b = BuiltTransaction.model_validate(self.store.get("build", base["build_id"]))
-        facts = token_facts(
-            receipt,
-            b.vault_address,
-            b.router,
-            b.token_in,
-            b.token_out,
-            int(b.amount_in_base_units),
-            int(b.min_amount_out_base_units),
-            dex_route=self.chain.deployment.get("lfj_route"),
-        )
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            events = self.chain.vault.events.SwapExecuted().process_receipt(receipt)
-        p = self.store.get("submitted-pdr", tx_hash)
-        matching = [
-            e
-            for e in events
-            if (
-                e["address"].lower() == b.vault_address.lower()
-                and e["args"]["nonce"] == int(b.nonce)
-                and Web3.to_hex(e["args"]["policyHash"]) == b.policy_hash
-                and Web3.to_hex(e["args"]["evidenceRoot"]) == p["approval"]["evidenceRoot"]
-                and e["args"]["tokenIn"].lower() == b.token_in.lower()
-                and e["args"]["tokenOut"].lower() == b.token_out.lower()
-                and e["args"]["amountIn"] == int(b.amount_in_base_units)
-                and e["args"]["amountOut"] == int(facts["token_out_delta_base_units"])
-            )
-        ]
-        mismatch = receipt.status == 1 and (
-            len(matching) != 1
-            or facts["unexpected_transfer"]
-            or facts["unauthorized_approval"]
-            or not self.chain.vault.functions.usedNonce(int(b.nonce)).call(
-                block_identifier=receipt.blockNumber
-            )
-            or self.chain.usdc.functions.allowance(b.vault_address, b.router).call(
-                block_identifier=receipt.blockNumber
-            )
-            != 0
-            or (
-                self.chain.is_lfj
-                and self.chain.usdc.functions.allowance(
-                    b.router, self.chain.deployment["lfj_route"]["lfj_router"]
-                ).call(block_identifier=receipt.blockNumber)
-                != 0
-            )
-        )
-        ref = self.store.artifact(
-            {
-                "receipt": plain(receipt),
-                "events": plain(events),
-                "facts": facts,
-                "actual_delta_source": "RECEIPT_ERC20_TRANSFER_LOGS",
-                "dex_route": self.chain.deployment.get("lfj_route"),
-                "gas_cost_wei": str(receipt.gasUsed * receipt.effectiveGasPrice),
-                "simulation_output_base_units": self.store.get("evidence", b.build_id)["baseline"][
-                    "token_out_delta_base_units"
-                ],
-                "receipt_output_base_units": facts["token_out_delta_base_units"],
-                "signed_min_output_base_units": b.min_amount_out_base_units,
-                "review_required": mismatch,
-                "recommended_action": "PAUSE_REVIEW" if mismatch else None,
-            }
-        )
-        return ExecutionResult(
-            **{
-                **base,
-                "status": "CONFIRMED" if receipt.status == 1 else "REVERTED",
-                "block_number": receipt.blockNumber,
-                "gas_used": str(receipt.gasUsed),
-                "actual_token_in_delta_base_units": facts["token_in_delta_base_units"],
-                "actual_token_out_delta_base_units": facts["token_out_delta_base_units"],
-                "revert_reason": "CRITICAL_MISMATCH_PAUSE_REVIEW"
-                if mismatch
-                else "ONCHAIN_REVERT"
-                if receipt.status == 0
-                else None,
-                "event_refs": ["SwapExecuted"] if matching else [],
-                "artifact_refs": [ref["ref"]],
-            }
-        ).model_dump()
+            report = verify_outcome(reader, built, pdr, tx_hash,
+                expected_relayer=self.chain.deployment["relayer"],
+                expected_attestor=saved["context"]["attestor"],
+                bytecode_hash=evidence["bytecode_hash"], evidence_root=evidence["evidence_root"])
+        finally:
+            reader.provider.close()
+        ref = self.store.artifact(report.model_dump())
+        return report.model_copy(update={"artifact_refs":[ref["ref"]]}).model_dump()
+
+    def submission_for_build(self, build_id):
+        with self.store.db() as db:
+            row = db.execute("SELECT tx_hash FROM submissions WHERE build_id=?",(build_id,)).fetchone()
+        if row is None:
+            raise PlaneError("NOT_FOUND", "No durable submission is known for this build", 404)
+        value=self.store.get("execution",row[0])
+        return {"tx_hash":row[0],"status":value["status"]}
+
+    def monitor(self, tx_hash):
+        report = self.reconciliation(tx_hash)
+        base = self.store.get("execution", tx_hash)
+        status = report["receipt_status"]
+        if status not in {"SUCCESS","REVERTED"} or not report["canonical"]:
+            return {**base,"status":"PENDING"}
+        mismatch = report["verification_status"]!="VERIFIED"
+        return ExecutionResult(**{**base,"status":"CONFIRMED" if status=="SUCCESS" else "REVERTED",
+            "block_number":report["block_number"],"gas_used":report["gas_used"],
+            "actual_token_in_delta_base_units":report["token_in_delta_base_units"],
+            "actual_token_out_delta_base_units":report["token_out_delta_base_units"],
+            "revert_reason":"CRITICAL_MISMATCH_PAUSE_REVIEW" if mismatch else "ONCHAIN_REVERT" if status=="REVERTED" else None,
+            "event_refs":["SwapExecuted"] if report["swap_events"] else [],
+            "artifact_refs":report["artifact_refs"]}).model_dump()

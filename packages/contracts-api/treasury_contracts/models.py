@@ -158,6 +158,43 @@ class ExecutionResult(Wire):
     artifact_refs: list[str] = Field(default_factory=list)
 
 
+class ExecutionReconciliation(Wire):
+    """Read-only report v1.0; separate from legacy receipt inclusion status."""
+    schema_version: Literal["1.0"] = "1.0"
+    chain_id: int
+    vault_address: Address
+    build_id: str
+    decision_id: str
+    tx_hash: Hash
+    typed_data_hash: Hash
+    verification_status: Literal["VERIFIED", "PENDING", "UNAVAILABLE", "MISMATCH", "REORGED"]
+    receipt_status: Literal["SUCCESS", "REVERTED", "PENDING", "UNKNOWN"]
+    reason_codes: list[str] = Field(default_factory=list)
+    canonical: bool = False
+    block_number: int | None = None
+    block_hash: Hash | None = None
+    block_timestamp: int | None = None
+    observed_at: int
+    head_block: int | None = None
+    confirmations: int = 0
+    finality_confidence: Literal["UNESTABLISHED", "INCLUDED", "DEPTH_CONFIRMED"] = "UNESTABLISHED"
+    gas_used: UInt | None = None
+    effective_gas_price_wei: UInt | None = None
+    gas_cost_wei: UInt | None = None
+    gas_payer: Address | None = None
+    gas_verified: bool = False
+    gas_payer_role: Literal["RELAYER", "UNKNOWN"] = "UNKNOWN"
+    token_in_delta_base_units: Delta | None = None
+    token_out_delta_base_units: Delta | None = None
+    nonce_used: bool | None = None
+    allowances: dict[str, UInt] = Field(default_factory=dict)
+    swap_events: list[dict] = Field(default_factory=list)
+    transfers: list[dict] = Field(default_factory=list)
+    approvals: list[dict] = Field(default_factory=list)
+    dex_route: dict | None = None
+    artifact_refs: list[str] = Field(default_factory=list)
+
+
 class SimulationRequest(Wire):
     build_id: str
     expected_policy_hash: Hash
