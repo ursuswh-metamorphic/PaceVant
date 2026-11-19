@@ -1,4 +1,4 @@
-"""Small bounded chat-completion provider; no agent, tools, wallet keys or auth forwarding."""
+"""Bounded Chat Completions / Responses adapter; no agent or wallet execution tools."""
 
 import json
 import os
@@ -57,6 +57,8 @@ class ShieldConfig:
     provider: str = "openai"
     model: str = "gpt-4o-2024-05-13"
     base_url: str = "https://api.openai.com/v1"
+    api_style: str = "chat_completions"
+    user_agent: str = "PaceVant-TaskShield/1.0"
     api_key: str | None = field(default=None, repr=False)
     temperature: float | None = 0.0
     timeout: float = 20
@@ -72,6 +74,9 @@ class ShieldConfig:
         if (
             self.mode not in {"disabled", "legacy_fixture", "paper", "wallet_hardened"}
             or self.provider not in {"openai", "openai_compatible"}
+            or self.api_style not in {"chat_completions", "responses"}
+            or not 1 <= len(self.user_agent) <= 128
+            or not all(32 <= ord(c) <= 126 for c in self.user_agent)
             or not self.epsilon.is_finite()
             or not 0 <= self.epsilon <= 32
             or not 0 <= self.retries <= 2
@@ -93,6 +98,7 @@ class ShieldConfig:
             or parsed.password
             or parsed.query
             or parsed.fragment
+            or parsed.path.rstrip("/").endswith(("/responses", "/chat/completions"))
             or not (
                 parsed.scheme == "https"
                 or (
@@ -114,6 +120,8 @@ class ShieldConfig:
             provider=os.environ.get("PACEVANT_SHIELD_PROVIDER", "openai"),
             model=os.environ.get("PACEVANT_SHIELD_MODEL", "gpt-4o-2024-05-13"),
             base_url=os.environ.get("PACEVANT_SHIELD_BASE_URL", "https://api.openai.com/v1"),
+            api_style=os.environ.get("PACEVANT_SHIELD_API_STYLE", "chat_completions"),
+            user_agent=os.environ.get("PACEVANT_SHIELD_USER_AGENT", "PaceVant-TaskShield/1.0"),
             api_key=os.environ.get("PACEVANT_SHIELD_API_KEY"),
             temperature=None if temp == "omit" else float(temp),
             timeout=float(os.environ.get("PACEVANT_SHIELD_TIMEOUT", "20")),
@@ -128,6 +136,8 @@ class ShieldConfig:
             "mode": self.mode,
             "provider": self.provider,
             "model": self.model,
+            "api_style": self.api_style,
+            "user_agent": self.user_agent,
             "temperature": self.temperature,
             "timeout": self.timeout,
             "retries": self.retries,
@@ -168,15 +178,28 @@ class ChatProvider:
             "max_completion_tokens": 4096,
             "stream": False,
         }
+        path = "/chat/completions"
+        if self.config.api_style == "responses":
+            path = "/responses"
+            payload = {
+                "model": self.config.model,
+                "input": messages,
+                "max_output_tokens": 4096,
+                "stream": False,
+                "store": False,
+            }
         if self.config.temperature is not None:
             payload["temperature"] = self.config.temperature
         started = time.monotonic()
         try:
             with self.http.stream(
                 "POST",
-                self.config.base_url + "/chat/completions",
+                self.config.base_url.rstrip("/") + path,
                 json=payload,
-                headers={"Authorization": "Bearer " + self.config.api_key},
+                headers={
+                    "Authorization": "Bearer " + self.config.api_key,
+                    "User-Agent": self.config.user_agent,
+                },
                 timeout=self.config.timeout,
                 follow_redirects=False,
             ) as response:
@@ -190,15 +213,25 @@ class ChatProvider:
                         raise ControlError("TASK_SHIELD_PROVIDER_LIMIT", 503)
                     data.extend(chunk)
                 raw = json.loads(data)
-            choice = raw["choices"][0]
-            if choice.get("finish_reason") != "stop" or choice["message"].get("tool_calls"):
-                raise ValueError("Incomplete or tool response")
-            content = choice["message"]["content"]
+            if self.config.api_style == "responses":
+                content = self._response_text(raw)
+                raw_usage = raw.get("usage", {})
+                raw_usage = {
+                    "prompt_tokens": raw_usage.get("input_tokens"),
+                    "completion_tokens": raw_usage.get("output_tokens"),
+                    "total_tokens": raw_usage.get("total_tokens"),
+                }
+            else:
+                choice = raw["choices"][0]
+                if choice.get("finish_reason") != "stop" or choice["message"].get("tool_calls"):
+                    raise ValueError("Incomplete or tool response")
+                content = choice["message"]["content"]
+                raw_usage = raw.get("usage", {})
             if not isinstance(content, str) or len(content) > 32000:
                 raise ValueError("Invalid content")
             usage = {
                 k: v
-                for k, v in raw.get("usage", {}).items()
+                for k, v in raw_usage.items()
                 if k in {"prompt_tokens", "completion_tokens", "total_tokens"}
                 and type(v) is int
                 and v >= 0
@@ -208,3 +241,30 @@ class ChatProvider:
             raise
         except Exception:
             raise ControlError("TASK_SHIELD_PROVIDER_UNAVAILABLE", 503, retryable=True) from None
+
+    @staticmethod
+    def _response_text(raw):
+        if raw.get("status") != "completed" or raw.get("error") or raw.get("incomplete_details"):
+            raise ValueError("Incomplete Responses result")
+        output = raw.get("output")
+        if not isinstance(output, list):
+            raise ValueError("Missing output items")
+        parts = []
+        for item in output:
+            if item.get("type") == "reasoning":
+                continue
+            if (
+                item.get("type") != "message"
+                or item.get("role") != "assistant"
+                or item.get("status") != "completed"
+                or not isinstance(item.get("content"), list)
+            ):
+                raise ValueError("Unexpected output item or tool call")
+            for part in item["content"]:
+                if part.get("type") != "output_text" or not isinstance(part.get("text"), str):
+                    raise ValueError("Refusal or invalid text part")
+                parts.append(part["text"])
+        content = "".join(parts)
+        if not content.strip():
+            raise ValueError("No completed text output")
+        return content

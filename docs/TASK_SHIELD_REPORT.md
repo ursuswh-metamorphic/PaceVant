@@ -2,6 +2,8 @@
 
 Baseline: `main` at `53180f7b1af3202bba24dfbfd871612cd4c4d786`. Implementation branch: `codex/task-shield-paper`. [Inspection before implementation](TASK_SHIELD_INSPECTION.md) · [Methodology, trust boundaries and configuration](TASK_SHIELD.md).
 
+This is the original pre-provider report for commit `e082e95`. The user subsequently supplied an authorized Xingchi provider; see the [new setup and live-validation report](XINGCHI_TASK_SHIELD.md). Historical NOT_RUN entries below describe the original run, not the later provider setup.
+
 **Verification boundary:** the user explicitly chose “Triển khai trước, ghi rõ chưa chạy đánh giá LLM thật”. No real LLM inference, AgentDojo benchmark, public Fuji transaction or new deployment was performed. The implementation uses a real configurable chat-completions adapter in production; test providers are isolated scripted fixtures. Their scores do not demonstrate semantic detection accuracy. No component is accepted as an empirically reproduced defense merely because a scripted provider test passes.
 
 ## A. Repository changes

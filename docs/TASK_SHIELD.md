@@ -2,6 +2,8 @@
 
 This extends the existing `app.alignment` module and rules planner. It does not add an independent verifier agent or agent framework. Source: [Jia et al., ACL 2025](https://aclanthology.org/2025.acl-long.1435/), Sections 3–4, Appendix B.1/B.2, C.4 and E Figures 4–7. Prompts are attributed adaptations, not byte-identical copies. [Repository inspection/plan](TASK_SHIELD_INSPECTION.md) · [Implementation and validation report](TASK_SHIELD_REPORT.md).
 
+The configured Xingchi Responses integration and subsequent real-model validation are documented in [Xingchi setup/results](XINGCHI_TASK_SHIELD.md). The original report records the earlier validation before a provider was supplied.
+
 ## Core behavior and paper fidelity
 
 1. An authenticated actual user message is extracted by an LLM into a JSON array of instruction strings. The extractor includes implicit/nested directives, questions and dependencies in natural language. Exact extracted strings are retained, apart from documented secret redaction. Instructions carry server-assigned source, message/tool/call IDs and timestamp.
@@ -63,6 +65,8 @@ PACEVANT_SHIELD_MAX_REPLANS=2
 ```
 
 `openai_compatible` supports an explicitly configured HTTPS endpoint or HTTP loopback `/v1` origin using `PACEVANT_SHIELD_BASE_URL`. OpenAI mode pins the official endpoint, preventing accidental credential forwarding. Model selection is explicit; no automatic model substitution or temperature fallback occurs. Set temperature to `omit` only if that configured model requires it. HTTP is bounded by timeout, 256 KiB response size, 4096 maximum completion tokens and bounded parsing/provider retries. Failed parsing does not echo the malformed output back. Retry feedback requests valid JSON only. Provider errors are sanitized and fail closed.
+
+`PACEVANT_SHIELD_API_STYLE` selects `chat_completions` (default) or `responses`. Responses mode sends structured message input to `/responses`, requests `store=false`, accepts completed assistant output_text only and normalizes input/output token counters to the existing usage schema. Refusals, incomplete responses and unexpected output tool calls fail closed. The base URL is the `/v1` prefix, not a complete `/responses` URL. `PACEVANT_SHIELD_USER_AGENT` supports the provider-required client header; CR/LF and control characters are rejected.
 
 Context budget is explicitly **characters**, not an asserted tokenizer count. Messages are at most 16,000 characters; instructions/tasks are capped; checker calls are bounded per check and the orchestration/retry loops are finite. Oversized outputs are not silently truncated (a trailing injection could be lost); they halt for review. Large trace artifacts may require a larger reviewed context/message-budget implementation. The 30-second signed approval TTL is unchanged: slow LLMs may exhaust it, in which case existing expiry gates refuse signing/submission. Real-provider latency/feasibility must be measured before enabling live workflows; it has not been verified in this task.
 

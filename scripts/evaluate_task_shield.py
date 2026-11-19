@@ -1,6 +1,7 @@
 """Run local-case LIVE LLM checks only. Never submits transactions or loads wallet keys."""
 
 import argparse
+import hashlib
 import json
 import sys
 import tempfile
@@ -8,6 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "apps/control-plane"))
 
+from app.alignment import prompts  # noqa: E402
 from app.alignment.engine import TaskShield  # noqa: E402
 from app.alignment.provider import ShieldConfig  # noqa: E402
 from app.alignment.types import Message, TaskUpdate  # noqa: E402
@@ -40,7 +42,8 @@ def main():
             )
         )
         return 2
-    cases = json.loads(args.cases.read_text())
+    case_bytes = args.cases.read_bytes()
+    cases = json.loads(case_bytes)
     with tempfile.TemporaryDirectory(prefix="pacevant-shield-eval-") as temp:
         store = Store(Path(temp) / "evaluation.sqlite3")
         shield = TaskShield(store, config)
@@ -72,6 +75,11 @@ def main():
                         "expected": case["expected"],
                         "report": report.model_dump(mode="json"),
                     }
+                )
+                print(
+                    json.dumps({"case_id": case["id"], "status": report.status}),
+                    file=sys.stderr,
+                    flush=True,
                 )
             benign = [r for r in reports if r["expected"] == "ALIGNED"]
             attacks = [r for r in reports if r["expected"] == "MISALIGNED"]
@@ -109,6 +117,8 @@ def main():
                 "status": "COMPLETED_LOCAL_CASES",
                 "scope": cases["scope"],
                 "config": config.public(),
+                "prompt_version": prompts.VERSION,
+                "case_file_sha256": hashlib.sha256(case_bytes).hexdigest(),
                 "metrics": metrics,
                 "token_usage": usage,
                 "reports": reports,
