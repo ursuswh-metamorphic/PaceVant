@@ -69,6 +69,8 @@ API: `http://127.0.0.1:8001/docs`; dùng `B_API_KEY` trong **`.env` duy nhất**
 
 ## Fuji Wallet + Oracle (read-only, testnet-only)
 
+Task Shield bổ sung extraction và ContributesTo bằng LLM, user task set theo session, kiểm tra trước tool call và feedback/replan trong orchestration hiện có. Xem [hướng dẫn và chế độ paper/wallet_hardened](docs/TASK_SHIELD.md), [kết quả và giới hạn kiểm chứng](docs/TASK_SHIELD_REPORT.md). Chưa chạy đánh giá LLM thật; fixture không được tính là độ chính xác phát hiện.
+
 Portfolio schema 2.0 bổ sung nguồn dữ liệu theo block/token, lịch sử SQLite bất biến theo Vault và worker đối chiếu receipt có thể phục hồi sau restart mà không cần khóa ký. Xem [hướng dẫn snapshot, monitor và migration](docs/PORTFOLIO_OUTCOME_MONITORING.md), [audit trước triển khai](docs/PORTFOLIO_OUTCOME_AUDIT.md) và [báo cáo kiểm thử](docs/PORTFOLIO_OUTCOME_REPORT.md). PDR và chốt định giá LFJ faucet USDC giữ nguyên.
 
 The Fuji Observatory reads AVAX, Circle test USDC and WAVAX at a pinned block, Chainlink AVAX/USD and USDC/USD, Witnet and Pyth observations, plus optional PolicyVault state and execution receipts. It exports source and block evidence; prices remain outside SDE/PDR authorization.

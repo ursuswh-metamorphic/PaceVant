@@ -2,6 +2,8 @@
 
 ## Đọc để implement và merge A/B
 
+- [Task Shield: phương pháp, cấu hình và runtime](TASK_SHIELD.md), [báo cáo triển khai/kiểm thử](TASK_SHIELD_REPORT.md).
+
 1. [Shared integration contract v1.1](03_SHARED_INTEGRATION_CONTRACT.md): API/units/EIP-712/ownership chuẩn.
 2. [Guide A](01_GUIDE_PERSON_A_CONTROL_PLANE.md) và [guide B](02_GUIDE_PERSON_B_EXECUTION_PLANE.md): phạm vi và acceptance tests từng người.
 3. [Handoff A/B chi tiết](06_AB_INTEGRATION_HANDOFF.md): code thực tế, SDK, response models, signing, evidence, retries, config và gates.

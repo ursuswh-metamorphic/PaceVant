@@ -38,3 +38,14 @@ def propose(
         deadline=deadline,
         user_goal_reason="Rebalance test USDC into WAVAX within the owner's allocation limits",
     )
+
+
+def revise(mandate, amount, deadline, feedback):
+    """Existing rules planner receives shield feedback; reissues a mandate-bound proposal.
+
+    It cannot invent new user tasks or arbitrary tool names/arguments. General natural-language
+    replanning requires a future planner implementation, not a separate verification agent.
+    """
+    if feedback.code not in {"TASK_MISALIGNED", "TASK_SHIELD_UNAVAILABLE"}:
+        raise ValueError("Unsupported planner feedback")
+    return propose(mandate, amount, deadline)

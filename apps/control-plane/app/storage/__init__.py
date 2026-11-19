@@ -269,6 +269,18 @@ class Store(PortfolioStore):
 
     def transition(self, workflow_id, decision_id, expected, state, now, **details):
         with self.connection(write=True) as conn:
+            # Linearize task cancellation against the transition that starts a financial submission.
+            if state == "SUBMITTING" and expected == "ATTESTED":
+                record = conn.execute(
+                    "SELECT body FROM decisions WHERE id=?", (decision_id,)
+                ).fetchone()
+                proof = json.loads(record[0]).get("task_shield_proof") if record else None
+                if proof:
+                    session = conn.execute(
+                        "SELECT revision FROM shield_sessions WHERE id=?", (proof["session_id"],)
+                    ).fetchone()
+                    if not session or session[0] != proof["revision"]:
+                        raise ControlError("TASK_SHIELD_STALE_TASKS")
             cursor = conn.execute(
                 "UPDATE attestations SET state=? WHERE decision_id=? AND state=?",
                 (state, decision_id, expected),
