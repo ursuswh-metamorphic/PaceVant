@@ -27,6 +27,24 @@ class TemporalSemanticEvaluator:
     def __init__(self, shield):
         self.shield = shield
 
+    def before_decision(self, graph, candidate, alignment, *, shield_blocked, expired=False):
+        reasons = []
+        if shield_blocked:
+            reasons.append("ITAG_UPSTREAM_TASK_SHIELD_INTERVENTION")
+        elif alignment != "ALIGNED":
+            reasons.append("ITAG_WALLET_ALIGNMENT_INTERVENTION")
+        if expired:
+            reasons.append("ITAG_CANDIDATE_EXPIRED")
+        if reasons:
+            return SemanticAssessment(
+                verdict="UNAVAILABLE",
+                reason_codes=reasons,
+                provider_metadata={},
+                latency_ms=0,
+                token_usage={},
+            )
+        return self.assess(graph, candidate)
+
     def assess(self, graph, candidate):
         started = monotonic()
         metadata = {

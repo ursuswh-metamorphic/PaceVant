@@ -60,6 +60,10 @@ SQLite stores intent revisions, workflow bindings and assessment graphs immutabl
 
 ## Operating limits
 
+Signing and submission both read the current candidate's PRE snapshot, its workflow/decision/build link and its invalidation events inside the SQLite write transaction. The final deterministic revalidation follows the execution tool's model check. The HTTP provider caps each request, including retries, by the remaining candidate window. Initial user extraction precedes that window.
+
+For ordered and one-shot intents, a revision may edit future steps. A signed step with a confirmed or unresolved outcome retains its original amount and prerequisite terms. A verified revert permits editing that step. This keeps historical completion credit attached to the task actually performed.
+
 ITAG supports the existing swap shape and operator trust model. Enforce the gate on all signing instances sharing the vault if intent limits are a deployment requirement. The SQLite reservation coordinates writers sharing a database. Independent signer instances with independent databases would need a shared authoritative ledger. The unmodified Vault still enforces its own mandate-level caps.
 
 The monitor establishes and invalidates the receipt history against chain data. ITAG reads that durable history and its version during approval. An older reorg can only affect ITAG once reflected by the monitor or an invalidation. Keep reconciliation running for on-chain deployments. Ambiguous past outcomes are intentionally held for review. The history scan fails closed above 256 signed attempts. A long-lived intent or heavily instrumented workflow may exceed the bounded semantic context. These limits need load testing before production use.

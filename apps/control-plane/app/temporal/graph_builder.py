@@ -119,7 +119,8 @@ def build_graph(
             [observation.snapshot_id, observation.content_hash],
             {"block_number": observation.block_number, "block_hash": observation.block_hash},
         )
-        graph.link(candidate, state, "DERIVED_FROM", [observation.snapshot_id])
+        # The observation is an evaluation input collected after the proposal.
+        graph.link(candidate, state, "DEPENDS_ON", [observation.snapshot_id])
     step_outcomes = {}
     last = None
     for entry in entries:
@@ -176,7 +177,7 @@ def build_graph(
             {"state": outcome["state"], "receipt": proof, "invalidated": entry["invalidated"]},
         )
         graph.link(decision_id, outcome_id, "PRODUCED_OUTCOME", [decision_id, outcome_id])
-        if proof["tx_hash"]:
+        if confirmed:
             graph.link(action, outcome_id, "EXECUTED_AS", [proof["tx_hash"], decision_id])
         for snap_id, snap_hash in entry.get("snapshots", {}).items():
             graph.node(
@@ -186,12 +187,13 @@ def build_graph(
                 [snap_id, snap_hash],
                 {"content_hash": snap_hash},
             )
-            graph.link(
-                outcome_id,
-                snap_id,
-                "UPDATED_STATE" if snap_id == outcome["post_snapshot_id"] else "DERIVED_FROM",
-                [decision_id, snap_id],
-            )
+            if confirmed:
+                graph.link(
+                    outcome_id,
+                    snap_id,
+                    "UPDATED_STATE" if snap_id == outcome["post_snapshot_id"] else "DERIVED_FROM",
+                    [decision_id, snap_id],
+                )
         if confirmed == "CONFIRMED":
             step_outcomes[entry["step_id"]] = outcome_id
     if last:
@@ -205,10 +207,18 @@ def build_graph(
                 [spec_ref, step_outcomes[dependency]],
             )
     task_ids = {task["instruction_id"] for task in tasks}
+    active_sources = {task["source_message_id"] for task in tasks}
     for message in user_messages:
         message_id = message["message_id"]
-        graph.node(message_id, "AUTHENTICATED_USER_INTENT", "AUTHENTICATED", [message_id], message)
-        graph.link(candidate, message_id, "DEPENDS_ON", [message_id, proposal.intent_id])
+        if message_id in active_sources:
+            source = graph.node(
+                "user-message:" + message_id,
+                "AUTHENTICATED_USER_INTENT",
+                "AUTHENTICATED",
+                [message_id],
+                message,
+            )
+            graph.link(candidate, source, "DEPENDS_ON", [message_id, proposal.intent_id])
     for task in tasks:
         task_id = task["instruction_id"]
         graph.node(
@@ -218,22 +228,24 @@ def build_graph(
             [task_id, task["source_message_id"]],
             task,
         )
-        if task["source_message_id"] in graph.nodes:
-            graph.link(
-                task_id, task["source_message_id"], "DERIVED_FROM", [task["source_message_id"]]
-            )
+        source = "user-message:" + task["source_message_id"]
+        if source in graph.nodes:
+            graph.link(task_id, source, "DERIVED_FROM", [task["source_message_id"]])
     calls = {}
     for check in reports:
         check_id = check["check_id"]
-        source_id = check.get("source_message_id") or check_id + ":source"
+        source_id = "shield-source:" + check_id
         is_tool = check["source"] == "TOOL"
-        output = (output_context or {}).get(check.get("tool_call_id")) if is_tool else None
+        output = None
+        if is_tool and output_context:
+            output = output_context.get(check_id, output_context.get(check.get("tool_call_id")))
         graph.node(
             source_id,
             "TOOL_OBSERVATION" if is_tool else "AGENT_ACTION",
             "UNTRUSTED" if is_tool else "UNVERIFIED",
             [check["candidate_hash"]],
             {
+                "source_message_id": check.get("source_message_id"),
                 "tool_name": check.get("tool_name"),
                 "tool_call_id": check.get("tool_call_id"),
                 **({"sanitized_output": output} if output is not None else {}),

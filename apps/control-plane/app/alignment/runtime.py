@@ -84,6 +84,7 @@ class ShieldRuntime:
                 "call": tool,
                 "tool_call_id": call_id,
                 "output": safe,
+                "check_id": report.check_id,
                 "trust": "UNTRUSTED_TOOL",
                 "feedback": report.feedback.model_dump(mode="json") if report.feedback else None,
             },

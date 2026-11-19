@@ -1,4 +1,5 @@
 import json
+from collections import Counter
 from time import monotonic
 from uuid import uuid4
 
@@ -8,7 +9,7 @@ from app.temporal import storage
 from app.temporal.fusion import fuse
 from app.temporal.graph_builder import build_graph
 from app.temporal.intent_spec import make_spec
-from app.temporal.models import HybridTemporalAssessment, IntentSpec, SemanticAssessment
+from app.temporal.models import HybridTemporalAssessment, IntentSpec
 from app.temporal.semantic_evaluator import TemporalSemanticEvaluator
 from app.temporal.verifier import verify
 
@@ -86,6 +87,9 @@ class TemporalService:
                         (runtime.session_id,),
                     )
                 ]
+                output_calls = Counter(
+                    r.get("tool_call_id") for r in reports if r["source"] == "TOOL"
+                )
                 for row in conn.execute(
                     "SELECT body FROM shield_context WHERE session_id=? ORDER BY seq",
                     (runtime.session_id,),
@@ -94,13 +98,17 @@ class TemporalService:
                     if record.get("trust") == "AUTHENTICATED_USER":
                         messages.append(record["message"])
                     elif record.get("trust") == "UNTRUSTED_TOOL":
-                        outputs[record["tool_call_id"]] = record["output"]
+                        if record.get("check_id"):
+                            outputs[record["check_id"]] = record["output"]
+                        elif output_calls[record["tool_call_id"]] == 1:
+                            outputs[record["tool_call_id"]] = record["output"]
         verifying = monotonic()
         verified = verify(spec, link, mandate, proposal, built, self.mode, self.clock(), entries)
         verified_ms = int((monotonic() - verifying) * 1000)
         step = next((s for s in spec.terms.steps if s.step_id == link["step_id"]), None)
         authorized = step.prerequisites if step and verified.verdict == "PASS" else None
         building = monotonic()
+        check_ids = set(runtime.attempt_checks) if runtime else set()
         graph = build_graph(
             spec,
             mandate,
@@ -114,37 +122,41 @@ class TemporalService:
             revisions,
             authorized=authorized,
             step_id=link["step_id"],
-            current_report_ids=set(runtime.attempt_checks) if runtime else set(),
+            current_report_ids=check_ids,
             user_messages=messages,
             output_context=outputs,
         )
         if runtime:
             runtime.attempt_checks.clear()
         graph_ms = int((monotonic() - building) * 1000)
-        upstream = aligned.verdict != "ALIGNED" or bool(runtime and runtime.last_feedback)
-        if upstream:
-            semantic = SemanticAssessment(
-                verdict="UNAVAILABLE",
-                reason_codes=[],
-                provider_metadata={},
-                latency_ms=0,
-                token_usage={},
-            )
-        else:
-            semantic = self.semantic.assess(graph, proposal.intent_id)
+        failed_checks = {
+            r["check_id"]
+            for r in reports
+            if r["check_id"] in check_ids and r["status"] != "ALIGNED"
+        }
+        feedback = bool(runtime and runtime.last_feedback)
+        shield_blocked = feedback or (aligned.verdict != "ALIGNED" and bool(failed_checks))
+        semantic = self.semantic.before_decision(
+            graph,
+            proposal.intent_id,
+            aligned.verdict,
+            shield_blocked=shield_blocked,
+            expired=self.clock() >= proposal.deadline,
+        )
         shield_verdict = aligned.verdict
-        if upstream and shield_verdict == "ALIGNED":
+        if feedback and shield_verdict == "ALIGNED":
             shield_verdict = "UNCERTAIN"
         verdict, reasons = fuse(semantic, verified, shield_verdict=shield_verdict)
-        node_ids = {node_id for v in verified.violations for node_id in v.node_ids}
-        if semantic.verdict == "MISALIGNED" and semantic.finding:
-            node_ids.update(semantic.finding.referenced_graph_node_ids)
-        if verdict != "PASS":
-            node_ids.add(proposal.intent_id)
-        if upstream:
-            node_ids.update(check["check_id"] for check in reports if check["status"] != "ALIGNED")
-        graph_ids = {n.node_id for n in graph.nodes}
-        node_ids &= graph_ids
+        if self.clock() >= proposal.deadline:
+            if "ITAG_CANDIDATE_EXPIRED" not in reasons:
+                reasons.append("ITAG_CANDIDATE_EXPIRED")
+            if verdict in {"PASS", "REPLAN"}:
+                verdict = "ESCALATE"
+        node_ids = [proposal.intent_id] if verdict != "PASS" else []
+        evidence = {f"{spec.spec_id}:{spec.revision}", proposal.intent_id}
+        evidence.update(n for v in verified.violations for n in v.node_ids)
+        if shield_blocked:
+            evidence.update(failed_checks)
         suggested = None
         if verdict == "REPLAN" and step:
             completed = {e["step_id"] for e in entries if e["state"] == "CONFIRMED"}
@@ -166,12 +178,14 @@ class TemporalService:
             candidate_hash=content_hash(proposal.model_dump()),
             build_hash=content_hash(built.model_dump()) if built else None,
             build_id=built.build_id if built else None,
-            evidence_refs=[f"{spec.spec_id}:{spec.revision}", proposal.intent_id],
+            evidence_refs=sorted(evidence),
             verdict=verdict,
             reason_codes=reasons,
             violating_node_ids=sorted(node_ids),
             violating_edge_ids=[
-                e.edge_id for e in graph.edges if e.source in node_ids or e.target in node_ids
+                e.edge_id
+                for e in graph.edges
+                if shield_blocked and e.source == proposal.intent_id and e.target in failed_checks
             ],
             suggested_amount=suggested,
             timing_ms={

@@ -4,8 +4,6 @@ from app.temporal.verifier import PRIORITY
 def fuse(semantic, deterministic, *, shield_verdict="ALIGNED"):
     reasons = [v.code for v in deterministic.violations]
     reasons.extend(semantic.reason_codes)
-    if shield_verdict != "ALIGNED":
-        reasons.append("ITAG_UPSTREAM_TASK_SHIELD_INTERVENTION")
     verdict = deterministic.verdict
     if semantic.verdict == "MISALIGNED" or shield_verdict == "MISALIGNED":
         verdict = "REJECT"

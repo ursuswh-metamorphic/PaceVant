@@ -23,6 +23,9 @@ def main():
     args = parser.parse_args()
     cases = load_cases(ROOT / "fixtures/itag/scenarios.csv")
     if args.case:
+        unknown = set(args.case) - {c["id"] for c in cases}
+        if unknown:
+            parser.error("Unknown case IDs: " + ", ".join(sorted(unknown)))
         cases = [c for c in cases if c["id"] in args.case]
     if not cases:
         parser.error("No matching benchmark cases.")
@@ -53,6 +56,12 @@ def main():
         for r in rows
         if any(r[k] != r["case"][k] for k in ("action_alignment", "deterministic", "hybrid"))
         or (r["sde"]["wallet"] != "APPROVE") != (r["case"]["baseline_blocks"] == "true")
+        or r["sde"]["hybrid"]
+        != ("APPROVE" if r["case"]["hybrid"] == "PASS" else r["case"]["hybrid"])
+        or r["first_intervention_step"]
+        != (int(r["case"]["first_violation"]) if r["case"]["first_violation"] else None)
+        or not r["explanation_references_grounded"]
+        or (r["first_intervention_step"] is not None and not r["candidate_localized"])
         or r["untrusted_authorizes"]
     ]
     results = {

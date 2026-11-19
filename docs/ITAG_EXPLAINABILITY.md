@@ -16,10 +16,10 @@ Data endpoints require the existing operator token. The graph records evidence a
 | Edge | Evidence and meaning |
 | --- | --- |
 | `AUTHORIZES` | Authenticated mandate/intent binding, passing deterministic candidate scope and budget, or a prior signed decision under that intent |
-| `DERIVED_FROM` | Stored user message/task extraction, bound simulation or actual snapshot input |
+| `DERIVED_FROM` | Stored user message/task extraction, bound simulation or the verified prior outcome's pre-snapshot |
 | `EVALUATED_BY` | Persisted Task Shield check records or a prior SDE decision |
 | `CONTRIBUTES_TO` | Model inference with a positive Task Shield score, original task ID, extracted instruction ID and check ID |
-| `DEPENDS_ON` | An authenticated input used by the workflow or a verified prerequisite identified in the current intent |
+| `DEPENDS_ON` | The candidate's evaluated snapshot, an active user task's source message or a verified prerequisite identified in the intent |
 | `PRECEDES` | Ledger evaluation order |
 | `EXECUTED_AS` | Transaction hash recorded in receipt evidence for the prior action |
 | `PRODUCED_OUTCOME` | Explicit decision/outcome binding or recorded tool call/output ID |

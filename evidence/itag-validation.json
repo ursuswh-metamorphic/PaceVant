@@ -1,7 +1,7 @@
 {
   "baseline_main": "08c35df88642ff42a029b2e73a5bac3caaa475ab",
   "control_plane_python": {
-    "passed": 183,
+    "passed": 194,
     "skipped": 1,
     "skip_scope": "Opt-in Fuji portfolio read"
   },
@@ -10,7 +10,10 @@
     "skipped": 2,
     "skip_scope": "Opt-in Fuji fork"
   },
-  "solidity": {"passed": 37, "failed": 0},
+  "solidity": {
+    "passed": 37,
+    "failed": 0
+  },
   "eip712_cross_language": "PASS",
   "secret_scan": "PASS",
   "ruff_lint_and_format": "PASS",
@@ -53,6 +56,22 @@
     "wrong_chain_itag_semantic": "MISALIGNED",
     "wrong_chain_sde": "REJECT",
     "independent_human_review": "PENDING",
-    "public_broadcasts": 0
+    "public_broadcasts": 0,
+    "evaluated_commit": "2e24de2b469d6906d07099a0145fe7e8cf4bb42c"
+  },
+  "review": {
+    "scripted_expected_label_access": false,
+    "scripted_gate_mismatches": 0,
+    "scripted_scenarios": 30,
+    "component_results": "itag-live-model-review.json",
+    "live_component_outcomes": {
+      "APPROVE": 1,
+      "REJECT": 3,
+      "ESCALATE": 1
+    },
+    "real_clock_initial": "itag-live-workflow-review.json",
+    "real_clock_deadline_aware": "itag-live-workflow-review-final.json",
+    "real_model_positive_signed_path": "UNVERIFIED",
+    "independent_human_review": "PENDING"
   }
 }

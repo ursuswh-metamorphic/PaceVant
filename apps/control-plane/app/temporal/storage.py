@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from app.errors import ControlError
 from app.portfolio.observations import content_hash
 from app.temporal.models import IntentSpec
+from app.temporal.verifier import confirmed_state
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS itag_intents (
@@ -54,6 +55,19 @@ def add_revision(conn, spec, expected):
             or prior.mandate_hash != spec.mandate_hash
         ):
             raise ControlError("ITAG_REVISION_SCOPE_CHANGED")
+        if prior.status == "AUTHENTICATED" and prior.terms.kind != "BOUNDED_SWAP":
+            changed_steps = {
+                old.step_id
+                for old, new in zip(prior.terms.steps, spec.terms.steps, strict=True)
+                if old != new
+            }
+            if changed_steps:
+                _, entries = history(conn, prior)
+                if any(
+                    e["step_id"] in changed_steps and confirmed_state(e, prior) != "REVERTED"
+                    for e in entries
+                ):
+                    raise ControlError("ITAG_SIGNED_STEP_TERMS_CHANGED", 409)
     conn.execute(
         "INSERT INTO itag_intents VALUES (?,?,?)",
         (spec.spec_id, spec.revision, spec.model_dump_json()),
@@ -195,7 +209,27 @@ def check_approval(conn, workflow_id, decision_id, now, *, submitting=False):
     candidate = decision.get("proposal")
     built = decision.get("build")
     simulation = decision.get("simulation")
-    graph_nodes = {node["node_id"] for node in graph["nodes"]}
+    graph_nodes = {node["node_id"]: node for node in graph["nodes"]}
+    snapshot_id = decision.get("pre_snapshot_id")
+    snapshot = conn.execute(
+        """SELECT s.content_hash FROM portfolio_snapshots s
+        JOIN portfolio_links l ON l.snapshot_id=s.snapshot_id
+        WHERE s.snapshot_id=? AND s.mode=? AND s.chain_id=? AND s.vault=?
+        AND l.workflow_id=? AND l.decision_id=? AND l.build_id=? AND l.phase='PRE'
+        AND NOT EXISTS (SELECT 1 FROM portfolio_status_events e
+            WHERE e.snapshot_id=s.snapshot_id AND e.state='INVALIDATED')""",
+        (
+            snapshot_id,
+            spec.mode,
+            spec.chain_id,
+            spec.vault_address.lower(),
+            workflow_id,
+            decision_id,
+            proof["build_id"],
+        ),
+    ).fetchone()
+    if not snapshot or snapshot[0] not in graph_nodes.get(snapshot_id, {}).get("evidence_refs", []):
+        raise ControlError("ITAG_PRE_SNAPSHOT_UNAVAILABLE")
     if (
         stored["workflow_id"] != workflow_id
         or proof["verdict"] != "PASS"
@@ -215,7 +249,6 @@ def check_approval(conn, workflow_id, decision_id, now, *, submitting=False):
         or proof["build_id"] != built["build_id"]
         or not isinstance(simulation, Mapping)
         or "simulation:" + simulation["evidence_root"] not in graph_nodes
-        or decision.get("pre_snapshot_id") not in graph_nodes
     ):
         raise ControlError("ITAG_STALE_OR_MISMATCHED_EVIDENCE")
     shield = decision.get("task_shield_proof")

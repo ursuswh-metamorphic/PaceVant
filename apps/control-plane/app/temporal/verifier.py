@@ -36,6 +36,7 @@ def confirmed_state(entry, spec):
         and proof["canonical"] is True
         and proof["verification_status"] == "VERIFIED"
         and outcome["state"] == state
+        and outcome["decision_id"] == entry["decision_id"]
         and not outcome["reason_codes"]
         and outcome["attribution_status"] == "EXACT_SNAPSHOT_AND_TRANSACTION_LOGS"
         and proof["decision_id"] == entry["decision_id"]
@@ -47,7 +48,9 @@ def confirmed_state(entry, spec):
         and proof["tx_hash"] == entry["tx_hash"]
         and proof["block_hash"]
         and proof["block_number"] is not None
-        and len(entry.get("snapshots", {})) == 2
+        and outcome["pre_snapshot_id"] != outcome["post_snapshot_id"]
+        and set(entry.get("snapshots", {}))
+        == {outcome["pre_snapshot_id"], outcome["post_snapshot_id"]}
         and proof["token_in_delta_base_units"] == ("-" + amount if state == "CONFIRMED" else "0")
         and proof.get("token_out_delta_base_units") is not None
         and (

@@ -17,7 +17,9 @@ def explain(assessment, graph):
     for edge in path:
         located.update([edge.source, edge.target])
     if "ITAG_UPSTREAM_TASK_SHIELD_INTERVENTION" in assessment.reason_codes:
-        summary = "Task Shield intervened before ITAG could authorize a trajectory assessment."
+        summary = "Task Shield blocked this candidate before the trajectory model ran."
+    elif "ITAG_WALLET_ALIGNMENT_INTERVENTION" in assessment.reason_codes:
+        summary = "Wallet alignment checks blocked this candidate before the trajectory model ran."
     else:
         summary = f"ITAG returned {assessment.verdict}. Semantic assessment: {semantic.verdict}. Deterministic constraints: {assessment.deterministic.verdict}."
     if semantic.verdict == "ALIGNED" and assessment.deterministic.verdict != "PASS":
@@ -30,6 +32,8 @@ def explain(assessment, graph):
         "REPLAN": "Build and reassess a candidate within the remaining step budget.",
         "ESCALATE": "Resolve the cited missing evidence, pending outcome or provider failure before retrying.",
     }[assessment.verdict]
+    if "ITAG_CANDIDATE_EXPIRED" in assessment.reason_codes:
+        recovery = "Create a fresh candidate and repeat the checks within its approval window."
     return ExplainableTemporalAssessment(
         assessment=assessment,
         decision_summary=summary,
