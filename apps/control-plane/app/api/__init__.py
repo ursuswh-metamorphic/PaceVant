@@ -13,6 +13,8 @@ from starlette.exceptions import HTTPException
 from app.alignment import check
 from app.domain import EconomicRiskAssessment, Id, SecurityDecision
 from app.errors import ControlError
+from app.fuji_api import install_fuji_routes
+from app.fuji_service import FujiService
 from app.models import Alignment, Goal, WorkflowRequest
 from app.orchestration.service import ControlPlane, utc_now
 from app.settings import DASHBOARD, Settings
@@ -70,10 +72,14 @@ def create_app(settings=None, clock=utc_now):
     @asynccontextmanager
     async def lifespan(app):
         app.state.control = ControlPlane(settings, clock)
+        if settings.mode == "FUJI":
+            app.state.fuji = FujiService(clock=clock)
         try:
             yield
         finally:
             app.state.control.close()
+            if settings.mode == "FUJI":
+                app.state.fuji.close()
 
     app = FastAPI(title="PaceVant Treasury Control Plane", version="1.1", lifespan=lifespan)
 
@@ -175,6 +181,10 @@ def create_app(settings=None, clock=utc_now):
     @app.get("/v1/treasury", dependencies=[Depends(operator)])
     def treasury(request: Request, service: Service):
         return service.treasury(request.state.request_id)
+
+    if settings.mode == "FUJI":
+        app.mount("/assets", StaticFiles(directory=DASHBOARD), name="assets")
+        install_fuji_routes(app, [Depends(operator)])
 
     if settings.mode == "MOCK":
         app.mount("/assets", StaticFiles(directory=DASHBOARD), name="assets")

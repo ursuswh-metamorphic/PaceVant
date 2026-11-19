@@ -64,3 +64,15 @@ API: `http://127.0.0.1:8001/docs`; dùng `B_API_KEY` trong **`.env` duy nhất**
 - [Kết quả kiểm chứng](evidence/execution-plane-validation.json)
 
 `npm test` chạy Forge, pytest và golden signature test. `npm run check` thêm secret scan. Các alias `b:*` vẫn dùng được. Kiểm thử Fuji cần triển khai riêng với ví test và chứng cứ fork tương ứng.
+
+## Fuji Wallet + Oracle (read-only, testnet-only)
+
+The Fuji Observatory reads AVAX, Circle test USDC and WAVAX at a pinned block, Chainlink AVAX/USD and USDC/USD, Witnet and Pyth observations, plus optional PolicyVault state and execution receipts. It exports source and block evidence; prices remain outside SDE/PDR authorization.
+
+```powershell
+uv run --locked python scripts/fuji_wallet_read.py 0xYOUR_PUBLIC_FUJI_ADDRESS
+```
+
+Run `uv run --locked python scripts/serve.py --fuji-readonly --port 8012` with `PACEVANT_OPERATOR_TOKEN` set locally (24+ characters), then open `http://127.0.0.1:8012/fuji-wallet`. No B service or private key is required. See the [observer guide](docs/FUJI_WALLET_MARKET_READONLY.md) and [live verification report](docs/FUJI_AVALANCHE_INTEGRATION_REPORT.md).
+
+**Important:** Fiat-looking testnet token quantities are not real assets; a real AVAX/USD feed is not sufficient to value a MockUSDC treasury. This reader is intentionally not in the approval path. Do not interpret legacy ERC-4337 Fuji receipts as deployments of the current PolicyVault.

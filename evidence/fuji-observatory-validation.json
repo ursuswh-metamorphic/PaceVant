@@ -1,0 +1,46 @@
+{
+  "verified_at": "2026-11-19",
+  "network": "AVALANCHE_FUJI_TESTNET",
+  "chain_id": 43113,
+  "control_plane_tests": {
+    "windows": 56,
+    "linux": 56,
+    "status": "PASS"
+  },
+  "ab_regression": {
+    "tests": 4,
+    "environment": "LINUX_WSL_ANVIL_LOCAL",
+    "status": "PASS",
+    "cases": [
+      "normal",
+      "exposure-replan",
+      "stale-oracle",
+      "pending-reservation"
+    ]
+  },
+  "checks": {
+    "ruff": "PASS",
+    "python_format": "PASS",
+    "javascript_syntax": "PASS",
+    "solidity_compile": "PASS",
+    "configured_secret_scan": "PASS"
+  },
+  "ui": {
+    "live_read": "PASS",
+    "auth_error": "PASS",
+    "json_download_and_hash": "PASS",
+    "responsive_horizontal_overflow": "NONE_AT_390PX_VIEWPORT",
+    "wallet_connector": "NOT_EXERCISED_NO_INJECTED_WALLET"
+  },
+  "live_observation": "fuji-oracle-readonly-live.json",
+  "live_scope": {
+    "public_wallet": true,
+    "chainlink": true,
+    "witnet_query": true,
+    "pyth_stored_price": true,
+    "policy_vault_deployment": false,
+    "swap_receipt": false,
+    "coingecko": false
+  },
+  "note": "Transport tests use deterministic mocked responses. A+B regression uses actual local Anvil execution. The public live observation uses Fuji RPC; no Fuji transaction was submitted."
+}
