@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 680" role="img" aria-label="Sơ đồ bảo mật PaceVant từ authenticated intent qua TaskShield, simulation, ITAG, economic risk, Z3, SDE, PDR đến PolicyVault và outcome monitor">
+<defs><linearGradient id="back" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F9FCFD"/><stop offset="1" stop-color="#E9F2F4"/></linearGradient><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#1C8F7B"/></marker></defs>
+<rect width="1600" height="680" rx="24" fill="url(#back)"/>
+<text x="60" y="54" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" letter-spacing="2.5" fill="#177F71">PACEVANT · SYSTEM MAP</text>
+<text x="60" y="95" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="800" fill="#19344A">Từ ý định được xác thực đến giao dịch được ràng buộc on-chain</text>
+<g font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" letter-spacing="2">
+ <text x="62" y="137" fill="#547585">01 · TRUSTED AUTHORIZATION</text>
+ <text x="62" y="309" fill="#547585">02 · OFF-CHAIN VERIFICATION (OVERVIEW)</text>
+ <text x="62" y="480" fill="#547585">03 · DECISION &amp; ENFORCEMENT</text>
+</g>
+<g stroke="#B8CFD8" stroke-width="1.7" fill="#FFFFFF">
+ <rect x="64" y="153" width="420" height="107" rx="17"/>
+ <rect x="588" y="153" width="420" height="107" rx="17"/>
+ <rect x="1112" y="153" width="420" height="107" rx="17"/>
+ <rect x="64" y="323" width="420" height="107" rx="17"/>
+ <rect x="588" y="323" width="420" height="107" rx="17"/>
+ <rect x="1112" y="323" width="420" height="107" rx="17"/>
+ <rect x="64" y="494" width="420" height="107" rx="17"/>
+ <rect x="588" y="494" width="420" height="107" rx="17"/>
+ <rect x="1112" y="494" width="420" height="107" rx="17"/>
+</g>
+<g stroke-width="5" stroke-linecap="round">
+ <path d="M85 181V232" stroke="#4CBDA1"/><path d="M609 181V232" stroke="#8095DB"/><path d="M1133 181V232" stroke="#4CBDA1"/>
+ <path d="M85 351V400" stroke="#67B7D0"/><path d="M609 351V400" stroke="#67B7D0"/><path d="M1133 351V400" stroke="#67B7D0"/>
+ <path d="M85 521V571" stroke="#4CBDA1"/><path d="M609 521V571" stroke="#4CBDA1"/><path d="M1133 521V571" stroke="#4CBDA1"/>
+</g>
+<g font-family="Arial,Helvetica,sans-serif">
+ <text x="108" y="193" font-size="24" font-weight="800" fill="#18374A">Authenticated Intent</text>
+ <text x="108" y="223" font-size="17" fill="#547282">User task · Treasury Mandate · revision</text>
+ <text x="632" y="193" font-size="24" font-weight="800" fill="#18374A">AI Treasury Planner</text>
+ <text x="632" y="223" font-size="17" fill="#547282">Giải nghĩa mục tiêu và đề xuất action</text>
+ <text x="1156" y="193" font-size="24" font-weight="800" fill="#18374A">Hybrid TaskShield</text>
+ <text x="1156" y="223" font-size="17" fill="#547282">Task binding · constraints · semantic</text>
+
+ <text x="108" y="363" font-size="24" font-weight="800" fill="#18374A">Economic Risk + Z3</text>
+ <text x="108" y="393" font-size="17" fill="#547282">Portfolio · Chainlink · bounds · Phi</text>
+ <text x="632" y="363" font-size="24" font-weight="800" fill="#18374A">Evidence + Hybrid ITAG</text>
+ <text x="632" y="393" font-size="17" fill="#547282">State diffs · history · graph · purpose</text>
+ <text x="1156" y="363" font-size="24" font-weight="800" fill="#18374A">Builder + Anvil Fork</text>
+ <text x="1156" y="393" font-size="17" fill="#547282">Exact call · baseline · MEV stress</text>
+
+ <text x="108" y="534" font-size="24" font-weight="800" fill="#18374A">Security Decision</text>
+ <text x="108" y="564" font-size="17" fill="#547282">APPROVE / REJECT / REPLAN / ESCALATE</text>
+ <text x="632" y="534" font-size="24" font-weight="800" fill="#18374A">Signed PDR + Revalidation</text>
+ <text x="632" y="564" font-size="17" fill="#547282">Attestor · session · task · call binding</text>
+ <text x="1156" y="534" font-size="24" font-weight="800" fill="#18374A">PolicyVault + Monitor</text>
+ <text x="1156" y="564" font-size="17" fill="#547282">Fuji/LFJ · receipt · gas reconciliation</text>
+</g>
+<g fill="none" stroke="#1C8F7B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+ <path d="M484 205H580"/>
+ <path d="M1008 205H1104"/>
+ <path d="M1323 260V320"/>
+ <path d="M1112 375H1016"/>
+ <path d="M588 375H492"/>
+ <path d="M274 430V491"/>
+ <path d="M484 547H580"/>
+ <path d="M1008 547H1104"/>
+</g>
+<rect x="59" y="620" width="1480" height="37" rx="13" fill="#E1F1EA"/>
+<text x="799" y="644" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" fill="#267965">AI đề xuất · Deterministic gates có quyền veto · Chỉ giao dịch được phê duyệt mới được ký và gửi.</text>
+</svg>
