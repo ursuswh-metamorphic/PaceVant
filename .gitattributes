@@ -2,3 +2,4 @@ fixtures/eip712_golden/manifest.canonical.json -text
 *.smt2 text eol=lf
 packages/contracts-api/treasury_contracts/proof.py text eol=lf
 packages/contracts-api/treasury_contracts/v2.py text eol=lf
+fixtures/evaluation/curated-300/benchmark_300_curated.jsonl -text
