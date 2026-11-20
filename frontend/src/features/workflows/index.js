@@ -4,6 +4,11 @@ import {units,symbol} from "../../shared/format.js";
 import {showPortfolio,showRiskBudget} from "../treasury/index.js";
 
 function detailRows(event) {
+  if (event.assessment_hash) return {
+    "ITAG assessment": event.assessment_hash, "Temporal verdict": event.verdict,
+    "Reason codes": event.reason_codes?.join(", "),
+    "Timing (ms)": JSON.stringify(event.timing_ms),
+  };
   if (event.proof) return {
     "Proof": event.proof.status, "Reason": event.proof.reason,
     "CHECK": event.proof.check_mode, "COMPILE": event.proof.compile_mode, "RISK BOUND": event.proof.risk_bound,
@@ -25,6 +30,7 @@ function detailRows(event) {
   };
   if (event.alignment) return {
     "Verdict": event.alignment.verdict,
+    "Guard": event.alignment.shield_model_version,
     "Reason codes": event.alignment.reason_codes.join(", "),
     "Hash market feed": event.alignment.evidence_refs.join(", "),
   };
@@ -119,8 +125,10 @@ function renderAttempt(groups, index) {
 
 export function display(workflow, mandate) {
   byId("workflow-id").textContent = workflow.workflow_id;
-  byId("planner-source").textContent = workflow.planner_provider === "groq"
-    ? "Planner: Groq · " + workflow.planner_model
+  const plan = workflow.timeline.findLast((event) => event.stage === "PLANNED");
+  const provider = plan?.planner_provider ?? workflow.planner_provider;
+  byId("planner-source").textContent = provider && provider !== "rules"
+    ? (plan ? "Planner thực dùng: " : "Planner cấu hình: ") + provider + " · " + (plan?.planner_model ?? workflow.planner_model ?? "provider rotation")
     : "Planner: rules · offline";
   byId("workflow-status").textContent = workflow.status;
   byId("workflow-status").className = "status " + tone(workflow.status);

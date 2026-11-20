@@ -7,6 +7,25 @@ from treasury_backend.core.errors import ControlError
 from .groq import GroqPlanner, PlanDraft
 
 
+class DeepSeekPlanner(GroqPlanner):
+    version = "deepseek-flash-bounded-v1"
+
+    def request_spec(self, messages):
+        return (
+            "https://api.deepseek.com/chat/completions",
+            {"Authorization": "Bearer " + self.settings.api_key},
+            {"model": self.settings.model,
+             "messages": [
+                 {"role": "system", "content": messages[0]["content"] + "\nJSON schema: " + json.dumps(PlanDraft.model_json_schema())},
+                 messages[1],
+             ],
+             "thinking": {"type": "disabled"},
+             "max_tokens": self.settings.max_completion_tokens,
+             "temperature": 0, "stream": False,
+             "response_format": {"type": "json_object"}},
+        )
+
+
 class GeminiPlanner(GroqPlanner):
     version = "gemini-gemma-bounded-v1"
 

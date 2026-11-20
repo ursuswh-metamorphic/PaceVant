@@ -222,6 +222,12 @@ class AuthorizationPipeline:
             ):
                 raise ControlError("PROOF_INVALID")
             client.preflight_v2(built, proof, mandate.session_id, mandate.required_stress)
+        # Fork preflight and proof verification can take significant wall time.
+        # Recheck time/round freshness after them, rather than signing against the
+        # timestamp captured before those network operations.
+        now = self.clock()
+        if not portfolio.price_fresh(snapshot, now, portfolio.state_age(context)):
+            raise ControlError("STALE_PRICE")
         recomputed = sde.decide(
             mandate,
             approved.proposal,

@@ -85,6 +85,10 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
             "execution_transport": "in-process" if runtime is not None else "mock",
             "planner_provider": settings.planning.provider,
             "task_shield_mode": settings.shield.mode,
+            "require_itag": settings.require_itag,
+            "shield_provider": settings.shield.provider,
+            "shield_model": settings.shield.model,
+            "shield_fallback_models": [c.model for c in settings.shield.fallbacks],
             "planner_model": settings.planning.model
             if settings.planning.provider == "groq"
             else None,

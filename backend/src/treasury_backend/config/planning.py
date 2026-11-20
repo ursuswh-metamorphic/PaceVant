@@ -1,4 +1,4 @@
-"""Groq settings are independent of chain authority and private wallet keys."""
+"""AI planner settings are independent of chain authority and private wallet keys."""
 
 from dataclasses import dataclass, field
 from urllib.parse import urlsplit
@@ -21,6 +21,8 @@ class PlanningSettings:
     xingchi_api_key: str = field(default="", repr=False)
     xingchi_base_url: str = ""
     xingchi_model: str = "gpt-6.1-sol"
+    deepseek_api_key: str = field(default="", repr=False)
+    deepseek_model: str = "deepseek-flash"
     rotation_order: tuple[str, ...] = ("gemini", "groq", "xingchi")
 
     @classmethod
@@ -35,12 +37,12 @@ class PlanningSettings:
             return value
 
         provider = values.get("PACEVANT_PLANNER_PROVIDER", "rules")
-        if provider not in {"rules", "groq", "gemini", "xingchi", "rotate"}:
+        if provider not in {"rules", "groq", "gemini", "xingchi", "deepseek", "rotate"}:
             raise RuntimeError("Unsupported PACEVANT_PLANNER_PROVIDER")
         gemini_key = values.get("GEMINI_API_KEY", "")
         gemini_model = values.get("GEMINI_MODEL", "gemma-4-26b-a4b-it")
-        if gemini_model != "gemma-4-26b-a4b-it":
-            raise RuntimeError("GEMINI_MODEL must be the reviewed Gemma free-tier model")
+        if gemini_model not in {"gemma-4-26b-a4b-it", "gemini-3.1-flash-lite"}:
+            raise RuntimeError("GEMINI_MODEL must be a reviewed free-tier Gemma or Flash-Lite model")
         xingchi_key = values.get("XINGCHI_API_KEY", "")
         xingchi_url = values.get("XINGCHI_BASE_URL", "").rstrip("/")
         parsed = urlsplit(xingchi_url)
@@ -51,8 +53,14 @@ class PlanningSettings:
         xingchi_model = values.get("XINGCHI_MODEL", "gpt-6.1-sol")
         if xingchi_model != "gpt-6.1-sol":
             raise RuntimeError("XINGCHI_MODEL must be gpt-6.1-sol")
+        deepseek_key = values.get("DEEPSEEK_API_KEY", "")
+        deepseek_model = values.get("DEEPSEEK_MODEL", "deepseek-flash")
+        if deepseek_model != "deepseek-flash":
+            raise RuntimeError("DEEPSEEK_MODEL must be the reviewed lightweight deepseek-flash")
+        if provider == "deepseek" and not deepseek_key:
+            raise RuntimeError("Configure DEEPSEEK_API_KEY")
         order = tuple(x.strip() for x in values.get("PACEVANT_AI_ROTATION_ORDER", "gemini,groq,xingchi").split(","))
-        if not order or len(set(order)) != len(order) or set(order) - {"gemini", "groq", "xingchi"}:
+        if not order or len(set(order)) != len(order) or set(order) - {"gemini", "groq", "xingchi", "deepseek"}:
             raise RuntimeError("Invalid PACEVANT_AI_ROTATION_ORDER")
         if provider == "gemini" and not gemini_key:
             raise RuntimeError("Configure GEMINI_API_KEY")
@@ -65,7 +73,7 @@ class PlanningSettings:
             raise RuntimeError("GROQ_MODEL must be a reviewed GPT-OSS strict-schema model")
         if provider == "groq" and (not key or not key.startswith("gsk_")):
             raise RuntimeError("Configure GROQ_API_KEY for the Groq planner")
-        configured = {"gemini": bool(gemini_key), "groq": bool(key), "xingchi": bool(xingchi_key and xingchi_url)}
+        configured = {"gemini": bool(gemini_key), "groq": bool(key), "xingchi": bool(xingchi_key and xingchi_url), "deepseek": bool(deepseek_key)}
         if provider == "rotate" and not any(configured[name] for name in order):
             raise RuntimeError("Configure at least one provider in the rotation order")
         return cls(
@@ -77,6 +85,8 @@ class PlanningSettings:
             xingchi_api_key=xingchi_key,
             xingchi_base_url=xingchi_url,
             xingchi_model=xingchi_model,
+            deepseek_api_key=deepseek_key,
+            deepseek_model=deepseek_model,
             rotation_order=order,
             timeout_seconds=integer("GROQ_TIMEOUT_SECONDS", 20, 1, 30),
             max_completion_tokens=integer("GROQ_MAX_COMPLETION_TOKENS", 512, 128, 2048),

@@ -62,26 +62,32 @@ class ReadOnlyProvider(JSONBaseProvider):
             self.http.close()
 
     def _exchange(self, payload):
-        remaining = self.deadline - self.monotonic()
-        if remaining <= 0:
-            raise ReadError("READONLY_TIMEOUT")
-        try:
-            payload = json.loads(Web3.to_json(payload))
-            with self.http.stream(
-                "POST", self.url, json=payload, timeout=min(4, remaining), follow_redirects=False
-            ) as response:
-                response.raise_for_status()
-                data = bytearray()
-                for chunk in response.iter_bytes():
-                    if self.monotonic() > self.deadline:
-                        raise ReadError("READONLY_TIMEOUT")
-                    if len(data) + len(chunk) > 1_048_576:
-                        raise ReadError("READONLY_RESPONSE_TOO_LARGE")
-                    data.extend(chunk)
-                result = json.loads(data)
-            return result
-        except (httpx.HTTPError, ValueError, UnicodeError):
-            raise ReadError("READONLY_RPC_UNAVAILABLE") from None
+        payload = json.loads(Web3.to_json(payload))
+        for attempt in range(3):
+            remaining = self.deadline - self.monotonic()
+            if remaining <= 0:
+                raise ReadError("READONLY_TIMEOUT")
+            try:
+                with self.http.stream(
+                    "POST", self.url, json=payload, timeout=min(4, remaining), follow_redirects=False
+                ) as response:
+                    if response.status_code in {429, 502, 503, 504} and attempt < 2:
+                        pause = min(0.5 * (attempt + 1), max(0, remaining))
+                    else:
+                        response.raise_for_status()
+                        data = bytearray()
+                        for chunk in response.iter_bytes():
+                            if self.monotonic() > self.deadline:
+                                raise ReadError("READONLY_TIMEOUT")
+                            if len(data) + len(chunk) > 1_048_576:
+                                raise ReadError("READONLY_RESPONSE_TOO_LARGE")
+                            data.extend(chunk)
+                        return json.loads(data)
+                # Only allowlisted read RPCs reach this transport. Never retry a write.
+                time.sleep(pause)
+            except (httpx.HTTPError, ValueError, UnicodeError):
+                raise ReadError("READONLY_RPC_UNAVAILABLE") from None
+        raise ReadError("READONLY_RPC_UNAVAILABLE")
 
     def _rpc(self, method, params):
         self.request_id += 1

@@ -4,6 +4,8 @@ For the live Circle route, `lfj_stress.py` provisions a **hypothetical external 
 
 A cold fork may lazily read many public historical slots in one EVM call. The local Anvil request timeout is bounded separately at at least 60 seconds; source reads remain bounded. This changes neither timestamps nor approval freshness. See the [live runbook](../../../../../../docs/demo/FUJI_LIVE_END_TO_END.md).
 
+`TREASURY_FUJI_FORK_RPC_URL` optionally supplies the fork source (`B_FORK_RPC_URL` in execution settings); normal chain reads use the primary RPC. Both simulation and preflight verify the pinned fork header hash against the saved build context. Splitting providers changes performance, not chain identity or evidence authority. See the [current ITAG runbook](../../../../../../docs/demo/FUJI_ITAG_LIVE.md).
+
 This module already implements actual EVM simulation; it is part of the unified backend, not a separate API process. `runner.py` owns `Simulator`, `fork_node`, pinned fork lifecycle and baseline/stress/preflight execution. `Simulator` is created once by `ExecutionService.start` and called through the injected execution client.
 
 ## Interfaces
@@ -29,7 +31,7 @@ Inputs are the immutable build/policy, chain settings/deployment, native Anvil p
 
 Simulation does not authorize or sign a live transaction. Workflow still verifies evidence hashes/bindings, chain state, oracle freshness, economic risk and proof; signing revalidates before final submission. Missing/stale/mismatched evidence must fail closed. Keep final compiled Phi/debit on the preflight path; never substitute an unguarded adapter quote.
 
-Current supported environment uses MockUSDC/MockWAVAX/MockSwapAdapter. A real DEX adapter needs builder, simulation/stress, extraction and protocol review. Merge the real oracle through its owning module; do not use an adapter quote as a trusted market oracle.
+LOCAL supports MockUSDC/MockWAVAX/MockSwapAdapter. The live Fuji environment uses Circle test USDC, WAVAX and the LFJ adapter, including concrete reserve-shift stresses and Chainlink reference rounds. An adapter quote is not a trusted market oracle. Additional protocols require their own builder, stress, evidence and policy review.
 
 ## Development and verification
 

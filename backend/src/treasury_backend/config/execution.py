@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     )
     mode: Literal["local", "fuji"] = "local"
     rpc_url: str = ""
+    fork_rpc_url: str = ""
     deployment_file: Path | None = None
     data_dir: Path | None = None
     api_key: SecretStr = SecretStr("")

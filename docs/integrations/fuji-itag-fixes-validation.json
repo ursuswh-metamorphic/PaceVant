@@ -1,0 +1,114 @@
+{
+  "schema_version": "fuji-itag-fixes-validation-v1",
+  "date": "2026-11-20",
+  "base_commit": "48fae36",
+  "backup_branch": "backup/pre-fuji-fixes-48fae36",
+  "test_runs": [
+    {
+      "scope": "Full repository suite after initial Fuji fixes, before DeepSeek addition",
+      "command": "python -m pytest -q --tb=short",
+      "passed": 406,
+      "skipped": 4,
+      "seconds": 264.97
+    },
+    {
+      "scope": "Task Shield/ITAG/read-only transport after protocol metadata and pipeline audit changes",
+      "command": "pytest backend/tests/control/test_task_shield.py backend/tests/control/test_itag.py backend/tests/control/test_readonly_batch.py -q",
+      "passed": 93,
+      "seconds": 54.21
+    },
+    {
+      "scope": "Bounded read-only 429 recovery + real local Anvil V2 ITAG workflows",
+      "command": "pytest backend/tests/control/test_readonly_batch.py backend/tests/execution/test_itag_unified.py -q",
+      "passed": 9,
+      "seconds": 59.13
+    },
+    {
+      "scope": "DeepSeek + all planner adapters/configuration/secret forwarding + Shield native adapters",
+      "command": "pytest backend/src/treasury_backend/modules/planning/tests backend/tests/integration/test_planning_configuration.py backend/tests/control/test_shield_native_rotation.py -q",
+      "passed": 39,
+      "seconds": 9.02
+    },
+    {
+      "scope": "Final semantic identifier-namespace prompt + ITAG and DeepSeek adapter regressions",
+      "command": "pytest backend/tests/control/test_itag.py backend/src/treasury_backend/modules/planning/tests/test_deepseek.py backend/tests/control/test_shield_native_rotation.py -q",
+      "passed": 33,
+      "seconds": 35.96
+    },
+    {
+      "scope": "Operator CLI waits for real feed headroom, bounded timeout, no fake freshness",
+      "command": "pytest backend/tests/integration/test_fuji_demo_freshness.py -q",
+      "passed": 2,
+      "seconds": 1.42
+    },
+    {
+      "scope": "Final strict citation repair + ITAG budget/revision/ordering/reference checks + native DeepSeek + bounded oracle preparation",
+      "command": "pytest backend/tests/control/test_itag.py backend/tests/control/test_itag_citation_repair.py backend/tests/integration/test_fuji_demo_freshness.py backend/src/treasury_backend/modules/planning/tests/test_deepseek.py backend/tests/control/test_shield_native_rotation.py -q",
+      "passed": 39,
+      "seconds": 16.48
+    },
+    {
+      "scope": "Workflow and ITAG regressions after removing duplicate display-only oracle reads from signing snapshots",
+      "command": "pytest backend/tests/control/test_itag.py backend/tests/control/test_itag_citation_repair.py backend/tests/control/test_workflows.py -q",
+      "passed": 56,
+      "seconds": 42.19
+    },
+    {
+      "scope": "120-block drift/time failures remain enforced; dashboard-only oracle observations retained outside signing phases",
+      "command": "pytest backend/tests/control/test_operator_settings.py -q",
+      "passed": 7,
+      "seconds": 1.5
+    }
+  ],
+  "checks": {
+    "root_uv_sync_locked_offline": "PASS; shared SDK 1.3.1",
+    "frontend_javascript_syntax": "PASS; all feature source files and ITAG viewer",
+    "env_variable_names_match": true,
+    "env_variable_count": 100,
+    "example_contains_live_credentials": false,
+    "private_env_committed": false
+  },
+  "test_semantics": "Scripted AI/MockTransport tests verify software gates and wire protocols, not model detection accuracy. V2 Anvil tests use real local EVM/proof/sign/receipt with explicitly scripted model responses. Live Fuji API/model evidence is separate.",
+  "public_evidence": [
+    "fuji-itag-gemini-validation.json",
+    "fuji-deepseek-demo-funding.json",
+    "fuji-itag-live-validation.json"
+  ],
+  "remaining_assumptions": [
+    "Testnet Chainlink USD reference valuation for test assets, no redemption/profitability claim.",
+    "Hypothetical external actor funding and attestor override exist only on isolated Anvil stress forks.",
+    "Public free RPC/model availability can cause safe rejection; approval expiry/freshness/risk limits are enforced.",
+    "Operator treasury demo only; reserved Demo User is not a multi-user product."
+  ],
+  "observed_safe_failures": [
+    {
+      "workflow_id": "workflow_2d8a5e803d6a466283ee5da0c5f8df94",
+      "reason": "ITAG_INVALID_SEMANTIC_REFERENCES_OR_OUTPUT",
+      "signed": false,
+      "broadcast": false,
+      "fix": "Separate node/task/evidence identifier namespaces in the semantic payload/prompt; strict validation retained."
+    },
+    {
+      "workflow_id": "workflow_e98a0dd8e9bd468b80b16ead711991df",
+      "reason": "STALE_OR_UNVERIFIED_CHAINLINK_PRICE",
+      "signed": true,
+      "broadcast": false,
+      "nonce_checked_unused": true,
+      "approval_expired_before_retry": true,
+      "fix": "Prepare demo using a genuinely fresh round with sufficient headroom; no policy age increase."
+    },
+    {
+      "workflow_id": "workflow_debb89629a4c418f9cdd70eebc36bb29",
+      "reason": "120-block drift exceeded; old diagnostic FUJI_DEPLOYMENT_MISMATCH",
+      "signed": true,
+      "broadcast": false,
+      "approval_expired_before_retry": true,
+      "nonce_checked_unused": true,
+      "fix": "Omit only duplicate display-only oracle observations in signing snapshots, retain dedicated risk/proof Chainlink reads; report staleness correctly. No drift limit increase."
+    }
+  ],
+  "final_live_status": "CONFIRMED",
+  "final_live_workflow": "workflow_329702d0468442d88c8f9789c4eca5c5",
+  "final_live_tx_hash": "0x3fdbbeb96646ed2e88ce31a63068747dd6d288644487cc2c8a09b49a4e2f55fe",
+  "all_public_checks_passed": true
+}

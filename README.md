@@ -1,17 +1,12 @@
-# PaceVant — AI Treasury Security V2.1
+# PaceVant - AI Treasury Security V2.1
 
-Đã tích hợp ITAG từ `main@70bf6c7`: intent budget, ordered tasks, temporal graph và viewer `/itag`. [Cấu hình opt-in và giới hạn V2 đang còn](docs/integrations/ITAG_MAIN_SYNC.md).
+Current Fuji pipeline: required ITAG, Task Shield `wallet_pipeline` with live AI, direct Chainlink reference rounds, LFJ fork simulation, risk/Z3 proof, ApprovalV2, real relayer broadcast and receipt reconciliation. Owner-approved TTL and snapshot age are 300 seconds. [Current Fuji runbook, configuration and limitations](docs/demo/FUJI_ITAG_LIVE.md).
 
-Đã tích hợp tính năng mới từ `main@08c35df` vào cấu trúc module: Task Shield, portfolio history và outcome reconciliation có hỗ trợ PDR V2. [Chi tiết thay đổi, cấu hình và kiểm chứng](docs/integrations/MAIN_SYNC_2026_11_20.md). Task Shield LLM hiện **chưa bật** trong `.env`; các gate deterministic/proof/on-chain vẫn giữ nguyên.
+The ITAG-protected workflow `workflow_329702d0468442d88c8f9789c4eca5c5` confirmed on public Fuji: [transaction](https://testnet.snowtrace.io/tx/0x3fdbbeb96646ed2e88ce31a63068747dd6d288644487cc2c8a09b49a4e2f55fe). [Validation report](docs/integrations/fuji-itag-live-validation.json) separates public-chain evidence from scripted tests. Testnet USD valuation and hypothetical fork stresses are explicitly labelled; this is not a production security audit or a real-money profitability claim.
 
-Cập nhật 20/11/2026: [demo toàn hệ thống trên Fuji thật](docs/demo/FUJI_LIVE_END_TO_END.md) dùng Circle USDC/WAVAX, direct Chainlink và ba ví đã cấu hình. [Report nghiệm thu](docs/integrations/fuji-live-validation.json) có receipt public, proof và các phép kiểm âm.
+Read [the current V2.1 system design](docs/AI_Treasury_Security_System_Design_v2.1.md). New main features were adapted into the modular codebase: Task Shield, observed portfolio/history, V2 outcome reconciliation and ITAG temporal budgets/ordered tasks/graph viewer. Historical integration notes preserve their original checkpoints and link to the current runbook.
 
-
-Đọc trước: [System design V2.1 hiện tại](docs/AI_Treasury_Security_System_Design_v2.1.md). Live Fuji đã xác nhận workflow đầy đủ; MOCK/LOCAL còn để regression. [Audit cũ](docs/audit/V2_1_READINESS_REVIEW.md) giữ checkpoint trước live cutover. Production/hosting vẫn cần kiểm chứng riêng.
-
-Hệ thống treasury dùng Python để lập kế hoạch, kiểm tra alignment/risk, chứng minh điều kiện an toàn, ký và gửi giao dịch qua Solidity `PolicyVault`. Frontend là HTML/CSS/JavaScript chạy trong trình duyệt. Backend không cần Node.js.
-
-Repository được chia theo năng lực nghiệp vụ để nhiều người phát triển song song. Các module **control/workflow** và **execution** chạy trong **một ứng dụng FastAPI, một process Uvicorn, một cổng API**, dùng chung một package Python, `pyproject.toml`, `uv.lock` và `.venv`. Luồng nội bộ gọi module trực tiếp, không chạy execution server riêng.
+One Python 3.12 package, root `pyproject.toml`, `uv.lock`, `.venv`, and one FastAPI/Uvicorn process/port serve workflow and execution modules. Internal calls go directly to execution services. Solidity contracts remain; frontend HTML/CSS/JavaScript runs in the browser. Node.js is not required for backend runtime. MOCK/LOCAL remain explicit regression environments.
 
 ## Bắt đầu
 

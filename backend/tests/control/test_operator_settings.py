@@ -53,7 +53,23 @@ def test_independent_fuji_verifier_keeps_wall_clock_freshness():
     with httpx.Client(transport=httpx.MockTransport(respond)) as http:
         verifier = FujiVerifier(http, "https://independent.example/rpc")
         verifier.verify(context, now)
-        with pytest.raises(ControlError):
+        with pytest.raises(ControlError, match="STALE_REQUIRES_REEVALUATION"):
             verifier.verify(context, now + 61)
-        with pytest.raises(ControlError):
+        with pytest.raises(ControlError, match="STALE_REQUIRES_REEVALUATION"):
             verifier.verify(context.model_copy(update={"max_block_drift": 29}), now)
+
+
+@pytest.mark.parametrize("phase,include_display_prices", [("PRE", False), ("REVALIDATION", False), ("OBSERVED", True)])
+def test_signing_observation_avoids_display_only_oracle_calls(phase, include_display_prices):
+    from types import SimpleNamespace
+
+    from treasury_backend.modules.workflows.service import ControlPlane
+
+    calls = []
+    client = SimpleNamespace(observe=lambda *args, **kwargs: calls.append(kwargs) or "snapshot")
+    service = SimpleNamespace(settings=SimpleNamespace(mode="FUJI"),
+                              store=SimpleNamespace(history_version=lambda *args: 1))
+    mandate = SimpleNamespace(chain_id=43113, vault_address="0x" + "12" * 20)
+    assert ControlPlane.observe(service, client, mandate, SimpleNamespace(block_number=5), None,
+                                phase=phase, persist=False) == "snapshot"
+    assert calls[0]["include_oracles"] is include_display_prices

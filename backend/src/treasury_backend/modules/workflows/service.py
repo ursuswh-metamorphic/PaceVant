@@ -71,6 +71,11 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
         if settings.mode == "FUJI":
             self.fuji_http = httpx.Client(timeout=3, trust_env=False, follow_redirects=False)
 
+    @property
+    def shield_version(self):
+        return ("task-shield-wallet-pipeline-v1" if self.settings.shield.mode == "wallet_pipeline"
+                else "task-shield-acl2025-v1")
+
     def close(self):
         self.planner.close()
         self.shield.close()
@@ -329,7 +334,10 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
                 mandate,
                 block_number=balances.block_number,
                 history_version=version,
-                include_oracles=self.settings.mode == "FUJI",
+                # Signing snapshots need verified balances/policy. Authoritative
+                # Chainlink rounds are read separately by price() for risk/proof;
+                # dashboard-only Witnet/Pyth/reference observations add no gate here.
+                include_oracles=self.settings.mode == "FUJI" and phase not in {"PRE", "REVALIDATION"},
             )
         if persist:
             self.store.save_snapshot(
@@ -343,8 +351,25 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
 
     def _tool(self, workflow_id, name, arguments, execute, *, deadline=None):
         runtime = self.shield_runtimes.get(workflow_id)
+        purpose = {
+            "read_chain_context": "Read the configured treasury vault policy, chain and session to verify prerequisites for the requested swap; this does not execute a transaction.",
+            "read_portfolio": "Read current treasury balances and spend history to enforce the requested swap's balance, exposure and budget constraints.",
+            "read_simulation_artifact": "Read the content-addressed simulation evidence required to verify this exact swap before approving or signing it.",
+            "observe_portfolio": "Record block-pinned treasury balances for risk checks and post-transaction reconciliation of the requested swap.",
+        }.get(name, "")
+        if runtime and self.settings.shield.mode == "wallet_pipeline" and name in {
+            "read_chain_context", "read_portfolio", "observe_portfolio",
+            "build_swap", "simulate_swap", "read_simulation_artifact",
+        }:
+            # These are fixed backend data operations, not model-selected financial
+            # actions. Their output stays untrusted and is flushed before SDE/signing.
+            if deadline is not None and self.clock() >= deadline:
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
+            value = execute()
+            runtime.defer_data(name, arguments, value)
+            return value
         if deadline is None:
-            return runtime.invoke(name, arguments, execute) if runtime else execute()
+            return runtime.invoke(name, arguments, execute, purpose) if runtime else execute()
 
         def within_window():
             if self.clock() >= deadline:
@@ -355,7 +380,7 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
             return execute()
 
         within_window()
-        return runtime.invoke(name, arguments, checked_execute) if runtime else execute()
+        return runtime.invoke(name, arguments, checked_execute, purpose) if runtime else execute()
 
     def check_alignment(self, mandate, proposal, goal, tool_output=""):
         if not self.shield.active:
@@ -383,19 +408,19 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
             runtime.assistant(proposal.user_goal_reason)
             runtime.before("build_swap", proposal.model_dump(), proposal.user_goal_reason)
             value = alignment.wallet_constraints(mandate, proposal, goal)
-            return value.model_copy(update={"shield_model_version": "task-shield-acl2025-v1"})
+            return value.model_copy(update={"shield_model_version": self.shield_version})
         except ShieldBlocked as error:
             return Alignment(
                 verdict="MISALIGNED" if error.report.status == "MISALIGNED" else "UNCERTAIN",
                 reason_codes=[error.code],
-                shield_model_version="task-shield-acl2025-v1",
+                shield_model_version=self.shield_version,
                 evidence_refs=[error.report.candidate_hash],
             )
         except ControlError:
             return Alignment(
                 verdict="UNCERTAIN",
                 reason_codes=["TASK_SHIELD_UNAVAILABLE"],
-                shield_model_version="task-shield-acl2025-v1",
+                shield_model_version=self.shield_version,
                 evidence_refs=[],
             )
 
@@ -435,7 +460,7 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
                 runtime.before("build_swap", proposal.model_dump(), proposal.user_goal_reason)
                 constraints = alignment.wallet_constraints(mandate, proposal, goal)
                 value = constraints.model_copy(
-                    update={"shield_model_version": "task-shield-acl2025-v1"}
+                    update={"shield_model_version": self.shield_version}
                 )
                 return proposal, value
             except ShieldBlocked as error:
@@ -455,7 +480,7 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
                         else "MISALIGNED",
                         reason_codes=[error.code],
                         evidence_refs=[],
-                        shield_model_version="task-shield-acl2025-v1",
+                        shield_model_version=self.shield_version,
                     )
                 proposal = planner.revise(mandate, amount, deadline, error.report.feedback,
                                           reverse=proposal.token_in == mandate.token_out)

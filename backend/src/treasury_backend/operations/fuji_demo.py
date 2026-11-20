@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from web3 import Web3
 
+from treasury_backend.core.errors import ControlError
 from treasury_backend.modules.execution.dex.lfj import CIRCLE_USDC, ROUTER, WAVAX, LFJClient, call
 from treasury_backend.modules.oracle.chainlink import ChainlinkPriceProvider
 from treasury_contracts.oracle import CHAINLINK_SOURCE
@@ -19,6 +20,36 @@ BOOTSTRAP_WEI = 8_000_000_000_000_000  # 0.008 test AVAX; native value, excludin
 RELAYER_WEI = 2_000_000_000_000_000  # 0.002 test AVAX, retained by the user's relayer.
 
 
+def wait_for_oracle_window(p, *, wait_seconds=300):
+    """Wait before creating an intent; never restamp a round or relax its age policy."""
+    if p.network != "fuji" or p.values.get("TREASURY_ORACLE_MODE") != "chainlink":
+        return
+    data = json.loads(p.deployment.read_text(encoding="utf-8"))
+    provider = ChainlinkPriceProvider(p.rpc, data["vault_address"])
+    required = min(300, int(p.values.get("TREASURY_APPROVAL_TTL_SECONDS", "30")))
+    end = time.monotonic() + wait_seconds
+    while True:
+        try:
+            value = provider.read()
+            now = int(time.time())
+            headroom = min(f.max_age_seconds - (now - f.updated_at) for f in value.oracle_feeds)
+        except ControlError as error:
+            if error.code != "STALE_OR_UNVERIFIED_CHAINLINK_PRICE":
+                raise
+            # A round can cross its age limit just before its replacement arrives.
+            # No intent exists yet; wait only for a fully validated replacement.
+            headroom = -1
+        if headroom >= required:
+            return
+        remaining = end - time.monotonic()
+        if remaining <= 0:
+            raise OpsError("Chainlink round has insufficient remaining freshness for this demo; retry after a new round")
+        print(json.dumps({"stage": "WAITING_FOR_FRESH_CHAINLINK_ROUND",
+                          "remaining_feed_freshness_seconds": headroom,
+                          "required_seconds": required}), flush=True)
+        time.sleep(min(15, remaining))
+
+
 def send_setup(p, account, label, tx):
     """Journal signed bytes before broadcast; resume a timed-out write by hash."""
     w3 = p.web3()
@@ -30,7 +61,7 @@ def send_setup(p, account, label, tx):
         if journal["sender"].lower() != account.address.lower():
             raise OpsError("Setup journal sender mismatch")
     else:
-        tx = dict(tx, **{"from": account.address, "chainId": 43113,
+        tx = dict(tx, **{"from": account.address, "to": Web3.to_checksum_address(tx["to"]), "chainId": 43113,
                        "nonce": w3.eth.get_transaction_count(account.address, "pending"),
                        "gasPrice": w3.eth.gas_price})
         tx["gas"] = w3.eth.estimate_gas(tx) * 12 // 10 + 10000

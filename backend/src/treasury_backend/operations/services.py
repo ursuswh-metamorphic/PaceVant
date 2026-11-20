@@ -75,6 +75,9 @@ def services(p, *, public_host="127.0.0.1"):
 
 
 def demo(p, goal="Buy WAVAX with 200 USDC"):
+    if p.values.get("PACEVANT_REQUIRE_ITAG") == "1":
+        from .itag_demo import demo as itag_demo
+        return itag_demo(p, goal)
     # Only the real A workflow can obtain an application signature.
     with httpx.Client(
         base_url=f"http://127.0.0.1:{p.a_port}",
@@ -117,8 +120,8 @@ def doctor(p, *, live=False):
         row("planner_configuration", "OK", planner.provider)
         if planner.provider == "groq":
             row("GROQ_API_KEY", "OK")
-        if planner.provider in {"gemini", "xingchi", "rotate"}:
-            configured = {"gemini": bool(planner.gemini_api_key), "groq": bool(planner.api_key),
+        if planner.provider in {"gemini", "xingchi", "deepseek", "rotate"}:
+            configured = {"deepseek": bool(planner.deepseek_api_key), "gemini": bool(planner.gemini_api_key), "groq": bool(planner.api_key),
                           "xingchi": bool(planner.xingchi_api_key and planner.xingchi_base_url)}
             selected = planner.rotation_order if planner.provider == "rotate" else (planner.provider,)
             row("ai_provider_order", "OK", ",".join(n for n in selected if configured[n]))

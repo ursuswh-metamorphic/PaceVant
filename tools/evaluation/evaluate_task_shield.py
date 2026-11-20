@@ -30,7 +30,7 @@ def main():
     parser.add_argument("--output-usd-per-million", type=float)
     args = parser.parse_args()
     config = ShieldConfig.from_env("FUJI")
-    if not config.api_key or config.mode not in {"paper", "wallet_hardened"}:
+    if not config.api_key or config.mode not in {"paper", "wallet_hardened", "wallet_pipeline"}:
         print(
             json.dumps(
                 {

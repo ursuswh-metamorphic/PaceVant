@@ -31,6 +31,14 @@ def collect(p, workflow_id):
     bundle = next(a for a in attempts if a["decision"]["decision_id"] == confirmed["decision_id"])
     with store.connection() as db:
         row = db.execute("SELECT signed_pdr FROM attestations WHERE decision_id=?", (confirmed["decision_id"],)).fetchone()
+        shield_rows = db.execute(
+            "SELECT c.body FROM shield_checks c JOIN shield_sessions s ON s.id=c.session_id WHERE s.workflow_id=? ORDER BY c.rowid",
+            (workflow_id,),
+        ).fetchall()
+        temporal_row = db.execute(
+            "SELECT assessment_hash,body FROM itag_assessments WHERE workflow_id=? ORDER BY rowid DESC LIMIT 1",
+            (workflow_id,),
+        ).fetchone()
     pdr = SignedPDRV2.model_validate_json(row[0])
     signer = Account.recover_message(message_v2(pdr.domain, pdr.approval), signature=pdr.signature)
     encoded = vault.encode_abi("executeApprovedSwapV2", args=[pdr.approval.abi_tuple,
@@ -99,6 +107,26 @@ def collect(p, workflow_id):
             "Stress uses hypothetical external actor funding and attestor overrides ONLY on isolated Anvil forks.",
             "Bounded SMT model plus concrete EVM tests; not a complete security audit."],
     }
+    planned = next((e for e in workflow["timeline"] if e["stage"] == "PLANNED"), None)
+    if planned:
+        report["planner"]["runtime"] = {
+            key: planned[key] for key in ("planner_provider", "planner_model", "provider_attempts")
+            if key in planned
+        }
+    if shield_rows:
+        shield_checks = [json.loads(item[0]) for item in shield_rows]
+        report["task_shield"] = {
+            "model_version": bundle["alignment"]["shield_model_version"],
+            "all_aligned": all(item["status"] == "ALIGNED" for item in shield_checks),
+            "checks": [{key: item.get(key) for key in (
+                "check_id", "status", "kind", "tool_name", "model", "provider", "llm_calls",
+                "latency_ms", "provider_trace", "prompt_version", "evaluation_scope",
+            )} for item in shield_checks],
+        }
+        report["all_checks_passed"] &= report["task_shield"]["all_aligned"]
+    if temporal_row:
+        report["itag"] = {"assessment_hash": temporal_row[0], "assessment": json.loads(temporal_row[1])}
+        report["all_checks_passed"] &= report["itag"]["assessment"]["verdict"] == "PASS"
     path = p.control_data / ("evidence-" + workflow_id + ".json")
     atomic_json(path, report)
     return report, path

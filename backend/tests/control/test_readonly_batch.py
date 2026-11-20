@@ -51,3 +51,30 @@ def test_readonly_batch_rejects_privileged_method_before_network():
             w3.provider.make_batch_request(
                 [("eth_chainId", []), ("eth_sendRawTransaction", ["0x"])]
             )
+
+
+@pytest.mark.parametrize("recover", [True, False])
+def test_transient_read_retry_is_bounded_and_never_retries_writes(monkeypatch, recover):
+    requests, pauses = [], []
+    monkeypatch.setattr("treasury_contracts.readonly.time.sleep", pauses.append)
+
+    def transport(request):
+        payload = json.loads(request.content)
+        requests.append(payload)
+        if not recover or len(requests) < 3:
+            return httpx.Response(429)
+        return httpx.Response(200, json={"jsonrpc": "2.0", "id": payload["id"], "result": "0xa869"})
+
+    with httpx.Client(transport=httpx.MockTransport(transport)) as http:
+        w3 = readonly_web3("https://fuji.invalid", 43113, client=http)
+        if recover:
+            assert w3.eth.chain_id == 43113
+        else:
+            with pytest.raises(ReadError, match="READONLY_RPC_UNAVAILABLE"):
+                _ = w3.eth.chain_id
+        count = len(requests)
+        with pytest.raises(ReadError, match="READONLY_METHOD_FORBIDDEN"):
+            w3.provider.make_request("eth_sendRawTransaction", ["0x"])
+        assert len(requests) == count
+        assert pauses == [0.5, 1.0]
+        assert all(r["method"] == "eth_chainId" for r in requests)

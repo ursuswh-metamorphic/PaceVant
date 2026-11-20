@@ -36,6 +36,9 @@ def propose(
     alternate_recipient: str | None = None,
     reverse=False,
 ) -> TransactionProposal:
+    decimals = 18 if reverse else 6
+    whole, fraction = divmod(amount, 10 ** decimals)
+    amount_text = f"{whole}.{fraction:0{decimals}d}".rstrip("0").rstrip(".")
     return TransactionProposal(
         intent_id=f"intent_{uuid4().hex}",
         mandate_id=mandate.mandate_id,
@@ -50,8 +53,11 @@ def propose(
         slippage_bps=mandate.max_slippage_bps,
         recipient=alternate_recipient or mandate.vault_address,
         deadline=deadline,
-        user_goal_reason=("Rebalance WAVAX into USDC within the owner's allocation limits" if reverse
-                          else "Rebalance USDC into WAVAX within the owner's allocation limits"),
+        user_goal_reason=(
+            f"{'Sell' if reverse else 'Buy WAVAX with'} "
+            f"{amount_text} "
+            f"{'WAVAX for USDC' if reverse else 'USDC'} for treasury vault {mandate.vault_address}."
+        ),
     )
 
 

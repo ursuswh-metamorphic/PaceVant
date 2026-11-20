@@ -1,5 +1,7 @@
 # PaceVant — Thiết kế hệ thống V2.1 hiện tại
 
+> **Current Fuji configuration (supersedes historical checkpoints below):** the owner-approved approval TTL and snapshot policy age are now 300 seconds. The local Fuji profile requires ITAG and uses Task Shield `wallet_pipeline`, official DeepSeek Flash (non-thinking), then Groq/Gemini/Xingchi fallback, explicit artifact semantic views, and separate primary/fork RPC sources. The 16k artifact blocker described in the original merge notes has been fixed and has successful V2 Anvil regression coverage. Each run still requires live freshness, risk, proof, temporal and on-chain checks. Read the [current runbook and limitations](demo/FUJI_ITAG_LIVE.md) and its linked validation report before making any live-readiness claim. The older successful transaction below predates ITAG; it is not evidence for the new pipeline. Env variable counts and TTL=180 statements below describe the earlier checkpoint.
+
 **ITAG từ main@70bf6c7:** đã tích hợp intent budget/ordered tasks, temporal graph, semantic assessment, atomic revalidation và viewer `/itag`. [Thiết kế tích hợp và giới hạn hiện tại](integrations/ITAG_MAIN_SYNC.md). ITAG là opt-in; thử nghiệm V2 Anvil có Shield tái hiện artifact quá giới hạn, nên chưa nghiệm thu live V2 có ITAG. Luồng V2 hiện tại không chọn ITAG vẫn giữ nguyên kiểm tra an toàn.
 
 **Đồng bộ main:** đã đưa Task Shield, portfolio observation/history và read-only outcome reconciliation từ `main@08c35df` vào backend module. Bộ đối soát được bổ sung hỗ trợ PDR V2/Phi/ProofCommitted và đường Fuji Circle USDC hiện có; worker nằm trong cùng FastAPI. [Thiết kế luồng bổ sung, API, cấu hình và kiểm chứng](integrations/MAIN_SYNC_2026_11_20.md). `.env` hiện tắt LLM Task Shield để giữ luồng demo đã kiểm chứng; cần đánh giá latency/artifact trước khi bật `paper`/`wallet_hardened`. Không đồng nhất các kết quả scripted tests của shield với độ chính xác AI hoặc với một giao dịch Fuji mới được shield bảo vệ.
@@ -14,7 +16,7 @@ Nguồn đối chiếu: [implementation plan gốc](IMPLEMENTATION_PLAN_V1_TO_V2
 
 **Live cutover 20/11/2026:** `.env` đã gắn ba ví, đủ 72 tên biến như template, dùng Groq `openai/gpt-oss-20b` và Chainlink RPC. Workflow đầy đủ đã CONFIRMED trên Fuji block **61340481**, transaction `0x956caf670aa366d86f7950322b0c5781bed77809749bbcfe227b08fb4c4b8182`: 14 public-chain checks và ba negative eth_calls đều pass. Hosting/production vẫn cần kiểm chứng riêng.
 
-**Freshness live:** AVAX updatedAt ≤600s, USDC updatedAt ≤86400s; observation/simulation/session state ≤180s, approval TTL owner 180s, drift ≤120 blocks. Không tăng chain-state freshness thành 24 giờ. `setApprovalTtl` chỉ owner, tối đa 300s, vô hiệu policy cũ khi đổi; TTL nằm trong active policy hash. Revalidation yêu cầu pinned/latest rounds khớp. USD chỉ là testnet reference valuation. Stress provision external actor bằng minter impersonation **chỉ trên Anvil**; không thay balance/feed/policy của treasury để baseline thành công.
+**Freshness live:** AVAX updatedAt ≤600s, USDC updatedAt ≤86400s; observation/simulation/session state ≤300s, approval TTL owner 300s, drift ≤120 blocks. Không tăng chain-state freshness thành 24 giờ. `setApprovalTtl` chỉ owner, tối đa 300s, vô hiệu policy cũ khi đổi; TTL nằm trong active policy hash. Revalidation yêu cầu pinned/latest rounds khớp. USD chỉ là testnet reference valuation. Stress provision external actor bằng minter impersonation **chỉ trên Anvil**; không thay balance/feed/policy của treasury để baseline thành công.
 
 **Cách đọc để phản biện:** mục 1–6 mô tả sản phẩm và đường chạy; mục 7–11 là hợp đồng proof/on-chain/dữ liệu/API; mục 12–14 là vận hành và mức kiểm chứng; mục 15–20 giải thích chi tiết các quyết định, failure modes và câu hỏi cần review. Các hình Mermaid có source ngay trong file; [bộ hình SVG](architecture/diagrams/README.md) dùng khi công cụ đọc Markdown không render Mermaid.
 
@@ -40,7 +42,7 @@ PaceVant nhận một goal swap có cấu trúc giới hạn, kiểm tra mục t
 | Test lõi V2.1 thực thi trên máy | Có: LOCAL dùng Anvil, mock contracts, proof/Z3, ApprovalV2 và receipt thật |
 | Demo trên public Avalanche Fuji | Đã kiểm chứng Groq → risk/proof → ký → swap LFJ → public receipt; xem report live |
 | Oracle | Direct Chainlink cho risk/proof Circle-USDC/WAVAX, original rounds và per-feed age. Observatory Witnet/Pyth/CoinGecko riêng, chỉ tham khảo |
-| LLM planner / semantic verifier | Có real Groq bounded planner + strict JSON và independent goal validation; chưa có semantic verifier/agent hội thoại tự do |
+| LLM planner / semantic verifier | Official DeepSeek Flash prioritized, then Groq/Gemini/Xingchi. Live Task Shield + ITAG semantic assessment; independent validation and fail-closed behavior remain mandatory. See the current Fuji ITAG runbook for receipts and provider traces. |
 | Swap LFJ | Circle test USDC → Fuji WAVAX: build, fork stress, proof, ký, relaying và public receipt đã kiểm. Route LFJ faucet USDC vẫn bị chặn |
 | Chạy production/quỹ thật | Chưa sẵn sàng: chưa audit/hosting/HSM/HA; live Fuji testnet không thay nghiệm thu production |
 
@@ -56,7 +58,7 @@ Hình 1. Đường phụ thuộc/chức năng của runtime hiện tại. Các b
 flowchart TD
   USER["Operator: dashboard / CLI"] --> API
   PRICE["Nguồn giá: Chainlink RPC / controlled demo"] --> GATES
-  LLM["Groq API: bounded JSON plan"] --> GATES
+  LLM["DeepSeek / Groq / Gemini / Xingchi: bounded AI"] --> GATES
   subgraph BACKEND["Python backend process"]
     API["FastAPI: auth, routes, lifecycle"] --> WF["Workflow: evaluation / authorization / monitoring"]
     API --> OBS["Fuji Observatory: giá tham khảo"]

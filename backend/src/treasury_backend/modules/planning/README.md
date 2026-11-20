@@ -1,6 +1,8 @@
 # planning
 
-Provider failover is now available: `PACEVANT_PLANNER_PROVIDER=rotate`, with default order `gemini,groq,xingchi`. Google uses native Gemini `generateContent` with `gemma-4-26b-a4b-it`; the user-confirmed Xingchi endpoint uses `/v1/responses` with model ID `gpt-6.1-sol`. Groq strict-schema behavior remains available as a standalone provider. See [rotation configuration and live validation](../../../../../docs/integrations/AI_PROVIDER_ROTATION.md).
+The current Fuji env/template prioritizes `deepseek,groq,gemini,xingchi`. `DeepSeekPlanner` calls only `https://api.deepseek.com/chat/completions` with reviewed `deepseek-flash`, thinking disabled, bounded max_tokens and strict local amount/direction validation. `DEEPSEEK_API_KEY` is private; only control/unified runtime receives it. See [DeepSeek integration](../../../../../docs/integrations/DEEPSEEK_PRIORITY.md).
+
+Legacy-compatible provider failover remains available: `PACEVANT_PLANNER_PROVIDER=rotate`, with default order `gemini,groq,xingchi`. Google uses native Gemini `generateContent` with `gemma-4-26b-a4b-it`; the user-confirmed Xingchi endpoint uses `/v1/responses` with model ID `gpt-6.1-sol`. Groq strict-schema behavior remains available as a standalone provider. See [rotation configuration and live validation](../../../../../docs/integrations/AI_PROVIDER_ROTATION.md).
 
 `remote.py` provides native wire adapters; `rotation.py` orchestrates bounded failover and request-local trace metadata. `PLANNED` timeline events record actual provider/model and sanitized attempt reasons. The workflow's top-level provider `rotate` identifies configuration, not a claim that every provider was called.
 

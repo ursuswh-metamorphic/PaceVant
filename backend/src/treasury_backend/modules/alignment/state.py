@@ -46,7 +46,29 @@ class TaskState:
                 "INSERT INTO shield_sessions VALUES(?,?,?,?,0,?)",
                 (id_, workflow_id, mandate.mandate_id, content_hash(mandate.model_dump()), now),
             )
+            conn.execute(
+                "INSERT INTO shield_events(session_id,kind,created_at,body) VALUES(?,?,?,?)",
+                (id_, "MANDATE_PROTOCOL_SCHEMA", now, pack({
+                    "mandate_hash": content_hash(mandate.model_dump()),
+                    "chain_id": mandate.chain_id,
+                    "vault": mandate.vault_address,
+                    "configured_adapter": mandate.router,
+                    "assets": [
+                        {"address": mandate.token_in, "symbol": "USDC", "decimals": 6},
+                        {"address": mandate.token_out, "symbol": "WAVAX", "decimals": 18},
+                    ],
+                    "authority": "Protocol metadata only; does not authorize additional actions",
+                })),
+            )
         return self.session(id_)
+
+    def protocol_schema(self, id_):
+        with self.store.connection() as conn:
+            row = conn.execute(
+                "SELECT body FROM shield_events WHERE session_id=? AND kind='MANDATE_PROTOCOL_SCHEMA' ORDER BY seq LIMIT 1",
+                (id_,),
+            ).fetchone()
+        return json.loads(row[0]) if row else None
 
     def session(self, id_):
         with self.store.connection() as conn:

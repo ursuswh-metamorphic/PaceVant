@@ -21,6 +21,10 @@ POLICY_ENV = {
     "TREASURY_GLOBAL_DAILY_RISK_LIMIT_USD": "",
 }
 ENV_DEFAULTS = {
+    "TREASURY_FUJI_FORK_RPC_URL": "https://api.avax-test.network/ext/bc/C/rpc",
+    "PACEVANT_SHIELD_FALLBACKS": "",
+    "PACEVANT_SHIELD_REASONING_EFFORT": "",
+    "PACEVANT_SHIELD_MAX_OUTPUT_CHARS": "16000",
     "PACEVANT_REQUIRE_ITAG": "0",
     "READ_ADDRESS": "0x0000000000000000000000000000000000000000",
     "VITE_NETWORK": "fuji",
@@ -43,12 +47,14 @@ ENV_DEFAULTS = {
     "GROQ_TOKENS_PER_MINUTE": "4000",
     "GROQ_TOKENS_PER_DAY": "80000",
     "GROQ_CACHE_TTL_SECONDS": "300",
+    "DEEPSEEK_API_KEY": "",
+    "DEEPSEEK_MODEL": "deepseek-flash",
     "GEMINI_API_KEY": "",
     "GEMINI_MODEL": "gemma-4-26b-a4b-it",
     "XINGCHI_API_KEY": "",
     "XINGCHI_BASE_URL": "",
     "XINGCHI_MODEL": "gpt-6.1-sol",
-    "PACEVANT_AI_ROTATION_ORDER": "gemini,groq,xingchi",
+    "PACEVANT_AI_ROTATION_ORDER": "deepseek,groq,gemini,xingchi",
     # Explicit opt-in preserves the established Fuji signing window during a main sync.
     "PACEVANT_SHIELD_MODE": "disabled",
     "PACEVANT_SHIELD_PROVIDER": "openai_compatible",
@@ -126,7 +132,7 @@ def read_env(path):
         {
             k: v
             for k, v in os.environ.items()
-            if k.startswith(("B_", "PACEVANT_", "TREASURY_", "FUJI_", "GROQ_", "GEMINI_", "XINGCHI_"))
+            if k.startswith(("B_", "PACEVANT_", "TREASURY_", "FUJI_", "GROQ_", "GEMINI_", "XINGCHI_", "DEEPSEEK_"))
         }
     )
     return values

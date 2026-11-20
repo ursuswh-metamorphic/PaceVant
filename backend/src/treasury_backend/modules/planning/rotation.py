@@ -8,7 +8,7 @@ from filelock import Timeout
 from treasury_backend.core.errors import ControlError
 
 from .groq import GroqPlanner
-from .remote import GeminiPlanner, XingchiPlanner
+from .remote import DeepSeekPlanner, GeminiPlanner, XingchiPlanner
 
 FAILOVER_ERRORS = {
     "PLANNER_AUTH_FAILED", "PLANNER_UNAVAILABLE", "PLANNER_RATE_LIMITED",
@@ -29,6 +29,7 @@ class RotatingPlanner:
                 "groq": (settings.api_key, settings.model, GroqPlanner),
                 "gemini": (settings.gemini_api_key, settings.gemini_model, GeminiPlanner),
                 "xingchi": (settings.xingchi_api_key, settings.xingchi_model, XingchiPlanner),
+                "deepseek": (settings.deepseek_api_key, settings.deepseek_model, DeepSeekPlanner),
             }[name]
             if not key or (name == "xingchi" and not settings.xingchi_base_url):
                 continue

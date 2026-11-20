@@ -1,0 +1,24 @@
+{
+  "chain_id": 43113,
+  "native_spent_wei": "7000000000000000",
+  "deposited_usdc_base_units": "526",
+  "vault": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+  "owner_transactions": [
+    {
+      "label": "deepseek-demo-circle-topup-v1",
+      "sender": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+      "tx_hash": "0xe560e1133a68eb7a0ea5a420f987807f12123408f24819ce2d2aac8549750cfe",
+      "block_number": 61368602,
+      "gas_used": 158834
+    },
+    {
+      "label": "deepseek-demo-vault-deposit-v1",
+      "sender": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+      "tx_hash": "0x306651b145af27d9ac9e0621cf6611622d5eff53ae9d1584adca41c5f0b9b2bf",
+      "block_number": 61368628,
+      "gas_used": 45047
+    }
+  ],
+  "policy_limits_unchanged": true,
+  "not_a_treasury_agent_swap": true
+}

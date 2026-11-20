@@ -142,7 +142,7 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
 
     def operator(request: Request):
         if (settings.mode != "MOCK" or settings.operator_token is not None
-                or settings.shield.mode in {"paper", "wallet_hardened"}):
+                or settings.shield.mode in {"paper", "wallet_hardened", "wallet_pipeline"}):
             auth(request, settings.operator_token)
 
     def observer_operator(request: Request):

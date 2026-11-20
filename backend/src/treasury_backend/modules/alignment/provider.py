@@ -6,7 +6,7 @@ import re
 import time
 from contextlib import contextmanager
 from contextvars import ContextVar
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal
 from urllib.parse import urlsplit
 
@@ -69,6 +69,9 @@ def safe_value(value):
 
 @dataclass(frozen=True, repr=False)
 class ShieldConfig:
+    fallbacks: tuple = field(default=(), repr=False)
+    reasoning_effort: str | None = None
+    max_output_chars: int = 16000
     mode: str = "legacy_fixture"
     provider: str = "openai"
     model: str = "gpt-4o-2024-05-13"
@@ -88,9 +91,13 @@ class ShieldConfig:
 
     def __post_init__(self):
         if (
-            self.mode not in {"disabled", "legacy_fixture", "paper", "wallet_hardened"}
-            or self.provider not in {"openai", "openai_compatible"}
-            or self.api_style not in {"chat_completions", "responses"}
+            len(self.fallbacks) > 3
+            or any(c.fallbacks for c in self.fallbacks)
+            or self.reasoning_effort not in {None, "low", "medium", "high"}
+            or not 1000 <= self.max_output_chars <= 65536
+            or self.mode not in {"disabled", "legacy_fixture", "paper", "wallet_hardened", "wallet_pipeline"}
+            or self.provider not in {"openai", "openai_compatible", "gemini", "deepseek"}
+            or self.api_style not in {"chat_completions", "responses", "gemini"}
             or not 1 <= len(self.user_agent) <= 128
             or not all(32 <= ord(c) <= 126 for c in self.user_agent)
             or not self.epsilon.is_finite()
@@ -122,6 +129,19 @@ class ShieldConfig:
                 )
             )
             or (self.provider == "openai" and self.base_url != "https://api.openai.com/v1")
+            or (self.provider == "deepseek" and (
+                self.base_url != "https://api.deepseek.com"
+                or self.api_style != "chat_completions"
+                or self.model != "deepseek-flash"
+            ))
+            or (
+                (self.provider == "gemini" or self.api_style == "gemini")
+                and (
+                    self.provider != "gemini"
+                    or self.api_style != "gemini"
+                    or self.base_url != "https://generativelanguage.googleapis.com/v1beta"
+                )
+            )
         ):
             raise ValueError("Invalid Task Shield provider endpoint")
 
@@ -131,18 +151,35 @@ class ShieldConfig:
             "PACEVANT_SHIELD_MODE", "legacy_fixture" if mode == "MOCK" else "disabled"
         )
         temp = os.environ.get("PACEVANT_SHIELD_TEMPERATURE", "0")
-        return cls(
+        primary = cls(
+            reasoning_effort=os.environ.get("PACEVANT_SHIELD_REASONING_EFFORT") or None,
+            max_output_chars=int(os.environ.get("PACEVANT_SHIELD_MAX_OUTPUT_CHARS", "16000")),
             mode=selected,
             provider=os.environ.get("PACEVANT_SHIELD_PROVIDER", "openai"),
             model=os.environ.get("PACEVANT_SHIELD_MODEL", "gpt-4o-2024-05-13"),
             base_url=os.environ.get("PACEVANT_SHIELD_BASE_URL", "https://api.openai.com/v1"),
             api_style=os.environ.get("PACEVANT_SHIELD_API_STYLE", "chat_completions"),
             user_agent=os.environ.get("PACEVANT_SHIELD_USER_AGENT", "PaceVant-TaskShield/1.0"),
-            api_key=(os.environ.get("PACEVANT_SHIELD_API_KEY") or
-                     (os.environ.get("XINGCHI_API_KEY") if
-                      os.environ.get("PACEVANT_SHIELD_PROVIDER") == "openai_compatible" and
-                      os.environ.get("PACEVANT_SHIELD_BASE_URL", "").rstrip("/") == "https://xingchiapi.com/v1"
-                      else None)),
+            api_key=(
+                os.environ.get("PACEVANT_SHIELD_API_KEY")
+                or (
+                    os.environ.get("DEEPSEEK_API_KEY")
+                    if os.environ.get("PACEVANT_SHIELD_PROVIDER") == "deepseek"
+                    else None
+                )
+                or (
+                    os.environ.get("GEMINI_API_KEY")
+                    if os.environ.get("PACEVANT_SHIELD_PROVIDER") == "gemini"
+                    else None
+                )
+                or (
+                    os.environ.get("XINGCHI_API_KEY")
+                    if os.environ.get("PACEVANT_SHIELD_PROVIDER") == "openai_compatible"
+                    and os.environ.get("PACEVANT_SHIELD_BASE_URL", "").rstrip("/")
+                    == "https://xingchiapi.com/v1"
+                    else None
+                )
+            ),
             temperature=None if temp == "omit" else float(temp),
             timeout=float(os.environ.get("PACEVANT_SHIELD_TIMEOUT", "20")),
             retries=int(os.environ.get("PACEVANT_SHIELD_RETRIES", "1")),
@@ -150,9 +187,53 @@ class ShieldConfig:
             epsilon=Decimal(os.environ.get("PACEVANT_SHIELD_EPSILON", "0")),
             max_replans=int(os.environ.get("PACEVANT_SHIELD_MAX_REPLANS", "2")),
         )
+        fallbacks = []
+        names = [n for n in os.environ.get("PACEVANT_SHIELD_FALLBACKS", "").split(",") if n]
+        for name in names:
+            if name == "gemini":
+                child = replace(primary, provider="gemini", api_style="gemini",
+                                base_url="https://generativelanguage.googleapis.com/v1beta",
+                                api_key=os.environ.get("GEMINI_API_KEY"),
+                                model=os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite"),
+                                temperature=0, reasoning_effort=None)
+            elif name == "gemini_dense":
+                child = replace(primary, provider="gemini", api_style="gemini",
+                                base_url="https://generativelanguage.googleapis.com/v1beta",
+                                api_key=os.environ.get("GEMINI_API_KEY"), model="gemma-4-31b-it",
+                                temperature=0, reasoning_effort=None)
+            elif name == "groq":
+                child = replace(
+                    primary,
+                    provider="openai_compatible",
+                    api_style="chat_completions",
+                    base_url="https://api.groq.com/openai/v1",
+                    api_key=os.environ.get("GROQ_API_KEY"),
+                    model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b"),
+                    temperature=None,
+                    reasoning_effort=None,
+                )
+            elif name == "xingchi":
+                child = replace(
+                    primary,
+                    provider="openai_compatible",
+                    api_style="responses",
+                    base_url="https://xingchiapi.com/v1",
+                    api_key=os.environ.get("XINGCHI_API_KEY"),
+                    model=os.environ.get("XINGCHI_MODEL", "gpt-6.1-sol"),
+                    temperature=None,
+                    reasoning_effort="low",
+                    user_agent="Cursor/0.45.0",
+                )
+            else:
+                raise ValueError("Unsupported shield fallback provider")
+            fallbacks.append(child)
+        return replace(primary, fallbacks=tuple(fallbacks))
 
     def public(self):
         return {
+            "fallbacks": [{"endpoint": c.base_url, **c.public()} for c in self.fallbacks],
+            "reasoning_effort": self.reasoning_effort,
+            "max_output_chars": self.max_output_chars,
             "mode": self.mode,
             "provider": self.provider,
             "model": self.model,
@@ -184,12 +265,67 @@ class ChatProvider:
         self.config = config
         self.http = client or httpx.Client(trust_env=False, follow_redirects=False)
         self.owned = client is None
+        self.fallbacks = [ChatProvider(c) for c in config.fallbacks]
+        self._attempt_context = ContextVar("shield_provider_attempts", default=None)
+        self.last_attempts = []
+        self.cooldown_until = 0
+
+    @property
+    def last_attempts(self):
+        value = self._attempt_context.get()
+        return value if value is not None else []
+
+    @last_attempts.setter
+    def last_attempts(self, value):
+        self._attempt_context.set(value)
 
     def close(self):
+        for provider in self.fallbacks:
+            provider.close()
         if self.owned:
             self.http.close()
 
     def complete(self, messages):
+        overall_started = time.monotonic()
+        self.last_attempts = []
+        for provider in [self, *self.fallbacks]:
+            if time.monotonic() < provider.cooldown_until:
+                continue
+            start = time.monotonic()
+            item = {
+                "provider": provider.config.provider,
+                "model": provider.config.model,
+                "endpoint": provider.config.base_url,
+            }
+            try:
+                result = provider._complete(messages)
+                self.last_attempts.append(
+                    {
+                        **item,
+                        "status": "SUCCESS",
+                        "latency_ms": int((time.monotonic() - start) * 1000),
+                    }
+                )
+                result.latency_ms = int((time.monotonic() - overall_started) * 1000)
+                return result
+            except ControlError as error:
+                self.last_attempts.append(
+                    {
+                        **item,
+                        "status": "FAILED",
+                        "code": error.code,
+                        "latency_ms": int((time.monotonic() - start) * 1000),
+                    }
+                )
+                if error.code.endswith("429"):
+                    provider.cooldown_until = time.monotonic() + 60
+                elif error.code.endswith(("500", "502", "503", "504")):
+                    provider.cooldown_until = time.monotonic() + 2
+                if not self.fallbacks:
+                    raise
+        raise ControlError("TASK_SHIELD_ALL_PROVIDERS_UNAVAILABLE", 503)
+
+    def _complete(self, messages):
         if not self.config.api_key:
             raise ControlError("TASK_SHIELD_PROVIDER_NOT_CONFIGURED", 503)
         payload = {
@@ -199,6 +335,9 @@ class ChatProvider:
             "stream": False,
         }
         path = "/chat/completions"
+        if self.config.provider == "deepseek":
+            payload["max_tokens"] = payload.pop("max_completion_tokens")
+            payload["thinking"] = {"type": "disabled"}
         if self.config.api_style == "responses":
             path = "/responses"
             payload = {
@@ -210,6 +349,34 @@ class ChatProvider:
             }
         if self.config.temperature is not None:
             payload["temperature"] = self.config.temperature
+        if self.config.reasoning_effort and self.config.api_style == "responses":
+            payload["reasoning"] = {"effort": self.config.reasoning_effort}
+        headers = {
+            "Authorization": "Bearer " + self.config.api_key,
+            "User-Agent": self.config.user_agent,
+        }
+        if self.config.api_style == "gemini":
+            path = "/models/" + self.config.model + ":generateContent"
+            headers = {"x-goog-api-key": self.config.api_key}
+            payload = {
+                "contents": [
+                    {
+                        "role": "user",
+                        "parts": [
+                            {
+                                "text": "\n\n".join(
+                                    m["role"].upper() + ": " + m["content"] for m in messages
+                                )
+                            }
+                        ],
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": 0,
+                    "maxOutputTokens": 4096,
+                    "thinkingConfig": {"thinkingLevel": "minimal"},
+                },
+            }
         started = time.monotonic()
         timeout = self.config.timeout
         deadline = _inference_deadline.get()
@@ -222,10 +389,7 @@ class ChatProvider:
                 "POST",
                 self.config.base_url.rstrip("/") + path,
                 json=payload,
-                headers={
-                    "Authorization": "Bearer " + self.config.api_key,
-                    "User-Agent": self.config.user_agent,
-                },
+                headers=headers,
                 timeout=timeout,
                 follow_redirects=False,
             ) as response:
@@ -236,7 +400,20 @@ class ChatProvider:
                         raise ControlError("TASK_SHIELD_PROVIDER_LIMIT", 503)
                     data.extend(chunk)
                 raw = json.loads(data)
-            if self.config.api_style == "responses":
+            if self.config.api_style == "gemini":
+                candidates = raw["candidates"]
+                if len(candidates) != 1 or candidates[0].get("finishReason") != "STOP":
+                    raise ValueError("Incomplete Gemini response")
+                content = "".join(
+                    p["text"] for p in candidates[0]["content"]["parts"] if not p.get("thought")
+                )
+                usage = raw.get("usageMetadata", {})
+                raw_usage = {
+                    "prompt_tokens": usage.get("promptTokenCount"),
+                    "completion_tokens": usage.get("candidatesTokenCount"),
+                    "total_tokens": usage.get("totalTokenCount"),
+                }
+            elif self.config.api_style == "responses":
                 content = self._response_text(raw)
                 raw_usage = raw.get("usage", {})
                 raw_usage = {
@@ -262,6 +439,12 @@ class ChatProvider:
             return Completion(content, int((time.monotonic() - started) * 1000), usage)
         except ControlError:
             raise
+        except httpx.HTTPStatusError as error:
+            raise ControlError(
+                "TASK_SHIELD_PROVIDER_HTTP_" + str(error.response.status_code),
+                503,
+                retryable=error.response.status_code in {429, 500, 502, 503, 504},
+            ) from None
         except Exception:
             raise ControlError("TASK_SHIELD_PROVIDER_UNAVAILABLE", 503, retryable=True) from None
 

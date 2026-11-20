@@ -9,6 +9,7 @@ from treasury_backend.modules import portfolio as portfolio
 from treasury_backend.modules import proof as proof_service
 from treasury_backend.modules import risk as economic_risk
 from treasury_backend.modules.alignment.provider import inference_window
+from treasury_backend.modules.alignment.types import Feedback
 from treasury_backend.modules.workflows.client import VerifiedExecutionClient
 from treasury_backend.modules.workflows.evidence import verify_build
 from treasury_backend.modules.workflows.mock import MockExecutionClient
@@ -23,9 +24,9 @@ STAGES = {
 
 class EvaluationPipeline:
     def _run_attempts(self, workflow_id, mandate, client, goal, intent_deadline=None, workflow_started=None):
-        # Resolve the remote plan before opening the 30-second approval window.
+        # Resolve the remote plan before opening the owner-configured approval window.
         plan = self.planner.parse(goal)
-        if self.settings.planning.provider in {"rotate", "gemini", "xingchi"}:
+        if self.settings.planning.provider in {"rotate", "gemini", "xingchi", "deepseek"}:
             provider = self.planner.provider
             self.store.event(
                 workflow_id, "PLANNED", self.clock(),
@@ -36,7 +37,11 @@ class EvaluationPipeline:
         fixture = client.fixture if isinstance(client, MockExecutionClient) else {}
         for index in range(mandate.max_replans + 1):
             context = (
-                self._tool(workflow_id, "read_chain_context", {}, client.context)
+                self._tool(workflow_id, "read_chain_context", {
+                    "chain_id": mandate.chain_id, "vault_address": mandate.vault_address,
+                    "token_in": mandate.token_in, "token_out": mandate.token_out,
+                    "mandate_id": mandate.mandate_id,
+                }, client.context)
                 if isinstance(client, VerifiedExecutionClient)
                 else None
             )
@@ -235,6 +240,14 @@ class EvaluationPipeline:
                 except ControlError as balance_error:
                     issues.append(balance_error.code)
 
+        runtime = self.shield_runtimes.get(workflow_id)
+        if runtime and self.settings.shield.mode == "wallet_pipeline":
+            try:
+                runtime.flush_data()
+            except ControlError as error:
+                issues.append(error.code)
+                if runtime.last_feedback is None:
+                    runtime.last_feedback = Feedback(code="TASK_SHIELD_UNAVAILABLE", explanation=error.code)
         temporal, temporal_hash = self.temporal.evaluate(
             workflow_id,
             mandate,

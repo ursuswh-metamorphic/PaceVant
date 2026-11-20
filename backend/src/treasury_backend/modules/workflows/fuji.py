@@ -44,12 +44,15 @@ class FujiVerifier:
                 or int(fork["number"], 16) != context.fork_block
                 or fork["hash"] != context.fork_block_hash
                 or fork_timestamp != context.fork_block_timestamp
-                or not 0 <= head_block - context.fork_block <= context.max_block_drift
-                or not fresh(fork_timestamp, now, state_age(context))
                 or not fork_code_bytes
                 or hash_bytes(fork_code_bytes) != context.bytecode_hash
                 or current_code_bytes != fork_code_bytes
             ):
                 raise ControlError("FUJI_DEPLOYMENT_MISMATCH")
+            if (
+                not 0 <= head_block - context.fork_block <= context.max_block_drift
+                or not fresh(fork_timestamp, now, state_age(context))
+            ):
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
         except (httpx.HTTPError, KeyError, ValueError, TypeError, AttributeError):
             raise ControlError("FUJI_RPC_UNVERIFIED", 503, retryable=True) from None

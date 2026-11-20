@@ -92,7 +92,9 @@ def evidence_issues(
             ):
                 return ["HASH_MISMATCH"]
             return [] if fresh(timestamp, now, state_age(context)) else ["SIMULATION_INCOMPLETE"]
-        except (ControlError, httpx.HTTPError):
+        except ControlError as error:
+            return [error.code] if error.code.startswith("TASK_SHIELD_") else ["SIMULATION_INCOMPLETE"]
+        except httpx.HTTPError:
             return ["SIMULATION_INCOMPLETE"]
         except (ValueError, KeyError, TypeError, RecursionError):
             return ["HASH_MISMATCH"]

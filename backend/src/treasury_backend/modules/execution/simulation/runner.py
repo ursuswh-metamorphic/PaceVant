@@ -54,7 +54,7 @@ def fork_node(settings, block, chain_id):
         str(port),
         "--silent",
         "--fork-url",
-        settings.rpc_url,
+        settings.fork_rpc_url or settings.rpc_url,
         "--fork-block-number",
         str(block),
         "--chain-id",
@@ -387,6 +387,8 @@ class Simulator:
                 raise
         refs, scenarios, complete = [], [], True
         with fork_node(self.chain.settings, c["block_number"], b.chain_id) as w3:
+            if Web3.to_hex(w3.eth.get_block(c["block_number"]).hash) != c["block_hash"]:
+                raise PlaneError("SIMULATION_INCOMPLETE", "Fork snapshot block hash mismatch", 503)
             vault = contract(w3, "PolicyVault", b.vault_address)
             is_lfj = b.adapter_version == ADAPTER_VERSION
             router = contract(w3, "LFJSwapAdapter" if is_lfj else "MockSwapAdapter", b.router)

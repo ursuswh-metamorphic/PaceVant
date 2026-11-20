@@ -101,7 +101,10 @@ class VerifiedExecutionClient:
         self.settings = settings
         self.store = store
         self.rpc = readonly_web3(
-            settings.chain_rpc_url, 31337 if settings.mode == "LOCAL" else 43113, seconds=180
+            # This client spans user extraction, planning and simulation. Its transport
+            # lifetime is not an approval TTL; policy freshness/deadlines are checked
+            # separately at evaluation, signing and submission.
+            settings.chain_rpc_url, 31337 if settings.mode == "LOCAL" else 43113, seconds=600
         )
 
     @staticmethod

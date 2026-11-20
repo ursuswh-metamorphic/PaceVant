@@ -23,7 +23,7 @@ class GoalPlanner:
         self.provider = None
         if settings.provider == "groq":
             self.provider = GroqPlanner(settings, directory, **kwargs)
-        elif settings.provider in {"gemini", "xingchi", "rotate"}:
+        elif settings.provider in {"gemini", "xingchi", "deepseek", "rotate"}:
             self.provider = RotatingPlanner(settings, directory, **kwargs)
         self.version = self.provider.version if self.provider else VERSION
 
@@ -34,6 +34,7 @@ class GoalPlanner:
             "planner_provider": self.settings.provider,
             "planner_model": (
                 self.settings.gemini_model if self.settings.provider == "gemini"
+                else self.settings.deepseek_model if self.settings.provider == "deepseek"
                 else self.settings.xingchi_model if self.settings.provider == "xingchi"
                 else None if self.settings.provider == "rotate"
                 else self.settings.model if self.provider else None

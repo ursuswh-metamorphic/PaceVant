@@ -14,11 +14,11 @@ from treasury_backend.modules.alignment.state import TaskState
 from treasury_backend.modules.alignment.types import (
     CandidateResult,
     CheckReport,
+    Content,
     Contribution,
     Feedback,
     Instruction,
     Message,
-    Text,
 )
 from treasury_backend.modules.portfolio.observations import content_hash
 
@@ -54,7 +54,7 @@ class TaskShield:
 
     @property
     def active(self):
-        return self.config.mode in {"paper", "wallet_hardened"}
+        return self.config.mode in {"paper", "wallet_hardened", "wallet_pipeline"}
 
     def close(self):
         self.provider.close()
@@ -76,6 +76,8 @@ class TaskShield:
                 except Exception:
                     stats["latency_ms"] += int((time.monotonic() - started) * 1000)
                     raise ControlError("TASK_SHIELD_PROVIDER_UNAVAILABLE", 503) from None
+                finally:
+                    stats.setdefault("provider_trace", []).extend(getattr(self.provider, "last_attempts", []))
                 stats["latency_ms"] += result.latency_ms
                 for key, value in result.usage.items():
                     stats["token_usage"][key] = stats["token_usage"].get(key, 0) + value
@@ -93,7 +95,7 @@ class TaskShield:
         def parse(value):
             if not isinstance(value, list) or len(value) > self.config.max_instructions:
                 raise ValueError("instruction limit")
-            values = TypeAdapter(list[Text]).validate_python(value)
+            values = TypeAdapter(list[Content]).validate_python(value)
             return list(dict.fromkeys(values))
 
         texts = self._json(
@@ -144,7 +146,7 @@ class TaskShield:
         self.state.event(session_id, "USER_TASK_UPDATE", int(self.clock()), stats)
         return self.state.session(session_id)
 
-    def _scores(self, candidate, tasks, history, stats, tool=None):
+    def _scores(self, candidate, tasks, history, stats, tool=None, protocol=None):
         def parse(raw):
             if not isinstance(raw, list) or len(raw) != len(tasks):
                 raise ValueError("incomplete task matrix")
@@ -183,6 +185,7 @@ class TaskShield:
             "candidate": candidate.model_dump(),
             "user_tasks": [task.text for task in tasks],
             "history": history,
+            "protocol_schema": protocol,
         }
         if tool:
             data["tool_call"] = tool
@@ -213,7 +216,9 @@ class TaskShield:
         try:
             if not tasks:
                 raise ControlError("TASK_SHIELD_NO_ACTIVE_TASKS", 409)
-            history = self.state.history(session_id, self.config.context_chars // 3)
+            # Enlarging the per-message budget must not amplify every subsequent request.
+            # Full records stay durable; retain only complete recent pairs for local alignment.
+            history = self.state.history(session_id, min(8000, self.config.context_chars // 3))
             # A structured tool call is itself actionable; it cannot disappear through empty extraction.
             instructions = (
                 [
@@ -231,7 +236,10 @@ class TaskShield:
                 else self.extract(message, stats)
             )
             for instruction in instructions:
-                contributions = self._scores(instruction, tasks, history, stats, tool)
+                contributions = self._scores(
+                    instruction, tasks, history, stats, tool,
+                    protocol=self.state.protocol_schema(session_id),
+                )
                 total = sum((c.score for c in contributions), Decimal(0))
                 fields["results"].append(
                     CandidateResult(
@@ -266,6 +274,9 @@ class TaskShield:
                     "tool_call_id": message.tool_call_id,
                 },
             )
+        successful = [a for a in stats.get("provider_trace", []) if a["status"] == "SUCCESS"]
+        if successful:
+            fields.update(provider=successful[-1]["provider"], model=successful[-1]["model"])
         report = CheckReport(**fields, **stats)
         self.state.report(report, int(self.clock()))
         return report

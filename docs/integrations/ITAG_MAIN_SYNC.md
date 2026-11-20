@@ -1,5 +1,7 @@
 # Tích hợp ITAG từ main vào backend module
 
+> **Historical checkpoint:** current configuration, artifact fixes, owner-approved TTL=300, required ITAG, model rotation and validation are documented in [the current Fuji ITAG runbook](../demo/FUJI_ITAG_LIVE.md). Statements below about disabled Shield/optional ITAG or the unresolved 16k artifact limit describe the earlier checkpoint, not the current profile.
+
 Nguồn: `main@70bf6c7`, gồm `2e24de2` và `dbadd51` (PR #5). Checkpoint trước khi sửa là `9c05936`, nhánh dự phòng `backup/pre-itag-9c05936`. Lần ghép giữ một Python/FastAPI, execution gọi nội bộ, planner rotation Gemini/Groq/Xingchi, proof V2 và Solidity hiện tại.
 
 ## Tính năng đã chuyển

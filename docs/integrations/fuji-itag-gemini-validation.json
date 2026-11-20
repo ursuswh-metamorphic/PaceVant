@@ -1,0 +1,605 @@
+{
+  "schema_version": "fuji-live-evidence-v1",
+  "workflow_id": "workflow_a97cd40cea0b41b7987d8c275317da6d",
+  "status": "CONFIRMED",
+  "chain_id": 43113,
+  "public_chain": true,
+  "planner": {
+    "planner_version": "provider-failover-bounded-v1",
+    "planner_provider": "rotate",
+    "planner_model": null
+  },
+  "wallets": {
+    "owner": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+    "attestor": "0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989",
+    "relayer": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C"
+  },
+  "contracts": {
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "router": "0x497d967d003717FA49ce16ac6FFf73a399aFe5D4",
+    "token_in": "0x5425890298aed601595a70AB815c96711a31Bc65",
+    "token_out": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+  },
+  "transaction": {
+    "hash": "0x1710b5b2d756900f718a761bd6faceeeb5386572884660d6bb5293bf70a13371",
+    "block": 61366377,
+    "block_hash": "0xb439d262dd66f80f0af8f3cc774e99c9efc810024028f4f4144a41dfd2d89be5",
+    "gas_used": "373477",
+    "explorer": "https://testnet.snowtrace.io/tx/0x1710b5b2d756900f718a761bd6faceeeb5386572884660d6bb5293bf70a13371"
+  },
+  "token_deltas_base_units": [
+    "-1",
+    "13192899717724"
+  ],
+  "checks": {
+    "chain_43113": true,
+    "successful_receipt": true,
+    "relayer_is_configured_wallet": true,
+    "recipient_is_vault": true,
+    "calldata_is_exact_signed_call": true,
+    "signer_is_attestor": true,
+    "nonce_consumed": true,
+    "exact_input_delta": true,
+    "output_at_least_minimum": true,
+    "vault_allowance_cleared": true,
+    "adapter_allowance_cleared": true,
+    "session_debit_matches_proof": true,
+    "global_debit_matches_proof": true,
+    "three_unsat_obligations": true
+  },
+  "negative_eth_calls": [
+    {
+      "case": "replay",
+      "block_number": 61366377,
+      "expected_error": "NonceReplay()",
+      "selector": "0x6aa319b1",
+      "passed": true,
+      "broadcast": false
+    },
+    {
+      "case": "tampered_router_calldata",
+      "block_number": 61366376,
+      "expected_error": "HashMismatch()",
+      "selector": "0x3f4d6053",
+      "passed": true,
+      "broadcast": false
+    },
+    {
+      "case": "unauthorized_signer",
+      "block_number": 61366376,
+      "expected_error": "BadSignature()",
+      "selector": "0x5cd5d233",
+      "passed": true,
+      "broadcast": false
+    }
+  ],
+  "all_checks_passed": true,
+  "proof": {
+    "status": "VERIFIED",
+    "reason": "PROOF_VERIFIED",
+    "check_mode": "UNSAT",
+    "compile_mode": "UNSAT",
+    "risk_bound": "UNSAT",
+    "assumptions_satisfiable": true,
+    "compiled_region_satisfiable": true,
+    "phi": {
+      "balance_bounds": [
+        {
+          "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "min_delta": "-1"
+        },
+        {
+          "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "min_delta": "13140128118853"
+        }
+      ],
+      "allowance_caps": [
+        {
+          "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "max_remaining": "0"
+        },
+        {
+          "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "max_remaining": "0"
+        }
+      ]
+    },
+    "risk_debit_usd_e8": "0",
+    "query_hashes": [
+      "0x24dccacf59ab385beb29b691ee30dac077e9743fdb88b0a2ca3d825de0397c9a",
+      "0x438552425ca83164ac64a831ceb9ea15a5ce4cc576042c593a0253f4beb957d5",
+      "0xaa55e5351b3e6d3a87d58cacac5fd4a8662512306a142c1f91c1c25d7bcb9ab7",
+      "0x910b8b4ad5e62fb5c73aefd54e17b000ec7d04ada6d989c49da19b581f84a3a6",
+      "0xec63e1fdb08d2693bc9e0516dfac76ffc7ad0c719af7e9099c30e4c664cfb16f"
+    ],
+    "encoder_version": "pgs-treasury-2.1.0",
+    "solver_version": "4.15.4",
+    "source_hash": "0x5cdc2805d0ba5cfa31d5d0be05cdbb81fd012e03cdf4767bac7d2cfa66f2623b",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "policy_config_hash": "0x87f37da6d302d867e133fd83bbe68daa640ce7e4d55e03010935880cd43ac24e",
+    "registry_hash": "0x30a36da3cece29c71519f120726a10668285d1964ec51d81cd347895bf3a9a20",
+    "oracle_hash": "0xf5f19ea8d1f3cfee2065cd3048bfa5bee65babda203fb511680bffc4ae2776b6",
+    "exact_call_hash": "0x0563cb5a70f1465ef9e346112ba2866d6e193ec1825f15cd59ccad74aa25f367",
+    "evidence_root": "0x2e7728b36c9ea0a2dab69d620c3b33cea75d074b77180f10cefd60a11e62247c",
+    "session_context_hash": "0x739772d7b106ca67a9aa4badd0737de45cff0ab10466bada7daf27e7062945e4",
+    "fallback_tau_zero": false,
+    "witness": null
+  },
+  "oracle_snapshot": {
+    "snapshot_id": "snapshot_3577a79606a9832239e51037e8ae75bce0e6d78eb2a44d30bf98b3c5eda64a6d",
+    "chain_id": 43113,
+    "vault_address": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+    "block_number": 61366280,
+    "usdc_base_units": "603",
+    "wavax_base_units": "13192993554324",
+    "price_usdc_usd_e8": "99981087",
+    "price_wavax_usd_e8": "690773881",
+    "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+    "price_timestamp": 1795121325,
+    "history_version": 1,
+    "oracle_observed_at": 1795154585,
+    "oracle_block_number": 61366252,
+    "oracle_block_hash": "0xc9748b6c4042bbfe02898641b566c3828e65cf51328b311a91a2f84dbb8486df",
+    "oracle_feeds": [
+      {
+        "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+        "description": "USDC/USD",
+        "decimals": 8,
+        "answer_raw": "99981087",
+        "round_id": "18446744073709552589",
+        "answered_in_round": "18446744073709552589",
+        "started_at": 1795121325,
+        "updated_at": 1795121325,
+        "max_age_seconds": 86400,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      },
+      {
+        "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+        "description": "AVAX/USD",
+        "decimals": 8,
+        "answer_raw": "690773881",
+        "round_id": "55340232221128821010",
+        "answered_in_round": "55340232221128821010",
+        "started_at": 1795154366,
+        "updated_at": 1795154366,
+        "max_age_seconds": 600,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      }
+    ],
+    "schema_version": "2.0",
+    "observation_snapshot_id": "observed_14c22787fd4aa3429ad3247cf5731690543af12987dfa49d61db20d61eb8470e",
+    "observation_hash": "0x14c22787fd4aa3429ad3247cf5731690543af12987dfa49d61db20d61eb8470e",
+    "content_hash": "0x3577a79606a9832239e51037e8ae75bce0e6d78eb2a44d30bf98b3c5eda64a6d",
+    "eligible_for_authorization": true,
+    "verification_scope": "FUJI_CHAINLINK_POLICY_REFERENCE",
+    "block_hash": "0x08b92cad95711086871d35b48a115c705db01fc6d398e6fca2cc66802685d280",
+    "block_timestamp": 1795154637,
+    "observed_at": 1795154657,
+    "source_rpc_id": "https://avalanche-fuji-c-chain-rpc.publicnode.com#path-c5d2460186f7233c",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "policy_version": 7,
+    "asset_identities": [
+      "43113:native",
+      "43113:erc20:0x5425890298aed601595a70ab815c96711a31bc65",
+      "43113:erc20:0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+    ],
+    "build_id": "build_5b0aec853715350369d1c1213726d2d31d5228b880c611d5f457f50fd4297c94"
+  },
+  "simulation": {
+    "effects_v2": {
+      "chain_id": 43113,
+      "vault": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+      "intent_hash": "0x6aafbcb5cb200e1a51ecc31dac53a426358f89838b07348639dd64c3c678db94",
+      "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+      "calldata_hash": "0xfd57fe7c44923365c44212478da719025a06726ab09379f6cb445f6ce1479207",
+      "block_number": 61366252,
+      "block_hash": "0xc9748b6c4042bbfe02898641b566c3828e65cf51328b311a91a2f84dbb8486df",
+      "timestamp": 1795154585,
+      "registry_hash": "0x30a36da3cece29c71519f120726a10668285d1964ec51d81cd347895bf3a9a20",
+      "balances": [
+        {
+          "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "before": "603",
+          "after": "602"
+        },
+        {
+          "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "before": "13192993554324",
+          "after": "26385893272048"
+        }
+      ],
+      "allowances": [
+        {
+          "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "before": "0",
+          "after": "0"
+        }
+      ],
+      "unexpected_transfer": false,
+      "unauthorized_approval": false,
+      "simulator_version": "guarded-v2.1",
+      "adapter_version": "lfj-v1-fuji-v1"
+    },
+    "schema_version": "1.1",
+    "intent_id": "intent_cb432ada930143ddad2783a2632c74fd",
+    "build_id": "build_5b0aec853715350369d1c1213726d2d31d5228b880c611d5f457f50fd4297c94",
+    "chain_id": 43113,
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "calldata_hash": "0xfd57fe7c44923365c44212478da719025a06726ab09379f6cb445f6ce1479207",
+    "nonce": "1013",
+    "deadline": 1795154867,
+    "fork_block": 61366252,
+    "bytecode_hash": "0x893bef38ed64d6d4d347d5b4911a73ba497ecaab88a0d00726903538eb2685f0",
+    "simulation_mode": "LOCAL_TEST_ATTESTOR",
+    "baseline": {
+      "execution_status": "SUCCESS",
+      "token_in_delta_base_units": "-1",
+      "token_out_delta_base_units": "13192899717724",
+      "unexpected_transfer": false,
+      "unauthorized_approval": false,
+      "gas_used": "305389"
+    },
+    "stress_tests": [
+      {
+        "scenario_id": "reserve_shift_mild",
+        "status": "SUCCESS_SAFE",
+        "scenario_hash": "0x1b074c806e8139990ee4c7e56d403a322e9cb96036f1d09d4d87938bf55389a7",
+        "output_base_units": "13166664802282",
+        "revert_reason": null
+      },
+      {
+        "scenario_id": "reserve_shift_adverse",
+        "status": "PROTECTED_REVERT",
+        "scenario_hash": "0x82cc29ae1862b982c7daca219ddfd0efc297aae2dfd1e1b81409c4e6ab1ce432",
+        "output_base_units": "0",
+        "revert_reason": "MIN_OUTPUT_NOT_MET"
+      }
+    ],
+    "verification_status": "COMPLETE",
+    "parser_version": "extractor-v1",
+    "source": "FORK_SIM",
+    "artifact_refs": [
+      "/v1/artifacts/f56246500522bd7ef4fbe33d1ea25f7853b9d3181e5f0a829c98e3a016ed33f7",
+      "/v1/artifacts/1c4d32264a8b76e2ba6eaf50290cee6222c0b41dd7cbab8decc0e9718d7a55f7",
+      "/v1/artifacts/01bc28f54c24011f500e1b9927ed88fff3f60075373552d41ba1dc5666e94787"
+    ],
+    "evidence_manifest_ref": "/v1/artifacts/42066d4d20a8cb28afd73bb0534a3a458ab1d38f99e3d745edd870777da54ec7",
+    "evidence_root": "0x42066d4d20a8cb28afd73bb0534a3a458ab1d38f99e3d745edd870777da54ec7"
+  },
+  "limitations": [
+    "Testnet reference USD valuations; no redemption or real-dollar claim.",
+    "Stress uses hypothetical external actor funding and attestor overrides ONLY on isolated Anvil forks.",
+    "Bounded SMT model plus concrete EVM tests; not a complete security audit."
+  ],
+  "task_shield": {
+    "mode": "wallet_pipeline",
+    "require_itag": true,
+    "checks": [
+      {
+        "check_id": "shield_456878bcf39d46c4812d5d5e69c478e9",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": null,
+        "model": "gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "llm_calls": 2,
+        "latency_ms": 2077,
+        "provider_trace": [
+          {
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+            "latency_ms": 1125,
+            "model": "gemini-3.1-flash-lite",
+            "provider": "gemini",
+            "status": "SUCCESS"
+          },
+          {
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+            "latency_ms": 952,
+            "model": "gemini-3.1-flash-lite",
+            "provider": "gemini",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3"
+      },
+      {
+        "check_id": "shield_bc561601f8344352ba6354f6acc632b6",
+        "status": "ALIGNED",
+        "kind": "TOOL_CALL",
+        "tool_name": "build_swap",
+        "model": "gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "llm_calls": 1,
+        "latency_ms": 1281,
+        "provider_trace": [
+          {
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+            "latency_ms": 1281,
+            "model": "gemini-3.1-flash-lite",
+            "provider": "gemini",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3"
+      },
+      {
+        "check_id": "shield_6c9a37c0d2004830991660038ec07432",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "llm_calls": 1,
+        "latency_ms": 3342,
+        "provider_trace": [
+          {
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+            "latency_ms": 3342,
+            "model": "gemini-3.1-flash-lite",
+            "provider": "gemini",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3"
+      },
+      {
+        "check_id": "shield_b8a85b0eb6a945cf886ad427ea9fd1d4",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "llm_calls": 1,
+        "latency_ms": 1218,
+        "provider_trace": [
+          {
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+            "latency_ms": 1218,
+            "model": "gemini-3.1-flash-lite",
+            "provider": "gemini",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3"
+      },
+      {
+        "check_id": "shield_b0c7d154d4184ed4a3b8f4b1d7202f81",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "llm_calls": 1,
+        "latency_ms": 750,
+        "provider_trace": [
+          {
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+            "latency_ms": 750,
+            "model": "gemini-3.1-flash-lite",
+            "provider": "gemini",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3"
+      },
+      {
+        "check_id": "shield_7497d6bd29c4453ea37f49dec3af9284",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "llm_calls": 1,
+        "latency_ms": 3983,
+        "provider_trace": [
+          {
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+            "latency_ms": 3983,
+            "model": "gemini-3.1-flash-lite",
+            "provider": "gemini",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3"
+      },
+      {
+        "check_id": "shield_4e6781235a2e4ce699b3c861b822e8f8",
+        "status": "ALIGNED",
+        "kind": "TOOL_CALL",
+        "tool_name": "execute_approved_swap",
+        "model": "gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "llm_calls": 1,
+        "latency_ms": 1186,
+        "provider_trace": [
+          {
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+            "latency_ms": 1186,
+            "model": "gemini-3.1-flash-lite",
+            "provider": "gemini",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3"
+      },
+      {
+        "check_id": "shield_b9bdb2eef9154a23b58d546607f583c1",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "execute_approved_swap",
+        "model": "gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "llm_calls": 1,
+        "latency_ms": 3608,
+        "provider_trace": [
+          {
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+            "latency_ms": 3608,
+            "model": "gemini-3.1-flash-lite",
+            "provider": "gemini",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3"
+      }
+    ],
+    "all_aligned": true
+  },
+  "itag": {
+    "assessment_hash": "0x115d5209f6f7c285599bf78feb057335152aba7158380bdbd31a0aace8c20636",
+    "assessment": {
+      "semantic": {
+        "verdict": "ALIGNED",
+        "finding": {
+          "candidate_action_id": "intent_cb432ada930143ddad2783a2632c74fd",
+          "referenced_task_ids": [
+            "instruction_14bd8c47786d4ebb9a069abbe1f0070a"
+          ],
+          "referenced_graph_node_ids": [
+            "intent_cb432ada930143ddad2783a2632c74fd",
+            "instruction_14bd8c47786d4ebb9a069abbe1f0070a",
+            "itag_b1ebc4c0dcf541f9b21e8d2806ec9a87:1"
+          ],
+          "semantic_verdict": "ALIGNED",
+          "contribution_assessments": [
+            {
+              "task_id": "instruction_14bd8c47786d4ebb9a069abbe1f0070a",
+              "relationship": "DIRECT",
+              "explanation": "The candidate action proposes a swap of 1 base unit of USDC (0.000001 USDC) for WAVAX, which directly fulfills the user's intent and adheres to the constraints defined in the authenticated intent itag_b1ebc4c0dcf541f9b21e8d2806ec9a87:1."
+            }
+          ],
+          "detected_goal_drift": false,
+          "claimed_instruction_source": "USER",
+          "reasoning_summary": "The candidate action correctly maps the user's request to buy WAVAX with 0.000001 USDC to a swap operation on the Fuji chain. The amount_in_base_units is set to 1, which corresponds to 0.000001 USDC (given USDC's 6 decimal places). The recipient, vault address, and router match the authorized parameters in the intent specification.",
+          "supporting_evidence_refs": [
+            "intent_cb432ada930143ddad2783a2632c74fd",
+            "itag_b1ebc4c0dcf541f9b21e8d2806ec9a87:1"
+          ],
+          "uncertainty_reasons": []
+        },
+        "reason_codes": [],
+        "provider_metadata": {
+          "model": "gemini-3.1-flash-lite",
+          "provider": "gemini",
+          "config_hash": "0xf030ea9744be3573e97fa153ec28b135aec72f23afebb90a071ae45fb847b71e",
+          "prompt_version": "itag-trajectory-v2",
+          "scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION",
+          "provider_trace": [
+            {
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+              "status": "SUCCESS",
+              "latency_ms": 2391
+            }
+          ]
+        },
+        "latency_ms": 2405,
+        "token_usage": {
+          "prompt_tokens": 11559,
+          "completion_tokens": 577,
+          "total_tokens": 12136
+        }
+      },
+      "deterministic": {
+        "verdict": "PASS",
+        "violations": [],
+        "spent": "0",
+        "reserved": "0",
+        "remaining": "1"
+      },
+      "graph_hash": "0xa03c95971a125dbcc2a9ce61889507800b0cab246a69947925972bb007760798",
+      "intent_hash": "0x8dd5ef670100597852f93e812e641c269173b59600960f3074365c1e99223065",
+      "history_hash": "0x518674ab2b227e5f11e9084f615d57663cde47bce1ba168b4c19c7ee22a73d70",
+      "task_revision": 1,
+      "history_version": 1,
+      "candidate_action_id": "intent_cb432ada930143ddad2783a2632c74fd",
+      "candidate_hash": "0xa604b438bde90c21a3ec4ea54b50653af8a6ac94f4c309b04c55809e48c09697",
+      "build_hash": "0x9f7ed4ff05a4ceb73b3efff26fc8081b69df2ecd6d75e69d8b020d1973c2c9d6",
+      "build_id": "build_5b0aec853715350369d1c1213726d2d31d5228b880c611d5f457f50fd4297c94",
+      "evidence_refs": [
+        "intent_cb432ada930143ddad2783a2632c74fd",
+        "itag_b1ebc4c0dcf541f9b21e8d2806ec9a87:1"
+      ],
+      "verdict": "PASS",
+      "reason_codes": [],
+      "violating_node_ids": [],
+      "violating_edge_ids": [],
+      "suggested_amount": null,
+      "timing_ms": {
+        "graph": 0,
+        "deterministic": 0,
+        "semantic": 2405,
+        "task_shield_reported": 12651,
+        "itag_total": 2421
+      }
+    }
+  },
+  "timeline_seconds": [
+    {
+      "stage": "PLANNED",
+      "timestamp": 1795154573
+    },
+    {
+      "stage": "PROPOSED",
+      "timestamp": 1795154582
+    },
+    {
+      "stage": "ALIGNED",
+      "timestamp": 1795154586
+    },
+    {
+      "stage": "BUILT",
+      "timestamp": 1795154608
+    },
+    {
+      "stage": "SIMULATED",
+      "timestamp": 1795154678
+    },
+    {
+      "stage": "ITAG_ASSESSED",
+      "timestamp": 1795154695
+    },
+    {
+      "stage": "EVALUATED",
+      "timestamp": 1795154695
+    },
+    {
+      "stage": "PROVED",
+      "timestamp": 1795154695
+    },
+    {
+      "stage": "APPROVED",
+      "timestamp": 1795154695
+    },
+    {
+      "stage": "ATTESTED",
+      "timestamp": 1795154768
+    },
+    {
+      "stage": "SUBMITTING",
+      "timestamp": 1795154828
+    },
+    {
+      "stage": "SUBMITTED",
+      "timestamp": 1795154839
+    },
+    {
+      "stage": "CONFIRMED",
+      "timestamp": 1795154843
+    }
+  ],
+  "validation_scope": "Live Gemini 3.1 Flash-Lite pipeline before DeepSeek cutover. No scripted runtime model responses."
+}

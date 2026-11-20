@@ -36,9 +36,11 @@ def test_profile_only_gives_provider_secret_to_control_or_unified(tmp_path, monk
     monkeypatch.setenv("GROQ_API_KEY", "gsk_parent_should_not_leak")
     monkeypatch.setenv("GEMINI_API_KEY", "test-parent-google-secret")
     monkeypatch.setenv("XINGCHI_API_KEY", "test-parent-gateway-secret")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-parent-deepseek-secret")
     assert "GROQ_API_KEY" not in ops.safe_environment({})
     assert "GEMINI_API_KEY" not in ops.safe_environment({})
     assert "XINGCHI_API_KEY" not in ops.safe_environment({})
+    assert "DEEPSEEK_API_KEY" not in ops.safe_environment({})
     env = tmp_path / "roles.env"
     ops.init_env(env, generate_attestor=True)
     owner, relayer = Account.create(), Account.create()
@@ -57,7 +59,7 @@ def test_profile_only_gives_provider_secret_to_control_or_unified(tmp_path, monk
     assert ops.a_environment(p)["GROQ_API_KEY"] == "gsk_profile_test_credential"
     assert ops.backend_environment(p)["GROQ_API_KEY"] == "gsk_profile_test_credential"
     assert "GROQ_API_KEY" not in ops.b_environment(p)
-    for key in ("GEMINI_API_KEY", "XINGCHI_API_KEY"):
+    for key in ("GEMINI_API_KEY", "XINGCHI_API_KEY", "DEEPSEEK_API_KEY"):
         assert key not in ops.b_environment(p)
         assert ops.backend_environment(p)[key] == ops.a_environment(p)[key]
     p.values["TREASURY_RELAYER_ADDRESS"] = owner.address

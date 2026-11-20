@@ -1,5 +1,7 @@
 # Demo toàn bộ hệ thống trên Avalanche Fuji
 
+> **Historical checkpoint:** current configuration, artifact fixes, owner-approved TTL=300, required ITAG, model rotation and validation are documented in [the current Fuji ITAG runbook](FUJI_ITAG_LIVE.md). Statements below about disabled Shield/optional ITAG or the unresolved 16k artifact limit describe the earlier checkpoint, not the current profile.
+
 Tài liệu cho bản code hiện tại: một FastAPI Python, Groq thật, Chainlink đọc RPC, vault V2 và LFJ trên Fuji chain `43113`. Mục tiêu nghiệm thu là chứng minh một yêu cầu đi qua đủ các gate rồi tạo giao dịch có thể kiểm tra độc lập. Testnet token và phép định giá USD tham chiếu không mang ý nghĩa tài sản có thể quy đổi thành USD thật.
 
 **Kết quả đã chạy:** workflow `workflow_58cd85d5d8a246a0b96a3e20fc20d199`, block **61340481**, [giao dịch Fuji thật](https://testnet.snowtrace.io/tx/0x956caf670aa366d86f7950322b0c5781bed77809749bbcfe227b08fb4c4b8182). Vault `0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D`, adapter `0x497d967d003717FA49ce16ac6FFf73a399aFe5D4`. [Report JSON](../integrations/fuji-live-validation.json) có 14 checks và ba negative eth_calls đều pass. [Năm truy vấn SMT](../integrations/fuji-live-proof/README.md) kèm hash để kiểm lại.

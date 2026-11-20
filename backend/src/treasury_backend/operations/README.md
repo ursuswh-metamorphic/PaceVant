@@ -6,6 +6,8 @@
 
 Live Chainlink profiles read feeds directly; the launcher does not compete with a periodic oracle writer during fork calls. Independent contract reads are batched at an explicit block, with hash/reorg and policy checks retained. On Windows, owned Popen subtrees are stopped together so a venv interpreter child cannot remain after launcher shutdown.
 
+With `PACEVANT_REQUIRE_ITAG=1`, `services.demo` delegates to `itag_demo.py`: create one operator-authenticated exact-amount intent, start the workflow, poll only an existing submission and persist its result. It never substitutes scripted AI. Unknown signed/submitting outcomes are not retried as fresh intents. Provider/schema/artifact/RPC fixes and the owner-approved 300-second policy are documented in the [current Fuji runbook](../../../../docs/demo/FUJI_ITAG_LIVE.md). A renewal whose owner receipts succeeded but final read failed reports `OWNER_CONFIGURATION_CONFIRMED_PREPARE_REQUIRED`; use `prepare`, not another renewal, to complete the read-only step.
+
 Live update 2026-11-20: [Circle / Chainlink / full Fuji demo](../../../../docs/demo/FUJI_LIVE_END_TO_END.md). Earlier faucet-USDC blockers and controlled/mock descriptions below belong to their historical profiles.
 
 

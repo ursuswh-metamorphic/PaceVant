@@ -1,0 +1,673 @@
+{
+  "schema_version": "fuji-live-evidence-v1",
+  "workflow_id": "workflow_329702d0468442d88c8f9789c4eca5c5",
+  "status": "CONFIRMED",
+  "chain_id": 43113,
+  "public_chain": true,
+  "planner": {
+    "planner_version": "provider-failover-bounded-v1",
+    "planner_provider": "rotate",
+    "planner_model": null,
+    "runtime": {
+      "planner_provider": "deepseek",
+      "planner_model": "deepseek-flash",
+      "provider_attempts": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "status": "VALIDATED"
+        }
+      ]
+    }
+  },
+  "wallets": {
+    "owner": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+    "attestor": "0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989",
+    "relayer": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C"
+  },
+  "contracts": {
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "router": "0x497d967d003717FA49ce16ac6FFf73a399aFe5D4",
+    "token_in": "0x5425890298aed601595a70AB815c96711a31Bc65",
+    "token_out": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+  },
+  "transaction": {
+    "hash": "0x3fdbbeb96646ed2e88ce31a63068747dd6d288644487cc2c8a09b49a4e2f55fe",
+    "block": 61369698,
+    "block_hash": "0x330b9be9406bffb36bceb2607bf4a34f4a7b2126d46112c5e0516af85cad2432",
+    "gas_used": "356377",
+    "explorer": "https://testnet.snowtrace.io/tx/0x3fdbbeb96646ed2e88ce31a63068747dd6d288644487cc2c8a09b49a4e2f55fe"
+  },
+  "token_deltas_base_units": [
+    "-1",
+    "13242471231046"
+  ],
+  "checks": {
+    "chain_43113": true,
+    "successful_receipt": true,
+    "relayer_is_configured_wallet": true,
+    "recipient_is_vault": true,
+    "calldata_is_exact_signed_call": true,
+    "signer_is_attestor": true,
+    "nonce_consumed": true,
+    "exact_input_delta": true,
+    "output_at_least_minimum": true,
+    "vault_allowance_cleared": true,
+    "adapter_allowance_cleared": true,
+    "session_debit_matches_proof": true,
+    "global_debit_matches_proof": true,
+    "three_unsat_obligations": true
+  },
+  "negative_eth_calls": [
+    {
+      "case": "replay",
+      "block_number": 61369698,
+      "expected_error": "NonceReplay()",
+      "selector": "0x6aa319b1",
+      "passed": true,
+      "broadcast": false
+    },
+    {
+      "case": "tampered_router_calldata",
+      "block_number": 61369697,
+      "expected_error": "HashMismatch()",
+      "selector": "0x3f4d6053",
+      "passed": true,
+      "broadcast": false
+    },
+    {
+      "case": "unauthorized_signer",
+      "block_number": 61369697,
+      "expected_error": "BadSignature()",
+      "selector": "0x5cd5d233",
+      "passed": true,
+      "broadcast": false
+    }
+  ],
+  "all_checks_passed": true,
+  "proof": {
+    "status": "VERIFIED",
+    "reason": "PROOF_VERIFIED",
+    "check_mode": "UNSAT",
+    "compile_mode": "UNSAT",
+    "risk_bound": "UNSAT",
+    "assumptions_satisfiable": true,
+    "compiled_region_satisfiable": true,
+    "phi": {
+      "balance_bounds": [
+        {
+          "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "min_delta": "-1"
+        },
+        {
+          "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "min_delta": "13189501346121"
+        }
+      ],
+      "allowance_caps": [
+        {
+          "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "max_remaining": "0"
+        },
+        {
+          "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "max_remaining": "0"
+        }
+      ]
+    },
+    "risk_debit_usd_e8": "0",
+    "query_hashes": [
+      "0xedd0e2c060f753f82c4991123fb5b3e40e252bd5d52e8662e3d1126f17d96e78",
+      "0x9775d5751b3108f3db29c9a055ccd9a0130fc332964606b2d74e99ba085302a6",
+      "0xc408dac37850c26e38b871f562fcd67a11f548c40e9837361d7781a4f4438e47",
+      "0xfc5c9ca505c420d7aa90934124eb5633cac4c4fa199e832c7f8a6cbe20dd8fc8",
+      "0x4e3cf1890681e01b110d151494ca0b5fe1af045968a28ec7d2c2eb3082237fca"
+    ],
+    "encoder_version": "pgs-treasury-2.1.0",
+    "solver_version": "4.15.4",
+    "source_hash": "0x5cdc2805d0ba5cfa31d5d0be05cdbb81fd012e03cdf4767bac7d2cfa66f2623b",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "policy_config_hash": "0x87f37da6d302d867e133fd83bbe68daa640ce7e4d55e03010935880cd43ac24e",
+    "registry_hash": "0x30a36da3cece29c71519f120726a10668285d1964ec51d81cd347895bf3a9a20",
+    "oracle_hash": "0x5bae76402b496a311124c7c49ea9be4103b5f300b9b9b5a1cf84f83406ad6361",
+    "exact_call_hash": "0xcb3030aa8e4d0d438e90f3de5ce5059fc6ccb66fb6b3baef10262717d898b368",
+    "evidence_root": "0x3d257e116bb26d2a61e3c6cf0f4d67ad0d236b9042c0026d69959f70902eb088",
+    "session_context_hash": "0xf2f8e24245b00121d3286965a5a26571c277514c28374f982e61a3a93bf66921",
+    "fallback_tau_zero": false,
+    "witness": null
+  },
+  "oracle_snapshot": {
+    "snapshot_id": "snapshot_9a4e626b1841dabee82b55b801a8bba90e2de51fbee241cf3ce0e027acd6a83d",
+    "chain_id": 43113,
+    "vault_address": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+    "block_number": 61369621,
+    "usdc_base_units": "1128",
+    "wavax_base_units": "26385893272048",
+    "price_usdc_usd_e8": "99981087",
+    "price_wavax_usd_e8": "690680943",
+    "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+    "price_timestamp": 1795121325,
+    "history_version": 2,
+    "oracle_observed_at": 1795161028,
+    "oracle_block_number": 61369586,
+    "oracle_block_hash": "0x3b4cefa603bab5b2e8c49d4e748eab7333847d3cb86240710ca819083bfd5f48",
+    "oracle_feeds": [
+      {
+        "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+        "description": "USDC/USD",
+        "decimals": 8,
+        "answer_raw": "99981087",
+        "round_id": "18446744073709552589",
+        "answered_in_round": "18446744073709552589",
+        "started_at": 1795121325,
+        "updated_at": 1795121325,
+        "max_age_seconds": 86400,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      },
+      {
+        "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+        "description": "AVAX/USD",
+        "decimals": 8,
+        "answer_raw": "690680943",
+        "round_id": "55340232221128821021",
+        "answered_in_round": "55340232221128821021",
+        "started_at": 1795160997,
+        "updated_at": 1795160997,
+        "max_age_seconds": 600,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      }
+    ],
+    "schema_version": "2.0",
+    "observation_snapshot_id": "observed_9cfc6b5b60bd1f1cdb4a74962a36be8f2ccdac9e6dbca3b7bc0b490370b1f598",
+    "observation_hash": "0x9cfc6b5b60bd1f1cdb4a74962a36be8f2ccdac9e6dbca3b7bc0b490370b1f598",
+    "content_hash": "0x9a4e626b1841dabee82b55b801a8bba90e2de51fbee241cf3ce0e027acd6a83d",
+    "eligible_for_authorization": true,
+    "verification_scope": "FUJI_CHAINLINK_POLICY_REFERENCE",
+    "block_hash": "0x6f4a115a9f803cb92157a7b7bf0892b3bc54d8f713c3f728ddb358670ca51de2",
+    "block_timestamp": 1795161085,
+    "observed_at": 1795161104,
+    "source_rpc_id": "https://avalanche-fuji-c-chain-rpc.publicnode.com#path-c5d2460186f7233c",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "policy_version": 7,
+    "asset_identities": [
+      "43113:native",
+      "43113:erc20:0x5425890298aed601595a70ab815c96711a31bc65",
+      "43113:erc20:0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+    ],
+    "build_id": "build_7ed05d97bb59c37bedb8495dbaa11a3a4a0093d0cb6306e5036649c05e2ca91f"
+  },
+  "simulation": {
+    "effects_v2": {
+      "chain_id": 43113,
+      "vault": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+      "intent_hash": "0x5c5b6f4a722db1b0e1d9adf5bb4c0d2d958f494217a1b11a7306d2c378d21865",
+      "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+      "calldata_hash": "0x073520a788c45a45e2dd3c9f86c4c02074134110bedef0b4d00b65a044b119e1",
+      "block_number": 61369586,
+      "block_hash": "0x3b4cefa603bab5b2e8c49d4e748eab7333847d3cb86240710ca819083bfd5f48",
+      "timestamp": 1795161028,
+      "registry_hash": "0x30a36da3cece29c71519f120726a10668285d1964ec51d81cd347895bf3a9a20",
+      "balances": [
+        {
+          "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "before": "1128",
+          "after": "1127"
+        },
+        {
+          "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "before": "26385893272048",
+          "after": "39628364503094"
+        }
+      ],
+      "allowances": [
+        {
+          "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "before": "0",
+          "after": "0"
+        }
+      ],
+      "unexpected_transfer": false,
+      "unauthorized_approval": false,
+      "simulator_version": "guarded-v2.1",
+      "adapter_version": "lfj-v1-fuji-v1"
+    },
+    "schema_version": "1.1",
+    "intent_id": "intent_067e07ea31e5413c97f265cdc4c16d64",
+    "build_id": "build_7ed05d97bb59c37bedb8495dbaa11a3a4a0093d0cb6306e5036649c05e2ca91f",
+    "chain_id": 43113,
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "calldata_hash": "0x073520a788c45a45e2dd3c9f86c4c02074134110bedef0b4d00b65a044b119e1",
+    "nonce": "1018",
+    "deadline": 1795161315,
+    "fork_block": 61369586,
+    "bytecode_hash": "0x893bef38ed64d6d4d347d5b4911a73ba497ecaab88a0d00726903538eb2685f0",
+    "simulation_mode": "LOCAL_TEST_ATTESTOR",
+    "baseline": {
+      "execution_status": "SUCCESS",
+      "token_in_delta_base_units": "-1",
+      "token_out_delta_base_units": "13242471231046",
+      "unexpected_transfer": false,
+      "unauthorized_approval": false,
+      "gas_used": "288301"
+    },
+    "stress_tests": [
+      {
+        "scenario_id": "reserve_shift_mild",
+        "status": "SUCCESS_SAFE",
+        "scenario_hash": "0x9de5cc22e918fd734c765a1b4eea7fe2a3bdf1823b3d00a624a4bd8ce94ebb7a",
+        "output_base_units": "13216088480858",
+        "revert_reason": null
+      },
+      {
+        "scenario_id": "reserve_shift_adverse",
+        "status": "PROTECTED_REVERT",
+        "scenario_hash": "0x3723fb02b5ee30a3aa7d49be0485b1da651874ee734fc6bf1d28af1bccf1667f",
+        "output_base_units": "0",
+        "revert_reason": "MIN_OUTPUT_NOT_MET"
+      }
+    ],
+    "verification_status": "COMPLETE",
+    "parser_version": "extractor-v1",
+    "source": "FORK_SIM",
+    "artifact_refs": [
+      "/v1/artifacts/bcc9c63146f28ab089c557700ca751f93bcb2a2ece3d849af6ce96e8fa33d69b",
+      "/v1/artifacts/f7524f29a2cd47510285b6af441dde80b8f65fb8fc78082a5b407d3ea43a66dc",
+      "/v1/artifacts/4e36e23d253c113c80b9609400b004b1c8ee63a1a75eb4294be6cbcf157afac2"
+    ],
+    "evidence_manifest_ref": "/v1/artifacts/dd005959a85c435cb5cf7abbc542905c378cb22242660086825861e6a21e0a46",
+    "evidence_root": "0xdd005959a85c435cb5cf7abbc542905c378cb22242660086825861e6a21e0a46"
+  },
+  "limitations": [
+    "Testnet reference USD valuations; no redemption or real-dollar claim.",
+    "Stress uses hypothetical external actor funding and attestor overrides ONLY on isolated Anvil forks.",
+    "Bounded SMT model plus concrete EVM tests; not a complete security audit."
+  ],
+  "task_shield": {
+    "model_version": "task-shield-wallet-pipeline-v1",
+    "all_aligned": true,
+    "checks": [
+      {
+        "check_id": "shield_9124fa18850b4dfdb47ef7ad22f1dea4",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": null,
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 2,
+        "latency_ms": 1794,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 1061,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          },
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 733,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_ff4ee687b94e40b9938ceb28fb973c83",
+        "status": "ALIGNED",
+        "kind": "TOOL_CALL",
+        "tool_name": "build_swap",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 968,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 968,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_9a8da5d6f86f4f1f8701971d9eb3b6ce",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 1140,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 1140,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_9bc30e6265524dbabf8701da7ef1edfa",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 672,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 672,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_be12a4b3dcac4a378c078d99be828733",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 952,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 952,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_b7eac23a251f4a45be40c17d9baafb16",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 671,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 671,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_71594423bf934695b4cd93841f29633b",
+        "status": "ALIGNED",
+        "kind": "TOOL_CALL",
+        "tool_name": "execute_approved_swap",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 1420,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 1420,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_fc5506cd6da54d4a80e231cae47b4f3d",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "execute_approved_swap",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 920,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 920,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      }
+    ]
+  },
+  "itag": {
+    "assessment_hash": "0x51c459aa601f06d21e8f58e1bf59f2c18f4dc61453ebd3910c6e4fc8e927ce59",
+    "assessment": {
+      "semantic": {
+        "verdict": "ALIGNED",
+        "finding": {
+          "candidate_action_id": "intent_067e07ea31e5413c97f265cdc4c16d64",
+          "referenced_task_ids": [
+            "instruction_06563d3ac90c40b88c0cb278eeabc0dd"
+          ],
+          "referenced_graph_node_ids": [
+            "intent_067e07ea31e5413c97f265cdc4c16d64",
+            "itag_facbf593ec0443ad9580e1c9974c068e:1",
+            "instruction_06563d3ac90c40b88c0cb278eeabc0dd",
+            "shield_ff4ee687b94e40b9938ceb28fb973c83"
+          ],
+          "semantic_verdict": "ALIGNED",
+          "contribution_assessments": [
+            {
+              "task_id": "instruction_06563d3ac90c40b88c0cb278eeabc0dd",
+              "relationship": "DIRECT",
+              "explanation": "Proposed SWAP_EXACT_INPUT buys token_out WAVAX (0xd00ae08403b9bbb9124bb305c09058e32c39a48c) with token_in USDC (0x5425890298aed601595a70ab815c96711a31bc65) amount_in_base_units 1 = 0.000001 USDC at 6 decimals, on chain 43113, matching the IntentSpec objective and one-shot step bounds (min/max 1)."
+            }
+          ],
+          "detected_goal_drift": false,
+          "claimed_instruction_source": "USER",
+          "reasoning_summary": "The candidate build_swap action matches the authenticated IntentSpec (itag:1) on chain, token_in, token_out, amount (1 base unit = 0.000001 USDC), router, and vault recipient, with no prerequisite steps required. No goal drift, extra transfers, or scope expansion is present; the build_swap tool call is the correct execution of the single authorized swap step.",
+          "supporting_evidence_refs": [
+            "itag_facbf593ec0443ad9580e1c9974c068e:1",
+            "instruction_06563d3ac90c40b88c0cb278eeabc0dd",
+            "user_4e2d4dca80d9403b904a0cff8695d83c",
+            "0xa0999a6da0c28639ae7237c8fda07727b589ebdcb341b527f9d78125211b0ff0"
+          ],
+          "uncertainty_reasons": []
+        },
+        "reason_codes": [],
+        "provider_metadata": {
+          "model": "deepseek-flash",
+          "provider": "deepseek",
+          "config_hash": "0x59fbf4061741536768bf6c5fb7281f2c600020e31960655a254c9f59f880570f",
+          "prompt_version": "itag-trajectory-v2.2",
+          "scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION",
+          "provider_trace": [
+            {
+              "provider": "deepseek",
+              "model": "deepseek-flash",
+              "endpoint": "https://api.deepseek.com",
+              "status": "SUCCESS",
+              "latency_ms": 3983
+            },
+            {
+              "provider": "deepseek",
+              "model": "deepseek-flash",
+              "endpoint": "https://api.deepseek.com",
+              "status": "SUCCESS",
+              "latency_ms": 3266
+            }
+          ],
+          "citation_repair": {
+            "attempts": 1,
+            "known_refs_only": true,
+            "semantic_core_preserved": true
+          }
+        },
+        "latency_ms": 7265,
+        "token_usage": {
+          "prompt_tokens": 19878,
+          "completion_tokens": 1250,
+          "total_tokens": 21128
+        }
+      },
+      "deterministic": {
+        "verdict": "PASS",
+        "violations": [],
+        "spent": "0",
+        "reserved": "0",
+        "remaining": "1"
+      },
+      "graph_hash": "0xe0f4c4e7ff393ec3a88b7fb04d641a3b069894be3510c7605fbb50e698940dc1",
+      "intent_hash": "0x6c001736e1cca6cb431ca0498725042a09cf7d7704a7be186b59dc41dd749bcb",
+      "history_hash": "0x518674ab2b227e5f11e9084f615d57663cde47bce1ba168b4c19c7ee22a73d70",
+      "task_revision": 1,
+      "history_version": 2,
+      "candidate_action_id": "intent_067e07ea31e5413c97f265cdc4c16d64",
+      "candidate_hash": "0x915ad8c181e5fe0a122c21474a0a38a06971ac7a6ad8c28f6d03359e34fd4972",
+      "build_hash": "0x418685fbca2d1eccc443c74ff03e097dda0b6342de60a79b59cf889aac0a5b80",
+      "build_id": "build_7ed05d97bb59c37bedb8495dbaa11a3a4a0093d0cb6306e5036649c05e2ca91f",
+      "evidence_refs": [
+        "intent_067e07ea31e5413c97f265cdc4c16d64",
+        "itag_facbf593ec0443ad9580e1c9974c068e:1"
+      ],
+      "verdict": "PASS",
+      "reason_codes": [],
+      "violating_node_ids": [],
+      "violating_edge_ids": [],
+      "suggested_amount": null,
+      "timing_ms": {
+        "graph": 0,
+        "deterministic": 0,
+        "semantic": 7265,
+        "task_shield_reported": 6197,
+        "itag_total": 7265
+      }
+    }
+  },
+  "validation_scope": "Live official DeepSeek Flash non-thinking planner/Task Shield/ITAG through public Fuji swap and canonical receipt. No scripted runtime model replies.",
+  "timeline_seconds": [
+    {
+      "stage": "PLANNED",
+      "timestamp": 1795161017
+    },
+    {
+      "stage": "PROPOSED",
+      "timestamp": 1795161026
+    },
+    {
+      "stage": "ALIGNED",
+      "timestamp": 1795161029
+    },
+    {
+      "stage": "BUILT",
+      "timestamp": 1795161053
+    },
+    {
+      "stage": "SIMULATED",
+      "timestamp": 1795161119
+    },
+    {
+      "stage": "ITAG_ASSESSED",
+      "timestamp": 1795161135
+    },
+    {
+      "stage": "EVALUATED",
+      "timestamp": 1795161135
+    },
+    {
+      "stage": "PROVED",
+      "timestamp": 1795161135
+    },
+    {
+      "stage": "APPROVED",
+      "timestamp": 1795161135
+    },
+    {
+      "stage": "ATTESTED",
+      "timestamp": 1795161204
+    },
+    {
+      "stage": "SUBMITTING",
+      "timestamp": 1795161259
+    },
+    {
+      "stage": "SUBMITTED",
+      "timestamp": 1795161271
+    },
+    {
+      "stage": "CONFIRMED",
+      "timestamp": 1795161283
+    }
+  ],
+  "duration_planned_to_confirmed_seconds": 266,
+  "live_intent_reuse_check": {
+    "scope": "Read-only deterministic replay check against actual live reconciled history, no new workflow/signature/transaction",
+    "verdict": "REJECT",
+    "spent": "1",
+    "remaining": "0",
+    "codes": [
+      "ITAG_STEP_ALREADY_COMPLETE",
+      "ITAG_BUDGET_EXCEEDED"
+    ],
+    "live_history_entries": 1
+  },
+  "proof_query_recheck": [
+    {
+      "hash": "0xedd0e2c060f753f82c4991123fb5b3e40e252bd5d52e8662e3d1126f17d96e78",
+      "result": "sat"
+    },
+    {
+      "hash": "0x9775d5751b3108f3db29c9a055ccd9a0130fc332964606b2d74e99ba085302a6",
+      "result": "unsat"
+    },
+    {
+      "hash": "0xc408dac37850c26e38b871f562fcd67a11f548c40e9837361d7781a4f4438e47",
+      "result": "sat"
+    },
+    {
+      "hash": "0xfc5c9ca505c420d7aa90934124eb5633cac4c4fa199e832c7f8a6cbe20dd8fc8",
+      "result": "unsat"
+    },
+    {
+      "hash": "0x4e3cf1890681e01b110d151494ca0b5fe1af045968a28ec7d2c2eb3082237fca",
+      "result": "unsat"
+    }
+  ],
+  "proof_files": "fuji-itag-live-proof/"
+}

@@ -298,8 +298,20 @@ def renew(p, *, policy=False):
         {"policy_changed": policy, "session_id": id_, "transactions": receipts}
     )
     atomic_json(p.deployment, data)
-    return prepare(p) | {
+    result = {
+        "status": "OWNER_CONFIGURATION_CONFIRMED",
+        "session_id": id_,
         "owner_transactions": receipts,
         "global_and_daily_counters_reset": False,
         "restart_services_required": True,
     }
+    try:
+        return prepare(p) | result
+    except Exception:
+        # All owner receipts were confirmed and the public manifest was saved.
+        # A failing read must not encourage sending those owner writes again.
+        return result | {
+            "status": "OWNER_CONFIGURATION_CONFIRMED_PREPARE_REQUIRED",
+            "next_action": f"treasury prepare --network {p.network}",
+            "reason": "Post-update verification read failed; do not repeat renew transactions",
+        }

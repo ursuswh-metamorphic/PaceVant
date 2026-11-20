@@ -10,7 +10,7 @@ def safe_environment(extra):
     env = {
         k: v
         for k, v in os.environ.items()
-        if not k.startswith(("B_", "PACEVANT_", "TREASURY_", "FUJI_", "GROQ_", "GEMINI_", "XINGCHI_"))
+        if not k.startswith(("B_", "PACEVANT_", "TREASURY_", "FUJI_", "GROQ_", "GEMINI_", "XINGCHI_", "DEEPSEEK_"))
         and k not in {"DEPLOYER_PRIVATE_KEY", "AGENT_PRIVATE_KEY", "AGENT_ADDRESS"}
     }
     return env | {k: str(v) for k, v in extra.items()}
@@ -20,6 +20,7 @@ def b_environment(p, *, deployment=False):
     values = {
         "B_MODE": p.network,
         "B_RPC_URL": p.rpc,
+        "B_FORK_RPC_URL": p.values.get(f"TREASURY_{p.network.upper()}_FORK_RPC_URL", ""),
         "B_DEPLOYMENT_FILE": p.deployment,
         "B_DATA_DIR": p.execution_data,
         "B_API_KEY": p.values.get("B_API_KEY", ""),
@@ -71,7 +72,7 @@ def a_environment(p, *, source_root=None):
         {
             name: value
             for name, value in p.values.items()
-            if name.startswith(("GROQ_", "GEMINI_", "XINGCHI_"))
+            if name.startswith(("GROQ_", "GEMINI_", "XINGCHI_", "DEEPSEEK_"))
             or name.startswith("PACEVANT_SHIELD_")
             or name in {"PACEVANT_PLANNER_PROVIDER", "PACEVANT_AI_ROTATION_ORDER", "PACEVANT_REQUIRE_ITAG"}
         }

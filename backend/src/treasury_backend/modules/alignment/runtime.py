@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from treasury_backend.core.errors import ControlError
 from treasury_backend.modules.alignment.provider import safe_value
+from treasury_backend.modules.alignment.serialization import semantic_value
 from treasury_backend.modules.alignment.types import Message
 
 
@@ -22,6 +23,33 @@ class ShieldRuntime:
         self.last_feedback = None
         self.reports = []
         self.attempt_checks = []
+        self.pending_outputs = []
+
+    def defer_data(self, name, arguments, value):
+        # Inspect the returned data, not a replay of our already-authorized call.
+        # Preserve call arguments separately as an immutable operational audit event.
+        self.shield.state.event(
+            self.session_id, "PIPELINE_DATA_OPERATION", int(self.shield.clock()),
+            {"tool_name": name, "arguments": semantic_value(arguments)},
+        )
+        self.pending_outputs.append({"tool_name": name, "output": semantic_value(value)})
+
+    def flush_data(self):
+        pending, self.pending_outputs = self.pending_outputs, []
+        group = []
+        for record in pending:
+            if group and len(json.dumps(group + [record], ensure_ascii=False)) > 14000:
+                self._data_group(group)
+                group = []
+            group.append(record)
+        if group:
+            self._data_group(group)
+
+    def _data_group(self, records):
+        call_id = "data_batch_" + uuid4().hex
+        self.output("verified_execution_evidence", call_id,
+                    {"tool_name": "verified_execution_evidence", "arguments": {"source_tools": [r["tool_name"] for r in records]}},
+                    {"type": "UNTRUSTED_READ_ONLY_EVIDENCE_BATCH", "records": records})
 
     def _require(self, report):
         self.attempt_checks.append(report.check_id)
@@ -51,7 +79,7 @@ class ShieldRuntime:
         )
         tool = {
             "tool_name": name,
-            "arguments": safe_value(arguments),
+            "arguments": semantic_value(arguments),
             "related_content": related_content,
         }
         report = self.shield.check(self.session_id, message, tool=tool)
@@ -59,9 +87,9 @@ class ShieldRuntime:
         return call_id, tool, report
 
     def output(self, name, call_id, tool, value):
-        safe = safe_value(value)
+        safe = semantic_value(value)
         encoded = json.dumps(safe, ensure_ascii=False, separators=(",", ":"))
-        if len(encoded) > 16000:
+        if len(encoded) > self.shield.config.max_output_chars:
             # Never truncate away a trailing injection and claim the complete response was checked.
             self.shield.state.event(
                 self.session_id,
@@ -90,7 +118,7 @@ class ShieldRuntime:
             },
         )
         if report.status == "UNAVAILABLE" or (
-            report.status == "MISALIGNED" and self.shield.config.mode == "wallet_hardened"
+            report.status == "MISALIGNED" and self.shield.config.mode in {"wallet_hardened", "wallet_pipeline"}
         ):
             self._require(report)
         if report.feedback:
@@ -111,6 +139,8 @@ class ShieldRuntime:
         return value
 
     def proof(self, proposal):
+        if self.pending_outputs:
+            raise ControlError("TASK_SHIELD_UNINSPECTED_EVIDENCE")
         session = self.shield.state.session(self.session_id)
         return {
             "session_id": self.session_id,

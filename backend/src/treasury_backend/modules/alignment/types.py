@@ -10,12 +10,13 @@ from treasury_contracts.models import Hash, Wire
 
 Role = Literal["USER", "ASSISTANT", "TOOL"]
 Text = Annotated[StrictStr, Field(min_length=1, max_length=16000)]
+Content = Annotated[StrictStr, Field(min_length=1, max_length=65536)]
 
 
 class Message(Wire):
     message_id: Id
     role: Role
-    content: Text
+    content: Content
     tool_name: Id | None = None
     tool_call_id: Id | None = None
     parent_task_id: Id | None = None
@@ -23,7 +24,7 @@ class Message(Wire):
 
 class Instruction(Wire):
     instruction_id: Id
-    text: Text
+    text: Content
     source: Role
     source_message_id: Id
     tool_name: Id | None = None
@@ -58,6 +59,7 @@ class Feedback(Wire):
 
 
 class CheckReport(Wire):
+    provider_trace: list[dict] = Field(default_factory=list)
     check_id: Id
     session_id: Id
     revision: int

@@ -3,6 +3,7 @@ import {byId,showError} from "./shared/dom.js";
 import {state} from "./shared/state.js";
 import {loadTreasury} from "./features/treasury/index.js";
 import {display} from "./features/workflows/index.js";
+import {workflowRequest} from "./features/intents/index.js";
 
 async function connectTreasury() {
   state.activeMandate = await loadTreasury();
@@ -16,7 +17,10 @@ async function connectTreasury() {
 api("/healthz").then((health) => {
   state.deploymentMode = health.mode;
   document.querySelector(".environment").textContent = health.mode;
-  document.querySelector(".notice").textContent = health.mode === "MOCK" ? "MOCK: fixture V1, không chạy proof V2.1 hoặc giao dịch on-chain" : "Testnet / local · controlled oracle · chưa audit";
+  document.querySelector(".notice").textContent = health.mode === "MOCK"
+    ? "MOCK: fixture V1, không chạy proof V2.1 hoặc giao dịch on-chain"
+    : health.mode === "FUJI" ? "Avalanche Fuji · Chainlink thật · mô phỏng trên fork · chưa audit"
+    : "Local · controlled oracle · chưa audit";
   if (health.mode === "MOCK") return connectTreasury();
   byId("connect-form").hidden = false;
   byId("scenarios").hidden = true;
@@ -42,10 +46,12 @@ byId("run-form").addEventListener("submit", async (event) => {
   byId("workflow-status").className = "status idle";
   byId("workflow-id").textContent = "";
   try {
+    const payload = await workflowRequest(state.activeMandate,
+      state.deploymentMode === "MOCK" ? "Buy WAVAX with 500 USDC" : byId("live-goal").value,
+      state.deploymentMode === "MOCK" ? scenario : null);
     const result = await api("/v1/workflows/start", {
       method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({mandate_id: state.mandateId, goal: state.deploymentMode === "MOCK" ? "Buy WAVAX with 500 USDC" : byId("live-goal").value,
-        ...(state.deploymentMode === "MOCK" ? {scenario} : {})}),
+      body: JSON.stringify(payload),
     });
     const workflowPath = "/v1/workflows/" + result.workflow_id;
     let workflow = await api(workflowPath);
