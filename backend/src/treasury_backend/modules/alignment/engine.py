@@ -77,7 +77,9 @@ class TaskShield:
                     stats["latency_ms"] += int((time.monotonic() - started) * 1000)
                     raise ControlError("TASK_SHIELD_PROVIDER_UNAVAILABLE", 503) from None
                 finally:
-                    stats.setdefault("provider_trace", []).extend(getattr(self.provider, "last_attempts", []))
+                    stats.setdefault("provider_trace", []).extend(
+                        getattr(self.provider, "last_attempts", [])
+                    )
                 stats["latency_ms"] += result.latency_ms
                 for key, value in result.usage.items():
                     stats["token_usage"][key] = stats["token_usage"].get(key, 0) + value
@@ -192,6 +194,12 @@ class TaskShield:
         return self._json(prompts.TOOL if tool else prompts.CONTENT, data, parse, stats)
 
     def check(self, session_id, message, *, tool=None):
+        if self.config.algorithm == "hybrid-v1":
+            from treasury_backend.modules.alignment.hybrid_engine import check
+
+            return check(self, session_id, message, tool)
+        if not self.provider.evaluation_scope.startswith(("SCRIPTED", "OFFLINE_")):
+            raise ControlError("LEGACY_ALIGNMENT_REPLAY_ONLY")
         snapshot = self.state.session(session_id)
         tasks = [Instruction.model_validate(t) for t in snapshot["tasks"]]
         stats = {"llm_calls": 0, "latency_ms": 0, "token_usage": {}}
@@ -237,7 +245,11 @@ class TaskShield:
             )
             for instruction in instructions:
                 contributions = self._scores(
-                    instruction, tasks, history, stats, tool,
+                    instruction,
+                    tasks,
+                    history,
+                    stats,
+                    tool,
                     protocol=self.state.protocol_schema(session_id),
                 )
                 total = sum((c.score for c in contributions), Decimal(0))
@@ -281,10 +293,13 @@ class TaskShield:
         self.state.report(report, int(self.clock()))
         return report
 
-    def validate(self, session_id, report_ids, revision):
+    def validate(self, session_id, report_ids, revision, proposal=None):
         current = self.state.session(session_id)
         if current["revision"] != revision or not current["tasks"]:
             raise ControlError("TASK_SHIELD_STALE_TASKS")
+        if not report_ids:
+            raise ControlError("TASK_SHIELD_INVALID_APPROVAL_PROOF")
+        concrete = False
         for id_ in report_ids:
             report = CheckReport.model_validate_json(json.dumps(self.state.check_record(id_)))
             if (
@@ -292,5 +307,19 @@ class TaskShield:
                 or report.revision != revision
                 or report.config_hash != self.config_hash
                 or report.status != "ALIGNED"
+                or self.config.algorithm == "hybrid-v1"
+                and report.algorithm != "hybrid-v1"
             ):
                 raise ControlError("TASK_SHIELD_INVALID_APPROVAL_PROOF")
+            if (
+                report.action_input_hash
+                and proposal is not None
+                and report.action_input_hash == content_hash(safe_value(proposal))
+                and report.binding
+                and report.binding.verdict == "VALID"
+                and report.constraints
+                and all(c.status == "PASS" for c in report.constraints)
+            ):
+                concrete = True
+        if proposal is not None and self.config.algorithm == "hybrid-v1" and not concrete:
+            raise ControlError("TASK_SHIELD_CONCRETE_ACTION_PROOF_REQUIRED")

@@ -157,6 +157,7 @@ def evaluate(case, config, budget):
                 "ALIGNED": "ACCEPT",
                 "MISALIGNED": "REJECT",
                 "UNAVAILABLE": "UNAVAILABLE",
+                "UNCERTAIN": "UNAVAILABLE",
             }[report.status]
         except ControlError as exc:
             error = exc.code
@@ -202,12 +203,20 @@ def main():
         p.error("Primary provider credential missing")
     args.output.mkdir(parents=True, exist_ok=True)
     manifest = {
+        "implementation_sha256": {
+            str(path.relative_to(ROOT)).replace("\\", "/"): hashlib.sha256(
+                path.read_bytes().replace(b"\r\n", b"\n")
+            ).hexdigest()
+            for path in sorted(
+                (ROOT / "backend/src/treasury_backend/modules/alignment").glob("*.py")
+            )
+        },
         "dataset_sha256": hashlib.sha256(args.dataset.read_bytes()).hexdigest(),
         "dataset_lf_sha256": hashlib.sha256(
             args.dataset.read_bytes().replace(b"\r\n", b"\n")
         ).hexdigest(),
         "config": cfg.public(),
-        "base": "7210efd455407f2905f31dd44b1ed54270947802",
+        "base": "ad01336dbce5e512a48bdea8207df85972f8eb3e",
         "mode": "PRODUCTION_TASK_SHIELD_PAPER_OFFLINE",
         "native_transactions": 0,
         "maximum_requests": args.max_requests,
@@ -217,6 +226,7 @@ def main():
     if path.exists():
         previous = json.loads(path.read_text())
         stable_keys = (
+            "implementation_sha256",
             "config",
             "base",
             "mode",

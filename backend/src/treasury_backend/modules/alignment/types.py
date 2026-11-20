@@ -6,6 +6,11 @@ from typing import Annotated, Literal
 from pydantic import Field, StrictStr
 
 from treasury_backend.core.domain import Id
+from treasury_backend.modules.alignment.hybrid_types import (
+    ConstraintResult,
+    SemanticFinding,
+    TaskBinding,
+)
 from treasury_contracts.models import Hash, Wire
 
 Role = Literal["USER", "ASSISTANT", "TOOL"]
@@ -67,7 +72,12 @@ class CheckReport(Wire):
     kind: Literal["CONTENT", "TOOL_CALL"]
     candidate_hash: Hash
     config_hash: Hash
-    status: Literal["ALIGNED", "MISALIGNED", "UNAVAILABLE"]
+    status: Literal["ALIGNED", "MISALIGNED", "UNCERTAIN", "UNAVAILABLE"]
+    algorithm: str = "legacy-score-v1"
+    binding: TaskBinding | None = None
+    constraints: list[ConstraintResult] = Field(default_factory=list)
+    semantic_findings: list[SemanticFinding] = Field(default_factory=list)
+    action_input_hash: Hash | None = None
     results: list[CandidateResult] = Field(default_factory=list)
     feedback: Feedback | None = None
     llm_calls: int = 0

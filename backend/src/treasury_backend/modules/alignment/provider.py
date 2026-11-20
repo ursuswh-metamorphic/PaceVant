@@ -69,6 +69,7 @@ def safe_value(value):
 
 @dataclass(frozen=True, repr=False)
 class ShieldConfig:
+    algorithm: str = "hybrid-v1"
     fallbacks: tuple = field(default=(), repr=False)
     reasoning_effort: str | None = None
     max_output_chars: int = 16000
@@ -91,11 +92,13 @@ class ShieldConfig:
 
     def __post_init__(self):
         if (
-            len(self.fallbacks) > 3
+            self.algorithm not in {"hybrid-v1", "legacy-score-v1"}
+            or len(self.fallbacks) > 3
             or any(c.fallbacks for c in self.fallbacks)
             or self.reasoning_effort not in {None, "low", "medium", "high"}
             or not 1000 <= self.max_output_chars <= 65536
-            or self.mode not in {"disabled", "legacy_fixture", "paper", "wallet_hardened", "wallet_pipeline"}
+            or self.mode
+            not in {"disabled", "legacy_fixture", "paper", "wallet_hardened", "wallet_pipeline"}
             or self.provider not in {"openai", "openai_compatible", "gemini", "deepseek"}
             or self.api_style not in {"chat_completions", "responses", "gemini"}
             or not 1 <= len(self.user_agent) <= 128
@@ -129,11 +132,14 @@ class ShieldConfig:
                 )
             )
             or (self.provider == "openai" and self.base_url != "https://api.openai.com/v1")
-            or (self.provider == "deepseek" and (
-                self.base_url != "https://api.deepseek.com"
-                or self.api_style != "chat_completions"
-                or self.model != "deepseek-flash"
-            ))
+            or (
+                self.provider == "deepseek"
+                and (
+                    self.base_url != "https://api.deepseek.com"
+                    or self.api_style != "chat_completions"
+                    or self.model != "deepseek-flash"
+                )
+            )
             or (
                 (self.provider == "gemini" or self.api_style == "gemini")
                 and (
@@ -195,16 +201,27 @@ class ShieldConfig:
         names = [n for n in values.get("PACEVANT_SHIELD_FALLBACKS", "").split(",") if n]
         for name in names:
             if name == "gemini":
-                child = replace(primary, provider="gemini", api_style="gemini",
-                                base_url="https://generativelanguage.googleapis.com/v1beta",
-                                api_key=values.get("GEMINI_API_KEY"),
-                                model=values.get("GEMINI_MODEL", "gemini-3.1-flash-lite"),
-                                temperature=0, reasoning_effort=None)
+                child = replace(
+                    primary,
+                    provider="gemini",
+                    api_style="gemini",
+                    base_url="https://generativelanguage.googleapis.com/v1beta",
+                    api_key=values.get("GEMINI_API_KEY"),
+                    model=values.get("GEMINI_MODEL", "gemini-3.1-flash-lite"),
+                    temperature=0,
+                    reasoning_effort=None,
+                )
             elif name == "gemini_dense":
-                child = replace(primary, provider="gemini", api_style="gemini",
-                                base_url="https://generativelanguage.googleapis.com/v1beta",
-                                api_key=values.get("GEMINI_API_KEY"), model="gemma-4-31b-it",
-                                temperature=0, reasoning_effort=None)
+                child = replace(
+                    primary,
+                    provider="gemini",
+                    api_style="gemini",
+                    base_url="https://generativelanguage.googleapis.com/v1beta",
+                    api_key=values.get("GEMINI_API_KEY"),
+                    model="gemma-4-31b-it",
+                    temperature=0,
+                    reasoning_effort=None,
+                )
             elif name == "groq":
                 child = replace(
                     primary,
@@ -235,6 +252,7 @@ class ShieldConfig:
 
     def public(self):
         return {
+            "algorithm": self.algorithm,
             "fallbacks": [{"endpoint": c.base_url, **c.public()} for c in self.fallbacks],
             "reasoning_effort": self.reasoning_effort,
             "max_output_chars": self.max_output_chars,

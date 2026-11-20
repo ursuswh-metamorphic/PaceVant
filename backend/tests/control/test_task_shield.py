@@ -48,7 +48,8 @@ class QueueProvider:
 def setup(tmp_path, provider, **config):
     db = Store(tmp_path / "shield.sqlite3")
     mandate = Mandate.model_validate_json((FIXTURES / "mandate.json").read_text())
-    shield = TaskShield(db, ShieldConfig(mode="paper", retries=0, **config), provider, lambda: NOW)
+    # Preserve explicit historical algorithm tests; production default is hybrid.
+    shield = TaskShield(db, ShieldConfig(mode="paper", retries=0, algorithm="legacy-score-v1", **config), provider, lambda: NOW)
     shield.state.create("session_a", mandate, NOW)
     return shield, mandate
 
@@ -346,6 +347,18 @@ class WalletFixtureProvider:
         if self.fail:
             raise ControlError("TEST_PROVIDER_OUTAGE", 503)
         data = json.loads(messages[1]["content"])
+        if messages[0]["content"] == prompts.HYBRID_SEMANTIC:
+            candidate = json.dumps(data["candidate"])
+            tool = (data.get("tool_call") or {}).get("tool_name")
+            blocked = ((self.attack is not None and self.attack in candidate)
+                       or (self.reject_tool is not None and tool == self.reject_tool))
+            return Completion(json.dumps({
+                "task_id":data["bound_task_id"], "action_ref":data["action_ref"],
+                "finding_type":"PROMPT_INJECTION" if blocked else "OBJECTIVE_ALIGNMENT",
+                "verdict":"MISALIGNED" if blocked else "ALIGNED",
+                "evidence_refs":[next(iter(data["evidence_catalog"])), data["action_ref"]],
+                "explanation":"Scripted hybrid control-flow fixture, not model accuracy.",
+            }))
         if messages[0]["content"] == prompts.EXTRACT:
             message = data["message"]
             if message["role"] == "USER":
@@ -474,12 +487,17 @@ def test_feedback_replans_new_candidate_and_rechecks_before_build(tmp_path, monk
     def reject_first(messages):
         data = json.loads(messages[1]["content"])
         if (
-            messages[0]["content"] == prompts.TOOL
-            and data.get("tool_call", {}).get("tool_name") == "build_swap"
+            messages[0]["content"] == prompts.HYBRID_SEMANTIC
+            and (data.get("tool_call") or {}).get("tool_name") == "build_swap"
             and first[0]
         ):
             first[0] = False
-            return Completion(scores(data["user_tasks"], 0))
+            return Completion(json.dumps({
+                "task_id":data["bound_task_id"], "action_ref":data["action_ref"],
+                "finding_type":"GOAL_DRIFT", "verdict":"MISALIGNED",
+                "evidence_refs":[next(iter(data["evidence_catalog"])), data["action_ref"]],
+                "explanation":"Scripted first-candidate rejection.",
+            }))
         return base(messages)
 
     provider.complete = reject_first
@@ -501,14 +519,14 @@ def test_positive_alignment_never_overrides_deterministic_recipient_gate(tmp_pat
         self.fixture = {**self.fixture, "poisoned_recipient": "0x" + "77" * 20}
 
     monkeypatch.setattr(MockExecutionClient, "__init__", init)
-    with wallet_api(tmp_path, provider, monkeypatch) as api:
+    with wallet_api(tmp_path, provider, monkeypatch, max_replans=0) as api:
         workflow = start(api)
         assert workflow["status"] == "REJECTED"
         decision = next(e["decision"] for e in workflow["timeline"] if "decision" in e)
-        assert "BAD_RECIPIENT" in decision["reason_codes"]
+        assert "TASK_MISALIGNED" in decision["reason_codes"]
         session = api.app.state.control.shield.state.for_workflow(workflow["workflow_id"])
-        assert all(
-            c["status"] == "ALIGNED"
+        assert any(
+            c["status"] == "MISALIGNED" and any(r["status"] == "FAIL" for r in c["constraints"])
             for c in api.app.state.control.shield.state.audit(session["id"])["checks"]
         )
 
@@ -548,7 +566,7 @@ def test_api_user_trust_session_isolation_and_cancellation(tmp_path, monkeypatch
         check = api.post(
             f"{route}/{id_}/check-tool", json={"tool_name": "execute_swap", "arguments": {}}
         )
-        assert check.json()["status"] == "UNAVAILABLE"
+        assert check.json()["status"] == "UNCERTAIN"
 
 
 @pytest.mark.parametrize(
