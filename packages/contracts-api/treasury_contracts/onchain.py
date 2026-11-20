@@ -5,6 +5,8 @@ from importlib.resources import files
 
 from web3 import Web3
 
+from treasury_contracts.rpc import evm_web3
+
 from .crypto import keccak
 from .models import ApprovalChainState, BuiltTransaction
 from .rpc import read_functions
@@ -21,7 +23,7 @@ def vault_abi():
 def read_approval_state(
     rpc_url: str, build: BuiltTransaction, timeout: int = 10, block_number: int | None = None
 ) -> ApprovalChainState:
-    w3 = Web3(Web3.HTTPProvider(rpc_url, request_kwargs={"timeout": timeout}))
+    w3 = evm_web3(Web3.HTTPProvider(rpc_url, request_kwargs={"timeout": timeout}))
     if w3.eth.chain_id != build.chain_id:
         raise ValueError("RPC chain does not match build")
     block = w3.eth.get_block(block_number if block_number is not None else "latest")

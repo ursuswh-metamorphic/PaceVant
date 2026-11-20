@@ -92,9 +92,9 @@
   "relayer": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C",
   "router": "0x497d967d003717FA49ce16ac6FFf73a399aFe5D4",
   "schema_version": "1.1",
-  "session_creation_block": 61339861,
-  "session_creation_tx": "0xa79c1491857ba0ee3b0396138c2aed71279f31f350cae43f2f71eced62f517be",
-  "session_id": "0x33c1269fd8391de148e19247289d28af4e169cc3e925c50d8146baa680468351",
+  "session_creation_block": 61370413,
+  "session_creation_tx": "0x1b3886be791ed08ee97aaf80f2bdbb0fba74c0fa540cd8da66e9ca09b589c5e1",
+  "session_id": "0x9eb4d7b5afe9e3e516d0b31efa451f0823fbc97bf13a63e81361106c0eed9098",
   "token_in": "0x5425890298aed601595a70AB815c96711a31Bc65",
   "token_out": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
   "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
@@ -140,6 +140,18 @@
           "block": 61368264
         }
       ]
+    },
+    {
+      "policy_changed": false,
+      "session_id": "0x9eb4d7b5afe9e3e516d0b31efa451f0823fbc97bf13a63e81361106c0eed9098",
+      "transactions": [
+        {
+          "tx_hash": "0x1b3886be791ed08ee97aaf80f2bdbb0fba74c0fa540cd8da66e9ca09b589c5e1",
+          "block": 61370413
+        }
+      ]
     }
-  ]
+  ],
+  "initial_session_creation_tx": "0xa79c1491857ba0ee3b0396138c2aed71279f31f350cae43f2f71eced62f517be",
+  "initial_session_creation_block": 61339861
 }

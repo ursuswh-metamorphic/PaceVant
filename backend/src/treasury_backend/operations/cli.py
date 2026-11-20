@@ -8,6 +8,7 @@ from pathlib import Path
 
 from web3 import Web3
 
+from treasury_backend.core.errors import ControlError
 from treasury_backend.operations import (
     ROOT,
     OpsError,
@@ -182,6 +183,7 @@ def main():
                     "status": "BLOCKED",
                     "reason": str(exc)
                     if isinstance(exc, OpsError)
+                    else exc.code if isinstance(exc, ControlError)
                     else "Configuration, RPC or dependency error; run doctor and inspect private profile logs",
                     "error_type": type(exc).__name__,
                 }

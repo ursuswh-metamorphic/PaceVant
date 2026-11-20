@@ -1,5 +1,7 @@
 # Rà soát toàn hệ thống V2.1 — 19/11/2026
 
+> **Báo cáo lịch sử:** kết luận không có oracle/DEX/LLM/public Fuji bên dưới thuộc checkpoint 19/11. Xem [rà soát source, security và dữ liệu thực hiện tại](SYSTEM_SECURITY_REAL_DATA_REVIEW.md) cùng bằng chứng được liên kết trong đó cho phiên bản sau tích hợp main, Shield và ITAG.
+
 > Checkpoint trước tích hợp Groq. Sau đó có bounded real Groq planner, thay ba cặp ví theo user và sync env; xem [integration guide](../integrations/GROQ_PLANNER_AND_ENV.md). Các số tests/env-preservation và missing-LLM nhận xét trong báo cáo này mô tả checkpoint ban đầu, không phải trạng thái sau cập nhật đó.
 
 Đọc [system design hiện tại](../AI_Treasury_Security_System_Design_v2.1.md) để hiểu kiến trúc, từng module, dữ liệu, luồng xử lý, quyền và vận hành. Báo cáo này ghi đối chiếu yêu cầu, lỗi đã sửa, kiểm chứng và phần chưa hoàn thành. [Evidence tóm tắt dạng JSON](validation-summary.json) không chứa private keys, tokens hoặc RPC credentials.

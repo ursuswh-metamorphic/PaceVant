@@ -50,7 +50,7 @@ class Mandate(Wire):
 
 
 class ChainContext(Wire):
-    max_block_drift: Annotated[int, Field(ge=1, le=120)] = 3
+    max_block_drift: Annotated[int, Field(ge=1, le=240)] = 3
     proof_policy: ProofPolicy | None = Field(default=None, exclude_if=lambda v: v is None)
     registry: Registry | None = Field(default=None, exclude_if=lambda v: v is None)
     proof_session: SessionContext | None = Field(default=None, exclude_if=lambda v: v is None)

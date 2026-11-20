@@ -8,6 +8,8 @@ import httpx
 from web3 import Web3
 from web3.providers.base import JSONBaseProvider
 
+from treasury_contracts.rpc import evm_web3
+
 
 class ReadError(Exception):
     def __init__(self, code):
@@ -156,4 +158,4 @@ class ReadOnlyProvider(JSONBaseProvider):
 
 
 def readonly_web3(url, chain_id, **options):
-    return Web3(ReadOnlyProvider(url, chain_id, **options))
+    return evm_web3(ReadOnlyProvider(url, chain_id, **options))

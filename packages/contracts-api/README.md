@@ -1,4 +1,6 @@
-# Shared integration contract v1.1
+# Shared contracts SDK (current package 1.3.1)
+
+Runtime block compatibility lives in `rpc.evm_web3(provider)`: native Web3 middleware accepts Avalanche extended header extraData while preserving block hash, timestamp and number checks, including Anvil fork headers. `readonly_web3` still enforces its RPC method allowlist and chain identity; middleware does not permit signing or broadcast. `toolchain.native_tool_environment()` restricts native compiler/Anvil child environment variables to OS/path/cache/certificate settings.
 
 Current SDK package version: **1.3.1**, pinned consistently by the root project. Added `ExecutionReconciliation`, `outcomes.py`/`outcomes_v2.py` (read-only V1/V2 receipt/build/PDR/proof verification), `readonly.py` (bounded read-only RPC) and `token_facts.py` (shared receipt parser). `ExecutionClient.snapshot(block_number)`, `.reconciliation(tx_hash)` and `.submission_for_build(build_id)` serve portfolio/outcome monitoring. V2 signed domain and existing proof-engine hashes are unchanged. The unified remote base URL is `http://127.0.0.1:8000/execution`; normal backend workflows use an in-process adapter. The v1.1/1.2 notes below describe the original wire/LFJ additions, not the current package version.
 
@@ -8,14 +10,14 @@ Schema and EIP-712 follow `docs/03_SHARED_INTEGRATION_CONTRACT.md`. This directo
 
 The monorepo backend installs this package automatically with root `uv sync --locked`. An independent consumer can install the package directory/wheel without importing backend internals. See [backend module boundaries](../../backend/MODULES.md).
 
-`proof.py` is the single pure V2.1 proof engine; `v2.py` contains additive V2 models/hashes, `onchain_v2.py` read-only state helpers and `toolchain.py` native binary discovery. Keep this library independent of `treasury_backend`. The v1.1 package version is retained for wire compatibility; ApprovalV2 uses EIP-712 domain version 2.
+`proof.py` is the single pure V2.1 proof engine; `v2.py` contains additive V2 models/hashes, `onchain_v2.py` read-only state helpers and `toolchain.py` native binary discovery. Keep this library independent of `treasury_backend`. Wire V1 remains available for compatibility; the installed package is 1.3.1 and ApprovalV2 uses EIP-712 domain version 2.
 
 ```python
 from treasury_contracts import TransactionProposal, SignedPDR
 from treasury_contracts.client import ExecutionClient
 from treasury_contracts.crypto import approval_for, domain_for, digest, message
 
-client = ExecutionClient("http://127.0.0.1:8001", api_key=backend_api_key)
+client = ExecutionClient("http://127.0.0.1:8000/execution", api_key=backend_api_key)
 built = client.build(proposal, idempotency_key=f"{workflow_id}:build:0")
 evidence = client.simulate(built, idempotency_key=f"{workflow_id}:simulate:0")
 manifest = client.verify_evidence(built, evidence)
@@ -24,9 +26,9 @@ manifest = client.verify_evidence(built, evidence)
 # Verification of hashes alone does not authorize execution.
 ```
 
-`models.py` is the DTO source. `npm run b:schemas` regenerates the committed JSON Schemas. Solidity, Python and viem consume the golden vector in `fixtures/eip712_golden/`; `npm run b:check` checks their agreement.
+`models.py` is the DTO source. `uv run --locked python -m treasury_backend.operations.execution schemas` regenerates the committed JSON Schemas. Solidity, Python and the optional developer viem checks consume the golden vector in `fixtures/eip712_golden/`. Python regression and native Foundry tests validate backend/contract agreement; the npm commands are compatibility wrappers and optional developer checks.
 
-`npm run schemas` also exports `openapi.json` and the packaged `treasury_contracts/abi/PolicyVault.json` after compiling. `ChainContext`, `OnchainSnapshot`, `ExecutionSubmission`, `ErrorEnvelope` describe the existing read/submission/error responses; `OnchainSnapshot` intentionally contains no USD prices/history.
+The Python `schemas` command also exports `openapi.json` and the packaged `treasury_contracts/abi/PolicyVault.json` after compiling. `ChainContext`, `OnchainSnapshot`, `ExecutionSubmission`, `ErrorEnvelope` describe the existing read/submission/error responses; `OnchainSnapshot` intentionally contains no USD prices/history.
 
 Use `treasury_contracts.onchain.read_approval_state(rpc_url, built)` to read the exact Vault policy/nonce/attestor/bytecode state at one block before A attests. This helper never signs, submits, or decides APPROVE. The ABI is included when the SDK is installed as a wheel, so A does not need a backend `app` import or local Foundry output to perform these reads.
 
@@ -34,7 +36,7 @@ Use `treasury_contracts.onchain.read_approval_state(rpc_url, built)` to read the
 
 Build/simulation retries with the same key/body reuse immutable records. Execution retries use the same journaled signed bytes and hash while returning current status; a dropped RPC broadcast can be retried with the same key. Always poll `result(tx_hash)` instead of assuming POST success means CONFIRMED.
 
-Read the complete [A/B handoff](../../docs/06_AB_INTEGRATION_HANDOFF.md), [AI merge prompt](../../docs/07_AI_MERGE_PLAYBOOK.md), and [compatibility audit](../../docs/08_AB_COMPATIBILITY_AUDIT.md). Run `npm run test:consumer` for a real HTTP test from a separate isolated consumer process. This test has a local ephemeral signer and does not implement or certify A's production SDE.
+Read the historical [A/B handoff](../../docs/06_AB_INTEGRATION_HANDOFF.md), [AI merge prompt](../../docs/07_AI_MERGE_PLAYBOOK.md), and [compatibility audit](../../docs/08_AB_COMPATIBILITY_AUDIT.md). Run `uv run --locked pytest backend/tests/execution/test_consumer_contract.py -q` after compiling for a real HTTP test from a separate isolated consumer process. This test has a local ephemeral signer and does not implement or certify the control module's production SDE.
 
 JSON token amounts/uint256 are decimal **strings**; timestamps are Unix seconds; hashes are lowercase; EIP-712 member names stay camelCase. Backend auth is `X-API-Key`; all POSTs require `Idempotency-Key`. Error responses contain `error.code`, `message`, `retryable`, `correlation_id`.
 

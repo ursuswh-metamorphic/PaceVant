@@ -1,5 +1,11 @@
 # Fuji: chạy luồng V2.1 có Task Shield và ITAG
 
+> **Current system review:** [architecture, real-data ledger, security fixes and evidence](../audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md). The Fuji session is now 24 hours and block drift is 200 blocks; approval TTL and snapshot age remain 300 seconds. Older receipts/test counts below retain their historical scope.
+
+Latest audited run: `workflow_b813ce97ad0542e9b1b667e4e5e07788`, Fuji block **61371323**, [confirmed transaction](https://testnet.snowtrace.io/tx/0xf975361607032ec0709140d32c6d5e98a266f8df6917226e1d6ecb6cf6361b10). [New public checks](../audit/system-security-live-validation.json) and [independently verified proof queries](../audit/system-security-live-proof/README.md) belong to the hardened code and current 24-hour session. Open `/?workflow=workflow_b813ce97ad0542e9b1b667e4e5e07788` to display this result without another trade. Historical receipts below remain separate checkpoints.
+
+**Next-trade prerequisite after this audit:** the read-only goal selector correctly refuses another swap under the 25% WAVAX exposure cap. Vault Circle USDC is only `1126` base units (`0.001126 USDC`), and the owner has none. Receive additional **Circle test USDC** from [Circle's faucet](https://faucet.circle.com/) on **Avalanche Fuji** into **`0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D`** (vault), or receive into an EOA and transfer that token to the vault. The faucet's reCAPTCHA requires human interaction; backend keys/env are already present. Exact [Fuji USDC token identity](https://developers.circle.com/stablecoins/usdc-contract-addresses): `0x5425890298aed601595a70AB815c96711a31Bc65`. Bootstrap only funds an empty vault; repeating `--setup` with this nonempty vault does not replenish exposure headroom. Never delete transaction journals or bypass the cap to force a new trade. The confirmed workflow remains viewable without funding another swap.
+
 Tài liệu vận hành cho bản sửa sau `48fae36`. Checkpoint rollback: `backup/pre-fuji-fixes-48fae36`. Đây là backend Python/FastAPI một process, execution gọi nội bộ, Solidity V2 giữ nguyên. Không có backend Node.js.
 
 
@@ -22,16 +28,18 @@ Các biến sau có trong cả `.env` và `.env.example`; template để trống
 | `PACEVANT_SHIELD_PROVIDER`, `PACEVANT_SHIELD_API_STYLE` | `deepseek`, `chat_completions`: official DeepSeek API |
 | `PACEVANT_SHIELD_MODEL` | `deepseek-flash`, non-thinking |
 | `PACEVANT_SHIELD_BASE_URL` | `https://api.deepseek.com` |
-| `PACEVANT_SHIELD_API_KEY` | Có thể để trống khi dùng đúng Gemini endpoint; dùng lại `GEMINI_API_KEY` |
-| `PACEVANT_SHIELD_FALLBACKS` | `groq,xingchi`; dùng credentials hiện có, ghi trace thực tế |
-| `PACEVANT_SHIELD_REASONING_EFFORT` | Để trống cho Gemini; adapter Xingchi fallback dùng `low` |
+| `PACEVANT_SHIELD_API_KEY` | Để trống khi dùng đúng official DeepSeek profile; dùng lại `DEEPSEEK_API_KEY` theo endpoint/model validation |
+| `PACEVANT_SHIELD_FALLBACKS` | `groq,gemini,xingchi`; dùng credentials hiện có, ghi trace thực tế |
+| `PACEVANT_SHIELD_REASONING_EFFORT` | Để trống cho DeepSeek non-thinking; adapter Xingchi fallback dùng `low` |
 | `PACEVANT_SHIELD_TIMEOUT`, `PACEVANT_SHIELD_RETRIES` | `20`, `1`; luôn bị chặn bởi thời gian còn lại của candidate |
 | `PACEVANT_SHIELD_MAX_REPLANS` | `0` cho demo một yêu cầu xác định |
 | `PACEVANT_SHIELD_MAX_OUTPUT_CHARS`, `PACEVANT_SHIELD_CONTEXT_CHARS` | `65536`, `100000`; vượt budget thì từ chối, không cắt đuôi |
-| `FUJI_RPC_URL` | `https://avalanche-fuji-c-chain-rpc.publicnode.com`: source chain/control reads |
+| `FUJI_RPC_URL`, `B_FUJI_RPC_URL` | `https://avalanche-fuji-c-chain-rpc.publicnode.com`: env hiện tại resolve `${FUJI_RPC_URL}` vào `B_FUJI_RPC_URL`, được CLI dùng cho chain/control reads |
 | `PACEVANT_FUJI_VERIFICATION_RPC` | Cùng endpoint PublicNode; là phép đối chiếu riêng, **không phải nhà cung cấp RPC độc lập** |
 | `TREASURY_FUJI_FORK_RPC_URL` | `https://api.avax-test.network/ext/bc/C/rpc`: Anvil cold-fork reads |
 | `TREASURY_APPROVAL_TTL_SECONDS`, `TREASURY_MAX_ORACLE_AGE_SECONDS` | `300`, `300`; phải khớp cấu hình owner trên chain |
+| `TREASURY_SESSION_DURATION_SECONDS` | `86400`; thời gian session mới, không kéo dài approval riêng lẻ |
+| `TREASURY_FUJI_MAX_BLOCK_DRIFT` | `200`; vẫn áp dụng thêm trần snapshot age 300 giây |
 
 Gemini 3.1 Flash-Lite có free tier theo [bảng giá Google](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.1-flash-lite). Quota thực phụ thuộc tài khoản; không thể bảo đảm API miễn phí luôn sẵn sàng hoặc không bao giờ 429. Provider rotation chỉ dùng endpoint được cấu hình, không tạo thêm tài khoản hay lách quota. Planner có quota/cache riêng; Shield có timeout, giới hạn số call và cooldown khi 429. Khi mọi provider lỗi, hệ thống fail closed, không dùng đáp án giả.
 
@@ -133,4 +141,4 @@ Before creating a Fuji ITAG intent, the CLI checks that real Chainlink rounds ha
 
 ## Signing-path RPC scope
 
-PRE/revalidation snapshots still collect and verify actual balances, asset identities, policy, block/hash and history. The workflow reads authoritative pinned/latest Chainlink rounds separately for risk and proof. PRE/revalidation therefore omit duplicate dashboard-only oracle observations (Witnet/Pyth/reference feeds); interactive treasury/dashboard observations still collect those reference sources. This reduces RPC latency while preserving the 120-block drift cap, 300-second policy/TTL, and all dedicated Chainlink checks. Drift/age rejection now reports STALE_REQUIRES_REEVALUATION rather than incorrectly claiming a deployment mismatch.
+PRE/revalidation snapshots still collect and verify actual balances, asset identities, policy, block/hash and history. The workflow reads authoritative pinned/latest Chainlink rounds separately for risk and proof. PRE/revalidation therefore omit duplicate dashboard-only oracle observations (Witnet/Pyth/reference feeds); interactive treasury/dashboard observations still collect those reference sources. This reduces RPC latency while preserving the 200-block drift cap and the independent 300-second age bound, 300-second policy/TTL, and all dedicated Chainlink checks. Drift/age rejection now reports STALE_REQUIRES_REEVALUATION rather than incorrectly claiming a deployment mismatch.

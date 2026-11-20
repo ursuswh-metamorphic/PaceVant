@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 import httpx
 
 from treasury_backend.paths import ROOT
-from treasury_contracts.toolchain import foundry_binary
+from treasury_contracts.toolchain import foundry_binary, native_tool_environment
 
 from .errors import OpsError
 
@@ -20,6 +20,7 @@ def compile_contracts(root=ROOT):
         [foundry_binary("forge", ROOT), "build", "--root", str(root)],
         cwd=ROOT,
         check=True,
+        env=native_tool_environment(),
     )
 
 
@@ -90,6 +91,7 @@ def local_chain(p):
                     ],
                     stdout=log,
                     stderr=log,
+                    env=native_tool_environment(),
                 )
             for _ in range(100):
                 if w3.is_connected():

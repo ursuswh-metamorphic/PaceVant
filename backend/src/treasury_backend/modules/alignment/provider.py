@@ -147,59 +147,63 @@ class ShieldConfig:
 
     @classmethod
     def from_env(cls, mode):
-        selected = os.environ.get(
+        return cls.from_values(mode, os.environ)
+
+    @classmethod
+    def from_values(cls, mode, values):
+        selected = values.get(
             "PACEVANT_SHIELD_MODE", "legacy_fixture" if mode == "MOCK" else "disabled"
         )
-        temp = os.environ.get("PACEVANT_SHIELD_TEMPERATURE", "0")
+        temp = values.get("PACEVANT_SHIELD_TEMPERATURE", "0")
         primary = cls(
-            reasoning_effort=os.environ.get("PACEVANT_SHIELD_REASONING_EFFORT") or None,
-            max_output_chars=int(os.environ.get("PACEVANT_SHIELD_MAX_OUTPUT_CHARS", "16000")),
+            reasoning_effort=values.get("PACEVANT_SHIELD_REASONING_EFFORT") or None,
+            max_output_chars=int(values.get("PACEVANT_SHIELD_MAX_OUTPUT_CHARS", "16000")),
             mode=selected,
-            provider=os.environ.get("PACEVANT_SHIELD_PROVIDER", "openai"),
-            model=os.environ.get("PACEVANT_SHIELD_MODEL", "gpt-4o-2024-05-13"),
-            base_url=os.environ.get("PACEVANT_SHIELD_BASE_URL", "https://api.openai.com/v1"),
-            api_style=os.environ.get("PACEVANT_SHIELD_API_STYLE", "chat_completions"),
-            user_agent=os.environ.get("PACEVANT_SHIELD_USER_AGENT", "PaceVant-TaskShield/1.0"),
+            provider=values.get("PACEVANT_SHIELD_PROVIDER", "openai"),
+            model=values.get("PACEVANT_SHIELD_MODEL", "gpt-4o-2024-05-13"),
+            base_url=values.get("PACEVANT_SHIELD_BASE_URL", "https://api.openai.com/v1"),
+            api_style=values.get("PACEVANT_SHIELD_API_STYLE", "chat_completions"),
+            user_agent=values.get("PACEVANT_SHIELD_USER_AGENT", "PaceVant-TaskShield/1.0"),
             api_key=(
-                os.environ.get("PACEVANT_SHIELD_API_KEY")
+                values.get("PACEVANT_SHIELD_API_KEY")
                 or (
-                    os.environ.get("DEEPSEEK_API_KEY")
-                    if os.environ.get("PACEVANT_SHIELD_PROVIDER") == "deepseek"
+                    values.get("DEEPSEEK_API_KEY")
+                    if values.get("PACEVANT_SHIELD_PROVIDER") == "deepseek"
                     else None
                 )
                 or (
-                    os.environ.get("GEMINI_API_KEY")
-                    if os.environ.get("PACEVANT_SHIELD_PROVIDER") == "gemini"
+                    values.get("GEMINI_API_KEY")
+                    if values.get("PACEVANT_SHIELD_PROVIDER") == "gemini"
                     else None
                 )
                 or (
-                    os.environ.get("XINGCHI_API_KEY")
-                    if os.environ.get("PACEVANT_SHIELD_PROVIDER") == "openai_compatible"
-                    and os.environ.get("PACEVANT_SHIELD_BASE_URL", "").rstrip("/")
+                    values.get("XINGCHI_API_KEY")
+                    if values.get("PACEVANT_SHIELD_PROVIDER") == "openai_compatible"
+                    and values.get("PACEVANT_SHIELD_BASE_URL", "").rstrip("/")
                     == "https://xingchiapi.com/v1"
                     else None
                 )
             ),
             temperature=None if temp == "omit" else float(temp),
-            timeout=float(os.environ.get("PACEVANT_SHIELD_TIMEOUT", "20")),
-            retries=int(os.environ.get("PACEVANT_SHIELD_RETRIES", "1")),
-            context_chars=int(os.environ.get("PACEVANT_SHIELD_CONTEXT_CHARS", "24000")),
-            epsilon=Decimal(os.environ.get("PACEVANT_SHIELD_EPSILON", "0")),
-            max_replans=int(os.environ.get("PACEVANT_SHIELD_MAX_REPLANS", "2")),
+            timeout=float(values.get("PACEVANT_SHIELD_TIMEOUT", "20")),
+            retries=int(values.get("PACEVANT_SHIELD_RETRIES", "1")),
+            context_chars=int(values.get("PACEVANT_SHIELD_CONTEXT_CHARS", "24000")),
+            epsilon=Decimal(values.get("PACEVANT_SHIELD_EPSILON", "0")),
+            max_replans=int(values.get("PACEVANT_SHIELD_MAX_REPLANS", "2")),
         )
         fallbacks = []
-        names = [n for n in os.environ.get("PACEVANT_SHIELD_FALLBACKS", "").split(",") if n]
+        names = [n for n in values.get("PACEVANT_SHIELD_FALLBACKS", "").split(",") if n]
         for name in names:
             if name == "gemini":
                 child = replace(primary, provider="gemini", api_style="gemini",
                                 base_url="https://generativelanguage.googleapis.com/v1beta",
-                                api_key=os.environ.get("GEMINI_API_KEY"),
-                                model=os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite"),
+                                api_key=values.get("GEMINI_API_KEY"),
+                                model=values.get("GEMINI_MODEL", "gemini-3.1-flash-lite"),
                                 temperature=0, reasoning_effort=None)
             elif name == "gemini_dense":
                 child = replace(primary, provider="gemini", api_style="gemini",
                                 base_url="https://generativelanguage.googleapis.com/v1beta",
-                                api_key=os.environ.get("GEMINI_API_KEY"), model="gemma-4-31b-it",
+                                api_key=values.get("GEMINI_API_KEY"), model="gemma-4-31b-it",
                                 temperature=0, reasoning_effort=None)
             elif name == "groq":
                 child = replace(
@@ -207,8 +211,8 @@ class ShieldConfig:
                     provider="openai_compatible",
                     api_style="chat_completions",
                     base_url="https://api.groq.com/openai/v1",
-                    api_key=os.environ.get("GROQ_API_KEY"),
-                    model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b"),
+                    api_key=values.get("GROQ_API_KEY"),
+                    model=values.get("GROQ_MODEL", "openai/gpt-oss-20b"),
                     temperature=None,
                     reasoning_effort=None,
                 )
@@ -218,8 +222,8 @@ class ShieldConfig:
                     provider="openai_compatible",
                     api_style="responses",
                     base_url="https://xingchiapi.com/v1",
-                    api_key=os.environ.get("XINGCHI_API_KEY"),
-                    model=os.environ.get("XINGCHI_MODEL", "gpt-6.1-sol"),
+                    api_key=values.get("XINGCHI_API_KEY"),
+                    model=values.get("XINGCHI_MODEL", "gpt-6.1-sol"),
                     temperature=None,
                     reasoning_effort="low",
                     user_agent="Cursor/0.45.0",

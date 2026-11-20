@@ -138,9 +138,16 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
 
     def client(self, workflow_id: str, mandate: Mandate, scenario: str | None = None):
         if self.client_factory is not None:
-            return self.client_factory(workflow_id, self.settings, self.store)
+            client = self.client_factory(workflow_id, self.settings, self.store)
+            if self.settings.mode != "MOCK" and (
+                isinstance(client, MockExecutionClient) or getattr(client, "fixture_mode", False)
+            ):
+                raise ControlError("LIVE_FIXTURE_CLIENT_FORBIDDEN", 503)
+            return client
         if self.http:
             return RestExecutionClient(self.http, workflow_id, self.settings, self.store)
+        if self.settings.mode != "MOCK":
+            raise ControlError("EXECUTION_CLIENT_UNAVAILABLE", 503)
         if workflow_id in self.mock_clients:
             return self.mock_clients[workflow_id]
         return MockExecutionClient(
@@ -194,6 +201,8 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
                 context.block_timestamp + ttl,
                 context.policy_expires_at or mandate.expires_at,
             )
+            if context.proof_session is not None:
+                deadline = min(deadline, context.proof_session.expires_at)
         return deadline
 
     def treasury(self, request_id):

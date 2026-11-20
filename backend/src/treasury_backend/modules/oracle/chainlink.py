@@ -7,6 +7,7 @@ from web3 import Web3
 
 from treasury_backend.core.errors import ControlError
 from treasury_contracts.oracle import CHAINLINK_SOURCE, CIRCLE_USDC, FEEDS, SOURCE_HASH, WAVAX
+from treasury_contracts.rpc import evm_web3
 from treasury_contracts.v2 import FeedObservation
 
 from .models import OraclePrice
@@ -14,7 +15,7 @@ from .models import OraclePrice
 
 class ChainlinkPriceProvider:
     def __init__(self, rpc_url, vault):
-        self.w3 = Web3(Web3.HTTPProvider(rpc_url, request_kwargs={"timeout": 10}))
+        self.w3 = evm_web3(Web3.HTTPProvider(rpc_url, request_kwargs={"timeout": 10}))
         self.vault = vault
 
     def read(self, block="latest"):

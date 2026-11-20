@@ -196,6 +196,8 @@ class AuthorizationPipeline:
                 mandate, built, sim, snapshot, context, now, self.store.proof_query
             )
             current = client.context(built=built)
+            if current.nonce_used is not False:
+                raise ControlError("NONCE_REPLAY")
             fields = (
                 "session_id",
                 "policy_hash",
@@ -226,6 +228,16 @@ class AuthorizationPipeline:
         # Recheck time/round freshness after them, rather than signing against the
         # timestamp captured before those network operations.
         now = self.clock()
+        if snapshot.oracle_feeds:
+            latest_after_preflight = self.price(client)
+            if latest_after_preflight.oracle_feeds != snapshot.oracle_feeds:
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
+            now = self.clock()
+        if self.fuji_http is not None:
+            from treasury_backend.modules.workflows.fuji import FujiVerifier
+
+            FujiVerifier(self.fuji_http, self.settings.fuji_verification_rpc).verify(context, now)
+            now = self.clock()
         if not portfolio.price_fresh(snapshot, now, portfolio.state_age(context)):
             raise ControlError("STALE_PRICE")
         recomputed = sde.decide(

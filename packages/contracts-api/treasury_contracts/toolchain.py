@@ -6,6 +6,16 @@ import shutil
 from pathlib import Path
 
 
+def native_tool_environment():
+    """Native tools need OS paths/certificates, never wallet or model credentials."""
+    allowed = {
+        "PATH", "PATHEXT", "SYSTEMROOT", "WINDIR", "COMSPEC", "TEMP", "TMP",
+        "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "XDG_CACHE_HOME",
+        "XDG_CONFIG_HOME", "LANG", "LC_ALL", "SSL_CERT_FILE", "SSL_CERT_DIR",
+    }
+    return {key: value for key, value in os.environ.items() if key.upper() in allowed}
+
+
 def foundry_binary(tool, root=None):
     if tool not in {"forge", "anvil", "cast"}:
         raise ValueError("Unsupported Foundry tool")

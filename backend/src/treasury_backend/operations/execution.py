@@ -42,6 +42,7 @@ from treasury_backend.modules.execution.simulation.runner import Simulator, rpc
 from treasury_backend.modules.execution.storage import Store
 from treasury_backend.modules.execution.transaction.builder import Builder
 from treasury_backend.operations.configuration import portable_path, update_env
+from treasury_contracts.rpc import evm_web3
 from treasury_contracts.toolchain import foundry_binary
 
 
@@ -79,7 +80,7 @@ def deploy(settings, fuji=False, write_env=True, env_file=None, v2_config=None, 
     usdc_address = CIRCLE_USDC if lfj_token == "circle" else USDC
     if is_lfj and not (fuji and v2_config):
         raise RuntimeError("LFJ deployment requires Fuji and V2 policy configuration")
-    w3 = Web3(Web3.HTTPProvider(settings.rpc_url, request_kwargs={"timeout": settings.rpc_timeout}))
+    w3 = evm_web3(Web3.HTTPProvider(settings.rpc_url, request_kwargs={"timeout": settings.rpc_timeout}))
     if fuji:
         if settings.mode != "fuji" or w3.eth.chain_id != 43113:
             raise RuntimeError("Fuji mode and chain 43113 required")
@@ -500,7 +501,7 @@ def start_local(settings, env_file, host, port):
         cwd=ROOT,
         check=True,
     )
-    w3 = Web3(Web3.HTTPProvider(settings.rpc_url, request_kwargs={"timeout": 2}))
+    w3 = evm_web3(Web3.HTTPProvider(settings.rpc_url, request_kwargs={"timeout": 2}))
     process = None
     try:
         if not w3.is_connected():

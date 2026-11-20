@@ -45,3 +45,5 @@ uv run --locked python -m pytest backend/tests/integration/test_treasury_ops.py 
 ```
 
 The operator smoke exercises one real local workflow through this module and receipt confirmation with no Node executable and with the retired execution API port occupied. For changes, cover both accepted simulation and missing/stale/wrong-binding/protected-revert cases. Add feature-specific tests in this module's `tests/` directory when needed. See [execution](../README.md) and [single-app architecture](../../../../../../docs/architecture/UNIFIED_BACKEND.md).
+
+Managed Anvil processes receive only the SDK native-tool OS/path/cache/certificate environment. Wallet/model/service credentials are excluded. This is environment minimization, not an OS sandbox; native tools remain trusted local executables.

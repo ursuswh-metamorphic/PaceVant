@@ -3,12 +3,14 @@ import subprocess
 import sys
 import time
 from contextlib import contextmanager
+from decimal import InvalidOperation
 from threading import Event, Thread
 from urllib.parse import urlsplit
 
 import httpx
 
 from treasury_backend.config.planning import PlanningSettings
+from treasury_backend.modules.alignment.provider import ShieldConfig
 
 from .contracts import prepare, refresh_oracle
 from .env import POLICY_ENV, atomic_json, key_account
@@ -127,6 +129,21 @@ def doctor(p, *, live=False):
             row("ai_provider_order", "OK", ",".join(n for n in selected if configured[n]))
     except RuntimeError:
         row("planner_configuration", "INVALID", "Check planner provider/key/model/local budgets")
+
+    try:
+        required = p.values.get("PACEVANT_REQUIRE_ITAG", "0")
+        if required not in {"0", "1"}:
+            raise ValueError("Invalid ITAG flag")
+        shield = ShieldConfig.from_values(p.network.upper(), p.values)
+        active = shield.mode in {"paper", "wallet_hardened", "wallet_pipeline"}
+        row("shield_configuration", "OK" if shield.mode != "legacy_fixture" else "INVALID", shield.mode)
+        row("itag_shield_requirement", "OK" if required == "0" or active else "BLOCKED",
+            "Required ITAG needs an active semantic shield")
+        if active:
+            row("shield_provider_credentials", "OK" if any(c.api_key for c in (shield, *shield.fallbacks)) else "MISSING",
+                "Presence check; live model availability is evaluated during requests")
+    except (ValueError, TypeError, InvalidOperation):
+        row("shield_configuration", "INVALID", "Check ITAG flag, shield endpoint/model/budgets")
 
     for name in ("B_API_KEY", "PACEVANT_OPERATOR_TOKEN", "PACEVANT_INTERNAL_TOKEN"):
         value = p.values.get(name, "")

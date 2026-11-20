@@ -1,5 +1,7 @@
 # PaceVant - AI Treasury Security V2.1
 
+> **Current system review:** [architecture, real-data ledger, security fixes and evidence](docs/audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md). The Fuji session is now 24 hours and block drift is 200 blocks; approval TTL and snapshot age remain 300 seconds. Older receipts/test counts below retain their historical scope.
+
 Current Fuji pipeline: required ITAG, Task Shield `wallet_pipeline` with live AI, direct Chainlink reference rounds, LFJ fork simulation, risk/Z3 proof, ApprovalV2, real relayer broadcast and receipt reconciliation. Owner-approved TTL and snapshot age are 300 seconds. [Current Fuji runbook, configuration and limitations](docs/demo/FUJI_ITAG_LIVE.md).
 
 The ITAG-protected workflow `workflow_329702d0468442d88c8f9789c4eca5c5` confirmed on public Fuji: [transaction](https://testnet.snowtrace.io/tx/0x3fdbbeb96646ed2e88ce31a63068747dd6d288644487cc2c8a09b49a4e2f55fe). [Validation report](docs/integrations/fuji-itag-live-validation.json) separates public-chain evidence from scripted tests. Testnet USD valuation and hypothetical fork stresses are explicitly labelled; this is not a production security audit or a real-money profitability claim.

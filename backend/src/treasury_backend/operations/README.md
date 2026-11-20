@@ -20,3 +20,5 @@ uv run --locked python -m pytest backend/tests/architecture backend/tests/contro
 ```
 
 Run from the repository root. Integration tests need native Foundry. Keep routes, config, deployment composition and feature behavior in their respective folders; add regression cases for any changed security boundary.
+
+`owner_transactions.py` journals renew-policy/session transactions before broadcast, verifies sender/hash and serializes writes. Session IDs are stable while resuming an operation from the previous manifest; after confirmation the manifest advances. Preserve private journals on timeout and resume with the same config; do not share raw signed bytes. The current operator profile uses a 24h session and 200-block drift, with 300s approval/snapshot limits. Direct Chainlink signing does not use the optional startup price cache: a failed refresh is reported UNAVAILABLE without stamping old data; source/scope mismatches still abort. `doctor` checks Shield/ITAG configuration and key presence, not actual model uptime.

@@ -1,12 +1,14 @@
 # PaceVant — Thiết kế hệ thống V2.1 hiện tại
 
+> **Current system review:** [architecture, real-data ledger, security fixes and evidence](audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md). The Fuji session is now 24 hours and block drift is 200 blocks; approval TTL and snapshot age remain 300 seconds. Older receipts/test counts below retain their historical scope.
+
 > **Current Fuji configuration (supersedes historical checkpoints below):** the owner-approved approval TTL and snapshot policy age are now 300 seconds. The local Fuji profile requires ITAG and uses Task Shield `wallet_pipeline`, official DeepSeek Flash (non-thinking), then Groq/Gemini/Xingchi fallback, explicit artifact semantic views, and separate primary/fork RPC sources. The 16k artifact blocker described in the original merge notes has been fixed and has successful V2 Anvil regression coverage. Each run still requires live freshness, risk, proof, temporal and on-chain checks. Read the [current runbook and limitations](demo/FUJI_ITAG_LIVE.md) and its linked validation report before making any live-readiness claim. The older successful transaction below predates ITAG; it is not evidence for the new pipeline. Env variable counts and TTL=180 statements below describe the earlier checkpoint.
 
-**ITAG từ main@70bf6c7:** đã tích hợp intent budget/ordered tasks, temporal graph, semantic assessment, atomic revalidation và viewer `/itag`. [Thiết kế tích hợp và giới hạn hiện tại](integrations/ITAG_MAIN_SYNC.md). ITAG là opt-in; thử nghiệm V2 Anvil có Shield tái hiện artifact quá giới hạn, nên chưa nghiệm thu live V2 có ITAG. Luồng V2 hiện tại không chọn ITAG vẫn giữ nguyên kiểm tra an toàn.
+**ITAG từ main@70bf6c7:** đã tích hợp intent budget/ordered tasks, temporal graph, semantic assessment, atomic revalidation và viewer `/itag`. Profile Fuji hiện bắt buộc ITAG và Task Shield `wallet_pipeline`. Lỗi giới hạn artifact ở checkpoint tích hợp đã sửa; [receipt toàn luồng có ITAG](integrations/fuji-itag-live-validation.json) là bằng chứng riêng. [Ghi chép tích hợp lịch sử](integrations/ITAG_MAIN_SYNC.md) giữ nguyên phạm vi của lần merge.
 
-**Đồng bộ main:** đã đưa Task Shield, portfolio observation/history và read-only outcome reconciliation từ `main@08c35df` vào backend module. Bộ đối soát được bổ sung hỗ trợ PDR V2/Phi/ProofCommitted và đường Fuji Circle USDC hiện có; worker nằm trong cùng FastAPI. [Thiết kế luồng bổ sung, API, cấu hình và kiểm chứng](integrations/MAIN_SYNC_2026_11_20.md). `.env` hiện tắt LLM Task Shield để giữ luồng demo đã kiểm chứng; cần đánh giá latency/artifact trước khi bật `paper`/`wallet_hardened`. Không đồng nhất các kết quả scripted tests của shield với độ chính xác AI hoặc với một giao dịch Fuji mới được shield bảo vệ.
+**Đồng bộ main:** Task Shield, portfolio observation/history và read-only outcome reconciliation đã vào các module hiện tại; PDR V2/Phi/ProofCommitted và Circle USDC được hỗ trợ trong cùng FastAPI. [Ghi chép lần tích hợp](integrations/MAIN_SYNC_2026_11_20.md) mô tả checkpoint khi Shield còn tắt. Profile hiện bật Shield thật; scripted tests vẫn không được coi là độ chính xác phát hiện tấn công của model.
 
-**Cập nhật AI provider:** planner hỗ trợ failover `Gemini/Gemma 4 → Groq → Xingchi gpt-6.1-sol`, với quota/cache/cooldown riêng và trace provider thực dùng trong event `PLANNED`. [Cấu hình và kiểm chứng live](integrations/AI_PROVIDER_ROTATION.md). Không có fallback fixture/rules khi provider lỗi; sai amount/direction vẫn từ chối và mọi gate risk/proof/signing giữ nguyên. Các mô tả Groq-only bên dưới là provider ban đầu; entrypoint `GoalPlanner` hiện chọn theo cấu hình này.
+**AI provider hiện tại:** `DeepSeek → Groq → Gemini → Xingchi`, có quota/cache/cooldown và trace provider thực dùng trong event `PLANNED`. DeepSeek chính thức dùng `deepseek-flash`, non-thinking; Shield/ITAG cũng gọi API thật. [Cấu hình hiện tại](integrations/DEEPSEEK_PRIORITY.md). Không fallback sang fixture/rules khi model lỗi; sai amount/direction vẫn từ chối và mọi gate risk/proof/signing giữ nguyên.
 
 **Loại tài liệu:** as-built, mô tả mã đang có sau refactor module và gộp API. **Ngày rà soát:** 20/11/2026. **Phạm vi:** proof-gated swap treasury cho testnet/research. Đây là bản thiết kế hiện trạng được viết từ repository; không phải bản design V2.1 bên ngoài từng được implementation plan dẫn chiếu nhưng chưa được cung cấp.
 
@@ -14,9 +16,9 @@ Nguồn đối chiếu: [implementation plan gốc](IMPLEMENTATION_PLAN_V1_TO_V2
 
 **Tích hợp từ main `8e833d3`:** FastAPI gộp có Fuji Observatory và LFJ cho vault V2.1. Live profile dùng Circle test USDC/WAVAX, direct Chainlink rounds và owner-approved policy. LFJ faucet USDC khác address vẫn bị chặn riêng. [Runbook live](demo/FUJI_LIVE_END_TO_END.md) và [report nghiệm thu](integrations/fuji-live-validation.json) là nguồn hiện tại; tài liệu tích hợp trước đó giữ checkpoint của route faucet.
 
-**Live cutover 20/11/2026:** `.env` đã gắn ba ví, đủ 72 tên biến như template, dùng Groq `openai/gpt-oss-20b` và Chainlink RPC. Workflow đầy đủ đã CONFIRMED trên Fuji block **61340481**, transaction `0x956caf670aa366d86f7950322b0c5781bed77809749bbcfe227b08fb4c4b8182`: 14 public-chain checks và ba negative eth_calls đều pass. Hosting/production vẫn cần kiểm chứng riêng.
+**Checkpoint live đầu tiên 20/11/2026:** workflow Groq trước ITAG đã CONFIRMED trên Fuji block **61340481**, transaction `0x956caf670aa366d86f7950322b0c5781bed77809749bbcfe227b08fb4c4b8182`. Không dùng receipt này thay bằng chứng ITAG/Shield mới. `.env` và template hiện có 100 tên biến tương ứng, ba role ví riêng; xem báo cáo rà soát hiện tại để biết cấu hình và test mới nhất. Hosting/production vẫn cần kiểm chứng riêng.
 
-**Freshness live:** AVAX updatedAt ≤600s, USDC updatedAt ≤86400s; observation/simulation/session state ≤300s, approval TTL owner 300s, drift ≤120 blocks. Không tăng chain-state freshness thành 24 giờ. `setApprovalTtl` chỉ owner, tối đa 300s, vô hiệu policy cũ khi đổi; TTL nằm trong active policy hash. Revalidation yêu cầu pinned/latest rounds khớp. USD chỉ là testnet reference valuation. Stress provision external actor bằng minter impersonation **chỉ trên Anvil**; không thay balance/feed/policy của treasury để baseline thành công.
+**Freshness live:** AVAX updatedAt ≤600s, USDC updatedAt ≤86400s; observation/simulation/session state ≤300s, approval TTL owner 300s, drift ≤200 blocks. Không tăng chain-state freshness thành 24 giờ. `setApprovalTtl` chỉ owner, tối đa 300s, vô hiệu policy cũ khi đổi; TTL nằm trong active policy hash. Revalidation yêu cầu pinned/latest rounds khớp. USD chỉ là testnet reference valuation. Stress provision external actor bằng minter impersonation **chỉ trên Anvil**; không thay balance/feed/policy của treasury để baseline thành công.
 
 **Cách đọc để phản biện:** mục 1–6 mô tả sản phẩm và đường chạy; mục 7–11 là hợp đồng proof/on-chain/dữ liệu/API; mục 12–14 là vận hành và mức kiểm chứng; mục 15–20 giải thích chi tiết các quyết định, failure modes và câu hỏi cần review. Các hình Mermaid có source ngay trong file; [bộ hình SVG](architecture/diagrams/README.md) dùng khi công cụ đọc Markdown không render Mermaid.
 
@@ -40,7 +42,7 @@ PaceVant nhận một goal swap có cấu trúc giới hạn, kiểm tra mục t
 | --- | --- |
 | Xem UI/luồng mẫu không cần chain | Có: MOCK dùng fixture V1; **không chạy proof/Phi/session V2.1** |
 | Test lõi V2.1 thực thi trên máy | Có: LOCAL dùng Anvil, mock contracts, proof/Z3, ApprovalV2 và receipt thật |
-| Demo trên public Avalanche Fuji | Đã kiểm chứng Groq → risk/proof → ký → swap LFJ → public receipt; xem report live |
+| Demo trên public Avalanche Fuji | Đã kiểm chứng DeepSeek → Task Shield/ITAG → risk/proof → ký → swap LFJ → public receipt; xem runbook và báo cáo audit hiện tại |
 | Oracle | Direct Chainlink cho risk/proof Circle-USDC/WAVAX, original rounds và per-feed age. Observatory Witnet/Pyth/CoinGecko riêng, chỉ tham khảo |
 | LLM planner / semantic verifier | Official DeepSeek Flash prioritized, then Groq/Gemini/Xingchi. Live Task Shield + ITAG semantic assessment; independent validation and fail-closed behavior remain mandatory. See the current Fuji ITAG runbook for receipts and provider traces. |
 | Swap LFJ | Circle test USDC → Fuji WAVAX: build, fork stress, proof, ký, relaying và public receipt đã kiểm. Route LFJ faucet USDC vẫn bị chặn |
@@ -179,7 +181,7 @@ flowchart TB
 
 | Nhóm | Trách nhiệm chi tiết | Không được tự làm |
 | --- | --- | --- |
-| Planning / alignment | Groq hoặc rules tạo bounded plan; đối chiếu goal/direction/amount/precision rồi compile mandate fields; kiểm injection | Không tự đổi recipient/router/calldata, không ký hoặc cấp allowlist |
+| Planning / alignment | Provider chain DeepSeek/Groq/Gemini/Xingchi hoặc explicit offline rules tạo bounded plan; kiểm goal/direction/amount/precision rồi compile mandate fields; Task Shield kiểm semantic evidence | Không tự đổi recipient/router/calldata, không ký hoặc cấp allowlist; model positive không ghi đè deterministic reject |
 | Portfolio / oracle / risk | Đọc balances và chi phí đã reconcile; gắn giá có source/timestamp/scope; tính projected exposure và eligibility | Không lấy adapter quote làm oracle, không sửa timestamp cũ để qua gate, không ghi chain budget |
 | Proof / shared engine | Map effects + registry + owner config + prices/session thành các nghĩa vụ; sinh Phi/debit và query commitments | Không gọi tool do goal cung cấp, không chọn hẹp price bands để ép pass, không cấp approval khi UNKNOWN |
 | Decision | Hợp nhất alignment/provenance/risk/proof/current context; chọn APPROVE/REPLAN/REJECT/ESCALATE | Không bỏ qua risk vì proof đã pass; không giữ private key |
@@ -189,25 +191,27 @@ flowchart TB
 | API / operations | API xác thực/chuyển đổi request; operations chuẩn bị profile/process/deployment và owner actions | Không tự deploy/renew khi container start; không gửi owner key vào serving environment |
 | Frontend | Form goal, token trong tab memory, treasury/proof/session/timeline và polling | Không giữ ví ký, không tự quyết APPROVE, không chứa secret trong public config |
 
-`ControlPlane` là facade của ba phần `evaluation.py`, `authorization.py`, `monitoring.py`. Một HTTP request start hiện chạy pipeline đồng bộ tới submission/response; không có queue/job worker durable. Groq plan được giải quyết trước approval TTL, cache draft 300s và durable quota/cooldown cạnh control DB; không cache authorization hoặc fallback khi API lỗi. Gọi lại start có thể tạo workflow mới, nên browser không được tự retry mutation này như một GET an toàn. Idempotency execution không tự biến toàn bộ workflow API thành exactly-once service.
+`ControlPlane` là facade của ba phần `evaluation.py`, `authorization.py`, `monitoring.py`. Một HTTP request start hiện chạy pipeline đồng bộ tới submission/response; không có queue/job worker durable. Planner chạy trước approval TTL, có cache draft hữu hạn và durable quota/cooldown riêng từng provider cạnh control DB; không cache authorization. Rotation xử lý lỗi availability/schema theo policy, không thay thế một plan sai amount/direction bằng cách thử đến khi có model đồng ý. Gọi lại start có thể tạo workflow mới, nên browser không tự retry mutation này như GET. Idempotency execution không biến toàn bộ workflow API thành exactly-once service.
 
 ## 4. Chế độ chạy và sổ nguồn dữ liệu
 
 | Nguồn / hành vi | MOCK | LOCAL | FUJI |
 | --- | --- | --- | --- |
 | Mandate | `fixtures/mock/mandate.json`, địa chỉ giả có nhãn fixture | Sinh từ deployment/chain; một số baseline limits cố định trong operator | Tương tự LOCAL + owner-approved proof config |
-| Số dư/context | State trong `MockExecutionClient` | RPC đọc Anvil thực | RPC đọc Fuji thực khi triển khai |
+| Số dư/context | State trong `MockExecutionClient` | RPC đọc Anvil thực | RPC đọc Fuji thực, chain 43113 |
 | Calldata | ABI placeholder riêng fixture | Builder encode exact adapter call | Cùng builder, deployment Fuji |
 | Price | USDC=1, WAVAX=20 fixture | Nominal env 1/20, demo writer | Circle live đọc Chainlink tại simulation block, giữ original rounds; USD chỉ tham chiếu testnet |
-| Swap/liquidity | Tính toán Python fixture | MockERC20 + MockSwapAdapter trên EVM | Mock profile hoặc pool LFJ V1 đã xác minh, tùy manifest |
+| Swap/liquidity | Tính toán Python fixture | MockERC20 + MockSwapAdapter trên EVM | Profile hiện tại dùng Circle USDC/WAVAX và pool LFJ V1 đã xác minh; mock adapter chỉ dành deployment research riêng |
 | Proof V2.1 | Không trong MOCK V1 | Z3, Phi, certified debit thật | Đã VERIFIED trên Circle/Chainlink/LFJ public workflow; artifacts và SMT kèm report |
 | Chữ ký | V1 offline bằng key tạm | ApprovalV2 + relayer envelope thật | Chữ ký attestor và giao dịch relayer đã đối chiếu trên Fuji public |
 | Receipt / tx hash / gas | Receipt, hash và gas giả lập | Receipt/hash/gas từ EVM local | Receipt public nếu thực hiện demo |
 | Stress | Fixture statuses | Sửa quote mock trong fork | Circle: external actor giả định mint trên Anvil rồi swap LFJ để tạo shift 20/200 bps. Không sửa số dư treasury khi setup. Không đủ impact → INCONCLUSIVE |
 
-Planner provider là trục riêng: `rules` chạy offline hoặc `groq` gọi API thật trong bất kỳ chain mode nào. Vì vậy Groq + MOCK vẫn có receipt fixture; chỉ Groq + LOCAL/FUJI mới có execution EVM theo chain mode. Private env hiện chọn Groq/FUJI; canonical local CLI override chain sang LOCAL.
+Planner provider là trục riêng: `rules` chạy offline, các provider model gọi API thật, hoặc `rotate` dùng chuỗi failover đã cấu hình. Provider thật + MOCK vẫn có receipt fixture. Profile hiện tại là `rotate` ưu tiên DeepSeek và execution FUJI; canonical local CLI override chain sang LOCAL. Trace runtime mới là bằng chứng provider nào thực sự trả lời.
 
-### 4.1 Những gì đang mock hoặc cố định
+### 4.1 Những gì mock trong development và các giới hạn cố định
+
+Ba mục đầu và oracle nominal dưới đây thuộc LOCAL/research, không phải token, liquidity hay oracle của profile Fuji hiện tại.
 
 - `MockUSDC` 6 decimals, `MockWAVAX` 18 decimals, mint bởi owner; không phải USDC/WAVAX thị trường, MockWAVAX không redeem ra AVAX.
 - `MockSwapAdapter` không phải AMM/DEX. Owner chỉnh `outputPerUsdc`; default 1 USDC → 0,05 WAVAX. Liquidity được mint khi deploy.
@@ -215,7 +219,7 @@ Planner provider là trục riêng: `rules` chạy offline hoặc `groq` gọi A
 - Risk baseline trong operator: 500 USDC/swap, 1.000 USDC/ngày, exposure 25%, execution cost $50/ngày, tối đa hai replans, mild stress phải thành công và adverse có thể protected revert. Không phải tất cả đều có form/env để owner thay đổi; sửa baseline cần đồng bộ owner commitment/config/code.
 - Oracle demo dùng giá nominal env, kiểm head freshness rồi gắn timestamp producer. Đây không phải timestamp một market feed. External mode giữ timestamp producer, không tự refresh giá cũ.
 - Hai fixed stresses: mild 9980/10000 và adverse 9800/10000 của quote mục tiêu; reverse dùng phép đổi quote tương ứng. Không mô phỏng đầy đủ mempool/MEV hoặc mọi thị trường.
-- Groq hiểu bounded template buy/sell rồi trả strict JSON, parser độc lập kiểm amount/chiều/precision. Provider `rules` là offline option có nhãn riêng. Chưa hỗ trợ hội thoại tự do, agent tự dùng tool hay semantic LLM verifier; “Experience” chỉ giảm amount theo luật. API lỗi/quota hết không tạo plan giả.
+- Planner DeepSeek/Groq/Gemini/Xingchi hiểu bounded template buy/sell rồi trả strict JSON, parser độc lập kiểm amount/chiều/precision. Provider `rules` là offline option có nhãn riêng. Task Shield/ITAG có semantic LLM assessment riêng; vẫn chưa hỗ trợ hội thoại tự do hay agent tự chọn tool/giao dịch. “Experience” chỉ giảm amount theo luật. API lỗi/quota hết không tạo plan giả.
 - Unit tests của Fuji verifier có mocked RPC responses; chúng không chứng minh public RPC/Fuji đã chạy.
 
 ### 4.2 Oracle quan sát và giá đủ điều kiện ký
@@ -232,7 +236,7 @@ Fuji Observatory đọc Chainlink/Witnet/Pyth theo block qua `GET /v1/fuji/walle
 | Attestor | Ký ApprovalV2 sau immutable APPROVE + revalidation | Module signing trong backend | Không cần gas để ký offline |
 | Relayer | Ký/gửi envelope EVM chứa exact call/PDR/Phi | Module execution trong cùng backend | Có test AVAX cho success/revert |
 
-Ba địa chỉ phải khác nhau. Vault contract mới giữ treasury tokens. Dashboard dùng operator token, không cần Core/MetaMask/WalletConnect; ví có thể được dùng ngoài app để nhận/chuyển test AVAX. Không cần tài khoản sàn; `groq` provider cần `GROQ_API_KEY`, `rules` không cần LLM key. Groq chỉ nhận goal/static instructions, không nhận private keys hoặc dữ liệu ký.
+Ba địa chỉ phải khác nhau. Vault contract giữ treasury tokens. Dashboard dùng operator token, không cần Core/MetaMask/WalletConnect; ví có thể dùng ngoài app để nhận/chuyển test AVAX. Không cần tài khoản sàn. Provider API cần key tương ứng; `rules` không cần LLM key. Model nhận goal và semantic views của evidence theo vai trò planner/Shield/ITAG, không nhận private keys. Demo User trong env hiện chỉ là tài khoản dự phòng.
 
 Sau gộp API, attestor và relayer keys **cùng process**. Tách module không phải process/HSM isolation. Container từ chối các owner/deployer key env đã biết; public owner lấy từ manifest rồi đối chiếu chain. Owner vẫn là trust assumption, có quyền cấu hình/rút token theo quy định của vault; không được mô tả hệ thống như chống lại một owner bị compromise.
 
@@ -274,7 +278,7 @@ Public RPC và oracle là external inputs được kiểm scope/freshness/identi
 ## 6. Luồng giao dịch V2.1
 
 1. Operator gửi `POST /v1/workflows/start` với goal/mandate ID. LOCAL/FUJI từ chối `scenario` fixture. API kiểm auth, schema và giới hạn request.
-2. Planner lấy Groq draft (hoặc explicit offline rules) trước khi mở TTL; strict schema + independent parser kiểm direction/amount/precision. Compiler lấy recipient/router/caps từ mandate tạo typed proposal. Alignment kiểm goal/amount, chain/vault, pair, router, recipient và injection. Mơ hồ/quota/provider lỗi → refuse/escalate; không fallback hoặc ký.
+2. Planner dùng provider chain hiện tại (hoặc explicit offline rules) trước khi mở TTL; strict schema + independent parser kiểm direction/amount/precision. Compiler lấy recipient/router/caps từ mandate tạo typed proposal. Alignment kiểm goal/amount, chain/vault, pair, router, recipient và injection. Availability/quota có thể chuyển sang provider được cấu hình; mơ hồ/sai amount/direction hoặc hết provider hợp lệ thì refuse/escalate, không tạo plan giả.
 3. Builder đọc context/allowlists/balances tại source block, kiểm cap/TTL và quote adapter theo manifest. LFJ yêu cầu quoter, reserves và adapter khớp. Builder encode canonical `exactInput`, cấp vault approval nonce và lưu build/quote/context bất biến. Nonce này khác relayer transaction nonce.
 4. Simulator tạo fork ở block build, đối chiếu hash/code/state, override attestor và gas balances **chỉ trong fork**, chạy cùng guarded vault entrypoint với fork-only test signer. V2 exploratory run dùng Phi ban đầu/minOut và zero-debit sentinel để đo effects, chưa phải approval thật.
 5. Thu balances/allowances của cả hai registry assets, receipt/logs/trace và stress outcomes. Simulation/evidence manifest, từng artifact và effect evidence đều được bind/hash; thiếu/không khớp không được coi COMPLETE.
@@ -295,7 +299,7 @@ sequenceDiagram
   actor U as Operator
   participant API as FastAPI
   participant W as Workflow
-  participant L as Groq (nếu chọn)
+  participant L as Configured planner provider chain
   participant E as ExecutionService
   participant F as Anvil fork tạm
   participant P as Risk + Proof + SDE
@@ -666,7 +670,7 @@ CORS chỉ bật exact origin allowlist, không thay auth. Frontend token chỉ 
 
 ### Cấu hình máy hiện tại
 
-Checkpoint audit ban đầu kiểm env read-only. Sau đó người dùng cấp ba cặp ví và Groq key, private env đã được cập nhật có ủy quyền; format/address đều khớp, template/init-env đồng bộ tên biến. Groq thật và Groq→LOCAL đã kiểm chứng; funding Fuji hiện tại, public RPC archive/trace, actual policy deployment và market oracle vẫn cần bước riêng.
+Private env đã được cập nhật có ủy quyền; hiện khớp 100 tên biến với template và ba role ví có address/key tương ứng. Cấu hình hiện tại có DeepSeek ưu tiên, fallback đã cấu hình, direct Chainlink và vault/LFJ trên Fuji thật. Receipt, role/signature, archive reads và token/budget deltas được kiểm riêng trong các báo cáo live. Template giữ trống credentials; copy template không tự cấp key, funding hay owner authorization.
 
 | Nhóm | Biến / đầu vào |
 | --- | --- |
@@ -681,7 +685,7 @@ Checkpoint audit ban đầu kiểm env read-only. Sau đó người dùng cấp 
 | Oracle | `TREASURY_ORACLE_MODE=chainlink`, `TREASURY_ORACLE_SOURCE_ID`, per-feed/source config cố định; TTL/state age riêng |
 | Planner | `PACEVANT_PLANNER_PROVIDER`, `GROQ_API_KEY`, model/timeouts/token/request caps/cache TTL; key chỉ trong private env |
 
-`TREASURY_A_PORT` còn là tên cấu hình cổng CLI để tương thích; container dùng `$PORT`. `TREASURY_B_PORT`, `PACEVANT_B_URL`, `PACEVANT_B_TOKEN` chỉ còn cho legacy tooling. Groq được cấu hình rõ trong [integration guide](integrations/GROQ_PLANNER_AND_ENV.md); chưa tự thêm market-feed credentials cho oracle chưa merge.
+`TREASURY_A_PORT` còn là tên cấu hình cổng CLI để tương thích; container dùng `$PORT`. `TREASURY_B_PORT`, `PACEVANT_B_URL`, `PACEVANT_B_TOKEN` chỉ còn cho legacy tooling. [AI provider guide](integrations/DEEPSEEK_PRIORITY.md) và [live runbook](demo/FUJI_ITAG_LIVE.md) ghi cấu hình hiện tại. Chainlink dùng RPC và feed addresses đã xác minh, không cần market-feed API key riêng cho đường cấp quyền ký này.
 
 ### Chạy local
 
@@ -760,7 +764,7 @@ Không đặt SLO/throughput mục tiêu từ các local timings. Simulation dù
 | Optional on-chain exposure | Chưa implement, không thuộc core bắt buộc; luôn PRE-SIGN ONLY |
 | Fuji oracle và LFJ | Direct Chainlink → Circle/LFJ đã CONFIRMED; baseline/stress/final Phi, 14 public-chain checks và ba negative eth_calls pass; xem runbook/report live |
 | HSM | Chưa tích hợp |
-| Bounded Groq planner | Real strict-schema API + independent validation, cache/durable local budgets; real API và full LOCAL đạt. Chưa open-ended agent/semantic verifier |
+| Bounded planner + semantic checks | Real DeepSeek/Groq/Gemini/Xingchi APIs + independent amount/direction validation; Task Shield và ITAG semantic assessment có trace runtime. Không phải open-ended trading agent |
 | Fuji/hosting | Public Fuji workflow, receipt/checks/negative eth_calls đã pass; image/Compose/Render chưa smoke trên host | Không coi testnet receipt là xác nhận hosting/production |
 | CI / clean container build | Cấu hình có; chưa xác nhận remote run/fresh image build |
 | Quantitative evaluation | Có bounded local suites; không suy APR/BPR thực tế, không full-protocol B/C performance hoặc production throughput claim |
@@ -914,8 +918,8 @@ Latest reads không atomic cùng nhau: balances/session/oracle có thể thay đ
 
 | Đe dọa / failure | Kiểm soát hiện tại | Giới hạn / phản biện cần giữ |
 | --- | --- | --- |
-| Prompt injection/sai goal | Groq strict schema, independent goal/direction/amount parser, mandate/alignment, no arbitrary call signing | Không phải semantic verifier; free-form goals vẫn ngoài scope |
-| Groq outage/auth/429/model drift | Durable local budgets/cache/cooldown, bounded output, timeout, reviewed model allowlist; không fallback | Quota theo organization ngoài local data path chưa thể bảo đảm; provider errors dừng plan |
+| Prompt injection/sai goal | Strict schema, independent parser, mandate/alignment, Task Shield/ITAG semantic checks; no arbitrary call signing | Semantic model có thể sai; không chứng minh chặn mọi injection, free-form trading vẫn ngoài scope |
+| Provider outage/auth/429/model drift | Durable local budgets/cache/cooldown, bounded output/timeout, configured provider rotation | Không bảo đảm quota bên ngoài hoặc availability; hết provider hợp lệ thì dừng, không fallback fixture |
 | Public client gọi sign trực tiếp | Operator/internal credentials riêng, immutable decision ID, attestor revalidation | Token không phải user identity/RBAC; host compromise đọc được các credentials |
 | Call/Phi bị thay sau approve | Canonical hashes, immutable record, signature bindings, exact relayer/vault checks | ABI/encoding implementation đúng vẫn là assumption; golden tests chỉ cover declared vectors/cases |
 | Replay trên chain/vault khác | EIP-712 domain, chain ID, verifying contract, nonce/deadline/policy | Không có replay protection cho arbitrary new user goals tạo lại ý định kinh tế |
@@ -963,7 +967,7 @@ Các hạng mục dưới đây gồm kết quả đã hoàn thành ở live cut
 | Fuji/hosted demo | Operations, manifests, deploy config/runbook | Actual deployment/code checks; normal + protected-revert hashes; restart/pending recovery, durable mount, TLS/proxy/CORS và smoke trên host |
 | Oracle cộng tác viên | `modules/oracle`, config/provider composition; proof/source commitments | Source/asset/decimals/provenance đúng; observation time trung thực; stale/outage/negative/duplicate/scope tests; owner config/session hash migration |
 | Public LFJ execution | Circle-USDC/WAVAX + Chainlink policy + deployed vault/session/funding | Đã có full public receipt và checks. LFJ faucet route vẫn cần nguồn định giá riêng |
-| Open-ended LLM agent / semantic alignment | Planning ports/provider, alignment, workflow policy | Bounded Groq đã có; free-form intents cần independent semantics/owner confirmation design, tool isolation và ambiguity/injection tests; không bypass proof/SDE |
+| Open-ended LLM agent | Planning ports/provider, alignment, workflow policy | Bounded planner và Shield/ITAG semantic checks đã có; free-form trading cần scope/owner authorization, tool isolation và ambiguity/injection tests riêng; không bypass proof/SDE |
 | Durable watcher | Workflows monitoring/operations/persistence | Restart-resume theo known hashes, leader ownership, bounded polling/backoff, canonical receipt/reorg/fee dedup và alerts; không tạo duplicate trades |
 | HSM/KMS hoặc signer riêng | Signing port, authorization contract, deployment/auth | Exact decision/bindings reverified tại signer boundary, rotation/audit/availability, không arbitrary digest signing API |
 | Multi-user/HA | API auth, persistence, execution locking/nonce manager, deploy | RBAC/audit identities; DB migration, distributed idempotency/locks, nonce coordination, worker ownership; failover/restore/load tests |
@@ -979,7 +983,7 @@ Mỗi nhận xét nên có: mục/diagram/invariant liên quan → assumption ho
 
 | Nhóm reviewer | Câu hỏi cần trả lời |
 | --- | --- |
-| Sản phẩm/treasury | Bounded Groq + template validation đã đủ chưa? Khi nào cần free-form agent/DEX/market oracle? Có chấp nhận reverse disabled và exposure chỉ pre-sign? |
+| Sản phẩm/treasury | Bounded planner + Shield/ITAG đã đủ cho use case chưa? Khi nào mở free-form agent, thêm DEX/assets/feeds? Có chấp nhận Fuji reverse disabled và exposure chỉ pre-sign? |
 | Backend/kiến trúc | Ownership module có rõ? Client port có quá phụ thuộc HTTP wire SDK? Synchronous request/SQLite lock có phù hợp tải kỳ vọng? Recovery còn cửa sổ nào cần durable job? |
 | Formal/math | Từ lower bounds đến policy có dựa đúng monotonicity/positive prices? Exact-input constraint và rounding/bands có sound? Có non-vacuity hoặc counterexample bị thiếu? |
 | Solidity/security | Hash/Phi/registry/approval checks đủ chưa? Budget CEI/rollback/replay/admin invalidation còn bypass nào? Trust attestor/owner/token có được chấp nhận? |

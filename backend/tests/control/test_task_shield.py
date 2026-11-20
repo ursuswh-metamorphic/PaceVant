@@ -101,7 +101,8 @@ def test_pipeline_batch_injection_is_quarantined(tmp_path):
     with pytest.raises(ShieldBlocked):
         runtime.flush_data()
     assert runtime.last_feedback.code == "TASK_MISALIGNED"
-    assert runtime.proof({})["unresolved_feedback"]["code"] == "TASK_MISALIGNED"
+    with pytest.raises(ControlError, match="TASK_SHIELD_UNINSPECTED_EVIDENCE"):
+        runtime.proof({})
     assert attack in provider.messages[1][1]["content"]
 
 

@@ -5,6 +5,7 @@ import subprocess
 import time
 
 from eth_account import Account
+from filelock import FileLock
 from web3 import Web3
 
 from treasury_backend.core.errors import ControlError
@@ -160,7 +161,7 @@ def prepare(p):
         "session_id": data["session_id"],
     }
     atomic_json(p.control_data / "mandate.json", mandate)
-    refresh_oracle(p)
+    oracle_status = _prepare_oracle(p, data, context)
     return {
         "network": p.network,
         "chain_id": p.chain_id,
@@ -168,7 +169,26 @@ def prepare(p):
         "session_id": data["session_id"],
         "mandate_file": str(p.control_data / "mandate.json"),
         "oracle_file": str(p.control_data / "oracle.json"),
+        "oracle_cache": oracle_status,
     }
+
+
+def _prepare_oracle(p, data, context):
+    try:
+        return {"status": "AVAILABLE", **refresh_oracle(p)}
+    except ControlError as error:
+        from treasury_contracts.oracle import CIRCLE_USDC, SOURCE_HASH, WAVAX
+
+        if (p.network != "fuji" or p.values.get("TREASURY_ORACLE_MODE") != "chainlink"
+                or (data["token_in"].lower(), data["token_out"].lower()) != (CIRCLE_USDC, WAVAX)
+                or context.get("proof_policy", {}).get("oracle_source_hash") != SOURCE_HASH
+                or error.code not in {"UNVERIFIED_PRICE", "STALE_OR_UNVERIFIED_CHAINLINK_PRICE"}):
+            raise
+        # The canonical live path reads Chainlink directly on every evaluation.
+        # A failed optional cache refresh must not invent a fresh price or prevent
+        # the API from explaining real source unavailability to the operator.
+        return {"status": "UNAVAILABLE", "reason_codes": [error.code],
+                "signing_requires_fresh_direct_chainlink_reads": True}
 
 
 def deploy_v2(p, *, adapter="mock"):
@@ -221,6 +241,12 @@ def deploy_v2(p, *, adapter="mock"):
 
 
 def renew(p, *, policy=False):
+    p.control_data.mkdir(parents=True, exist_ok=True)
+    with FileLock(str(p.control_data / "owner-renewal.lock"), timeout=5):
+        return _renew(p, policy=policy)
+
+
+def _renew(p, *, policy=False):
     data, w3, vault = deployed(p)
     config = (
         owner_config(p.values)
@@ -239,34 +265,36 @@ def renew(p, *, policy=False):
     if owner.address.lower() != vault.functions.owner().call().lower():
         raise OpsError("Configured owner does not own this deployment")
     receipts = []
+    scope = keccak(json.dumps({"chain_id": p.chain_id, "vault": data["vault_address"],
+                               "previous_session": data["session_id"], "policy_changed": policy,
+                               "config": config.model_dump(mode="json")},
+                              sort_keys=True, separators=(",", ":")).encode())[2:]
 
-    def send(fn):
-        tx = fn.build_transaction(
-            {
-                "from": owner.address,
-                "nonce": w3.eth.get_transaction_count(owner.address, "pending"),
-                "chainId": p.chain_id,
-                "gasPrice": w3.eth.gas_price,
-            }
-        )
-        receipt = w3.eth.wait_for_transaction_receipt(
-            w3.eth.send_raw_transaction(owner.sign_transaction(tx).raw_transaction), timeout=90
-        )
-        if receipt.status != 1:
-            raise OpsError("Owner configuration transaction reverted")
-        receipts.append(
-            {"tx_hash": Web3.to_hex(receipt.transactionHash), "block": receipt.blockNumber}
-        )
+    def send(step, fn):
+        from .owner_transactions import send_owner_transaction
+
+        def build():
+            return fn.build_transaction(
+                {
+                    "from": owner.address,
+                    "nonce": w3.eth.get_transaction_count(owner.address, "pending"),
+                    "chainId": p.chain_id,
+                    "gasPrice": w3.eth.gas_price,
+                }
+            )
+        receipts.append(send_owner_transaction(p, w3, owner, scope, step, build))
 
     if policy:
         if vault.functions.maxApprovalTtl().call() != config.approval_ttl_seconds:
-            send(vault.functions.setApprovalTtl(config.approval_ttl_seconds))
+            send("approval-ttl", vault.functions.setApprovalTtl(config.approval_ttl_seconds))
         send(
+            "proof-policy",
             vault.functions.configureProofPolicy(
                 Web3.to_checksum_address(data["router"]), config.proof_policy.abi_tuple
             )
         )
         send(
+            "wallet-policy",
             vault.functions.configurePolicy(
                 keccak(b"OWNER_DEMO_RENEWAL" + secrets.token_bytes(32)),
                 vault.functions.maxPerSwap().call(),
@@ -284,8 +312,10 @@ def renew(p, *, policy=False):
         or vault.functions.policyExpiresAt().call() <= now + 30
     ):
         raise OpsError("Owner policy expired/revoked; explicit renew-policy required")
-    id_ = keccak(secrets.token_bytes(32))
+    # Stable across retries until the public manifest advances to the new session.
+    id_ = keccak(b"OWNER_SESSION_RENEWAL_V1" + scope.encode())
     send(
+        "create-session",
         vault.functions.createSession(
             id_,
             now,
@@ -293,7 +323,15 @@ def renew(p, *, policy=False):
             int(config.session_limit_usd_e8),
         )
     )
-    data.update(session_id=id_, policy_hash=Web3.to_hex(vault.functions.activePolicyHash().call()))
+    for field in ("session_creation_tx", "session_creation_block"):
+        if field in data:
+            data.setdefault("initial_" + field, data[field])
+    data.update(
+        session_id=id_,
+        session_creation_tx=receipts[-1]["tx_hash"],
+        session_creation_block=receipts[-1]["block"],
+        policy_hash=Web3.to_hex(vault.functions.activePolicyHash().call()),
+    )
     data.setdefault("owner_renewals", []).append(
         {"policy_changed": policy, "session_id": id_, "transactions": receipts}
     )

@@ -7,6 +7,7 @@ from treasury_backend.modules.execution.dex.lfj import LFJClient
 from treasury_backend.modules.execution.errors import PlaneError
 from treasury_backend.modules.oracle.fuji.fuji_oracles import CHAINLINK_FEEDS, chainlink
 from treasury_backend.modules.oracle.fuji.fuji_rpc import FujiReadError, FujiRPC, quantity
+from treasury_contracts.rpc import evm_web3
 from treasury_contracts.v2 import keccak
 
 from .env import PUBLIC_RPC
@@ -18,7 +19,7 @@ def preflight():
     import rfc8785
 
     try:
-        w3 = Web3(Web3.HTTPProvider(PUBLIC_RPC, request_kwargs={"timeout": 8}))
+        w3 = evm_web3(Web3.HTTPProvider(PUBLIC_RPC, request_kwargs={"timeout": 8}))
         route = LFJClient(w3).preflight()
         with httpx.Client(trust_env=False, follow_redirects=False) as http:
             reader = FujiRPC(http)

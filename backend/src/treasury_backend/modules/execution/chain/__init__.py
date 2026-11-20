@@ -1,5 +1,6 @@
 import json
 from web3 import Web3
+from treasury_contracts.rpc import evm_web3
 from treasury_backend.modules.execution.errors import PlaneError
 from treasury_backend.config.execution import ROOT, Settings
 
@@ -36,7 +37,7 @@ def plain(value):
 class Chain:
     def __init__(self, settings: Settings):
         self.settings = settings
-        self.w3 = Web3(
+        self.w3 = evm_web3(
             Web3.HTTPProvider(
                 settings.rpc_url, request_kwargs={"timeout": settings.rpc_timeout}
             )

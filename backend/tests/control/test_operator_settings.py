@@ -11,12 +11,14 @@ def test_default_and_bounded_block_drift(monkeypatch):
     assert Settings.from_env().max_block_drift == 3
     monkeypatch.setenv("PACEVANT_MAX_BLOCK_DRIFT", "30")
     assert Settings.from_env().max_block_drift == 30
-    monkeypatch.setenv("PACEVANT_MAX_BLOCK_DRIFT", "121")
-    with pytest.raises(RuntimeError, match="1..120"):
+    monkeypatch.setenv("PACEVANT_MAX_BLOCK_DRIFT", "200")
+    assert Settings.from_env().max_block_drift == 200
+    monkeypatch.setenv("PACEVANT_MAX_BLOCK_DRIFT", "241")
+    with pytest.raises(RuntimeError, match="1..240"):
         Settings.from_env()
 
 
-@pytest.mark.parametrize("rpc", ["http://remote.example/rpc", "https://user:secret@rpc.example"])
+@pytest.mark.parametrize("rpc", ["http://remote.example/rpc", "https://user:secret@rpc.example", "https://rpc.example/?token=test"])
 def test_verification_rpc_rejects_insecure_or_embedded_credentials(monkeypatch, rpc):
     monkeypatch.setenv("PACEVANT_MODE", "MOCK")
     monkeypatch.setenv("PACEVANT_FUJI_VERIFICATION_RPC", rpc)

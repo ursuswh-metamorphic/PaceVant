@@ -35,15 +35,17 @@ class ShieldRuntime:
         self.pending_outputs.append({"tool_name": name, "output": semantic_value(value)})
 
     def flush_data(self):
-        pending, self.pending_outputs = self.pending_outputs, []
+        pending = list(self.pending_outputs)
         group = []
         for record in pending:
             if group and len(json.dumps(group + [record], ensure_ascii=False)) > 14000:
                 self._data_group(group)
+                del self.pending_outputs[:len(group)]
                 group = []
             group.append(record)
         if group:
             self._data_group(group)
+            del self.pending_outputs[:len(group)]
 
     def _data_group(self, records):
         call_id = "data_batch_" + uuid4().hex
@@ -117,10 +119,9 @@ class ShieldRuntime:
                 "feedback": report.feedback.model_dump(mode="json") if report.feedback else None,
             },
         )
-        if report.status == "UNAVAILABLE" or (
-            report.status == "MISALIGNED" and self.shield.config.mode in {"wallet_hardened", "wallet_pipeline"}
-        ):
+        if report.status == "UNAVAILABLE" or self.shield.config.mode in {"wallet_hardened", "wallet_pipeline"}:
             self._require(report)
+            return report
         if report.feedback:
             self.last_feedback = report.feedback
             self.shield.state.event(

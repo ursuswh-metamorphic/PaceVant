@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     receipt_timeout: int = 20
     max_ttl: int = 30
     freshness_seconds: int = 60
-    max_block_drift: int = 3
+    max_block_drift: int = Field(default=3, ge=1, le=240)
     required_confirmations: int = Field(default=1, ge=1, le=100)
 
     def model_post_init(self, __context):

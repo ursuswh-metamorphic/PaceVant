@@ -1,0 +1,48 @@
+{
+  "workflow_id": "workflow_b813ce97ad0542e9b1b667e4e5e07788",
+  "temporal_reuse_verdict": "REJECT",
+  "temporal_reuse_reason_codes": [
+    "ITAG_STEP_ALREADY_COMPLETE",
+    "ITAG_BUDGET_EXCEEDED"
+  ],
+  "temporal_history_version": 4,
+  "new_transaction_broadcast": false,
+  "queries": [
+    {
+      "obligation": "assumptions",
+      "keccak": "0xfdb5ece70772d56435d49bbfd1bab87aa175d481d36752b65989a6dc92f61665",
+      "result": "SAT",
+      "expected": "SAT",
+      "hash_verified": true
+    },
+    {
+      "obligation": "check_mode",
+      "keccak": "0xcede3af853682cbda824405848c649bee9e5e9c3bba3f3018bc2fa0eec2aad62",
+      "result": "UNSAT",
+      "expected": "UNSAT",
+      "hash_verified": true
+    },
+    {
+      "obligation": "compiled_region",
+      "keccak": "0xe2773fddbb245f0d39b48694c830549d6d9b1f855c7a67aa086639c0ba89302c",
+      "result": "SAT",
+      "expected": "SAT",
+      "hash_verified": true
+    },
+    {
+      "obligation": "compile_mode",
+      "keccak": "0x18fe0bc5b4b1a97e02be3da3d439602e60bb4faef79b4614832786f77afe6b34",
+      "result": "UNSAT",
+      "expected": "UNSAT",
+      "hash_verified": true
+    },
+    {
+      "obligation": "risk_bound",
+      "keccak": "0x55aa39c7cab425d598ae1aa5eaadfe92dc70b992ef6281bbffdb955e6e3e0ac0",
+      "result": "UNSAT",
+      "expected": "UNSAT",
+      "hash_verified": true
+    }
+  ],
+  "solver_version": "4.15.4"
+}

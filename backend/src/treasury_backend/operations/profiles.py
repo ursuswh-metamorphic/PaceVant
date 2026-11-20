@@ -6,6 +6,7 @@ from urllib.parse import urlsplit
 from web3 import Web3
 
 from treasury_backend.modules.oracle import DEFAULT_SOURCE_ID, source_hash
+from treasury_contracts.rpc import evm_web3
 from treasury_contracts.v2 import DeploymentProofConfig, ProofPolicy
 
 from .env import POLICY_ENV, PUBLIC_RPC, integer, key_account, path_for, read_env, units
@@ -88,6 +89,7 @@ class Profile:
             not parsed.hostname
             or parsed.username
             or parsed.password
+            or parsed.query
             or parsed.fragment
             or (
                 parsed.scheme != "https"
@@ -123,7 +125,7 @@ class Profile:
                 f"TREASURY_{n}_MAX_BLOCK_DRIFT",
                 "30" if network == "fuji" else "3",
                 minimum=1,
-                maximum=120,
+                maximum=240,
             ),
             integer(
                 v,
@@ -139,7 +141,7 @@ class Profile:
         return 43113 if self.network == "fuji" else 31337
 
     def web3(self):
-        return Web3(Web3.HTTPProvider(self.rpc, request_kwargs={"timeout": 5}))
+        return evm_web3(Web3.HTTPProvider(self.rpc, request_kwargs={"timeout": 5}))
 
     def credentials(self, *, require_owner_key=False):
         if self.network == "local":

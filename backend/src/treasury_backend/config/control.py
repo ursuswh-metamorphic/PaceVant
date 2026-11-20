@@ -110,6 +110,7 @@ class Settings:
                 not rpc.hostname
                 or rpc.username
                 or rpc.password
+                or rpc.query
                 or rpc.fragment
                 or (mode == "LOCAL" and rpc.hostname not in LOOPBACK)
                 or (
@@ -120,8 +121,8 @@ class Settings:
                 raise RuntimeError("Use a loopback RPC for LOCAL and HTTPS for FUJI")
             TypeAdapter(Address).validate_python(env["RELAYER_ADDRESS"])
         max_drift = int(os.environ.get("PACEVANT_MAX_BLOCK_DRIFT", "3"))
-        if not 1 <= max_drift <= 120:
-            raise RuntimeError("PACEVANT_MAX_BLOCK_DRIFT must be 1..120")
+        if not 1 <= max_drift <= 240:
+            raise RuntimeError("PACEVANT_MAX_BLOCK_DRIFT must be 1..240")
         verification_rpc = os.environ.get(
             "PACEVANT_FUJI_VERIFICATION_RPC", "https://api.avax-test.network/ext/bc/C/rpc"
         )
@@ -130,6 +131,7 @@ class Settings:
             not parsed_verification.hostname
             or parsed_verification.username
             or parsed_verification.password
+            or parsed_verification.query
             or parsed_verification.fragment
             or not (
                 parsed_verification.scheme == "https"
@@ -140,10 +142,16 @@ class Settings:
             )
         ):
             raise RuntimeError("PACEVANT_FUJI_VERIFICATION_RPC must use HTTPS or loopback HTTP")
+        require_itag = os.environ.get("PACEVANT_REQUIRE_ITAG", "0")
+        if require_itag not in {"0", "1"}:
+            raise RuntimeError("PACEVANT_REQUIRE_ITAG must be 0 or 1")
+        shield = ShieldConfig.from_env(mode)
+        if mode != "MOCK" and shield.mode == "legacy_fixture":
+            raise RuntimeError("legacy_fixture Task Shield is restricted to MOCK mode")
         return cls(
-            require_itag=os.environ.get("PACEVANT_REQUIRE_ITAG", "0") == "1",
+            require_itag=require_itag == "1",
             planning=PlanningSettings.from_values(os.environ),
-            shield=ShieldConfig.from_env(mode),
+            shield=shield,
             cors_origins=origins,
             serve_frontend=serve_frontend == "true",
             max_block_drift=max_drift,

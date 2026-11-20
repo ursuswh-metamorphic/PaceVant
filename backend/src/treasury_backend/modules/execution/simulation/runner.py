@@ -3,9 +3,11 @@
 import socket
 import subprocess
 import time
+from treasury_contracts.toolchain import native_tool_environment
 from contextlib import contextmanager
 from eth_account import Account
 from web3 import Web3
+from treasury_contracts.rpc import evm_web3
 from treasury_backend.modules.execution.chain import artifact, contract, plain
 from treasury_backend.modules.execution.crypto import (
     approval_for,
@@ -62,9 +64,10 @@ def fork_node(settings, block, chain_id):
         "--hardfork",
         "cancun",
     ]
-    proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                            env=native_tool_environment())
     try:
-        w3 = Web3(
+        w3 = evm_web3(
             Web3.HTTPProvider(
                 f"http://127.0.0.1:{port}",
                 # A cold fork EVM call lazily fetches many historical slots. Bound

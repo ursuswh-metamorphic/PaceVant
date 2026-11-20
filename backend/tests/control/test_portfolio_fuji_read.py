@@ -4,7 +4,12 @@ import os
 
 import pytest
 
-from treasury_backend.modules.portfolio.observations import LFJ_USDC, WAVAX, PortfolioReader, verify_snapshot_hash
+from treasury_backend.modules.portfolio.observations import (
+    LFJ_USDC,
+    WAVAX,
+    PortfolioReader,
+    verify_snapshot_hash,
+)
 
 
 @pytest.mark.skipif(

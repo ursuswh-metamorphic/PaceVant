@@ -31,3 +31,5 @@ uv run --locked python -m pytest backend/tests/control/test_workflows.py -q
 ```
 
 Add focused tests under this module's `tests/` directory for new feature logic; pytest discovers them automatically. Existing regression tests remain under `backend/tests/`. Chain integration tests require native Foundry and compiled contracts; use [backend setup](../../../../README.md).
+
+Audit hardening: a failed evidence batch retains every uninspected record. Successful output checks in hardened/pipeline modes are part of approval check_ids and revalidated with objective revision/config. See `backend/tests/control/test_system_audit.py`.

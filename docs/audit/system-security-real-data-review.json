@@ -1,0 +1,278 @@
+{
+  "schema_version": "system-security-real-data-review-v1",
+  "review_date": "2026-11-20",
+  "base_commit": "4f3d0ad",
+  "backup_branch": "backup/pre-system-audit-4f3d0ad",
+  "origin_main": "70bf6c7ad92a64701a32ffced02bdfdecb75f5cd",
+  "origin_main_is_ancestor_of_current_code": true,
+  "architecture": "Single Python FastAPI modular monolith; in-process execution; Solidity V2; native Anvil; browser JavaScript; no Node backend",
+  "effective_profile": {
+    "PACEVANT_MODE": "FUJI",
+    "B_MODE": "fuji",
+    "PACEVANT_REQUIRE_ITAG": "1",
+    "PACEVANT_SHIELD_MODE": "wallet_pipeline",
+    "PACEVANT_SHIELD_PROVIDER": "deepseek",
+    "PACEVANT_SHIELD_MODEL": "deepseek-flash",
+    "PACEVANT_AI_ROTATION_ORDER": "deepseek,groq,gemini,xingchi",
+    "B_MAX_BLOCK_DRIFT": "200",
+    "B_FRESHNESS_SECONDS": "300",
+    "B_MAX_TTL": "300"
+  },
+  "env_names_match": true,
+  "env_name_count": 100,
+  "private_env_not_published": true,
+  "session_extension": {
+    "previous_state": {
+      "day": 20777,
+      "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+      "max_per_swap": "500000000",
+      "max_daily_spend": "1000000000",
+      "max_slippage_bps": 100,
+      "global_daily_risk_used": "0",
+      "daily_spent_usdc": "2"
+    },
+    "after_state": {
+      "day": 20777,
+      "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+      "max_per_swap": "500000000",
+      "max_daily_spend": "1000000000",
+      "max_slippage_bps": 100,
+      "global_daily_risk_used": "0",
+      "daily_spent_usdc": "2"
+    },
+    "financial_caps_and_global_daily_counters_unchanged": true,
+    "session_id": "0x9eb4d7b5afe9e3e516d0b31efa451f0823fbc97bf13a63e81361106c0eed9098",
+    "session_starts_at": 1795162614,
+    "session_expires_at": 1795249014,
+    "session_duration_seconds": 86400,
+    "session_active": true,
+    "owner_renewal": {
+      "policy_changed": false,
+      "session_id": "0x9eb4d7b5afe9e3e516d0b31efa451f0823fbc97bf13a63e81361106c0eed9098",
+      "transactions": [
+        {
+          "tx_hash": "0x1b3886be791ed08ee97aaf80f2bdbb0fba74c0fa540cd8da66e9ca09b589c5e1",
+          "block": 61370413
+        }
+      ]
+    },
+    "current_drift_blocks": 200,
+    "approval_ttl_seconds": 300,
+    "historical_block_comparison": {
+      "before_block": 61370412,
+      "after_block": 61370413,
+      "unchanged": {
+        "activePolicyHash": true,
+        "maxPerSwap": true,
+        "maxSpendPerDay": true,
+        "maxSlippageBps": true,
+        "maxApprovalTtl": true,
+        "proofPolicy": true,
+        "globalDailyRiskUsedUsdE8": true,
+        "dailySpentUsdc": true
+      },
+      "session_duration_seconds": 86400,
+      "session_active_at_receipt": true
+    }
+  },
+  "tests": [
+    {
+      "scope": "Full repository Python suite after core audit fixes",
+      "command": "python -m pytest -q --tb=short",
+      "passed": 432,
+      "skipped": 4,
+      "seconds": 241.42
+    },
+    {
+      "scope": "Final URI validation, planner config and audit invariants",
+      "passed": 24,
+      "seconds": 5.58
+    },
+    {
+      "scope": "Final oracle-cache startup policy, owner journal recovery and audit invariants",
+      "passed": 14,
+      "seconds": 2.19
+    },
+    {
+      "scope": "Native Solidity regression and fuzz suites",
+      "command": "python tools/contracts/foundry.py forge test --summary",
+      "passed": 60,
+      "failed": 0,
+      "fuzz_runs_per_fuzz_test": 256,
+      "fuzz_tests": 2
+    },
+    {
+      "scope": "Locked Python dependency compatibility",
+      "packages_checked": 68,
+      "status": "PASS"
+    },
+    {
+      "scope": "Final full repository Python suite including extended Fuji headers, oracle cache and owner journal regressions",
+      "command": "python -m pytest -q --tb=short",
+      "passed": 438,
+      "skipped": 4,
+      "seconds": 380.51,
+      "warnings": 2,
+      "warning_scope": "Dependency deprecations: websockets legacy and Starlette anyio portal alias"
+    },
+    {
+      "scope": "Final focused owner journal, oracle startup, header and audit checks after metadata correction",
+      "passed": 17,
+      "seconds": 1.91
+    }
+  ],
+  "skipped_scope": [
+    "Opt-in public Fuji portfolio observation",
+    "Opt-in Circle/LFJ Fuji fork pipeline",
+    "Opt-in LFJ Fuji fork adapter",
+    "Opt-in full V2 ablation artifact run"
+  ],
+  "historical_live_evidence": "../integrations/fuji-itag-live-validation.json",
+  "live_audit_run_status": "CONFIRMED",
+  "constraints_preserved": {
+    "approval_ttl_seconds": 300,
+    "snapshot_age_seconds": 300,
+    "avax_feed_max_age_seconds": 600,
+    "usdc_feed_max_age_seconds": 86400,
+    "financial_policy_unchanged": true,
+    "onchain_contracts_unchanged": true
+  },
+  "limits": [
+    "Operator-funded testnet demo; no multi-user account/billing product.",
+    "Real testnet rounds used for an explicitly assumed reference USD valuation; no real-dollar redemption or profitability proof.",
+    "Fork baseline/stress is concrete EVM but hypothetical, with overrides only on isolated Anvil.",
+    "Trusted owner/attestor/oracle/RPC assumptions; SMT verification is off-chain and bounded; not an independent production audit."
+  ],
+  "audit_attempts": [
+    {
+      "workflow_id": "workflow_018e9cf868c849b9869d0f9344b35c97",
+      "status": "ESCALATED",
+      "reason_codes": [
+        "EXECUTION_PLANE_UNAVAILABLE",
+        "ITAG_BUILD_UNAVAILABLE"
+      ],
+      "root_cause": "Fuji extended header extraData caused Web3 ExtraDataLengthError; fixed by shared EVM middleware",
+      "signed": false,
+      "broadcast": false
+    },
+    {
+      "workflow_id": "workflow_b813ce97ad0542e9b1b667e4e5e07788",
+      "status": "CONFIRMED",
+      "signed": true,
+      "broadcast": true,
+      "all_public_checks_passed": true
+    }
+  ],
+  "runtime_health": {
+    "status": "ok",
+    "mode": "FUJI",
+    "execution_transport": "in-process",
+    "require_itag": true,
+    "task_shield_mode": "wallet_pipeline",
+    "shield_provider": "deepseek",
+    "shield_model": "deepseek-flash",
+    "port": 8000,
+    "health_is_not_transaction_readiness": true
+  },
+  "template_credentials_blank": true,
+  "module_readmes_complete": true,
+  "approval_output_binding": {
+    "workflow_id": "workflow_b813ce97ad0542e9b1b667e4e5e07788",
+    "approval_bound_check_ids": [
+      "shield_893fb7057d7840a49a2594499051a875",
+      "shield_f3d4bff0d4e848a692d24dfc63f25449",
+      "shield_ac7059d256bd4d9c8449e62f2fbf3b96",
+      "shield_f55a85b6c9cf420dad5ecd98385cabb5",
+      "shield_8a4e2dc86c7947aeb45ceac60b50d516",
+      "shield_5c2c8b4f760042d4972bb8c1c14d1824"
+    ],
+    "preapproval_evidence_output_checks": [
+      "shield_ac7059d256bd4d9c8449e62f2fbf3b96",
+      "shield_f55a85b6c9cf420dad5ecd98385cabb5",
+      "shield_8a4e2dc86c7947aeb45ceac60b50d516",
+      "shield_5c2c8b4f760042d4972bb8c1c14d1824"
+    ],
+    "all_preapproval_evidence_checks_bound": true
+  },
+  "manifest_current_session_receipt_matches_owner_update": true,
+  "live_audit_evidence": "system-security-live-validation.json",
+  "live_proof_evidence": "system-security-live-proof/verification.json",
+  "live_audit_run": {
+    "workflow_id": "workflow_b813ce97ad0542e9b1b667e4e5e07788",
+    "status": "CONFIRMED",
+    "transaction": {
+      "hash": "0xf975361607032ec0709140d32c6d5e98a266f8df6917226e1d6ecb6cf6361b10",
+      "block": 61371323,
+      "block_hash": "0x2db6ffd8f5487e8326f7cea088705e66d0796d26cd7a63af5bc9cba34393f415",
+      "gas_used": "356377",
+      "explorer": "https://testnet.snowtrace.io/tx/0xf975361607032ec0709140d32c6d5e98a266f8df6917226e1d6ecb6cf6361b10"
+    },
+    "chain_checks_passed": 14,
+    "negative_eth_calls_passed": 3,
+    "all_checks_passed": true,
+    "planner_runtime": {
+      "planner_provider": "deepseek",
+      "planner_model": "deepseek-flash",
+      "provider_attempts": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "status": "VALIDATED"
+        }
+      ]
+    },
+    "timing": {
+      "inclusion_timestamp": 1795164309,
+      "approval_deadline": 1795164349,
+      "inclusion_before_approval_expiry": true,
+      "inclusion_headroom_seconds": 40,
+      "planned_to_confirmed_event_timestamps_seconds": 271,
+      "event_times_are_not_a_monotonic_request_stopwatch": true
+    },
+    "temporal_reuse_verdict": "REJECT",
+    "temporal_reuse_reason_codes": [
+      "ITAG_STEP_ALREADY_COMPLETE",
+      "ITAG_BUDGET_EXCEEDED"
+    ],
+    "independently_resolved_smt_results": [
+      "SAT",
+      "UNSAT",
+      "SAT",
+      "UNSAT",
+      "UNSAT"
+    ]
+  },
+  "quality_checks": {
+    "ruff": "PASS",
+    "git_diff_check": "PASS",
+    "secret_scan": "PASS",
+    "secret_scan_report": "../../evidence/execution-plane-secret-scan.json"
+  },
+  "api_auth_check": {
+    "unauthorized_assessment_status": 401,
+    "authorized_assessment_status": 200,
+    "dashboard_http_status": 200
+  },
+  "live_doctor_check": {
+    "configuration_ready": true,
+    "wallet_roles_and_testnet_ack": "OK",
+    "owner_gas_funding": "OK",
+    "relayer_gas_funding": "OK",
+    "historical_state_reads": "OK",
+    "model_key_presence_is_not_availability_guarantee": true
+  },
+  "post_run_next_trade_readiness": {
+    "check": "read-only select_goal after the confirmed audit swap",
+    "ready": false,
+    "reason": "Additional Circle test USDC is needed to stay under the unchanged 25% WAVAX exposure cap",
+    "vault_usdc_base_units": "1126",
+    "vault_wavax_base_units": "52870741369512",
+    "owner_usdc_base_units": "0",
+    "missing_env_names": [],
+    "gas_funding_sufficient_at_doctor_check": true,
+    "user_action": "Request Circle test USDC on Avalanche Fuji and send it to vault 0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D; faucet requires human reCAPTCHA",
+    "faucet": "https://faucet.circle.com/",
+    "no_automatic_policy_bypass": true,
+    "no_transaction_sent_for_this_readiness_check": true
+  }
+}
