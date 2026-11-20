@@ -25,7 +25,7 @@ export function showPortfolio(portfolio, mandate, stage = "Danh mục mẫu") {
 }
 
 export async function loadTreasury() {
-  const data = await api("/v1/treasury");
+  const data = await api(state.demoMode ? "/v1/demo/treasury" : "/v1/treasury");
   const mandate = data.mandate;
   state.deploymentMode = data.mode;
   byId("proof-summary").hidden = !mandate.proof_policy;

@@ -16,12 +16,24 @@
     </div>
   </header>
   <main class="shell">
+    <form id="demo-select-form" class="panel proof-summary" hidden>
+      <h2>Dùng thử với Demo User</h2>
+      <label for="demo-account-select">Tài khoản thử nghiệm</label>
+      <select id="demo-account-select"><option value="demo">PaceVant - Demo User</option></select>
+      <label for="demo-access-code">Mã truy cập demo do người trình diễn cung cấp</label>
+      <input id="demo-access-code" type="password" autocomplete="off" required>
+      <button type="submit">Chọn Demo User</button>
+      <small>Không cần Connect Wallet. Không nhập private key. Mã chỉ giữ trong bộ nhớ tab.</small>
+    </form>
+    <details id="operator-login" hidden>
+      <summary>Chế độ quản trị treasury</summary>
     <form id="connect-form" class="panel proof-summary" hidden>
       <label for="operator-token">Operator API credential</label>
       <input id="operator-token" type="password" autocomplete="off" required>
       <button type="submit">Kết nối treasury</button>
       <small>Chỉ giữ trong bộ nhớ tab này. Không nhập private key.</small>
     </form>
+    </details>
     <section class="intro" aria-labelledby="title">
       <div>
         <p class="overline">AI TREASURY SECURITY</p>
@@ -29,6 +41,18 @@
         <p>Kiểm tra đề xuất swap, giới hạn danh mục và chữ ký PDR.</p>
       </div>
       <p class="notice"><i></i> Đang xác minh chế độ chạy từ backend</p>
+    </section>
+
+    <section id="demo-budget" class="panel proof-summary" hidden aria-label="Tài khoản và gas credit Demo User">
+      <div class="panel-heading"><h2>Demo User · Prepaid gas credit</h2><button id="demo-refresh" type="button">Cập nhật</button></div>
+      <p id="demo-wallet"></p><p id="demo-wallet-balance"></p>
+      <p id="demo-credit"></p><p id="demo-last-fee" role="status"></p>
+      <p>Gas credit là ngân sách demo cấp sẵn trong hệ thống, không phải AVAX trong ví và chưa phải khoản nạp thanh toán. Relayer trả gas on-chain. Swap dùng tài sản của treasury vault.</p>
+      <p id="demo-request-state"></p>
+      <button id="demo-resume" type="button" hidden>Kiểm tra yêu cầu đã gửi</button>
+      <h3>Giao dịch và phí thực tế</h3><ul id="demo-transactions"></ul>
+      <h3>Lịch sử yêu cầu</h3><ul id="demo-requests"></ul>
+      <h3>Lịch sử gas credit</h3><ul id="demo-ledger"></ul>
     </section>
 
     <section class="summary" aria-label="Mandate và danh mục">
@@ -56,7 +80,7 @@
       <aside class="panel scenario-panel" aria-labelledby="scenario-title">
         <div class="panel-heading"><h2 id="scenario-title">Kịch bản</h2></div>
         <form id="run-form">
-          <label id="live-goal-label" for="live-goal" hidden>Owner goal (USDC ↔ WAVAX)
+          <label id="live-goal-label" for="live-goal" hidden>Yêu cầu AI swap (USDC / WAVAX)
             <input id="live-goal" value="Buy WAVAX with 200 USDC" maxlength="500">
           </label>
           <fieldset id="scenarios">

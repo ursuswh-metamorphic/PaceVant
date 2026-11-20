@@ -21,6 +21,10 @@ POLICY_ENV = {
     "TREASURY_GLOBAL_DAILY_RISK_LIMIT_USD": "",
 }
 ENV_DEFAULTS = {
+    "PACEVANT_DEMO_ENABLED": "0",
+    "PACEVANT_DEMO_ACCESS_TOKEN": "",
+    "PACEVANT_DEMO_INITIAL_CREDIT_WEI": "1000000000000000",
+    "PACEVANT_DEMO_MAX_TX_FEE_WEI": "100000000000000",
     "TREASURY_FUJI_FORK_RPC_URL": "https://api.avax-test.network/ext/bc/C/rpc",
     "PACEVANT_SHIELD_FALLBACKS": "",
     "PACEVANT_SHIELD_REASONING_EFFORT": "",
@@ -72,7 +76,7 @@ ENV_DEFAULTS = {
     "TREASURY_OWNER_ADDRESS": "",
     "TREASURY_ATTESTOR_ADDRESS": "",
     "TREASURY_RELAYER_ADDRESS": "",
-    # Reserved for future user-facing Fuji demos; never a system signing role.
+    # Demo identity address only is forwarded; its key never serves a signing role.
     "TREASURY_DEMO_USER_PRIVATE_KEY": "",
     "TREASURY_DEMO_USER_ADDRESS": "",
     "TREASURY_ORACLE_MODE": "demo",

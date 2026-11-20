@@ -128,3 +128,7 @@ footer.shell { color: var(--muted); display: flex; justify-content: space-betwee
  #live-goal-label { display: block; }
  #live-goal-label[hidden], #connect-form[hidden] { display: none; }
  #live-goal, #operator-token { display: block; width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #cbdcd3; border-radius: 6px; font: inherit; }
+ #demo-select-form[hidden], #demo-budget[hidden] { display: none; }
+ #demo-access-code, #demo-account-select { display: block; width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #cbdcd3; border-radius: 6px; font: inherit; }
+ #demo-budget ul { padding-left: 20px; font-size: 13px; line-height: 1.7; }
+ #demo-budget h3 { margin-top: 18px; }

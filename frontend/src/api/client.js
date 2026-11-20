@@ -11,7 +11,8 @@ function apiBase() {
 }
 
 export async function api(path, options) {
-  const response = await fetch(apiBase() + path, {...options, redirect:"error", headers:{...options?.headers, ...(state.operatorToken ? {Authorization:"Bearer " + state.operatorToken} : {})}});
+  const credential = path.startsWith("/v1/demo/") ? state.demoToken : state.operatorToken;
+  const response = await fetch(apiBase() + path, {...options, redirect:"error", headers:{...options?.headers, ...(credential ? {Authorization:"Bearer " + credential} : {})}});
   const data = await response.json();
   if (!response.ok) throw new Error(data.error?.code ?? "REQUEST_FAILED");
   return data;

@@ -9,6 +9,7 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from treasury_backend.config.demo import DemoSettings
 from treasury_backend.config.planning import PlanningSettings
 from treasury_backend.modules.alignment.provider import ShieldConfig
 
@@ -144,6 +145,17 @@ def doctor(p, *, live=False):
                 "Presence check; live model availability is evaluated during requests")
     except (ValueError, TypeError, InvalidOperation):
         row("shield_configuration", "INVALID", "Check ITAG flag, shield endpoint/model/budgets")
+
+    try:
+        demo = DemoSettings.from_values(p.values)
+        if demo.enabled:
+            credentials = [p.values.get(name) for name in ("B_API_KEY", "PACEVANT_OPERATOR_TOKEN", "PACEVANT_INTERNAL_TOKEN")]
+            valid = (demo.access_token not in credentials and p.values.get("PACEVANT_REQUIRE_ITAG") == "1"
+                     and p.values.get("PACEVANT_SHIELD_MODE") in {"wallet_pipeline", "wallet_hardened"})
+            row("demo_user_configuration", "OK" if valid else "INVALID",
+                "Scoped access; sponsor gas credit is off-chain, not a wallet balance")
+    except (ValueError, TypeError):
+        row("demo_user_configuration", "INVALID", "Check demo identity, access token and gas budgets")
 
     for name in ("B_API_KEY", "PACEVANT_OPERATOR_TOKEN", "PACEVANT_INTERNAL_TOKEN"):
         value = p.values.get(name, "")

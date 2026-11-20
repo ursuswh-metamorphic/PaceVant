@@ -5,19 +5,23 @@ from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 
 from treasury_backend.api.control import create_app as create_control_app
+from treasury_backend.api.demo import install_demo_routes
 from treasury_backend.api.execution import create_router
 from treasury_backend.api.local_execution import LocalExecutionSDK
 from treasury_backend.config.control import Settings
+from treasury_backend.config.demo import DemoSettings
 from treasury_backend.config.execution import Settings as ExecutionSettings
 from treasury_backend.modules.execution.errors import PlaneError
 from treasury_backend.modules.execution.service import ExecutionService
+from treasury_backend.modules.gas_credit import GasCreditLedger
 from treasury_backend.modules.monitoring.worker import start_monitor
 from treasury_backend.modules.workflows.client import VerifiedExecutionClient
 from treasury_backend.modules.workflows.service import utc_now
 
 
-def create_app(settings=None, execution_settings=None, clock=utc_now, execution_service=None):
+def create_app(settings=None, execution_settings=None, clock=utc_now, execution_service=None, demo_settings=None):
     settings = settings or Settings.from_env(require_execution_http=False)
+    demo = demo_settings or DemoSettings.from_env()
     runtime = None
     if settings.mode != "MOCK":
         execution_settings = execution_settings or ExecutionSettings(_env_file=None)
@@ -34,6 +38,12 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
         ):
             raise RuntimeError("Control/execution settings must use the same mode and chain RPC")
         runtime = execution_service or ExecutionService(execution_settings)
+    if demo.enabled and (
+        runtime is None or not settings.require_itag
+        or settings.shield.mode not in {"wallet_pipeline", "wallet_hardened"}
+        or demo.access_token in {settings.operator_token, settings.internal_token, execution_settings.api_key.get_secret_value()}
+    ):
+        raise RuntimeError("Demo requires live execution, required ITAG, hardened Shield and a separate access token")
 
     def client_factory(request_id, config, store):
         return VerifiedExecutionClient(LocalExecutionSDK(runtime, request_id), config, store)
@@ -48,6 +58,14 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
         if runtime is not None:
             runtime.start()
         async with control_lifespan(application):
+            if demo.enabled:
+                chain = runtime.chain
+                gas = GasCreditLedger(runtime.store.db_path, demo, chain_id=chain.chain_id,
+                                      vault=chain.deployment["vault_address"], relayer=chain.deployment["relayer"],
+                                      confirmations=execution_settings.required_confirmations)
+                application.state.gas_credit = gas
+                runtime.gas_credit = runtime.relayer.gas_credit = gas
+                application.state.control.monitor.fee_observer = gas.reconcile
             worker = start_monitor(application.state.control.monitor) if runtime is not None else None
             try:
                 yield
@@ -57,6 +75,7 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
                     worker[1].join(timeout=45)
 
     app.router.lifespan_context = lifespan
+    install_demo_routes(app, demo)
     if runtime is not None:
         app.include_router(
             create_router(runtime, execution_settings), prefix="/execution", tags=["execution"]

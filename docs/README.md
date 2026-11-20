@@ -1,5 +1,7 @@
 # Chỉ mục tài liệu
 
+Current Demo User addition: [single account + prepaid-style gas credit design/runbook](demo/DEMO_USER_GAS_CREDIT.md), [implementation test scope](audit/demo-user-gas-credit-validation.json). Full treasury security gates are preserved; public Fuji writes were not used to test this addition.
+
 Live update 2026-11-20: [Circle / Chainlink / full Fuji demo](demo/FUJI_LIVE_END_TO_END.md). Earlier faucet-USDC blockers and controlled/mock descriptions below belong to their historical profiles.
 
 

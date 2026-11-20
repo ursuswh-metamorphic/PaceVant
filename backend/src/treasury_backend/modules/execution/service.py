@@ -17,6 +17,7 @@ class ExecutionService:
         self.settings = settings
         self.store = Store(settings.data_dir)
         self.chain = chain
+        self.gas_credit = None
         self._expensive_requests = deque()
         self._rate_lock = Lock()
 
@@ -43,10 +44,13 @@ class ExecutionService:
         with self.store.lock:
             return self.store.idempotent(scope, key, body, fn, refresh=scope == "execute")
 
-    def build(self, proposal, key):
-        return self.mutate(
+    def build(self, proposal, key, *, workflow_id=None):
+        result = self.mutate(
             "build", key, proposal.model_dump(), lambda: self.builder.build(proposal)
         )
+        if self.gas_credit is not None and workflow_id:
+            self.gas_credit.bind_build(workflow_id, result["build_id"])
+        return result
 
     def simulate(self, request, key):
         self.expensive_rate()

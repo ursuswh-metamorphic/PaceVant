@@ -7,6 +7,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import ValidationError
 
 from treasury_backend.modules.execution.errors import PlaneError
+from treasury_backend.modules.gas_credit import CreditError
 from treasury_backend.modules.workflows.client import MAX_RESPONSE_BYTES
 from treasury_contracts.client import ExecutionAPIError, ExecutionClient
 from treasury_contracts.models import ExecutionRequest, SimulationRequest, TransactionProposal
@@ -39,6 +40,8 @@ class LocalExecutionSDK(ExecutionClient):
                 )
         except ValidationError:
             raise self._error(request, 400, "INVALID_SCHEMA", False) from None
+        except CreditError as exc:
+            raise self._error(request, 409, exc.code, False) from None
         except PlaneError as exc:
             logging.getLogger(__name__).warning("Execution operation %s failed: %s", path, exc.code)
             raise self._error(request, exc.status, exc.code, exc.retryable) from None
@@ -82,7 +85,7 @@ class LocalExecutionSDK(ExecutionClient):
                 return service.relayer.monitor(path.removeprefix("/v1/executions/")), False
         if method == "POST":
             if path == "/v1/build":
-                return service.build(TransactionProposal.model_validate(body), key), False
+                return service.build(TransactionProposal.model_validate(body), key, workflow_id=self.request_id), False
             if path == "/v1/simulations":
                 return service.simulate(SimulationRequest.model_validate(body), key), False
             if path == "/v2/simulations/preflight":

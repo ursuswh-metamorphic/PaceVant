@@ -1,0 +1,115 @@
+{
+  "schema_version": "demo-user-gas-credit-validation-v1",
+  "base_commit": "3fba479",
+  "backup_branch": "backup/pre-demo-user-3fba479",
+  "scope": "One shared Demo User; existing full security pipeline; prepaid-style sponsor allowance in execution SQLite",
+  "public_fuji_transactions_sent_for_testing": false,
+  "public_owner_transactions_sent": false,
+  "new_smart_contracts": false,
+  "solidity_abi_proof_engine_changed": false,
+  "demo_wallet_key_forwarded_to_runtime_or_frontend": false,
+  "env_names_match": true,
+  "env_name_count": 104,
+  "private_env_contains_scoped_demo_token": true,
+  "example_token_blank": true,
+  "initial_credit_wei": "1000000000000000",
+  "max_transaction_fee_wei": "100000000000000",
+  "initial_credit_meaning": "One-time off-chain sponsor allocation, not a verified user deposit or a wallet balance",
+  "tests": [
+    {
+      "scope": "Full repository suite, collected after demo billing and Anvil integration additions",
+      "passed": 457,
+      "skipped": 4,
+      "seconds": 265.39,
+      "warnings": 2
+    },
+    {
+      "scope": "Final API/config/CORS, ledger/concurrency/reorg, env isolation and architecture tests after final refinements",
+      "passed": 33,
+      "seconds": 6.68
+    },
+    {
+      "scope": "Demo User full V2 pipeline success + late fee-cap rejection on isolated Anvil",
+      "passed": 2,
+      "seconds": 15.62,
+      "chain_id": 31337,
+      "semantic_model": "Explicit scripted fixture; not an LLM accuracy or real provider test"
+    },
+    {
+      "scope": "Frontend module syntax",
+      "files_checked": 11,
+      "status": "PASS"
+    },
+    {
+      "scope": "Ruff",
+      "status": "PASS"
+    },
+    {
+      "scope": "Final ledger regression after test-helper readability cleanup",
+      "passed": 17,
+      "seconds": 1.73
+    }
+  ],
+  "covered_invariants": [
+    "Same request key and goal returns same workflow without new broadcast; different goal conflicts",
+    "Demo credentials cannot invoke operator workflow route",
+    "Full ITAG/Shield/proof/sign/execute/monitor path remains required",
+    "Receipt gas cost equals gasUsed * effectiveGasPrice",
+    "Actual receipt billing happens once across repeated polls and restarts",
+    "Insufficient initial credit or per-tx fee cap causes no broadcast",
+    "Maximum hold and raw send journal commit atomically",
+    "Unknown/pending/unverified reports keep hold without charging fake zero",
+    "Success and revert receipts both incur actual verified gas",
+    "Reorg reverses old charge and retains maximum hold until re-inclusion",
+    "Demo wallet private key never reaches runtime via profile composition",
+    "Restart or env initial-credit changes do not refill an existing account"
+  ],
+  "skipped_scope": [
+    "Public Fuji portfolio-read opt-in",
+    "Circle public-source fork pipeline opt-in",
+    "LFJ public-source fork adapter opt-in",
+    "Full V2 ablation artifact opt-in"
+  ],
+  "browser_visual_verification": {
+    "status": "NOT_COMPLETED",
+    "reason": "Browser plugin bootstrap failed with module-import restriction; no browser transaction was attempted"
+  },
+  "historical_fuji_evidence": "system-security-live-validation.json",
+  "historical_receipt_is_demo_billing_validation": false,
+  "runtime_readonly_check": {
+    "status": "PASS",
+    "http_methods_used": [
+      "GET"
+    ],
+    "mode": "FUJI",
+    "require_itag": true,
+    "task_shield_mode": "wallet_pipeline",
+    "demo_enabled": true,
+    "demo_wallet_address": "0xf23bE4A69B162DdC0F7D5456172212d294b233c7",
+    "allocated_wei": "1000000000000000",
+    "available_wei": "1000000000000000",
+    "spent_wei": "0",
+    "reserved_wei": "0",
+    "wallet_balance_status": "ONCHAIN",
+    "wallet_balance_is_separate": true,
+    "unauthenticated_demo_status": 401,
+    "demo_token_on_operator_treasury_status": 401,
+    "public_writes": false,
+    "no_demo_workflow_created": true,
+    "no_secrets_in_responses": true
+  },
+  "known_limits": [
+    "One shared access code and sponsor account; no real wallet-ownership login/multi-user/payment deposit product",
+    "Gas budget is separate from available Circle USDC, exposure, treasury policy/session/risk limits",
+    "Unknown send or startup crash can need operator review; no unsafe timeout release or automatic retry",
+    "Deep reorg may temporarily make available credit negative and block new sends",
+    "Browser visual check not completed; frontend syntax and backend/EVM behavior tested"
+  ],
+  "operator_doctor_configuration_ready": true,
+  "quality_checks": {
+    "secret_scan": "PASS",
+    "secret_scan_report": "../../evidence/execution-plane-secret-scan.json",
+    "git_diff_check": "PASS",
+    "local_document_links": "PASS"
+  }
+}

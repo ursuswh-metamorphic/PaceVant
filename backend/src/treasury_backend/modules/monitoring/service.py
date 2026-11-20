@@ -21,6 +21,7 @@ from treasury_contracts.readonly import readonly_web3
 class OutcomeMonitor:
     def __init__(self, store, mode, client_factory, clock=time.time):
         self.store, self.mode, self.client_factory, self.clock = store, mode, client_factory, clock
+        self.fee_observer = None
 
     def bootstrap(self):
         # Add jobs for legacy durable submissions without rewriting original evidence.
@@ -240,6 +241,8 @@ class OutcomeMonitor:
                 finally:
                     reader.provider.close()
                 invalidate = canonical_hash != old["block_hash"]
+            if self.fee_observer is not None:
+                self.fee_observer(report, invalidated=invalidate)
             if report.verification_status in {"PENDING", "UNAVAILABLE"} and not invalidate:
                 state = report.verification_status
                 details = {"state": state, "decision_id": id_, "verification": report.model_dump()}

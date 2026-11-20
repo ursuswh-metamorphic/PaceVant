@@ -1,5 +1,7 @@
 # PaceVant — Thiết kế hệ thống V2.1 hiện tại
 
+> **Bổ sung Demo User hiện tại:** [thiết kế chi tiết, input/output, API và cách demo](demo/DEMO_USER_GAS_CREDIT.md). Một tài khoản dùng chung, scoped demo credential, sponsor gas allowance off-chain trong execution SQLite, atomic reserve trước broadcast và debit từ receipt đã xác minh; không đổi Solidity/ABI/proof/security gates. Bổ sung này đã test trên Anvil, chưa có public Fuji receipt riêng theo yêu cầu không gửi giao dịch khi testing. Env hiện khớp 104 tên biến. Mục 21 dưới đây mô tả ranh giới mới; các báo cáo Fuji trước đó là bằng chứng pipeline trước bổ sung billing.
+
 > **Current system review:** [architecture, real-data ledger, security fixes and evidence](audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md). The Fuji session is now 24 hours and block drift is 200 blocks; approval TTL and snapshot age remain 300 seconds. Older receipts/test counts below retain their historical scope.
 
 > **Current Fuji configuration (supersedes historical checkpoints below):** the owner-approved approval TTL and snapshot policy age are now 300 seconds. The local Fuji profile requires ITAG and uses Task Shield `wallet_pipeline`, official DeepSeek Flash (non-thinking), then Groq/Gemini/Xingchi fallback, explicit artifact semantic views, and separate primary/fork RPC sources. The 16k artifact blocker described in the original merge notes has been fixed and has successful V2 Anvil regression coverage. Each run still requires live freshness, risk, proof, temporal and on-chain checks. Read the [current runbook and limitations](demo/FUJI_ITAG_LIVE.md) and its linked validation report before making any live-readiness claim. The older successful transaction below predates ITAG; it is not evidence for the new pipeline. Env variable counts and TTL=180 statements below describe the earlier checkpoint.
@@ -236,7 +238,7 @@ Fuji Observatory đọc Chainlink/Witnet/Pyth theo block qua `GET /v1/fuji/walle
 | Attestor | Ký ApprovalV2 sau immutable APPROVE + revalidation | Module signing trong backend | Không cần gas để ký offline |
 | Relayer | Ký/gửi envelope EVM chứa exact call/PDR/Phi | Module execution trong cùng backend | Có test AVAX cho success/revert |
 
-Ba địa chỉ phải khác nhau. Vault contract giữ treasury tokens. Dashboard dùng operator token, không cần Core/MetaMask/WalletConnect; ví có thể dùng ngoài app để nhận/chuyển test AVAX. Không cần tài khoản sàn. Provider API cần key tương ứng; `rules` không cần LLM key. Model nhận goal và semantic views của evidence theo vai trò planner/Shield/ITAG, không nhận private keys. Demo User trong env hiện chỉ là tài khoản dự phòng.
+Ba địa chỉ phải khác nhau. Vault contract giữ treasury tokens. Dashboard dùng operator token hoặc scoped demo credential, không cần Core/MetaMask/WalletConnect; ví có thể dùng ngoài app để nhận/chuyển test AVAX. Provider API cần key tương ứng; `rules` không cần LLM key. Model nhận goal và semantic views của evidence theo vai trò planner/Shield/ITAG, không nhận private keys. Demo User hiện có flow chọn tài khoản dùng chung và sponsor gas credit off-chain; xem mục 21. Chưa có multi-user hoặc customer deposit product.
 
 Sau gộp API, attestor và relayer keys **cùng process**. Tách module không phải process/HSM isolation. Container từ chối các owner/deployer key env đã biết; public owner lấy từ manifest rồi đối chiếu chain. Owner vẫn là trust assumption, có quyền cấu hình/rút token theo quy định của vault; không được mô tả hệ thống như chống lại một owner bị compromise.
 
@@ -493,7 +495,7 @@ Luồng thực tế dùng `PROPOSED → ALIGNED → BUILT → SIMULATED → EVAL
 
 `PENDING` là execution response khi chưa có receipt/canonical confirmations, workflow thường giữ SUBMITTED; không có status workflow `PROTECTED_REVERT` riêng. Reorg có thể đưa terminal workflow về SUBMITTED. Monitor revalidates receipt khi đọc workflow; hai protected reverts **khác attestation** liên tiếp cùng policy có thể quarantine signer. Receipt reconcile lặp không được đếm thành giao dịch mới.
 
-Monitor được kích hoạt bởi API/CLI/dashboard polling, **chưa có background watcher/broker**. Dashboard poll tối đa khoảng 60 giây cho một lượt; giao dịch chậm hơn vẫn nằm trong storage và cần poll tiếp/điều tra. Chưa có auto fee-bump/replacement/cancel hoặc autonomous recovery daemon.
+Canonical FastAPI đã chạy background read-only outcome worker trong lifespan (`modules/monitoring/worker.py`), mặc định tick tối đa 5 jobs rồi chờ 5 giây, có durable jobs/leases và reorg reconciliation. API/CLI/dashboard cũng có thể poll. Đây không phải durable workflow queue hay daemon tự ký/gửi lại. Demo User gas accounting dùng callback trên report của cùng monitor; pending không tự giải phóng hold. Chưa có auto fee-bump/replacement/cancel hoặc autonomous signing recovery.
 
 RPC gửi không rõ kết quả: giữ raw journal và hash; execution retry cùng idempotency/body dùng đúng signed raw bytes. Workflow không tự tạo trade mới. Nếu crash làm workflow còn SUBMITTING nhưng đã biết hash trong journal, dùng `POST /v1/workflows/{id}/recover` hoặc [recovery CLI](../tools/operations/README.md). Chỉ chấp nhận hash đã biết, khớp decision/build/chain; không ký/resend. Không xóa DB để gỡ pending/quarantine.
 
@@ -670,7 +672,7 @@ CORS chỉ bật exact origin allowlist, không thay auth. Frontend token chỉ 
 
 ### Cấu hình máy hiện tại
 
-Private env đã được cập nhật có ủy quyền; hiện khớp 100 tên biến với template và ba role ví có address/key tương ứng. Cấu hình hiện tại có DeepSeek ưu tiên, fallback đã cấu hình, direct Chainlink và vault/LFJ trên Fuji thật. Receipt, role/signature, archive reads và token/budget deltas được kiểm riêng trong các báo cáo live. Template giữ trống credentials; copy template không tự cấp key, funding hay owner authorization.
+Private env đã được cập nhật có ủy quyền; hiện khớp 104 tên biến với template và ba role ví có address/key tương ứng. Cấu hình có DeepSeek ưu tiên, fallback đã cấu hình, direct Chainlink và vault/LFJ trên Fuji thật; thêm scoped Demo User credential và gas allowance. Receipt và token/budget deltas trong audit trước đó thuộc pipeline trước bổ sung Demo User billing. Template giữ trống credentials; copy template không tự cấp key, funding hay owner authorization.
 
 | Nhóm | Biến / đầu vào |
 | --- | --- |
@@ -1003,3 +1005,38 @@ Mỗi nhận xét nên có: mục/diagram/invariant liên quan → assumption ho
 8. **Evidence phát hành:** ai chạy/duyệt actual Fuji normal/revert, hosted restart và remote CI; lưu sanitized hashes/logs ở đâu?
 
 Tài liệu cung cấp source, local/fork tests và public Fuji evidence để phản biện. Các deployment/feature chưa kiểm chứng khác tiếp tục giữ nhãn đó. Dùng invariant I01–I12 và hình 1–10 làm tham chiếu; xem runbook/report live để phân biệt dữ liệu thực với counterfactual stress.
+
+## 21. Demo User, delegated access và gas credit hiện tại
+
+Luồng mới giữ nguyên modular monolith và các lớp bảo mật ở mục 6–8. [Thiết kế bổ sung đầy đủ](demo/DEMO_USER_GAS_CREDIT.md) có input/output, API, schema, fee formula, pending/revert/reorg, cách demo và phạm vi test.
+
+```mermaid
+flowchart LR
+  U[Demo User: chọn account và mã demo] --> D[Scoped demo API]
+  D --> I[Exact one-shot ITAG intent]
+  I --> W[Full existing security pipeline]
+  W --> S[Approved signed build]
+  S --> R[Relayer estimates gas]
+  R --> DB[Atomic gas hold + existing raw tx journal]
+  DB --> F[Fuji vault and LFJ]
+  F --> M[Existing read-only outcome monitor]
+  M --> L[Idempotent actual fee / reorg hold ledger]
+  L --> UI[Wallet AVAX riêng / credit / history / result]
+```
+
+| Ranh giới | Input | Output / invariant |
+| --- | --- | --- |
+| Demo API | Scoped Bearer, exact goal, Idempotency-Key | Durable request/workflow ID, authenticated intent và full pipeline; không có quyền operator/internal/execution |
+| Build binding | Workflow ID từ trusted API adapter + immutable build | Chỉ build thuộc accepted demo request được tính phí vào tài khoản demo |
+| Gas reserve | Signed gas limit × gas price, available credit và relayer pending balance | Commit cùng raw send journal; thiếu ngân sách/fee cap thì không broadcast |
+| Fee settlement | Canonical gas-verified receipt đủ confirmations | Charge gasUsed × effectiveGasPrice cho success/revert một lần; unknown/pending giữ hold |
+| Reorg | Canonical invalidation hoặc receipt đổi | Append reversal, giữ maximum, re-inclusion settle lại; không tự resend |
+| UI | Account/balances/credit/history DTOs | Private keys không tới browser; token trong tab memory, request ID có thể lưu sessionStorage |
+
+Gas credit hiện là sponsor allowance cấp sẵn trong execution SQLite, chưa phải khoản khách hàng đã nạp on-chain. Account address là identity/địa chỉ đọc số dư; swap vẫn dùng token vault, relayer trả gas. Initial allowance 0,001 AVAX, per-tx reservation cap 0,0001 AVAX; restart không cấp lại. Giá trị này tách khỏi số dư AVAX thực và certified risk/session budgets.
+
+Demo User chỉ chấp nhận USDC → WAVAX, yêu cầu ITAG và hardened/pipeline Shield, không nhận arbitrary recipient/calldata. Model/provider/oracle/risk/proof/Phi/nonce/deadline/session/caps vẫn bắt buộc. Không thêm contract, WalletConnect, Paymaster hay giao dịch ghi credit. Demo sends dùng estimateGas +10% +5000 gas; cùng request ID chỉ trả workflow cũ, journaled demo retry chỉ theo dõi hash.
+
+Các bảng mới `demo_account`, `demo_requests`, `demo_builds`, `demo_gas_reservations`, `demo_gas_events` nằm trong execution DB hiện tại. Control evidence và gas state có thể update ở hai transaction khác nhau; settlement idempotent và monitor có thể đọc/đối soát lại. Không giả định SQL transaction trải qua cả hai DB và blockchain. Backup ledger cùng execution journals/control history.
+
+Giới hạn: shared access một account, chưa có wallet-ownership login, customer deposit/payment/top-up/refund product. Unknown sends và crash trước workflow có thể cần operator review. Public Fuji receipt trước tính năng mới không chứng minh billing mới; [test report](audit/demo-user-gas-credit-validation.json) tách rõ Anvil/offline/public scope. Trong đợt triển khai này không gửi giao dịch Fuji.

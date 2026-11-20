@@ -86,4 +86,9 @@ def backend_environment(p):
     # b_environment strips provider secrets; retain only the explicit planner profile.
     values.pop("PACEVANT_B_URL", None)
     values.pop("PACEVANT_B_TOKEN", None)
+    # Public identity and a scoped demo credential only; never the demo wallet key.
+    for name in ("PACEVANT_DEMO_ENABLED", "PACEVANT_DEMO_ACCESS_TOKEN", "TREASURY_DEMO_USER_ADDRESS",
+                 "PACEVANT_DEMO_INITIAL_CREDIT_WEI", "PACEVANT_DEMO_MAX_TX_FEE_WEI"):
+        if name in p.values:
+            values[name] = p.values[name]
     return values

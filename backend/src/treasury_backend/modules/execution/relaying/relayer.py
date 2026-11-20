@@ -36,11 +36,13 @@ from treasury_contracts.v2 import (
 class Relayer:
     def __init__(self, chain, store):
         self.chain, self.store = chain, store
+        self.gas_credit = None
 
     def execute(self, request: ExecutionRequest, *, dry_run=False):
         if self.chain.w3.eth.chain_id != self.chain.chain_id:
             raise PlaneError("CHAIN_MISMATCH", "RPC network changed", 503)
         b = BuiltTransaction.model_validate(self.store.get("build", request.build_id))
+        billed = self.gas_credit is not None and self.gas_credit.billed(b.build_id)
         from treasury_contracts.oracle import CIRCLE_USDC, SOURCE_HASH, WAVAX
 
         if (b.adapter_version == ADAPTER_VERSION or self.chain.deployment.get("lfj_route")) and (
@@ -72,6 +74,10 @@ class Relayer:
                 raise PlaneError("NONCE_REPLAY", "Build already submitted with another PDR", 409)
             if dry_run:
                 return {"dry_run": True, "broadcast": False, **self.monitor(row[1])}
+            if billed:
+                # Demo retries are read-only. An absent receipt is not permission
+                # to resend or spend additional gas; retain the same hash/hold.
+                return {"tx_hash": row[1], "status": self.monitor(row[1])["status"]}
             try:
                 self.chain.w3.eth.get_transaction(row[1])
             except TransactionNotFound:
@@ -206,7 +212,7 @@ class Relayer:
                 "from": account.address,
                 "chainId": b.chain_id,
                 "nonce": self.chain.w3.eth.get_transaction_count(account.address, "pending"),
-                "gas": gas * 12 // 10 + 10000,
+                "gas": (gas * 110 + 99) // 100 + 5000 if billed else gas * 12 // 10 + 10000,
                 "gasPrice": self.chain.w3.eth.gas_price,
             }
         )
@@ -223,6 +229,12 @@ class Relayer:
         self.store.put("execution", tx_hash, result)
         self.store.put("submitted-pdr", tx_hash, p.model_dump())
         with self.store.db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            if billed:
+                self.gas_credit.reserve(
+                    db, b.build_id, tx_hash, tx["gas"] * tx["gasPrice"],
+                    self.chain.w3.eth.get_balance(account.address, "pending"),
+                )
             db.execute(
                 "INSERT INTO submissions VALUES(?,?,?,?,?)",
                 (b.build_id, request_hash, tx_hash, raw, canonical(result).decode()),

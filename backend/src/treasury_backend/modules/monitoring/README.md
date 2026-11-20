@@ -1,5 +1,7 @@
 # monitoring
 
+`fee_observer` is an optional injected callback for demo gas billing. It receives the same verified reconciliation report and canonical invalidation flag used by the monitor; it performs no chain writes. Pending/unavailable reports retain the reservation, confirmed success/revert receipts settle actual gas, and reorgs reverse the old debit and hold funds until re-established. Gas settlement is independent of whether token effects need review. [Demo billing details](../../../../../docs/demo/DEMO_USER_GAS_CREDIT.md).
+
 Read-only reconciliation of durable workflow submissions. `service.py:OutcomeMonitor` polls receipt/build/PDR facts through an injected read client. `worker.py:start_monitor` runs it in the unified FastAPI lifespan; `api.py` provides authenticated portfolio/outcome history routes.
 
 `tick` bootstraps jobs from existing durable submissions, claims a SQLite lease, reads chain facts, reconciles pre/post observations and commits a projection. Missing RPC data stays PENDING/UNAVAILABLE; a reorg invalidates the affected projection and schedules another read. The worker never signs, executes, renews a session or rebroadcasts. Gas is a relayer expense, deduplicated by canonical transaction rather than poll count. Unexplained balance deltas are reported, not called profit.

@@ -1,6 +1,6 @@
 # signing
 
-Live Fuji revalidation supplies the owner-configured on-chain TTL (1–300 seconds; current profile 180) together with the verified proof/session. LOCAL defaults to 30. The signer checks the immutable decision and exact build deadline against that verified window after final Phi preflight. It does not invent a new deadline or authorize from unverified API/file prices.
+Live Fuji revalidation supplies the owner-configured on-chain TTL (1–300 seconds; current profile 300) together with the verified proof/session. LOCAL defaults to 30. The signer checks the immutable decision and exact build deadline against that verified window after final Phi preflight. It does not invent a new deadline or authorize from unverified API/file prices. Demo User gas credit is a separate relayer budget check; it never bypasses signing or changes treasury risk budgets.
 
 Issue a typed approval only for a persisted, bound, revalidated approved decision.
 

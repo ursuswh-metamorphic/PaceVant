@@ -62,6 +62,14 @@ def test_profile_only_gives_provider_secret_to_control_or_unified(tmp_path, monk
     for key in ("GEMINI_API_KEY", "XINGCHI_API_KEY", "DEEPSEEK_API_KEY"):
         assert key not in ops.b_environment(p)
         assert ops.backend_environment(p)[key] == ops.a_environment(p)[key]
+    p.values.update(TREASURY_DEMO_USER_PRIVATE_KEY="must-not-reach-runtime",
+                    TREASURY_DEMO_USER_ADDRESS=Account.create().address,
+                    PACEVANT_DEMO_ENABLED="1", PACEVANT_DEMO_ACCESS_TOKEN="demo-only-test-token")
+    unified = ops.backend_environment(p)
+    assert "TREASURY_DEMO_USER_PRIVATE_KEY" not in unified
+    assert "must-not-reach-runtime" not in unified.values()
+    assert unified["PACEVANT_DEMO_ACCESS_TOKEN"] == p.values["PACEVANT_DEMO_ACCESS_TOKEN"]
+    assert "PACEVANT_DEMO_ACCESS_TOKEN" not in ops.b_environment(p)
     p.values["TREASURY_RELAYER_ADDRESS"] = owner.address
     with pytest.raises(ops.OpsError, match="TREASURY_RELAYER_ADDRESS"):
         p.credentials()

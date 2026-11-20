@@ -24,6 +24,9 @@ from treasury_contracts.onchain import read_approval_state
 from treasury_contracts.readonly import ReadError, readonly_web3
 
 DOMAIN_ERRORS = {
+    "GAS_CREDIT_INSUFFICIENT",
+    "DEMO_TRANSACTION_FEE_LIMIT",
+    "RELAYER_GAS_INSUFFICIENT",
     "LFJ_CALL_FAILED",
     "LFJ_QUOTE_MISMATCH",
     "LFJ_UNSUPPORTED_ROUTE",

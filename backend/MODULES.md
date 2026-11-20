@@ -15,6 +15,7 @@ This is a modular monolith served by one FastAPI/Uvicorn process. Folders are di
 | Decision | `modules/decision` | `decide` -> security decision |
 | Attestation | `modules/signing` | `Attestor` -> signed PDR |
 | Control persistence | `modules/persistence` | `Store` |
+| Demo gas allowance | `modules/gas_credit` | Single-account request identity, gas reserve/debit/reorg ledger in existing execution DB; no chain writes |
 | Retry guidance | `modules/experience` | `next_amount` |
 | Use cases/monitoring | `modules/workflows` | `ControlPlane` |
 | Chain/build/simulate/relay | `modules/execution` | `Chain`, `Builder`, `Simulator`, `Relayer` |

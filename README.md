@@ -1,5 +1,7 @@
 # PaceVant - AI Treasury Security V2.1
 
+**Demo User flow:** select one predefined account with a scoped demo access code; use the existing full security pipeline with an off-chain sponsor gas allowance, atomic pre-broadcast reservation and verified receipt billing. [Setup, architecture, API, limits and testing](docs/demo/DEMO_USER_GAS_CREDIT.md). This addition was tested on isolated Anvil, without public Fuji transactions; older Fuji receipts do not certify the new billing flow.
+
 > **Current system review:** [architecture, real-data ledger, security fixes and evidence](docs/audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md). The Fuji session is now 24 hours and block drift is 200 blocks; approval TTL and snapshot age remain 300 seconds. Older receipts/test counts below retain their historical scope.
 
 Current Fuji pipeline: required ITAG, Task Shield `wallet_pipeline` with live AI, direct Chainlink reference rounds, LFJ fork simulation, risk/Z3 proof, ApprovalV2, real relayer broadcast and receipt reconciliation. Owner-approved TTL and snapshot age are 300 seconds. [Current Fuji runbook, configuration and limitations](docs/demo/FUJI_ITAG_LIVE.md).

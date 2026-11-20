@@ -346,6 +346,11 @@ class AuthorizationPipeline:
         try:
             submission = client.execute(built, pdr)
         except ControlError as error:
+            if error.code in {"GAS_CREDIT_INSUFFICIENT", "DEMO_TRANSACTION_FEE_LIMIT", "RELAYER_GAS_INSUFFICIENT"}:
+                # Execution refused before writing its send journal or broadcasting.
+                self.store.transition(workflow_id, id_, "SUBMITTING", "FAILED_TO_SUBMIT",
+                                      self.clock(), reason_codes=[error.code])
+                return
             self.store.transition(
                 workflow_id,
                 id_,

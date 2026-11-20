@@ -247,7 +247,7 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
             "issues": list(dict.fromkeys(issues)),
         }
 
-    def run(self, payload):
+    def run(self, payload, *, workflow_id=None):
         workflow_started = monotonic()
         mandate = self.mandate(payload.mandate_id)
         selection = payload.temporal_intent
@@ -271,7 +271,9 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
             intent_deadline = spec.terms.deadline
         if self.settings.mode != "MOCK" and payload.scenario is not None:
             raise ControlError("MOCK_SCENARIO_FORBIDDEN", 422)
-        workflow_id = f"workflow_{uuid4().hex}"
+        # Optional identity is allocated by a trusted API adapter for durable demo
+        # request idempotency; it is never accepted in the public WorkflowRequest.
+        workflow_id = workflow_id or f"workflow_{uuid4().hex}"
         scenario = payload.scenario
         client = self.client(workflow_id, mandate, scenario)
         if isinstance(client, MockExecutionClient):
