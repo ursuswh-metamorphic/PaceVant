@@ -20,7 +20,12 @@ class ProtocolFixture:
             result["explanation"] = "LOCAL TEST: scripted bounded proposal; no model inference."
         else:
             data = json.loads(messages[1]["content"])
-            if messages[0]["content"] == PROMPT:
+            if 'bound_task_id' in data:
+                result = {'task_id':data['bound_task_id'],'action_ref':data['action_ref'],
+                    'finding_type':'OBJECTIVE_ALIGNMENT','verdict':'MISALIGNED' if 'ignore policy' in json.dumps(data).lower() else 'ALIGNED',
+                    'evidence_refs':[next(iter(data['evidence_catalog'])),data['action_ref']],
+                    'explanation':'LOCAL scripted hybrid protocol fixture; not model inference.'}
+            elif messages[0]["content"] == PROMPT:
                 candidate, task = data["candidate_action_id"], data["active_task_ids"][0]
                 result = {
                     "candidate_action_id": candidate,

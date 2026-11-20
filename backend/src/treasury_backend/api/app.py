@@ -59,6 +59,8 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
     app.state.execution = runtime
     app.state.treasury_v3 = None
     app.state.treasury_mvp = None
+    from treasury_backend.api.local_transfers import LocalTransferExecution
+    app.state.transfer_execution = LocalTransferExecution(runtime)
     control_lifespan = app.router.lifespan_context
 
     @asynccontextmanager
@@ -115,6 +117,8 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
                     worker[1].join(timeout=45)
 
     app.router.lifespan_context = lifespan
+    from treasury_backend.modules.transfers.api import install_transfer_routes
+    install_transfer_routes(app,settings)
     install_demo_routes(app, demo)
     from treasury_backend.api.mvp import install_mvp_routes
     install_mvp_routes(app, settings)

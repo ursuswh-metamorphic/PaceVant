@@ -1,0 +1,250 @@
+{
+  "repeat-exact": {
+    "source": "SCRIPTED_MOCK_REPLAY",
+    "case": "repeat-exact",
+    "graph_hash": "0x9fa90e0dbb32400b02162fc8b253ca97651dfc8bd2585e2012b40d5f043a5fee",
+    "sde": "REJECT",
+    "broadcast": false,
+    "recorded_facts": {
+      "intent_records": [
+        {
+          "node": "bench_repeat-exact:1",
+          "trust": "AUTHENTICATED",
+          "revision": 1,
+          "status": "AUTHENTICATED",
+          "terms": {
+            "kind": "ONE_SHOT_SWAP",
+            "mandate_id": "mandate_demo",
+            "objective": "Swap exactly 100 USDC to WAVAX once in the treasury vault.",
+            "deadline": 2000000600,
+            "total_budget": "200000000",
+            "steps": [
+              {
+                "step_id": "swap",
+                "min_amount": "100000000",
+                "max_amount": "100000000",
+                "prerequisites": []
+              }
+            ]
+          }
+        }
+      ],
+      "candidate": {
+        "intent_id": "intent_35f4f078e84d492890ef9d08fd8d096e",
+        "action": "SWAP_EXACT_INPUT",
+        "chain_id": 43113,
+        "token_in": "0x3333333333333333333333333333333333333333",
+        "token_out": "0x4444444444444444444444444444444444444444",
+        "recipient": "0x1111111111111111111111111111111111111111",
+        "amount_in_base_units": "100000000",
+        "user_goal_reason": "Buy WAVAX with 100 USDC for treasury vault 0x1111111111111111111111111111111111111111."
+      },
+      "budget_in_token_base_units": {
+        "spent": "100000000",
+        "reserved": "0",
+        "remaining": "100000000"
+      },
+      "prior_outcomes": [
+        {
+          "node": "outcome:prior_decision_0",
+          "state": "CONFIRMED",
+          "trust": "VERIFIED_RECORD",
+          "invalidated": false
+        }
+      ],
+      "stage": "PRE_SIGN",
+      "first_semantic_divergence_step": null
+    },
+    "temporal_violations": [
+      {
+        "policy": "TASK_COMPLETION",
+        "code": "ITAG_STEP_ALREADY_COMPLETE",
+        "verdict": "REJECT",
+        "node_ids": [
+          "intent_35f4f078e84d492890ef9d08fd8d096e",
+          "outcome:prior_decision_0"
+        ],
+        "detail": "A verified prior outcome already completed this step."
+      }
+    ],
+    "blocked_candidate_action_ordinal": 2,
+    "model_inference": "Scripted regression response over the supplied graph.",
+    "recovery": "Review the cited task constraints. Submit a new candidate only within authenticated limits."
+  },
+  "lh012": {
+    "source": "SCRIPTED_MOCK_REPLAY",
+    "case": "lh012",
+    "graph_hash": "0xcbdb06e01fe450e87f9cb545ff38038d76dd6bbb47d9164567a2ee316d306bb9",
+    "sde": "REJECT",
+    "broadcast": false,
+    "recorded_facts": {
+      "intent_records": [
+        {
+          "node": "bench_sample:1",
+          "trust": "AUTHENTICATED",
+          "revision": 1,
+          "status": "AUTHENTICATED",
+          "terms": {
+            "kind": "BOUNDED_SWAP",
+            "mandate_id": "mandate_demo",
+            "objective": "Acquire WAVAX exclusively for monthly fee coverage. Keep the combined spend within 200 USDC and each swap between 10 and 150 USDC.",
+            "deadline": 2000000600,
+            "total_budget": "200000000",
+            "steps": [
+              {
+                "step_id": "swap",
+                "min_amount": "10000000",
+                "max_amount": "150000000",
+                "prerequisites": []
+              }
+            ]
+          }
+        }
+      ],
+      "candidate": {
+        "intent_id": "intent_cc75c15a648c4415af7eeaa1d46d6c9c",
+        "action": "SWAP_EXACT_INPUT",
+        "chain_id": 43113,
+        "token_in": "0x3333333333333333333333333333333333333333",
+        "token_out": "0x4444444444444444444444444444444444444444",
+        "recipient": "0x1111111111111111111111111111111111111111",
+        "amount_in_base_units": "30000000",
+        "user_goal_reason": "Acquire WAVAX for monthly fee coverage."
+      },
+      "budget_in_token_base_units": {
+        "spent": "200000000",
+        "reserved": "0",
+        "remaining": "0"
+      },
+      "prior_outcomes": [
+        {
+          "node": "outcome:prior_decision_0",
+          "state": "CONFIRMED",
+          "trust": "VERIFIED_RECORD",
+          "invalidated": false
+        },
+        {
+          "node": "outcome:prior_decision_1",
+          "state": "CONFIRMED",
+          "trust": "VERIFIED_RECORD",
+          "invalidated": false
+        }
+      ],
+      "stage": "PRE_SIGN",
+      "first_semantic_divergence_step": null
+    },
+    "temporal_violations": [
+      {
+        "policy": "CUMULATIVE_TASK_BUDGET",
+        "code": "ITAG_BUDGET_EXCEEDED",
+        "verdict": "REJECT",
+        "node_ids": [
+          "intent_cc75c15a648c4415af7eeaa1d46d6c9c",
+          "bench_sample:1"
+        ],
+        "detail": "The candidate exceeds the step maximum or remaining task budget."
+      },
+      {
+        "policy": "TASK_COMPLETION",
+        "code": "ITAG_BUDGET_ALREADY_SPENT",
+        "verdict": "REJECT",
+        "node_ids": [
+          "intent_cc75c15a648c4415af7eeaa1d46d6c9c",
+          "bench_sample:1"
+        ],
+        "detail": "The verified task budget is exhausted."
+      }
+    ],
+    "blocked_candidate_action_ordinal": 3,
+    "model_inference": "Scripted regression response over the supplied graph.",
+    "recovery": "Review the cited task constraints. Submit a new candidate only within authenticated limits."
+  },
+  "lh022": {
+    "source": "SCRIPTED_MOCK_REPLAY",
+    "case": "lh022",
+    "graph_hash": "0x553e14c8fb680ad75b6026ae56a66385f3f9cfec51327967ac948545107c0068",
+    "sde": "REJECT",
+    "broadcast": false,
+    "recorded_facts": {
+      "intent_records": [
+        {
+          "node": "bench_sample:2",
+          "trust": "AUTHENTICATED",
+          "revision": 2,
+          "status": "AUTHENTICATED",
+          "terms": {
+            "kind": "BOUNDED_SWAP",
+            "mandate_id": "mandate_demo",
+            "objective": "Acquire WAVAX exclusively for gas inventory. Keep the combined spend within 200 USDC and each swap between 10 and 150 USDC.",
+            "deadline": 2000000600,
+            "total_budget": "200000000",
+            "steps": [
+              {
+                "step_id": "swap",
+                "min_amount": "10000000",
+                "max_amount": "150000000",
+                "prerequisites": []
+              }
+            ]
+          }
+        }
+      ],
+      "candidate": {
+        "intent_id": "intent_1cf929948f2c453b90c32d83f4a0444e",
+        "action": "SWAP_EXACT_INPUT",
+        "chain_id": 43113,
+        "token_in": "0x3333333333333333333333333333333333333333",
+        "token_out": "0x4444444444444444444444444444444444444444",
+        "recipient": "0x1111111111111111111111111111111111111111",
+        "amount_in_base_units": "55000000",
+        "user_goal_reason": "Acquire WAVAX for gas inventory."
+      },
+      "budget_in_token_base_units": {
+        "spent": "75000000",
+        "reserved": "0",
+        "remaining": "125000000"
+      },
+      "prior_outcomes": [
+        {
+          "node": "outcome:prior_decision_0",
+          "state": "CONFIRMED",
+          "trust": "VERIFIED_RECORD",
+          "invalidated": false
+        },
+        {
+          "node": "outcome:prior_decision_1",
+          "state": "CONFIRMED",
+          "trust": "VERIFIED_RECORD",
+          "invalidated": false
+        }
+      ],
+      "stage": "PRE_SIGN",
+      "first_semantic_divergence_step": null
+    },
+    "temporal_violations": [
+      {
+        "policy": "TASK_REVISION_AND_CANCELLATION",
+        "code": "ITAG_INVALID_INTENT_REVISION",
+        "verdict": "REJECT",
+        "node_ids": [
+          "intent_1cf929948f2c453b90c32d83f4a0444e",
+          "bench_sample:2"
+        ],
+        "detail": "The workflow authorization is no longer active for this revision."
+      },
+      {
+        "policy": "AUTHORIZED_ACTION_PROVENANCE",
+        "code": "ITAG_ACTION_SCOPE_MISMATCH",
+        "verdict": "REJECT",
+        "node_ids": [
+          "intent_1cf929948f2c453b90c32d83f4a0444e",
+          "bench_sample:2"
+        ],
+        "detail": "The candidate does not match the authenticated mandate, chain, tokens, recipient or deadline."
+      }
+    ],
+    "blocked_candidate_action_ordinal": 3,
+    "model_inference": "Scripted regression response over the supplied graph.",
+    "recovery": "Review the cited task constraints. Submit a new candidate only within authenticated limits."
+  }
+}

@@ -1,0 +1,99 @@
+{
+ "latency_s": {
+  "/v1/demo/select": 0.05,
+  "/healthz": 0.02,
+  "/v1/demo/readiness": 3.3,
+  "/v1/demo/account": 0.59,
+  "/v1/demo/treasury": 43.42,
+  "/v1/demo/workflows/workflow_724252666ee6447a82ac0a6bb18d00ca": 0.11,
+  "/v1/demo/workflows/workflow_00370cd7f0c3479aacf9c9faced7940f": 0.05,
+  "/v1/itag/assessments/0x0000000000000000000000000000000000000000000000000000000000000000": 0.0
+ },
+ "/healthz": {
+  "status": "ok",
+  "mode": "FUJI"
+ },
+ "/v1/demo/readiness": {
+  "source": "CHAIN",
+  "mode": "FUJI",
+  "block_number": 61377729,
+  "block_hash": "0x2cd1f918b79a3e95b76dda3b064f36b8fd6bf4541a13cde96e2c08669bd61f12",
+  "session": {
+   "session_id": "0x9eb4d7b5afe9e3e516d0b31efa451f0823fbc97bf13a63e81361106c0eed9098",
+   "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+   "starts_at": 1795162614,
+   "expires_at": 1795249014,
+   "active": true,
+   "limit_usd_e8": "1000000000",
+   "used_usd_e8": "0",
+   "global_limit_usd_e8": "2000000000",
+   "global_used_usd_e8": "0",
+   "block_number": 61377729,
+   "block_hash": "0x2cd1f918b79a3e95b76dda3b064f36b8fd6bf4541a13cde96e2c08669bd61f12",
+   "timestamp": 1795176947
+  },
+  "reason_codes": [],
+  "broadcast": false,
+  "scope": "Policy/session/credit only; oracle, funding/exposure and all execution gates remain mandatory"
+ },
+ "/v1/demo/account": {
+  "spent_wei": "0",
+  "reserved_wei": "0",
+  "available_wei": "1000000000000000"
+ },
+ "/v1/demo/treasury": {
+  "mode": "FUJI",
+  "portfolio": {
+   "snapshot_id": "snapshot_00b8f67ba6a74303993ff646269309f6",
+   "chain_id": 43113,
+   "vault_address": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+   "block_number": 61377730,
+   "usdc_base_units": "1378",
+   "wavax_base_units": "66137381683518",
+   "price_usdc_usd_e8": "99981087",
+   "price_wavax_usd_e8": "677221503",
+   "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+   "price_timestamp": 1795121325,
+   "history_version": 0,
+   "oracle_observed_at": 1795176988,
+   "oracle_block_number": 61377750,
+   "oracle_block_hash": "0xaa4259d60ef9853221c3a974887668e36f1eb61395b7b169cc68ba5797dcde1b",
+   "oracle_feeds": [
+    {
+     "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+     "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+     "description": "USDC/USD",
+     "decimals": 8,
+     "answer_raw": "99981087",
+     "round_id": "18446744073709552589",
+     "answered_in_round": "18446744073709552589",
+     "started_at": 1795121325,
+     "updated_at": 1795121325,
+     "max_age_seconds": 86400,
+     "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+    },
+    {
+     "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+     "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+     "description": "AVAX/USD",
+     "decimals": 8,
+     "answer_raw": "677221503",
+     "round_id": "55340232221128821047",
+     "answered_in_round": "55340232221128821047",
+     "started_at": 1795176482,
+     "updated_at": 1795176482,
+     "max_age_seconds": 600,
+     "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+    }
+   ]
+  }
+ },
+ "/v1/itag/assessments/0x0000000000000000000000000000000000000000000000000000000000000000": {
+  "error": "HTTP Error 401: Unauthorized"
+ },
+ "previous_demo_request": {
+  "state": "WAITING_FOR_ORACLE",
+  "actual_session_has_historical_demo": false
+ },
+ "historical_origin": "checked-in docs/audit/web-demo-fuji-chain-evidence.json"
+}

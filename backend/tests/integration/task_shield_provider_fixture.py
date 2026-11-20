@@ -17,7 +17,12 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         payload = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         data = json.loads(payload["messages"][1]["content"])
-        if "graph" in data:
+        if "bound_task_id" in data:
+            values = dict(task_id=data["bound_task_id"], action_ref=data["action_ref"],
+                          finding_type="OBJECTIVE_ALIGNMENT", verdict="ALIGNED",
+                          evidence_refs=[next(iter(data["evidence_catalog"])), data["action_ref"]],
+                          explanation="Scripted HTTP fixture; not model accuracy.")
+        elif "graph" in data:
             candidate = data["candidate_action_id"]
             task = data["active_task_ids"][0]
             values = {

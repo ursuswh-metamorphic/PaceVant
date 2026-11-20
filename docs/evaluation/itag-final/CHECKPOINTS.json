@@ -1,0 +1,171 @@
+{
+ "doctor": {
+  "network": "fuji",
+  "configuration_ready": true,
+  "checks": [
+   {
+    "name": "planner_configuration",
+    "status": "OK",
+    "reason": "rotate"
+   },
+   {
+    "name": "ai_provider_order",
+    "status": "OK",
+    "reason": "deepseek,groq,gemini,xingchi"
+   },
+   {
+    "name": "shield_configuration",
+    "status": "OK",
+    "reason": "wallet_pipeline"
+   },
+   {
+    "name": "itag_shield_requirement",
+    "status": "OK",
+    "reason": "Required ITAG needs an active semantic shield"
+   },
+   {
+    "name": "shield_provider_credentials",
+    "status": "OK",
+    "reason": "Presence check; live model availability is evaluated during requests"
+   },
+   {
+    "name": "demo_user_configuration",
+    "status": "OK",
+    "reason": "Scoped access; sponsor gas credit is off-chain, not a wallet balance"
+   },
+   {
+    "name": "B_API_KEY",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "PACEVANT_OPERATOR_TOKEN",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "PACEVANT_INTERNAL_TOKEN",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "credential_separation",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "B_FUJI_OWNER_PRIVATE_KEY",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "B_FUJI_RELAYER_PRIVATE_KEY",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "PACEVANT_ATTESTOR_KEY",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "TREASURY_MAX_RELATIVE_LOSS_BPS",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "TREASURY_MAX_FIXED_LOSS_USD",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "TREASURY_ORACLE_BAND_BPS",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "TREASURY_POSTCONDITION_TOLERANCE_BPS",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "TREASURY_SESSION_RISK_LIMIT_USD",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "TREASURY_GLOBAL_DAILY_RISK_LIMIT_USD",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "owner_policy_approval",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "wallet_roles_and_testnet_ack",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "deployment_manifest",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "rpc_chain",
+    "status": "OK",
+    "reason": ""
+   },
+   {
+    "name": "owner_gas_funding",
+    "status": "OK",
+    "reason": "Deployment/transactions need test AVAX; doctor does not assume a universal gas amount"
+   },
+   {
+    "name": "relayer_gas_funding",
+    "status": "OK",
+    "reason": "Deployment/transactions need test AVAX; doctor does not assume a universal gas amount"
+   },
+   {
+    "name": "historical_state_reads",
+    "status": "OK",
+    "reason": ""
+   }
+  ],
+  "rpc": {
+   "requested_chain_id": 43113,
+   "rpc_host": "avalanche-fuji-c-chain-rpc.publicnode.com",
+   "actual_chain_id": 43113,
+   "block": 61377533,
+   "owner": {
+    "address": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+    "test_avax_wei": "27873064882675760"
+   },
+   "relayer": {
+    "address": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C",
+    "test_avax_wei": "1999999706328263"
+   },
+   "attestor": {
+    "address": "0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989",
+    "test_avax_wei": "499999924946240"
+   }
+  }
+ },
+ "legacy": {
+  "scenario_count": 30,
+  "label_mismatches": [],
+  "exact_first_step_matches": 21,
+  "grounded_reference_sets": 30,
+  "hybrid_only_interventions": [
+   "late-plan-change",
+   "tool-authority-laundering"
+  ]
+ },
+ "final_scripted_rerun": {
+  "n": 24,
+  "prompt": "itag-trajectory-v2.3",
+  "different_cases": []
+ }
+}

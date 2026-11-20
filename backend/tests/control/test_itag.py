@@ -171,7 +171,7 @@ def test_benchmark_scope_and_source_regressions(tmp_path, case_id):
     case = next(c for c in load_cases(root / "fixtures/itag/scenarios.csv") if c["id"] == case_id)
     result = run_case(
         Store(tmp_path / "bench.sqlite3"),
-        ShieldConfig(mode="paper", context_chars=100000),
+        ShieldConfig(mode="paper", context_chars=100000, algorithm="legacy-score-v1"),
         case,
         Mandate.model_validate_json((root / "fixtures/mock/mandate.json").read_bytes()),
         json.loads((root / "fixtures/mock/normal_swap.json").read_bytes()),
@@ -238,7 +238,7 @@ def test_semantic_veto_and_reference_validation(api, finding, result, code):
     assert view["explanation"]["assessment"]["violating_node_ids"]
 
 
-def test_replan_to_authorized_bound(api):
+def test_exact_user_amount_cannot_be_silently_reduced_to_itag_bound(api):
     client, _ = api
     spec = create(
         client,
@@ -246,11 +246,10 @@ def test_replan_to_authorized_bound(api):
         100,
         [{"step_id": "swap", "min_amount": "50000000", "max_amount": "100000000"}],
     )
-    assert start(client, spec, amount=150).json()["status"] == "CONFIRMED"
+    assert start(client, spec, amount=150).json()["status"] == "REJECTED"
     view, history = audit(client, spec)
-    assert [row["verdict"] for row in history["assessments"]] == ["PASS", "REPLAN"]
-    assert history["ledger"][0]["build"]["amount_in_base_units"] == "100000000"
-    assert view["latest_outcome"]["verification"]["canonical"]
+    assert history["ledger"] == []
+    assert view["decision"]["verdict"] == "REJECT"
 
 
 def test_signing_race_and_stale_graph(api, monkeypatch):
@@ -446,7 +445,7 @@ def test_scripted_provider_ignores_expected_labels(tmp_path):
     for index, expected in enumerate(["ALIGNED", "MISALIGNED"]):
         result = run_case(
             Store(tmp_path / f"blind-{index}.sqlite3"),
-            ShieldConfig(mode="paper", context_chars=100000),
+            ShieldConfig(mode="paper", context_chars=100000, algorithm="legacy-score-v1"),
             {**case, "trajectory_alignment": expected},
             Mandate.model_validate_json((root / "fixtures/mock/mandate.json").read_bytes()),
             json.loads((root / "fixtures/mock/normal_swap.json").read_bytes()),

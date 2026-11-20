@@ -223,7 +223,7 @@ class Relayer:
             {
                 "from": account.address,
                 "chainId": b.chain_id,
-                "nonce": self.chain.w3.eth.get_transaction_count(account.address, "pending"),
+                "nonce": self.store.transaction_nonce(account.address, self.chain.w3.eth.get_transaction_count(account.address, "pending")),
                 "gas": (gas * 110 + 99) // 100 + 5000 if billed else system_gas,
                 "gasPrice": system_price,
             }

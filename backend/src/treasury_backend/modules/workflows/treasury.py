@@ -48,6 +48,7 @@ class TreasuryWorkflows:
             ),
             authenticated=True,
         )
+        shield.state.fixed_scope(session, intent, self.clock())
         return ShieldRuntime(shield, session)
 
     def run(self, intent, key):
@@ -155,6 +156,7 @@ class TreasuryWorkflows:
                 runtime.before(
                     "execute_fixed_operation",
                     {
+                        **intent.model_dump(mode="json"),
                         "build_id": built["build_id"],
                         "intent_hash": intent.hash,
                         "proof_hash": proof["proof_hash"],

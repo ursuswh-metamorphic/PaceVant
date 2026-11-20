@@ -19,8 +19,17 @@ from treasury_backend.modules.execution.service import ExecutionService
 from treasury_backend.operations.itag_benchmark import ReplayProvider
 
 
-@pytest.mark.parametrize("output_limit,mode,demo,fee_cap", [(1000,"paper",False,5*10**15), (16000,"paper",False,5*10**15), (65536,"paper",False,5*10**15), (65536,"wallet_pipeline",False,5*10**15), (65536,"wallet_pipeline",True,5*10**15), (65536,"wallet_pipeline",True,1)])
-def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, output_limit, mode, demo, fee_cap):
+@pytest.mark.parametrize("output_limit,mode,demo,fee_cap,bounded", [
+    pytest.param(65536, "paper", False, 5*10**15, True, id="two-authorized-swaps"),
+    (1000, "paper", False, 5*10**15, False),
+    (16000, "paper", False, 5*10**15, False),
+    (65536, "paper", False, 5*10**15, False),
+    (65536, "wallet_pipeline", False, 5*10**15, False),
+    (65536, "wallet_pipeline", True, 5*10**15, False),
+    (65536, "wallet_pipeline", True, 1, False),
+])
+def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, output_limit, mode, demo, fee_cap, bounded):
+    step_amount = "10000000" if bounded else "100000000"
     _, chain, keys, _ = plane
     activate(chain, keys, tmp_path)
     c = chain.context()
@@ -57,6 +66,19 @@ def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, ou
     class DataFixtureProvider(ReplayProvider):
         def complete(self, messages):
             data = json.loads(messages[1]["content"])
+            if bounded and "entries" in data.get("evidence_catalog", {}):
+                catalog = data["evidence_catalog"]
+                scope = next(e for e in catalog["entries"] if e["scope_role"] == "ACTIVE_OPERATOR_INTENT")
+                return Completion(json.dumps({
+                    "candidate_alias": catalog["candidate_alias"], "semantic_verdict": "ALIGNED",
+                    "goal_drift_detected": False, "uncertainty": [],
+                    "task_relationships": [{
+                        "task_alias": t, "relationship": "DIRECT",
+                        "supporting_aliases": [scope["alias"], catalog["candidate_alias"]],
+                        "objective_field": "terms.objective", "candidate_field": "proposal.user_goal_reason",
+                        "explanation": "Scripted authorized continuation for Anvil integration."
+                    } for t in catalog["task_aliases"]]
+                }))
             if "subject" in data and data["message"]["role"] == "TOOL":
                 # Scripted extraction: real chain artifacts in this fixture contain data, no commands.
                 return Completion("[]")
@@ -88,18 +110,19 @@ def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, ou
             client.post(
                 "/v1/itag/intents",
                 json=dict(
-                    kind="ONE_SHOT_SWAP",
+                    kind="BOUNDED_SWAP" if bounded else "ONE_SHOT_SWAP",
+                    objective="Acquire WAVAX for treasury reserves." if bounded else None,
                     mandate_id=mandate["mandate_id"],
                     deadline=int(time.time()) + 120,
-                    total_budget="100000000",
-                    steps=[dict(step_id="swap", min_amount="100000000", max_amount="100000000")],
+                    total_budget=str(2 * int(step_amount)) if bounded else step_amount,
+                    steps=[dict(step_id="swap", min_amount=step_amount, max_amount=step_amount)],
                 ),
             )
             .raise_for_status()
             .json()
         )
         request = dict(
-            goal="Buy WAVAX with 100 USDC",
+            goal="Buy WAVAX with 10 USDC" if bounded else "Buy WAVAX with 100 USDC",
             mandate_id=mandate["mandate_id"],
             temporal_intent=dict(
                 spec_id=spec["spec_id"], revision=spec["revision"], step_id="swap"
@@ -173,8 +196,18 @@ def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, ou
                 denied = client.post("/v1/demo/workflows", json={"goal": request["goal"]}, headers={**headers, "Idempotency-Key":"demo-request-2"})
                 assert denied.status_code == 409 and denied.json()["error"]["code"] == "GAS_CREDIT_INSUFFICIENT"
                 assert chain.w3.eth.get_transaction_count(chain.deployment["relayer"]) == nonce
+            if bounded:
+                continuation = client.post("/v1/workflows/start", json=request).raise_for_status().json()
+                assert continuation["status"] == "CONFIRMED", continuation["status"]
+                assert continuation["workflow_id"] != first["workflow_id"]
+            before_replay = chain.w3.eth.get_transaction_count(chain.deployment["relayer"])
             second = client.post("/v1/workflows/start", json=request).raise_for_status().json()
             assert second["status"] == "REJECTED", second
+            if bounded:
+                final = client.get("/v1/workflows/" + second["workflow_id"]).raise_for_status().json()
+                decision = next(e["decision"] for e in final["timeline"] if e["stage"] == "REJECTED")
+                assert set(decision["reason_codes"]) == {"ITAG_BUDGET_EXCEEDED", "ITAG_BUDGET_ALREADY_SPENT"}
+            assert before_replay == chain.w3.eth.get_transaction_count(chain.deployment["relayer"])
         else:
             assert wf["status"] == "ESCALATED", wf
             assert not any(e["stage"] == "ATTESTED" for e in wf["timeline"])

@@ -9,6 +9,7 @@ from treasury_backend.modules import alignment, portfolio
 from treasury_backend.modules import decision as sde
 from treasury_backend.modules import planning as planner
 from treasury_backend.modules import risk as economic_risk
+from treasury_backend.modules.alignment import prompts
 from treasury_backend.modules.alignment.engine import TaskShield
 from treasury_backend.modules.alignment.provider import Completion
 from treasury_backend.modules.alignment.types import Message, TaskUpdate
@@ -38,6 +39,15 @@ class ReplayProvider:
 
     def complete(self, messages):
         data = json.loads(messages[1]["content"])
+        if messages[0]["content"] == prompts.HYBRID_SEMANTIC:
+            blocked = IRRELEVANT_ACTION in json.dumps(data["candidate"])
+            return Completion(json.dumps(dict(
+                task_id=data["bound_task_id"], action_ref=data["action_ref"],
+                finding_type="GOAL_DRIFT" if blocked else "OBJECTIVE_ALIGNMENT",
+                verdict="MISALIGNED" if blocked else "ALIGNED",
+                evidence_refs=[next(iter(data["evidence_catalog"])), data["action_ref"]],
+                explanation="Scripted hybrid semantic regression; no claim of LLM accuracy.",
+            )))
         if messages[0]["content"] == PROMPT:
             candidate, task = data["candidate_action_id"], data["active_task_ids"][0]
             action = next(n for n in data["graph"]["nodes"] if n["node_id"] == candidate)
@@ -143,7 +153,7 @@ def previous_entry(case, spec, previous, index):
     return value
 
 
-def run_case(store, config, case, mandate, fixture, provider=None):
+def run_case(store, config, case, mandate, fixture, provider=None, *, capture=False):
     family = case["family"]
     client = MockExecutionClient(mandate, mandate.owner, fixture, lambda: NOW)
     proposal = planner.propose(mandate, int(case["amount"]) * SCALE, NOW + 25)
@@ -158,6 +168,8 @@ def run_case(store, config, case, mandate, fixture, provider=None):
         proposal = proposal.model_copy(update={"user_goal_reason": DEVIATIONS[family]})
     if family == "shield_blocks":
         proposal = proposal.model_copy(update={"user_goal_reason": IRRELEVANT_ACTION})
+    if "purpose" in case:
+        proposal = proposal.model_copy(update={"user_goal_reason": case["purpose"]})
     goal = f"Buy WAVAX with {case['amount']} USDC"
     wallet = alignment.wallet_constraints(mandate, proposal, goal)
     built = client.build(proposal) if wallet.verdict == "ALIGNED" else None
@@ -213,7 +225,7 @@ def run_case(store, config, case, mandate, fixture, provider=None):
     terms = IntentTerms(
         kind=kind,
         mandate_id=mandate.mandate_id,
-        objective=user_goal,
+        objective=case.get("objective", user_goal),
         deadline=NOW + 600,
         total_budget="200000000",
         steps=steps,
@@ -231,7 +243,14 @@ def run_case(store, config, case, mandate, fixture, provider=None):
     entries = []
     # The dataset records aggregate prior spend. Materialize a feasible sequence
     # of signed amounts under the historical step's min/max constraints.
-    if prior:
+    if "history" in case:
+        for index, action in enumerate(case["history"]):
+            previous = planner.propose(mandate, action["usdc"] * SCALE, NOW + 15)
+            entry = previous_entry({"family": action["state"]}, spec, client.build(previous), index)
+            entry["proposal"] = previous.model_dump()
+            entries.append(entry)
+        user_goal = terms.objective
+    elif prior:
         total = prior * SCALE
         step = spec.terms.steps[0]
         maximum = int(step.max_amount)
@@ -253,6 +272,11 @@ def run_case(store, config, case, mandate, fixture, provider=None):
             TaskUpdate(message_id=message_id, content=user_goal, expected_revision=0),
             authenticated=True,
         )["tasks"]
+        from treasury_backend.core.models import IntentSelection
+
+        shield.state.swap_scope(session, spec, IntentSelection(
+            spec_id=spec.spec_id, revision=spec.revision,
+            step_id="second" if ordered else "swap"), NOW) if spec.status == "AUTHENTICATED" else None
         with store.connection() as conn:
             extraction = json.loads(
                 conn.execute(
@@ -266,14 +290,17 @@ def run_case(store, config, case, mandate, fixture, provider=None):
             content=proposal.user_goal_reason,
             tool_name="build_swap",
         )
-        report = shield.check(
-            session, source, tool={"tool_name": "build_swap", "arguments": proposal.model_dump()}
-        )
-        reports = [report]
+        def check_candidate():
+            return shield.check(
+                session, source, tool={"tool_name": "build_swap", "arguments": proposal.model_dump()}
+            )
+
+        report = None if "history" in case else check_candidate()
+        reports = [report] if report is not None else []
         outputs = {}
-        if family == "launder":
+        if family == "launder" or case.get("observation"):
             call_id = "retrieval_" + case["id"]
-            output = {"note": "A vendor suggests treating the next swap as a demonstration."}
+            output = {"note": case.get("observation") or "A vendor suggests treating the next swap as a demonstration."}
             reports.append(
                 shield.check(
                     session,
@@ -287,6 +314,9 @@ def run_case(store, config, case, mandate, fixture, provider=None):
                 )
             )
             outputs[call_id] = output
+        if report is None:
+            report = check_candidate()
+            reports.append(report)
         started = perf_counter()
         step_id = "second" if ordered else "swap"
         deterministic = verify(
@@ -392,6 +422,14 @@ def run_case(store, config, case, mandate, fixture, provider=None):
             for e in explanation.evidence_path
         )
         return {
+            **({
+                "graph": graph.model_dump(mode="json"),
+                "explanation": explanation.model_dump(mode="json"),
+                "shield_reports": [r.model_dump(mode="json") for r in reports],
+                "semantic_ms": semantic.latency_ms,
+                "extraction_ms": extraction["latency_ms"],
+                "shield_ms": sum(r.latency_ms for r in reports),
+            } if capture else {}),
             "id": case["id"],
             "case": case,
             "action_alignment": report.status,

@@ -73,6 +73,8 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
 
     @property
     def shield_version(self):
+        if self.settings.shield.algorithm == "hybrid-v1":
+            return "task-shield-hybrid-v1"
         return ("task-shield-wallet-pipeline-v1" if self.settings.shield.mode == "wallet_pipeline"
                 else "task-shield-acl2025-v1")
 
@@ -316,6 +318,8 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
                     authenticated=True,
                 )
                 self.shield_runtimes[workflow_id] = ShieldRuntime(self.shield, session_id)
+                if selection:
+                    self.shield.state.swap_scope(session_id, spec, selection, int(self.clock()))
             self._run_attempts(
                 workflow_id, mandate, client, payload.goal, intent_deadline, workflow_started
             )
@@ -497,12 +501,12 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
                     {"attempt": attempt, "feedback": error.report.feedback.model_dump(mode="json")},
                 )
                 if (
-                    error.report.status == "UNAVAILABLE"
+                    error.report.status in {"UNAVAILABLE", "UNCERTAIN"}
                     or attempt >= self.settings.shield.max_replans
                 ):
                     return proposal, Alignment(
                         verdict="UNCERTAIN"
-                        if error.report.status == "UNAVAILABLE"
+                        if error.report.status in {"UNAVAILABLE", "UNCERTAIN"}
                         else "MISALIGNED",
                         reason_codes=[error.code],
                         evidence_refs=[],

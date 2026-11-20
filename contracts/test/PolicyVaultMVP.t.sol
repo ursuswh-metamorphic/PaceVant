@@ -9,6 +9,15 @@ import {FeeUSDC,V3Vm} from "./PolicyVaultV3.t.sol";
 import {Vm} from "./PolicyVault.t.sol";
 
 contract PolicyVaultMVPTest {
+    function testMergedLocalTransferCannotBypassMvp() public {
+        PolicyVault.TransferRecipient memory rule;
+        vm.expectRevert(PolicyVault.InvalidCall.selector);
+        v.configureTransferRecipient(address(u),PAYEE,rule);
+        PolicyVault.TransferApprovalV2 memory approval;
+        vm.expectRevert(PolicyVault.InvalidCall.selector);
+        v.executeApprovedTransferV2(approval,hex"");
+        require(address(v).code.length <= 24576,"EIP170");
+    }
     receive() external payable {}
     Vm constant vm=Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint256 constant LOCAL_SIGNER=0x5633;

@@ -34,8 +34,32 @@ def explain(assessment, graph):
     }[assessment.verdict]
     if "ITAG_CANDIDATE_EXPIRED" in assessment.reason_codes:
         recovery = "Create a fresh candidate and repeat the checks within its approval window."
+    candidate = next((n for n in graph.nodes if n.node_id == assessment.candidate_action_id), None)
+    proposal = (candidate.data.get("proposal") or {}) if candidate else {}
+    facts = {
+        "intent_records": [
+            {"node": n.node_id, "trust": n.trust, "revision": n.data.get("revision"),
+             "status": n.data.get("effective_status", n.data.get("status")), "terms": n.data["terms"]}
+            for n in graph.nodes if n.kind == "AUTHENTICATED_USER_INTENT" and "terms" in n.data
+        ],
+        "candidate": {k: proposal.get(k) for k in (
+            "intent_id", "action", "chain_id", "token_in", "token_out", "recipient",
+            "amount_in_base_units", "user_goal_reason")},
+        "budget_in_token_base_units": {"spent": assessment.deterministic.spent,
+                                       "reserved": assessment.deterministic.reserved,
+                                       "remaining": assessment.deterministic.remaining},
+        "prior_outcomes": [
+            {"node": n.node_id, "state": n.data.get("state"), "trust": n.trust,
+             "invalidated": n.data.get("invalidated")} for n in graph.nodes
+            if n.kind == "TRANSACTION_OUTCOME"
+        ],
+        "stage": "PRE_SIGN", "first_semantic_divergence_step": None,
+        "semantic_anchors": semantic.provider_metadata.get("semantic_anchors", []),
+        "semantic_text_status": "MODEL_INFERENCE",
+    }
     return ExplainableTemporalAssessment(
         assessment=assessment,
+        recorded_facts=facts,
         decision_summary=summary,
         semantic_deviation=finding.reasoning_summary
         if finding

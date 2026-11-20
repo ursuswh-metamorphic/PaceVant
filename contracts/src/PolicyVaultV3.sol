@@ -12,6 +12,10 @@ import {ISwapAdapter} from "./interfaces/ISwapAdapter.sol";
 /// @notice Explicit new deployment. Fixed calls only; V1/V2 execution is permanently disabled.
 contract PolicyVaultV3 is PolicyVault {
     using SafeERC20 for IERC20;
+    // The separate LOCAL V2 transfer protocol must not bypass typed V3/MVP operations.
+    function configureTransferRecipient(address, address, TransferRecipient calldata) external pure override { revert InvalidCall(); }
+    function hashTransferApprovalV2(TransferApprovalV2 calldata) public pure override returns (bytes32) { revert InvalidCall(); }
+    function executeApprovedTransferV2(TransferApprovalV2 calldata, bytes calldata) external pure override { revert InvalidCall(); }
     // 1 swap, 2 payment, 3 deposit assets, 4 redeem shares. Rebalance is a bounded swap.
     struct Operation {
         uint8 kind;
