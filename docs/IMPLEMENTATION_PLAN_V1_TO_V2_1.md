@@ -1,5 +1,8 @@
 # IMPLEMENTATION PLAN — AI Treasury Security V1 → V2.1 (Lean Proof-Gated Treasury)
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > **Audience:** AI coding agent đang chạy tại **root repository của dự án thực tế**.  
 > **Loại tài liệu:** Execution plan + migration specification + acceptance tests; không phải mô tả code hiện có.  
 > **Ngày soạn:** 19/11/2026.  

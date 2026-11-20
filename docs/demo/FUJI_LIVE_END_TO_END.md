@@ -1,5 +1,8 @@
 # Demo toàn bộ hệ thống trên Avalanche Fuji
 
+> **DOC STATUS: HISTORICAL_RUNBOOK - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > **Historical checkpoint:** current configuration, artifact fixes, owner-approved TTL=300, required ITAG, model rotation and validation are documented in [the current Fuji ITAG runbook](FUJI_ITAG_LIVE.md). Statements below about disabled Shield/optional ITAG or the unresolved 16k artifact limit describe the earlier checkpoint, not the current profile.
 
 Tài liệu cho bản code hiện tại: một FastAPI Python, Groq thật, Chainlink đọc RPC, vault V2 và LFJ trên Fuji chain `43113`. Mục tiêu nghiệm thu là chứng minh một yêu cầu đi qua đủ các gate rồi tạo giao dịch có thể kiểm tra độc lập. Testnet token và phép định giá USD tham chiếu không mang ý nghĩa tài sản có thể quy đổi thành USD thật.

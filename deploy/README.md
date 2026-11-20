@@ -1,49 +1,33 @@
-# Triển khai backend và frontend
+# Deployment guidance
 
-Backend là Python + native Anvil, Solidity đã compile trong image build; frontend là static ES modules qua Nginx. Backend/Frontend có Dockerfile riêng và build context đều là repository root. Không cần Node trên server.
+> **DOC STATUS: COMPONENT_REFERENCE** — đối chiếu runtime source `3f9f9af`, 20/11/2026. Hosting chưa có end-to-end smoke evidence. [Current design](../docs/AI_Treasury_Security_System_Design_v2.1.md) là nguồn tổng hợp chính.
 
-## Chuẩn bị một lần
+Backend dùng Python/FastAPI và native Anvil. Dockerfile root compile Solidity trong build stage, runtime dùng artifacts đã build để mô phỏng và tương tác với contracts trên Avalanche. Server không thay blockchain; không cần Node backend. Frontend có thể serve chung API hoặc Nginx/static host riêng.
 
-1. Deploy contracts V2 Fuji từ máy quản trị theo [runbook](../docs/demo/AVALANCHE_FUJI_DEMO.md). Lệnh deploy gửi giao dịch thật trên testnet; serving container không deploy.
-2. Lưu manifest tạo được thành `deploy/treasury-fuji-v2.json`. Đây là manifest public, không có private key. Kiểm tra đúng chain/vault/session/code hashes.
-3. Copy `runtime.env.example` thành `runtime.env` (được Git ignore). Điền actual values, không dùng alias `${...}`. Chỉ đưa attestor/relayer keys lên server; owner key giữ ở máy quản trị. Risk settings phải khớp on-chain policy.
-4. Cấp persistent volume `/var/data` và chạy một backend instance. Giữ SQLite, proof/audit, artifacts và relay journal qua restart; không xóa để xử lý giao dịch pending.
+## Trước khi dùng Compose/Render/VPS
 
-## VPS với Compose
+`runtime.env.example` là **HISTORICAL_TEMPLATE**, chưa đủ flag/config của current Fuji profile: defaults session/TTL/provider cũ, thiếu one-click demo/Shield/ITAG settings. Không copy nguyên rồi coi đó là cấu hình hiện tại. Đối chiếu `.env.example`, effective profile trong [sanitized inventory](../docs/current-system-inventory.json), `operations/environments.py` và `operations/container.py`; tạo private runtime config không có owner/deployer/Demo User private key. Không upload root private `.env` lên frontend/hosting.
 
-```sh
-docker compose build
-docker compose up -d
-docker compose ps
-docker compose logs --tail=100 backend
-```
+Runtime cần attestor/relayer keys và các service/model credentials đúng scope. Ba service tokens phải khác nhau; demo signing secret riêng. Bật demo cần required ITAG + wallet_pipeline/wallet_hardened và real execution. Chọn direct Chainlink mapping cho Circle USDC/WAVAX, đúng manifests/policy/session. Đổi env không thay policy đã deploy.
 
-Compose đọc `deploy/runtime.env`, mount manifest read-only và volume `treasury-data`. Frontend tại http://127.0.0.1:8080 proxy tới backend ở mạng Docker; không còn B server/cổng API nội bộ. Chỉ fork Anvil dùng loopback tạm trong backend container. Đặt reverse proxy HTTPS của VPS trước cổng 8080 khi public. Nginx proxy cả `/v1`, `/v2`, `/execution` tới cùng một backend; không cần CORS vì cùng browser origin.
+Giữ **một backend instance/worker**, persistent disk cho cả control và execution databases, proofs/artifacts, send/owner journals. Mount public deployment manifest read-only; xác minh chain/vault/code/session trước dùng. Không reset DB hoặc dùng ephemeral storage để chữa pending transaction.
 
-Sau startup xem `/healthz`, đăng nhập dashboard bằng operator token và chạy một workflow có scope phù hợp. Health OK chỉ phản ánh API đang chạy; không chứng minh mọi proposal đủ policy/session/risk budget. Sau restart kiểm tra journal/history còn nguyên trước khi gửi tiếp. Dừng bằng `docker compose down`; tránh `down -v` vì xóa dữ liệu.
+## Files hiện có và phạm vi
 
-## Render hoặc frontend khác host
-
-Render backend: Docker Web Service, Dockerfile `Dockerfile`, giữ CMD mặc định `python -m treasury_backend.operations.container`, health `/healthz`, một instance, persistent disk `/var/data`, secret file manifest tại `/etc/secrets/treasury-fuji-v2.json`. Điền runtime env từ template; không upload root `.env`. Xem [runbook hosting đầy đủ](../docs/deployment/PYTHON_BACKEND_RENDER_VPS.md).
-
-Frontend: publish folder `frontend/` lên static hosting; không cần build command. Đặt public API URL trong `frontend/assets/config.js`, rồi đặt `PACEVANT_CORS_ORIGINS=https://frontend-domain` trên backend và giữ `PACEVANT_SERVE_FRONTEND=false`. Không dùng wildcard, không đưa token/private key vào frontend config. Hoặc chạy Nginx image với `BACKEND_URL` trỏ API và dùng cùng origin. Static hosting không có proxy cần API link trỏ trực tiếp backend nếu muốn mở Swagger.
-
-## Biến mới trong refactor
-
-Không thêm secret bắt buộc và không sửa `.env` đang có. Các biến tùy chọn có default:
-
-| Biến | Default / cách dùng |
+| File | Vai trò |
 | --- | --- |
-| `PACEVANT_SERVE_FRONTEND` | `true` local; Docker/Compose đặt `false` |
-| `PACEVANT_CORS_ORIGINS` | trống; danh sách exact HTTP(S) origins phân cách bằng dấu phẩy khi frontend khác origin |
-| `TREASURY_ORACLE_MODE` | `demo`; `external` ngăn demo writer ghi đè file oracle |
-| `TREASURY_ORACLE_SOURCE_ID` | `TRUSTED_TEST_ORACLE`; nguồn mới phải được review và cập nhật owner policy |
-| `BACKEND_URL` | chỉ Nginx frontend container; default `http://backend:10000` |
+| `../Dockerfile` | Foundry build stage + Python/native Anvil runtime |
+| `../compose.yaml` | Backend + frontend Nginx, private runtime env, manifest mount, persistent volume |
+| `../frontend/Dockerfile` | Static frontend, proxy về cùng backend |
+| `runtime.env.example` | Template lịch sử, cần reconcile trước khi sử dụng |
+| `../backend/src/treasury_backend/operations/container.py` | Owner-free hosted startup, PORT/data paths |
 
-Backend hiện là một FastAPI/Uvicorn. Attestor và relayer cùng process; owner key vẫn không đưa lên server. `TREASURY_B_PORT`, `PACEVANT_B_URL`, `PACEVANT_B_TOKEN` là cấu hình legacy, không cần cho runtime gộp. `B_API_KEY` vẫn bảo vệ endpoint execution. Xem [kiến trúc backend gộp](../docs/architecture/UNIFIED_BACKEND.md).
+Backend entrypoint là `python -m treasury_backend.operations.container`. Frontend proxy dùng `BACKEND_URL`; nếu static host khác origin thì public `frontend/assets/config.js` chỉ chứa API base URL và backend bật exact CORS origins. Cần cho phép Authorization/Content-Type/Idempotency-Key. Không đặt bất kỳ key/token nào trong assets.
 
-Runtime secrets/config đầy đủ nằm trong [template](runtime.env.example). Thiếu manifest Fuji thật thì chưa thể chạy hosted Fuji, dù env đầy đủ. Oracle thật chưa merge: external mode là giao diện tích hợp, không tự tạo market feed.
+Render có thể dùng Docker Web Service và persistent disk; VPS có thể dùng Compose cùng HTTPS reverse proxy. Đây là khả năng cấu trúc triển khai, chưa phải xác nhận deployment đã chạy. Cần kiểm image/native binary, startup, secret filtering, session/funding/provider readiness, browser/proxy/CORS, restart/persistence và billing reconciliation trước khi công bố hosting sẵn sàng.
 
-## Giới hạn xác minh
+## An toàn thao tác
 
-Python/local chain và contract tests được chạy trên máy phát triển. Docker engine local chưa hoạt động nên chưa build/run hai image hoặc deploy Render/VPS; CI đã có build và kiểm tra runtime riêng. Cần thực hiện image smoke, restart/persistence và một workflow Fuji sau khi có manifest/secrets/hạ tầng thật. Không có giao dịch Fuji hay thay đổi hosting trong refactor này.
+Build/start container không nên tự deploy contract hoặc chạy goal swap. `/healthz` chỉ liveness. Deployment/renew/setup là lệnh owner có transaction và phí; thực hiện riêng trên máy operator khi cần, không gắn vào container restart. Giữ logs private và không in authenticated RPC URLs/raw tx/keys. Không dùng `docker compose down -v` như thao tác restart vì sẽ xóa persistent state.
+
+Để demo tại máy operator trước khi hosting, dùng [current runbook](../docs/demo/DEMO_USER_GAS_CREDIT.md) và [design mục 20](../docs/AI_Treasury_Security_System_Design_v2.1.md#20-vận-hành-demo-và-chuẩn-bị-phản-biện). Các hướng dẫn hosting cũ trong `docs/deployment/` chỉ là lịch sử.

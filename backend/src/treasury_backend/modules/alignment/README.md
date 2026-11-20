@@ -1,5 +1,7 @@
 # alignment
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 Task Shield was ported from main into this module. `engine.py` extracts authenticated user objectives and scores candidate instructions; `state.py` persists objective revisions/audit; `runtime.py` intercepts assistant/tool calls and outputs; `provider.py` supports bounded Chat Completions/Responses requests, including Xingchi. `api.py` exposes authenticated inspection/objective endpoints. `service.py` retains deterministic wallet constraints independently of the model.
 
 The Fuji demo env template enables `wallet_pipeline` with official DeepSeek Flash, then Groq/Gemini/Xingchi fallback. Provider requests have bounded deadlines; actual provider/model/status/latency are audited. `paper` and `wallet_hardened` retain individual tool interception. `wallet_pipeline` inspects authenticated objectives/proposals/build arguments, batches fixed read/build/fork outputs before SDE/signing, and separately checks the execute call. Uninspected or malicious evidence cannot authorize signing; unavailable providers fail closed without fixture fallback. A passing LLM check never grants signing authority. No LLM request occurs inside the attestor reservation transaction. Final SUBMITTING also checks objective revision. Planner rotation has separate quotas/cache.

@@ -1,5 +1,7 @@
 # Phát triển theo module
 
+> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 Chạy mọi lệnh từ root; chỉ có một môi trường Python. Bắt đầu với [backend](backend/README.md), [bản đồ module](backend/MODULES.md) và README của module cần thay đổi.
 
 ## Chọn nơi viết code

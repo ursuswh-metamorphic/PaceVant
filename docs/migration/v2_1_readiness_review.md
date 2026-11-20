@@ -1,5 +1,8 @@
 # Đối chiếu chức năng V2.1 và phần còn lại trước tích hợp thực tế
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > Đây là review chỉ đọc ở checkpoint trước. [Rà soát mới có chạy tests và sửa lỗi](../audit/V2_1_READINESS_REVIEW.md), [system design hiện tại](../AI_Treasury_Security_System_Design_v2.1.md) được ưu tiên. File design hiện tại mới được viết từ source; design bên ngoài mà plan ban đầu tham chiếu vẫn chưa được cung cấp.
 
 Ngày đối chiếu: 19/11/2026. Chỉ đọc mã, tests và kết quả đã lưu; không chạy lại test, khởi động dịch vụ, gọi RPC hoặc gửi giao dịch trong lượt review này.

@@ -1,5 +1,8 @@
 # Local V1 / V2.1 guard ablation (2026-11-19)
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 **Additional completed experiment:** [actual original-commit/full A/B protocol comparison](full_protocol_results.md), with immutable-decision attestation, durable relay, mined drift ordering, original-bytecode gas and per-stage timings. The limitations below describe this separate four-mode guard harness; the additional report closes original-source/full-protocol A/D measurement gaps without claiming full-protocol B/C measurements.
 
 Commands: `RUN_V2_ABLATION=1 uv run --directory apps/execution-plane python -m pytest tests/test_v2_ablation.py -q` (PowerShell: set `$env:RUN_V2_ABLATION="1"` first); `uv run --locked python scripts/benchmark-v2-proof.py`. The measured ablation test passed; raw rows are in `v2_1_ablation_results.json` and `v2_1_proof_sweep.json`.

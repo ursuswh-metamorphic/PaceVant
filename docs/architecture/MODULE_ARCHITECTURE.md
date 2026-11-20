@@ -1,5 +1,8 @@
 # Kiến trúc module sau refactor
 
+> **DOC STATUS: HISTORICAL_DESIGN - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Checkpoint trước thay đổi: `19aa935`. Refactor diễn ra trên nhánh `refactor/modular-backend-frontend`. Mục tiêu là rõ ownership và đơn giản cài/deploy, đồng thời giữ wire contract và các gate ký/thực thi.
 
 ## Quyết định kiến trúc

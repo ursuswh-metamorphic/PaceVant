@@ -1,5 +1,7 @@
 # Gas credit for the single Demo User
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 This module maintains a sponsor-allocated allowance in the **existing execution SQLite DB**. It is a prepaid-style internal credit, not an on-chain deposit, the demo wallet AVAX balance, a swap budget, or a certified risk budget. It never signs, broadcasts, invokes a model or changes treasury authorization.
 
 `GasCreditLedger(path, config, chain_id, vault, relayer, confirmations)` binds one account to an immutable scope. `begin_request(key, goal)` allocates one workflow identity once; a matching repeated key returns that identity and a different body conflicts. `bind_build(workflow, build)` attaches billing only to workflows accepted by the authenticated demo API. Operator workflows remain separate. `account()` returns public amounts/history only.

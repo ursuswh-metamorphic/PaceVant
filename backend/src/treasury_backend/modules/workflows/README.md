@@ -1,5 +1,7 @@
 # workflows
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 The coordinator now owns a `TaskShield` runtime per active workflow (when enabled) and composes a read-only `modules.monitoring.OutcomeMonitor`. `evaluation.py` persists block-hashed pre-observations, optional shield proof and the existing V2 proof; `authorization.py` revalidates each, then checks the final execute call; `monitoring.py` handles workflow-facing recovery/detail queries. A known transaction hash is stored before any post-broadcast shield check, so a provider failure cannot trigger a replacement transaction. The underlying V2 attestor and on-chain gates remain mandatory. [Main integration details](../../../../../docs/integrations/MAIN_SYNC_2026_11_20.md).
 
 Orchestrate use cases across business modules and the execution client port.

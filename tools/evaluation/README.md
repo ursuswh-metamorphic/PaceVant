@@ -1,5 +1,7 @@
 # Evaluation tools
 
+> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 `benchmark_proof.py` measures the bounded shared proof engine. `evaluate_protocol.py` compares V1 and V2.1 local protocol behavior using isolated Anvil nodes, original V1 API processes and the current single-app V2.1 process. `protocol_server.py` loads either the archived V1 app layout or current package layout; role backend instruments both module groups in one app; retain this version-aware distinction for fair historical comparisons. `v1_gates.py` is a pre-sign gate helper.
 
 ```sh

@@ -1,5 +1,7 @@
 # Operator commands and composition
 
+> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 `observe.py` / `observer.py` provide the optional key-free portfolio/outcome observer ported from main. Normal serving already runs `modules.monitoring.worker` inside the single backend. For the optional separate observer, `PACEVANT_B_URL` may point to `http://127.0.0.1:8000/execution`. `a_environment` explicitly forwards `PACEVANT_SHIELD_*`; execution/deployment environments exclude model credentials. See [main integration configuration](../../../../docs/integrations/MAIN_SYNC_2026_11_20.md).
 
 `fuji-demo --setup` is the bounded owner bootstrap (deploy, up to 0.008 test AVAX token purchase and 0.002 gas transfer, gas additional). `fuji-demo` reuses deployment/funding, selects a tiny exposure-safe goal, starts one backend, runs the workflow and exports public receipt checks. It retries fresh evidence at most twice only before attestation/submission. `fuji-evidence --workflow-id ...` rechecks a confirmed receipt and three negative eth_calls without broadcasting. Owner deployment/setup steps journal signed bytes before send; preserve journals on timeout. Deployment journal names include the selected manifest path scope.

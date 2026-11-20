@@ -1,5 +1,7 @@
 # Shared fixtures v1.1
 
+> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 `normal_swap.json`, `exposure_limit.json`, `injection.json` are illustrative proposal templates. Replace chain, all addresses and deadline using B's chain context before submitting. They do not contain executable approvals. Exposure/Shield verdicts belong to A.
 
 Everything in `mock/` is synthetic and must never authorize Fuji execution. `SimulationEvidence.source=MOCK_FIXTURE`, `verification_status=INCOMPLETE`. The execution result with CONFIRMED is a **wire-format example with a fake hash**, not a chain claim. Input validity is separate from authorization.

@@ -1,5 +1,7 @@
 # Durable relaying
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 Canonical demo composition injects an optional `gas_credit` port. Only builds bound to accepted demo requests use it: reserve `gasLimit*gasPrice` in the same SQLite transaction as the send journal, check the actual relayer pending balance and refuse before broadcast on insufficient credit or fee cap. Demo gas limit is estimated +10% +5000; operator behavior is unchanged. A journaled demo retry only monitors its existing hash; it never automatically rebroadcasts. Settlement is handled by the existing outcome monitor using verified receipt gas, including reverts. [Detailed accounting/reorg/runbook](../../../../../../docs/demo/DEMO_USER_GAS_CREDIT.md).
 
 `Relayer` in `relayer.py`.

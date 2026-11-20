@@ -1,5 +1,7 @@
 # proof
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 The live Circle/LFJ bridge requires direct Chainlink evidence for the exact Circle-USDC/Fuji-WAVAX addresses. `OracleEvidence.feeds` binds raw rounds, original timestamps, feed identities and configured age limits into the oracle hash; its observation timestamp remains the pinned block time. The shared engine checks per-feed age separately from the owner-bound short state/session age. A legacy controlled snapshot cannot substitute for this provenance. LFJ effect evidence records `lfj-v1-fuji-v1`, not the mock adapter label.
 
 Adapt backend facts to the shared V2.1 proof engine.

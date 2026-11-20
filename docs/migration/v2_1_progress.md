@@ -1,5 +1,8 @@
 # V2.1 migration progress
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 ## Latest — user-supplied wallet update and real Groq planner
 
 Verified all three supplied key/address pairs before updating private env. Names in `.env`, `.env.example` and ENV_DEFAULTS match; examples contain no real secrets. Groq GPT-OSS 20B strict-schema inference is live, with independently checked bounded goals, durable cache/rolling budgets/Retry-After cooldown and no fixture/rules fallback. Wallet keys never enter prompts; owner stays outside serving env. Actual Groq→LOCAL V2 proof/three UNSAT/signature/receipt CONFIRMED passed; full Python suite **182 passed, 1 LOCAL ablation skipped**. No Fuji transaction or hosting deployment. [Integration details](../integrations/GROQ_PLANNER_AND_ENV.md). Earlier unchanged-env/no-LLM checkpoints below are historical.

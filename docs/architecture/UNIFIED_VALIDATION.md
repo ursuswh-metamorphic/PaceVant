@@ -1,5 +1,8 @@
 # Xác minh backend một FastAPI — 19/11/2026
 
+> **DOC STATUS: HISTORICAL_AUDIT - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > Checkpoint gộp API trước lượt audit cuối. Kết quả mới và lỗi đã sửa nằm tại [readiness review](../audit/V2_1_READINESS_REVIEW.md); không cộng/trộn các lần chạy.
 
 Kiến trúc hiện tại: [UNIFIED_BACKEND.md](UNIFIED_BACKEND.md). Checkpoint code trước refactor vẫn là `19aa935`; các thay đổi refactor/gộp API nằm trong working tree của nhánh `refactor/modular-backend-frontend`, chưa commit thêm.

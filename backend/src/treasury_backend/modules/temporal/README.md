@@ -1,5 +1,7 @@
 # temporal — Intent-Aware Temporal Action Graph (ITAG)
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 Owns authenticated per-intent terms, revision/cancellation, cross-workflow budgets and ordered dependencies. The deterministic verifier reads reservations and reconciled outcomes from SQLite; the semantic evaluator consumes the graph using the active Task Shield provider. Model output can veto or escalate, never create authorization.
 
 Files: `models.py` graph/spec/assessment DTOs; `intent_spec.py` scope validation; `storage.py` additive immutable history and atomic approval checks; `graph_builder.py` provenance graph; `verifier.py` budget/order/outcome gates; `semantic_evaluator.py` bounded LLM assessment; `fusion.py` strongest verdict; `explainer.py` explanations; `service.py` feature orchestration; `api.py` operator-authenticated endpoints and viewer. Shared `IntentSelection` is defined in core to preserve dependency direction. Scripted replay infrastructure lives in `operations/itag_benchmark.py`, not in this runtime module.

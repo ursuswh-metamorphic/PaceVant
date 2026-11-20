@@ -1,5 +1,8 @@
 > Imported technical reference from `origin/main` at `08c35df`. Adapted paths below use the modular Python backend. Historical test counts/live metrics in this document belong to upstream; see [current merge verification](integrations/MAIN_SYNC_2026_11_20.md) for this checkout. The current `.env` explicitly sets Task Shield to `disabled`; `paper`/`wallet_hardened` are opt-in. The current Fuji Circle-USDC/Chainlink/PDR-V2 authorization path is supported; blanket Fuji valuation blockers below describe upstream faucet-USDC only.
 
+> **DOC STATUS: HISTORICAL_AUDIT - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 # Báo cáo triển khai Portfolio State & Outcome Monitoring
 
 Nguồn: `main` tại `8e833d3d6eef4872f65312d2de23df47d0b1c0ab`, đã đối chiếu remote trước khi bàn giao. Nhánh: `codex/portfolio-outcome-reconciliation`. Thay đổi được gửi qua PR để review, không tự merge. [Audit trước triển khai](PORTFOLIO_OUTCOME_AUDIT.md) · [Vận hành và migration](PORTFOLIO_OUTCOME_MONITORING.md) · [Bằng chứng JSON](../evidence/portfolio-outcome-validation.json).

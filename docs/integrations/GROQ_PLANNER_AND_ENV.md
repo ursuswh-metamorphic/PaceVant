@@ -1,5 +1,8 @@
 # Groq planner và cấu hình ví — 19/11/2026
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > Tích hợp sau checkpoint này bổ sung oracle quan sát và adapter thực thi LFJ trên fork. Xem [Fuji/LFJ V2.1](FUJI_LFJ_V2_1.md) để biết trạng thái hiện tại của DEX và định giá.
 
 Private `.env` chọn `PACEVANT_PLANNER_PROVIDER=groq`, model `openai/gpt-oss-20b`. Template chọn `rules` để fresh clone/test offline không tự gọi dịch vụ ngoài. Groq lỗi không fallback sang rules/MOCK. Chain mode và planner provider là hai cấu hình độc lập.

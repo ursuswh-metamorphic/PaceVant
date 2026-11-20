@@ -1,5 +1,8 @@
 # Local PGS reference audit
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Read-only reference commit `f8fca9341407e1bca2d4d9f7eeda0319e132bcad`. Local `LICENSE`: Apache-2.0. No code blocks copied. Independent integer/rational implementation of the method; no dependency on this folder at runtime or CI.
 
 | Reference | Studied behavior | Adaptation |

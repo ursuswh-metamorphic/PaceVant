@@ -1,5 +1,8 @@
 # Backend FastAPI thống nhất
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Control và Execution hiện chạy trong **một ứng dụng FastAPI, một process Uvicorn và một cổng HTTP**. Đây là kiến trúc chạy mặc định của `treasury local`, `treasury serve` và container. Module nghiệp vụ vẫn giữ nguyên ranh giới sở hữu; không chia code theo process A/B nữa.
 
 ## Entry point và bố cục

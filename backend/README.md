@@ -1,8 +1,8 @@
 # Python backend
 
-Current live Fuji profile: [required ITAG + Task Shield runbook](../docs/demo/FUJI_ITAG_LIVE.md), including owner-approved TTL=300 and real-chain evidence. Historical audit notes below retain their checkpoint scope.
+> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
 
-Current full-system reference: [V2.1 system design](../docs/AI_Treasury_Security_System_Design_v2.1.md), [readiness audit](../docs/audit/V2_1_READINESS_REVIEW.md). The audit explicitly lists mock inputs, retained compatibility code and unverified Fuji/hosting gates.
+Current full-system reference: [V2.1 system design](../docs/AI_Treasury_Security_System_Design_v2.1.md), [reviewer guide](../docs/REVIEWER_GUIDE.md), [one-click Demo User runbook](../docs/demo/DEMO_USER_GAS_CREDIT.md). Earlier integration/audit reports retain checkpoint scope and do not certify current readiness.
 
 One Python 3.12 distribution, `pacevant-backend`, import namespace `treasury_backend`. One root `pyproject.toml`, `uv.lock`, `.venv` and **one FastAPI/Uvicorn application** for workflow and execution modules. No Node.js backend process.
 

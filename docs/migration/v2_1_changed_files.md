@@ -1,5 +1,8 @@
 # V2.1 changed files
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > Historical / compatibility document. For the current runtime use [V2.1 system design](../AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](../audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
 
 101 repository files changed/added for migration, operator tooling and Python backend packaging. The user-supplied implementation plan is retained unchanged and excluded. No local PGS reference, secrets or runtime data is included. Nothing has been staged, committed or pushed.

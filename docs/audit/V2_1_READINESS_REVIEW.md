@@ -1,5 +1,8 @@
 # Rà soát toàn hệ thống V2.1 — 19/11/2026
 
+> **DOC STATUS: HISTORICAL_AUDIT - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > **Báo cáo lịch sử:** kết luận không có oracle/DEX/LLM/public Fuji bên dưới thuộc checkpoint 19/11. Xem [rà soát source, security và dữ liệu thực hiện tại](SYSTEM_SECURITY_REAL_DATA_REVIEW.md) cùng bằng chứng được liên kết trong đó cho phiên bản sau tích hợp main, Shield và ITAG.
 
 > Checkpoint trước tích hợp Groq. Sau đó có bounded real Groq planner, thay ba cặp ví theo user và sync env; xem [integration guide](../integrations/GROQ_PLANNER_AND_ENV.md). Các số tests/env-preservation và missing-LLM nhận xét trong báo cáo này mô tả checkpoint ban đầu, không phải trạng thái sau cập nhật đó.

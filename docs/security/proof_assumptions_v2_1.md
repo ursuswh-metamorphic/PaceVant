@@ -1,5 +1,8 @@
 # Proof model and assumptions
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 `treasury_contracts/proof.py` is the only proof engine. `z3-solver==4.15.4.0` is pinned in the shared package and the single root uv.lock. Encoder: `pgs-treasury-2.1.0`. No upstream imports, generated SMT from users, floats in assertions, or signing keys in this library. A process lock serializes access to Z3's native default context.
 
 For token `a`, signed integer delta is `after.balanceOf - before.balanceOf`. Normalize by `10**decimals`. Prices and monetary limits use integer USD-e8. With zero payment credit:

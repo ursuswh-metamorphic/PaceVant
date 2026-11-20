@@ -1,1043 +1,1273 @@
-# PaceVant — Thiết kế hệ thống V2.1 hiện tại
+# PaceVant — System Design V2.1 hiện tại
 
-> **Bổ sung Demo User hiện tại:** [thiết kế chi tiết, input/output, API và cách demo](demo/DEMO_USER_GAS_CREDIT.md). Một tài khoản dùng chung, scoped demo credential, sponsor gas allowance off-chain trong execution SQLite, atomic reserve trước broadcast và debit từ receipt đã xác minh; không đổi Solidity/ABI/proof/security gates. Bổ sung này đã test trên Anvil, chưa có public Fuji receipt riêng theo yêu cầu không gửi giao dịch khi testing. Env hiện khớp 104 tên biến. Mục 21 dưới đây mô tả ranh giới mới; các báo cáo Fuji trước đó là bằng chứng pipeline trước bổ sung billing.
+> **DOC STATUS: CURRENT_SYSTEM_DESIGN — nguồn mô tả hiện trạng chính thức của repository.**
+> Source baseline: `3f9f9af91310040bd43eb3895d145a0fc46d776c`, ngày đối chiếu **20/11/2026**. Bao gồm modular backend, unified FastAPI, Chainlink/LFJ, Task Shield, ITAG, gas credit và thao tác chọn Demo User không nhập mã.
+> Phạm vi kiểm tra tài liệu: source/config cục bộ và evidence đã lưu. Không gửi giao dịch, gọi model, renew policy/session hoặc xác nhận lại số dư/round giá trên chain trong đợt biên soạn này.
 
-> **Current system review:** [architecture, real-data ledger, security fixes and evidence](audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md). The Fuji session is now 24 hours and block drift is 200 blocks; approval TTL and snapshot age remain 300 seconds. Older receipts/test counts below retain their historical scope.
+Đọc [chỉ mục docs](README.md), [hướng dẫn phản biện](REVIEWER_GUIDE.md), [inventory cấu hình/source](current-system-inventory.json) và [catalog API](current-api-catalog.json) cùng tài liệu này. [Documentation manifest](DOCUMENTATION_MANIFEST.json) phân loại mọi tài liệu; các file mang nhãn `HISTORICAL_*` không có thẩm quyền xác nhận trạng thái hiện tại. Bản design trước khi chuẩn hóa được giữ tại [archive](archive/AI_Treasury_Security_System_Design_v2.1.pre-review-3f9f9af.md).
 
-> **Current Fuji configuration (supersedes historical checkpoints below):** the owner-approved approval TTL and snapshot policy age are now 300 seconds. The local Fuji profile requires ITAG and uses Task Shield `wallet_pipeline`, official DeepSeek Flash (non-thinking), then Groq/Gemini/Xingchi fallback, explicit artifact semantic views, and separate primary/fork RPC sources. The 16k artifact blocker described in the original merge notes has been fixed and has successful V2 Anvil regression coverage. Each run still requires live freshness, risk, proof, temporal and on-chain checks. Read the [current runbook and limitations](demo/FUJI_ITAG_LIVE.md) and its linked validation report before making any live-readiness claim. The older successful transaction below predates ITAG; it is not evidence for the new pipeline. Env variable counts and TTL=180 statements below describe the earlier checkpoint.
+Đây là **as-built design**, không phải tuyên bố đã hoàn tất mọi yêu cầu trong một design bên ngoài chưa được cung cấp, và không phải audit bảo mật độc lập. [Implementation plan gốc](IMPLEMENTATION_PLAN_V1_TO_V2_1.md) được giữ như yêu cầu lịch sử; không tự đánh dấu checkbox để hợp thức hóa kết luận.
 
-**ITAG từ main@70bf6c7:** đã tích hợp intent budget/ordered tasks, temporal graph, semantic assessment, atomic revalidation và viewer `/itag`. Profile Fuji hiện bắt buộc ITAG và Task Shield `wallet_pipeline`. Lỗi giới hạn artifact ở checkpoint tích hợp đã sửa; [receipt toàn luồng có ITAG](integrations/fuji-itag-live-validation.json) là bằng chứng riêng. [Ghi chép tích hợp lịch sử](integrations/ITAG_MAIN_SYNC.md) giữ nguyên phạm vi của lần merge.
+## Mục lục
 
-**Đồng bộ main:** Task Shield, portfolio observation/history và read-only outcome reconciliation đã vào các module hiện tại; PDR V2/Phi/ProofCommitted và Circle USDC được hỗ trợ trong cùng FastAPI. [Ghi chép lần tích hợp](integrations/MAIN_SYNC_2026_11_20.md) mô tả checkpoint khi Shield còn tắt. Profile hiện bật Shield thật; scripted tests vẫn không được coi là độ chính xác phát hiện tấn công của model.
+1. [Sản phẩm, phạm vi và kết luận hiện trạng](#1-sản-phẩm-phạm-vi-và-kết-luận-hiện-trạng)
+2. [Kiến trúc, process và trust boundaries](#2-kiến-trúc-process-và-trust-boundaries)
+3. [Cấu trúc source và quyền sở hữu module](#3-cấu-trúc-source-và-quyền-sở-hữu-module)
+4. [Vai trò, tài sản, authentication và quyền](#4-vai-trò-tài-sản-authentication-và-quyền)
+5. [Đặc tả từng module: chức năng, input, output, trạng thái](#5-đặc-tả-từng-module-chức-năng-input-output-trạng-thái)
+6. [Data contracts, identity, đơn vị và commitments](#6-data-contracts-identity-đơn-vị-và-commitments)
+7. [Nguồn dữ liệu và oracle](#7-nguồn-dữ-liệu-và-oracle)
+8. [Luồng xử lý end-to-end hiện tại](#8-luồng-xử-lý-end-to-end-hiện-tại)
+9. [Mô phỏng EVM, stress và final guarded preflight](#9-mô-phỏng-evm-stress-và-final-guarded-preflight)
+10. [Risk, proof, Phi và phạm vi chứng minh](#10-risk-proof-phi-và-phạm-vi-chứng-minh)
+11. [Ký, broadcast và enforcement trên Solidity](#11-ký-broadcast-và-enforcement-trên-solidity)
+12. [Session, thời gian và các ngân sách](#12-session-thời-gian-và-các-ngân-sách)
+13. [Gas credit: allocation, reserve, settlement và reorg](#13-gas-credit-allocation-reserve-settlement-và-reorg)
+14. [Persistence, state machines và recovery](#14-persistence-state-machines-và-recovery)
+15. [API, frontend và error contracts](#15-api-frontend-và-error-contracts)
+16. [Cấu hình, startup và deployment](#16-cấu-hình-startup-và-deployment)
+17. [Threat model, invariants và coverage](#17-threat-model-invariants-và-coverage)
+18. [Mock, giả định, thiếu sót và vấn đề còn mở](#18-mock-giả-định-thiếu-sót-và-vấn-đề-còn-mở)
+19. [Bằng chứng và mức kiểm chứng](#19-bằng-chứng-và-mức-kiểm-chứng)
+20. [Vận hành demo và chuẩn bị phản biện](#20-vận-hành-demo-và-chuẩn-bị-phản-biện)
+21. [Mở rộng và quy trình bảo trì thiết kế](#21-mở-rộng-và-quy-trình-bảo-trì-thiết-kế)
 
-**AI provider hiện tại:** `DeepSeek → Groq → Gemini → Xingchi`, có quota/cache/cooldown và trace provider thực dùng trong event `PLANNED`. DeepSeek chính thức dùng `deepseek-flash`, non-thinking; Shield/ITAG cũng gọi API thật. [Cấu hình hiện tại](integrations/DEEPSEEK_PRIORITY.md). Không fallback sang fixture/rules khi model lỗi; sai amount/direction vẫn từ chối và mọi gate risk/proof/signing giữ nguyên.
+## 1. Sản phẩm, phạm vi và kết luận hiện trạng
 
-**Loại tài liệu:** as-built, mô tả mã đang có sau refactor module và gộp API. **Ngày rà soát:** 20/11/2026. **Phạm vi:** proof-gated swap treasury cho testnet/research. Đây là bản thiết kế hiện trạng được viết từ repository; không phải bản design V2.1 bên ngoài từng được implementation plan dẫn chiếu nhưng chưa được cung cấp.
+### 1.1 Bài toán hệ thống xử lý
 
-Nguồn đối chiếu: [implementation plan gốc](IMPLEMENTATION_PLAN_V1_TO_V2_1.md), source/tests hiện tại và [báo cáo rà soát](audit/V2_1_READINESS_REVIEW.md). File plan được giữ nguyên, không tự đánh dấu các checkbox của bản yêu cầu thành hoàn tất.
+PaceVant nhận một yêu cầu swap có phạm vi hẹp, kiểm xem giao dịch có đúng mục tiêu/quyền hạn và đáp ứng policy không, rồi chỉ ký/gửi khi mọi gate bắt buộc đạt. Hệ thống lưu evidence để giải thích vì sao approve, reject, replan hoặc escalate, và đối soát kết quả trên chain.
 
-**Tích hợp từ main `8e833d3`:** FastAPI gộp có Fuji Observatory và LFJ cho vault V2.1. Live profile dùng Circle test USDC/WAVAX, direct Chainlink rounds và owner-approved policy. LFJ faucet USDC khác address vẫn bị chặn riêng. [Runbook live](demo/FUJI_LIVE_END_TO_END.md) và [report nghiệm thu](integrations/fuji-live-validation.json) là nguồn hiện tại; tài liệu tích hợp trước đó giữ checkpoint của route faucet.
-
-**Checkpoint live đầu tiên 20/11/2026:** workflow Groq trước ITAG đã CONFIRMED trên Fuji block **61340481**, transaction `0x956caf670aa366d86f7950322b0c5781bed77809749bbcfe227b08fb4c4b8182`. Không dùng receipt này thay bằng chứng ITAG/Shield mới. `.env` và template hiện có 100 tên biến tương ứng, ba role ví riêng; xem báo cáo rà soát hiện tại để biết cấu hình và test mới nhất. Hosting/production vẫn cần kiểm chứng riêng.
-
-**Freshness live:** AVAX updatedAt ≤600s, USDC updatedAt ≤86400s; observation/simulation/session state ≤300s, approval TTL owner 300s, drift ≤200 blocks. Không tăng chain-state freshness thành 24 giờ. `setApprovalTtl` chỉ owner, tối đa 300s, vô hiệu policy cũ khi đổi; TTL nằm trong active policy hash. Revalidation yêu cầu pinned/latest rounds khớp. USD chỉ là testnet reference valuation. Stress provision external actor bằng minter impersonation **chỉ trên Anvil**; không thay balance/feed/policy của treasury để baseline thành công.
-
-**Cách đọc để phản biện:** mục 1–6 mô tả sản phẩm và đường chạy; mục 7–11 là hợp đồng proof/on-chain/dữ liệu/API; mục 12–14 là vận hành và mức kiểm chứng; mục 15–20 giải thích chi tiết các quyết định, failure modes và câu hỏi cần review. Các hình Mermaid có source ngay trong file; [bộ hình SVG](architecture/diagrams/README.md) dùng khi công cụ đọc Markdown không render Mermaid.
-
-| Điểm đến | Nội dung cần đánh giá |
-| --- | --- |
-| [Kiến trúc](#2-kiến-trúc-tổng-thể-và-ngôn-ngữ) / [module](#3-cấu-trúc-source-và-module) | Ranh giới trách nhiệm, dependency, process và tài sản |
-| [Nguồn dữ liệu](#4-chế-độ-chạy-và-sổ-nguồn-dữ-liệu) / [trust](#5-vai-trò-ví-quyền-và-trust-boundary) | Phần thực thi thật, mock và thành phần được tin cậy |
-| [Luồng giao dịch](#6-luồng-giao-dịch-v21) / [proof](#7-proof-đơn-vị-và-phạm-vi-bảo-đảm) | Các gate, thời điểm đọc state, toán và giới hạn bảo đảm |
-| [Vault](#8-approvalv2-và-enforcement-on-chain) / [state machine](#9-state-machine-monitor-và-recovery) | Tính nguyên tử, replay, pending, receipt và reorg |
-| [Data contracts](#15-hợp-đồng-dữ-liệu-và-bất-biến-xuyên-module) / [consistency](#16-tính-nhất-quán-concurrency-và-cửa-sổ-lỗi) | Identity, hash, idempotency, DB và chain khác nhau thế nào |
-| [Threat model](#17-threat-model-và-ma-trận-bảo-vệ) / [tradeoffs](#18-các-quyết-định-thiết-kế-để-nhóm-phản-biện) | Điều gì được bảo vệ, điều gì chưa được bảo vệ và vì sao |
-| [Mở rộng](#19-kế-hoạch-mở-rộng-và-tiêu-chí-chấp-nhận) / [câu hỏi review](#20-hướng-dẫn-phản-biện-và-các-câu-hỏi-còn-mở) | Scope tiếp theo, tiêu chí nghiệm thu và các quyết định chưa chốt |
-
-Thuật ngữ: **mandate** là phạm vi/quy tắc chủ quỹ giao; **intent** là đề xuất swap có cấu trúc; **SDE** là điểm tổng hợp quyết định bảo mật; **attestor** là bên ký approval sau kiểm tra; **PDR** là envelope phê duyệt có chữ ký; **Phi (Φ)** là các điều kiện kết quả vault phải enforce; **certified risk debit** là rủi ro dự phòng được chứng nhận theo mô hình, không phải tiền lỗ đã thực hiện. **Simulation** dự báo trên fork; **proof** kiểm quan hệ toán trong mô hình; **enforcement** kiểm điều kiện trên chain khi transaction thực thi.
-
-## 1. Hệ thống hiện có gì và đã sẵn sàng đến đâu?
-
-PaceVant nhận một goal swap có cấu trúc giới hạn, kiểm tra mục tiêu/mandate, dựng giao dịch xác định, mô phỏng trên fork, đánh giá kinh tế, chứng minh điều kiện an toàn, ký phê duyệt, gửi giao dịch qua vault và đối chiếu receipt. Lõi V2.1 đã chạy end-to-end trên Anvil với proof, chữ ký, giao dịch và accounting EVM thật.
-
-| Mục tiêu | Hiện trạng |
-| --- | --- |
-| Xem UI/luồng mẫu không cần chain | Có: MOCK dùng fixture V1; **không chạy proof/Phi/session V2.1** |
-| Test lõi V2.1 thực thi trên máy | Có: LOCAL dùng Anvil, mock contracts, proof/Z3, ApprovalV2 và receipt thật |
-| Demo trên public Avalanche Fuji | Đã kiểm chứng DeepSeek → Task Shield/ITAG → risk/proof → ký → swap LFJ → public receipt; xem runbook và báo cáo audit hiện tại |
-| Oracle | Direct Chainlink cho risk/proof Circle-USDC/WAVAX, original rounds và per-feed age. Observatory Witnet/Pyth/CoinGecko riêng, chỉ tham khảo |
-| LLM planner / semantic verifier | Official DeepSeek Flash prioritized, then Groq/Gemini/Xingchi. Live Task Shield + ITAG semantic assessment; independent validation and fail-closed behavior remain mandatory. See the current Fuji ITAG runbook for receipts and provider traces. |
-| Swap LFJ | Circle test USDC → Fuji WAVAX: build, fork stress, proof, ký, relaying và public receipt đã kiểm. Route LFJ faucet USDC vẫn bị chặn |
-| Chạy production/quỹ thật | Chưa sẵn sàng: chưa audit/hosting/HSM/HA; live Fuji testnet không thay nghiệm thu production |
-
-LOCAL dùng mock tokens/adapter với proof/chữ ký/EVM thật. Live setup `treasury fuji-demo --setup` chọn Circle test USDC, WAVAX và pool LFJ; lệnh deploy mặc định `--adapter mock` vẫn dành cho controlled research. Xem [runbook live](demo/FUJI_LIVE_END_TO_END.md).
-
-## 2. Kiến trúc tổng thể và ngôn ngữ
-
-![Kiến trúc runtime V2.1](architecture/diagrams/01-runtime.svg)
-
-Hình 1. Đường phụ thuộc/chức năng của runtime hiện tại. Các box control/execution nằm trong cùng API process; Anvil fork là process riêng. RPC trỏ Anvil source khi LOCAL hoặc Fuji khi FUJI. Owner và producer giá thuộc luồng quản trị/dữ liệu mô tả thêm ở mục 5 và 12.
-
-```mermaid
-flowchart TD
-  USER["Operator: dashboard / CLI"] --> API
-  PRICE["Nguồn giá: Chainlink RPC / controlled demo"] --> GATES
-  LLM["DeepSeek / Groq / Gemini / Xingchi: bounded AI"] --> GATES
-  subgraph BACKEND["Python backend process"]
-    API["FastAPI: auth, routes, lifecycle"] --> WF["Workflow: evaluation / authorization / monitoring"]
-    API --> OBS["Fuji Observatory: giá tham khảo"]
-    WF --> GATES["Planning + Alignment + Portfolio + Risk"]
-    GATES --> PROOF["Proof adapter + shared PGSProofEngine / Z3"]
-    PROOF --> DEC["SDE: quyết định duy nhất"]
-    DEC --> SIGN["Attestor: revalidate + ký ApprovalV2"]
-    WF --> PORT["Verified client port + LocalExecutionSDK"]
-    PORT --> EXEC["ExecutionService"]
-    API -->|"execution routes: X-API-Key"| EXEC
-    EXEC --> BUILD["Exact transaction builder"]
-    EXEC --> SIM["Simulator + evidence extractor"]
-    EXEC --> RELAY["Relayer: journal trước broadcast"]
-  end
-  WF --> CDB["Control SQLite + proof query files"]
-  EXEC --> EDB["Execution SQLite + artifacts + raw journal"]
-  SIM --> FORK["Native Anvil fork process tạm"]
-  BUILD --> RPC["Source RPC: Anvil LOCAL / Avalanche Fuji"]
-  FORK -->|"đọc source state"| RPC
-  RELAY -->|"signed transaction"| RPC
-  OBS -->|"read only"| RPC
-  RPC --> VAULT["PolicyVault + mock hoặc LFJ adapter"]
-```
-
-| Thành phần | Công nghệ / vai trò |
-| --- | --- |
-| Backend nghiệp vụ, API, CLI | Python 3.12, FastAPI, Uvicorn, Web3.py, Pydantic, httpx |
-| Proof | Python `int`/`Fraction`, Z3; một engine trong shared SDK |
-| Persistence | SQLite WAL, immutable records/triggers, file locks, content-addressed files |
-| On-chain | Solidity `PolicyVault` và `ISwapAdapter`. LOCAL dùng mock contracts. LFJ dùng adapter riêng với token và pool Fuji |
-| Frontend | HTML/CSS và ES modules chạy trong trình duyệt; không có Node server |
-| Build/test Solidity | Native Forge gọi solc; compiler cấu hình trong `foundry.toml` |
-| Simulation | Native Anvil, tạo fork/process tạm khi mô phỏng |
-| Deploy frontend riêng | Static hosting hoặc Nginx proxy |
-
-**Runtime mặc định chỉ có một API backend.** Launcher Python có thể quản lý heartbeat và một Uvicorn child; LOCAL thêm source Anvil và mỗi simulation tạo fork Anvil tạm. Do đó “một API process” không có nghĩa toàn hệ thống chỉ có một OS process.
-
-App factory: [api/app.py](../backend/src/treasury_backend/api/app.py). Runner: `python -m treasury_backend.api.serve`. Một root `pyproject.toml`, `uv.lock`, `.venv` dùng cho toàn backend. Package `treasury_contracts` là thư viện protocol/proof dùng chung, không phải dịch vụ HTTP riêng.
-
-`LocalExecutionSDK` gọi `ExecutionService` trực tiếp. Nó tái sử dụng SDK validation/evidence codec và các envelope trong bộ nhớ; không gọi loopback HTTP/ASGI để giao tiếp nội bộ. Các kết nối RPC tới chain và verification provider vẫn là HTTP thật. Standalone control/execution factories được giữ cho tests/consumer legacy, không được launcher/container khởi động mặc định.
-
-## 3. Cấu trúc source và module
+Đường demo hiện tại:
 
 ```text
-backend/src/treasury_backend/
-  api/                app composition, routers, auth, local adapter, lifecycle
-  config/             validated settings; compatibility B_* profile names
-  core/               application DTOs, errors, strict JSON
-  modules/
-    planning/         parser và typed proposals
-    alignment/        mandate/goal/injection rules
-    portfolio/        snapshot, freshness, policy context
-    oracle/           price DTO/provider/demo producer
-    risk/             economic eligibility
-    proof/            adapter vào shared proof engine
-    decision/         SDE
-    signing/          Attestor
-    persistence/      control SQLite/audit/reservations
-    experience/       retry guidance có giới hạn
-    workflows/        điều phối các pha và reconcile
-    execution/
-      service.py      facade dùng chung cho gọi nội bộ và HTTP
-      chain/          RPC/deployment/contract readers
-      transaction/    exact calldata builder
-      simulation/     pinned fork và final Phi preflight
-      evidence/       receipt/trace/transfer extraction
-      relaying/       journal, broadcast, retry, receipt/reorg
-      storage.py      execution SQLite/artifacts/idempotency
-  operations/         env/profile/deploy/prepare/serve/demo/renew
+Chọn Demo User → tự cấp quyền demo → goal USDC→WAVAX
+→ authenticated one-shot intent → planner + Task Shield
+→ build → Anvil baseline/stress → verified facts + Chainlink
+→ risk + Z3 + ITAG → SDE → revalidation → attestor
+→ giữ chỗ gas + durable journal → relayer → Fuji vault/LFJ
+→ canonical receipt reconciliation → actual gas debit + history/UI
 ```
 
-Các phần khác: `frontend/`, `contracts/`, `packages/contracts-api/`, `fixtures/`, `tools/`, `deploy/`, `docs/`. `scripts/` là compatibility launchers. Mỗi module/thành phần có README; [MODULES.md](../backend/MODULES.md) và [CONTRIBUTING.md](../CONTRIBUTING.md) hướng dẫn phát triển nhóm.
+Đây là treasury do hệ thống quản lý với một tài khoản thử nghiệm dùng chung. Tài sản swap ở **vault**, không ở ví Demo User. Relayer trả gas; gas credit là hạn mức sponsor **off-chain**, không phải khoản khách hàng đã nạp AVAX. AI không tự chọn arbitrary contract, không giữ ví ký và không tự cấp quyền giao dịch.
 
-| Module | Interface chính | Đầu vào → đầu ra / giới hạn |
-| --- | --- | --- |
-| Planning | `GoalPlanner.parse`, `propose` | `groq` real API hoặc explicit `rules`; draft direction/amount được kiểm độc lập, compiler tạo proposal từ mandate |
-| Alignment | `check` | Goal/proposal/mandate/tool text → `ALIGNED`, `MISALIGNED`, `UNCERTAIN`; rule-based |
-| Portfolio | `snapshot`, `policy_issues`, `fresh` | Chain balances + price + history → economic snapshot và issues |
-| Oracle | `ChainlinkPriceProvider`, `PriceProvider`, Fuji Observatory | Direct pinned Chainlink cho Circle live; controlled JSON cho demos; Observatory riêng chỉ tham khảo |
-| Risk | `evaluate` | Exact attempt/simulation/snapshot/context → risk PASS/FAIL/INCONCLUSIVE + amount hint |
-| Proof adapter | `prove` | V2 context/effects + prices → typed proof artifact từ SDK |
-| Decision | `decide` | Tất cả gate → APPROVE/REPLAN/REJECT/ESCALATE; không giữ private key |
-| Signing | `Attestor.attest` | Immutable decision + revalidation callback → signed PDR; không ký arbitrary payload |
-| Persistence | `Store` | Immutable decisions/proofs/Phi, events, signing reservations, audit/history |
-| Experience | `next_amount` | Lịch sử attempt của workflow → amount nhỏ hơn hoặc None; không học máy |
-| Workflows | `ControlPlane` | API use cases → pipeline, attest/submit, query/recovery/reconcile |
-| Execution facade | `ExecutionService` | Typed operations → build/simulation/preflight/execution; chung locks/rate limits |
-| Chain | `Chain` | Settings/manifest → verified code/context/balances từ RPC |
-| Transaction | `Builder.build` | Proposal → immutable exact calldata, nonce, quote/snapshot artifacts |
-| Simulation | `Simulator.simulate`, `preflight_v2` | Stored build → fork evidence / final Phi preflight artifact |
-| Evidence | `token_facts`, `assess` | Logs/trace/balances/receipt → facts, safe/rollback classification |
-| Relaying | `Relayer.execute`, `monitor` | Exact build + signed PDR → journaled tx hash và receipt facts |
+### 1.2 Ma trận trạng thái tổng thể
 
-Workflow phụ thuộc client port; API composition inject execution adapter. Execution không import signing/operator; core không import feature. Thay đổi ABI/signed fields/proof formulas cần phối hợp SDK, backend, contracts, fixtures/tests. Không cam kết mọi feature chỉ sửa đúng một folder.
-
-### 3.1 Cách các module phối hợp
-
-```mermaid
-flowchart TB
-  OPS["operations: profile, lifecycle, deploy"] --> API["api: auth, routes, composition"]
-  API --> WF["workflows: điều phối use cases"]
-  WF --> F["planning, alignment, portfolio, oracle, risk, proof, decision"]
-  WF --> SIGN["signing + persistence"]
-  WF --> PORT["workflows.client: client port"]
-  API --> ADAPTER["LocalExecutionSDK: injected adapter"]
-  PORT -. "runtime implementation" .-> ADAPTER
-  ADAPTER --> EX["ExecutionService: build, simulate, relay"]
-  F --> CORE["core: application DTOs / errors"]
-  SIGN --> CORE
-  F --> SDK["treasury_contracts: protocol, hashes, pure proof"]
-  EX --> SDK
-  CORE --> SDK
-```
-
-[Hình 2 — SVG](architecture/diagrams/02-modules.svg). Hướng phụ thuộc source; mũi tên không phải HTTP connection. `api/app.py` là nơi lắp adapter vào workflow. Shared SDK không import backend; execution không import attestor để xin chữ ký. Bản thân kiểm tra import không tạo security boundary giữa hai module trong cùng interpreter.
-
-### 3.2 Thiết kế bên trong các nhóm module
-
-| Nhóm | Trách nhiệm chi tiết | Không được tự làm |
-| --- | --- | --- |
-| Planning / alignment | Provider chain DeepSeek/Groq/Gemini/Xingchi hoặc explicit offline rules tạo bounded plan; kiểm goal/direction/amount/precision rồi compile mandate fields; Task Shield kiểm semantic evidence | Không tự đổi recipient/router/calldata, không ký hoặc cấp allowlist; model positive không ghi đè deterministic reject |
-| Portfolio / oracle / risk | Đọc balances và chi phí đã reconcile; gắn giá có source/timestamp/scope; tính projected exposure và eligibility | Không lấy adapter quote làm oracle, không sửa timestamp cũ để qua gate, không ghi chain budget |
-| Proof / shared engine | Map effects + registry + owner config + prices/session thành các nghĩa vụ; sinh Phi/debit và query commitments | Không gọi tool do goal cung cấp, không chọn hẹp price bands để ép pass, không cấp approval khi UNKNOWN |
-| Decision | Hợp nhất alignment/provenance/risk/proof/current context; chọn APPROVE/REPLAN/REJECT/ESCALATE | Không bỏ qua risk vì proof đã pass; không giữ private key |
-| Signing | Reread immutable decision, revalidate toàn bộ attempt, reserve nonce/scope và ký exact ApprovalV2 | Không nhận arbitrary EIP-712 fields từ dashboard hoặc planner |
-| Workflows | Điều phối evaluation → authorization → submission → monitoring; quản lý attempts và query/recovery | Không tự thay thế proof engine hoặc trực tiếp tạo adapter calldata |
-| Execution | Dựng exact call, mô phỏng, kiểm chữ ký, journal raw tx, broadcast, đọc receipt và facts | Không tự trở thành SDE/attestor; receipt success không tự chứng minh mọi policy ngoài chain |
-| API / operations | API xác thực/chuyển đổi request; operations chuẩn bị profile/process/deployment và owner actions | Không tự deploy/renew khi container start; không gửi owner key vào serving environment |
-| Frontend | Form goal, token trong tab memory, treasury/proof/session/timeline và polling | Không giữ ví ký, không tự quyết APPROVE, không chứa secret trong public config |
-
-`ControlPlane` là facade của ba phần `evaluation.py`, `authorization.py`, `monitoring.py`. Một HTTP request start hiện chạy pipeline đồng bộ tới submission/response; không có queue/job worker durable. Planner chạy trước approval TTL, có cache draft hữu hạn và durable quota/cooldown riêng từng provider cạnh control DB; không cache authorization. Rotation xử lý lỗi availability/schema theo policy, không thay thế một plan sai amount/direction bằng cách thử đến khi có model đồng ý. Gọi lại start có thể tạo workflow mới, nên browser không tự retry mutation này như GET. Idempotency execution không biến toàn bộ workflow API thành exactly-once service.
-
-## 4. Chế độ chạy và sổ nguồn dữ liệu
-
-| Nguồn / hành vi | MOCK | LOCAL | FUJI |
+| Thành phần/capability | Code hiện có | Mức bằng chứng | Giới hạn cần công bố |
 | --- | --- | --- | --- |
-| Mandate | `fixtures/mock/mandate.json`, địa chỉ giả có nhãn fixture | Sinh từ deployment/chain; một số baseline limits cố định trong operator | Tương tự LOCAL + owner-approved proof config |
-| Số dư/context | State trong `MockExecutionClient` | RPC đọc Anvil thực | RPC đọc Fuji thực, chain 43113 |
-| Calldata | ABI placeholder riêng fixture | Builder encode exact adapter call | Cùng builder, deployment Fuji |
-| Price | USDC=1, WAVAX=20 fixture | Nominal env 1/20, demo writer | Circle live đọc Chainlink tại simulation block, giữ original rounds; USD chỉ tham chiếu testnet |
-| Swap/liquidity | Tính toán Python fixture | MockERC20 + MockSwapAdapter trên EVM | Profile hiện tại dùng Circle USDC/WAVAX và pool LFJ V1 đã xác minh; mock adapter chỉ dành deployment research riêng |
-| Proof V2.1 | Không trong MOCK V1 | Z3, Phi, certified debit thật | Đã VERIFIED trên Circle/Chainlink/LFJ public workflow; artifacts và SMT kèm report |
-| Chữ ký | V1 offline bằng key tạm | ApprovalV2 + relayer envelope thật | Chữ ký attestor và giao dịch relayer đã đối chiếu trên Fuji public |
-| Receipt / tx hash / gas | Receipt, hash và gas giả lập | Receipt/hash/gas từ EVM local | Receipt public nếu thực hiện demo |
-| Stress | Fixture statuses | Sửa quote mock trong fork | Circle: external actor giả định mint trên Anvil rồi swap LFJ để tạo shift 20/200 bps. Không sửa số dư treasury khi setup. Không đủ impact → INCONCLUSIVE |
+| Modular backend Python, một FastAPI | Có | Source + architecture/API tests | Single instance, cùng host/trust domain |
+| Swap Circle test USDC → WAVAX qua LFJ Fuji | Có | Public Fuji receipt đã đối soát | Chỉ route/pair đã cho phép, không free-form DeFi |
+| Direct Chainlink Fuji cho risk/proof | Có | Original rounds trong live evidence | Giá reference cho test token, không redeem USD |
+| Planner DeepSeek và provider rotation | Có | Live DeepSeek trace ở pipeline trước gas-credit | Provider/quota/latency vẫn là phụ thuộc bên ngoài |
+| Task Shield + ITAG | Có, live profile bắt buộc | Local regressions + public pipeline evidence | Chưa có bằng chứng chặn mọi prompt injection |
+| PGS/Z3, Phi, certified risk debit | Có | SAT/UNSAT artifacts + guarded EVM tests | Bounded off-chain model, trusted attestor |
+| On-chain policy/session/caps/replay/Phi | Có | Solidity regressions/fuzz + public checks | Không chạy solver hoặc verify ZK trên chain |
+| Background outcome monitor | Có | Source + reconciliation/reorg tests | Read-only worker, không durable workflow orchestrator |
+| Demo User gas credit | Có | Isolated Anvil integration + ledger/API tests | Chưa có public Fuji receipt chứng minh billing mới |
+| Chọn Demo User không nhập mã/token | Có | Offline API/session tests | Cần process đang chạy nạp đúng bản code mới |
+| UI gas/history/viewer | Có | Syntax/API tests | Browser visual verification chưa hoàn tất trong evidence mới |
+| Multi-user, real customer deposits/billing | Chưa có | Không có nghiệm thu | Account và sponsor budget dùng chung |
+| Mainnet, hosted Render/VPS, HSM/HA | Chưa nghiệm thu | Config/source có một phần | Không gọi testnet demo là production audit |
 
-Planner provider là trục riêng: `rules` chạy offline, các provider model gọi API thật, hoặc `rotate` dùng chuỗi failover đã cấu hình. Provider thật + MOCK vẫn có receipt fixture. Profile hiện tại là `rotate` ưu tiên DeepSeek và execution FUJI; canonical local CLI override chain sang LOCAL. Trace runtime mới là bằng chứng provider nào thực sự trả lời.
+**Code chạy được trên Fuji** và **sẵn sàng gửi một giao dịch ngay bây giờ** là hai kết luận khác nhau. Quyền gửi còn phụ thuộc thời điểm: session/policy active, balances/exposure, risk/gas budgets, fresh rounds/state, RPC/model availability và version của backend process. Báo cáo cũ không xác nhận các điều kiện này ở hiện tại.
 
-### 4.1 Những gì mock trong development và các giới hạn cố định
+### 1.3 Thuật ngữ cần thống nhất khi phản biện
 
-Ba mục đầu và oracle nominal dưới đây thuộc LOCAL/research, không phải token, liquidity hay oracle của profile Fuji hiện tại.
+| Thuật ngữ | Ý nghĩa trong code |
+| --- | --- |
+| Mandate | Owner-bound phạm vi treasury: pair/router/vault/caps/stress/proof policy/session |
+| IntentSpec | Quyền thực hiện task/budget/steps do API xác thực, có revision/deadline |
+| Proposal / intent_id | Một candidate swap cụ thể; khác `spec_id` của quyền task |
+| Build | Exact calldata, quote, nonce, minOut, deadline tại state đã pin |
+| Simulation | Thực thi EVM trên fork để đo effects; chưa phải public swap |
+| Proof | Kiểm quan hệ toán có điều kiện trong mô hình hữu hạn |
+| Phi / Φ | Các lower bounds token deltas và residual allowance caps được vault enforce |
+| SDE | Security Decision Engine tổng hợp các gate thành verdict |
+| PDR V2 | Envelope phê duyệt có signature/commitments/Phi; không phải ZK proof |
+| Certified risk debit | Rủi ro dự phòng theo mô hình, không phải realized loss hay gas |
+| Reconciliation | Đối chiếu tx/receipt/canonical block/bindings/effects/history |
+| Gas credit | Sponsor allowance tính bằng wei trong execution SQLite |
 
-- `MockUSDC` 6 decimals, `MockWAVAX` 18 decimals, mint bởi owner; không phải USDC/WAVAX thị trường, MockWAVAX không redeem ra AVAX.
-- `MockSwapAdapter` không phải AMM/DEX. Owner chỉnh `outputPerUsdc`; default 1 USDC → 0,05 WAVAX. Liquidity được mint khi deploy.
-- Vốn khởi tạo demo: vault 7.700 mock USDC + 115 mock WAVAX; adapter được mint mock liquidity. Không lấy balance người dùng làm treasury demo.
-- Risk baseline trong operator: 500 USDC/swap, 1.000 USDC/ngày, exposure 25%, execution cost $50/ngày, tối đa hai replans, mild stress phải thành công và adverse có thể protected revert. Không phải tất cả đều có form/env để owner thay đổi; sửa baseline cần đồng bộ owner commitment/config/code.
-- Oracle demo dùng giá nominal env, kiểm head freshness rồi gắn timestamp producer. Đây không phải timestamp một market feed. External mode giữ timestamp producer, không tự refresh giá cũ.
-- Hai fixed stresses: mild 9980/10000 và adverse 9800/10000 của quote mục tiêu; reverse dùng phép đổi quote tương ứng. Không mô phỏng đầy đủ mempool/MEV hoặc mọi thị trường.
-- Planner DeepSeek/Groq/Gemini/Xingchi hiểu bounded template buy/sell rồi trả strict JSON, parser độc lập kiểm amount/chiều/precision. Provider `rules` là offline option có nhãn riêng. Task Shield/ITAG có semantic LLM assessment riêng; vẫn chưa hỗ trợ hội thoại tự do hay agent tự chọn tool/giao dịch. “Experience” chỉ giảm amount theo luật. API lỗi/quota hết không tạo plan giả.
-- Unit tests của Fuji verifier có mocked RPC responses; chúng không chứng minh public RPC/Fuji đã chạy.
+## 2. Kiến trúc, process và trust boundaries
 
-### 4.2 Oracle quan sát và giá đủ điều kiện ký
-
-Interface [oracle](../backend/src/treasury_backend/modules/oracle/README.md) cung cấp USD-e8, chain/vault, source, original round metadata và pinned block/hash. `TRUSTED_TEST_ORACLE` dành cho controlled demos. `CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1` chọn direct RPC provider qua owner source hash; JSON file không được tự nhận source Chainlink. Source hash gắn exact asset/feed/heartbeat và ý nghĩa testnet reference valuation; oracle evidence hash gắn raw rounds và original timestamps.
-
-Fuji Observatory đọc Chainlink/Witnet/Pyth theo block qua `GET /v1/fuji/wallet/{address}`. Định giá cho SDE cần asset mapping theo contract address, nguồn độc lập, precision, observation time, freshness và owner commitment. LFJ faucet USDC có địa chỉ khác Circle USDC. Đường LFJ không nhận giá demo hoặc quote từ chính pool để cấp quyền. [Chi tiết nguồn và định danh](integrations/FUJI_LFJ_V2_1.md).
-
-## 5. Vai trò ví, quyền và trust boundary
-
-| Vai trò | Làm gì | Nơi dùng khóa | Cần gas? |
-| --- | --- | --- | --- |
-| Owner/deployer | Deploy, allowlist, policy, session, pause/revoke/withdraw | Máy quản trị, explicit operator commands | Có test AVAX cho giao dịch quản trị |
-| Attestor | Ký ApprovalV2 sau immutable APPROVE + revalidation | Module signing trong backend | Không cần gas để ký offline |
-| Relayer | Ký/gửi envelope EVM chứa exact call/PDR/Phi | Module execution trong cùng backend | Có test AVAX cho success/revert |
-
-Ba địa chỉ phải khác nhau. Vault contract giữ treasury tokens. Dashboard dùng operator token hoặc scoped demo credential, không cần Core/MetaMask/WalletConnect; ví có thể dùng ngoài app để nhận/chuyển test AVAX. Provider API cần key tương ứng; `rules` không cần LLM key. Model nhận goal và semantic views của evidence theo vai trò planner/Shield/ITAG, không nhận private keys. Demo User hiện có flow chọn tài khoản dùng chung và sponsor gas credit off-chain; xem mục 21. Chưa có multi-user hoặc customer deposit product.
-
-Sau gộp API, attestor và relayer keys **cùng process**. Tách module không phải process/HSM isolation. Container từ chối các owner/deployer key env đã biết; public owner lấy từ manifest rồi đối chiếu chain. Owner vẫn là trust assumption, có quyền cấu hình/rút token theo quy định của vault; không được mô tả hệ thống như chống lại một owner bị compromise.
-
-Service credentials khác private keys: operator bearer dùng workflow/read/recover; internal bearer dùng attest; `B_API_KEY` dùng execution router. Cùng app không đồng nghĩa dùng một credential cho mọi quyền. Không có account/RBAC đa người dùng hoặc HSM/KMS integration trong bản này.
-
-### 5.1 Ranh giới tài sản và thẩm quyền
+### 2.1 Runtime topology
 
 ```mermaid
 flowchart TB
-  subgraph ADMIN["Máy admin"]
-    O["Owner key"]
+  J["Ban giám khảo / operator"] --> UI["Browser: dashboard / ITAG viewer / Fuji Observatory"]
+  UI --> HTTP
+  CLI["Python treasury CLI"] --> HTTP
+  subgraph HOST["Một backend host / instance"]
+    subgraph API["Python FastAPI / Uvicorn: một service"]
+      HTTP["HTTP auth + DTO validation"] --> DEMO["Demo API / session issuer"]
+      HTTP --> WF["ControlPlane: evaluation / authorization / monitoring"]
+      DEMO --> WF
+      WF --> AI["Planning / Task Shield / Temporal ITAG"]
+      WF --> G["Portfolio / Oracle / Risk / Proof / SDE / Signing"]
+      WF --> PORT["VerifiedExecutionClient + LocalExecutionSDK"]
+      PORT --> EX["ExecutionService: chain / builder / simulator / relayer"]
+      MON["Read-only background outcome worker"] --> REC["OutcomeMonitor / shared outcome verifier"]
+      DEMO --> CREDIT["GasCreditLedger"]
+      EX --> CREDIT
+      REC --> CREDIT
+    end
+    EX --> ANVIL["Ephemeral native Anvil fork"]
+    WF --> CDB[("Control SQLite + planner state + queries")]
+    EX --> EDB[("Execution SQLite + raw journals + artifacts")]
+    CREDIT --> EDB
+    REC --> CDB
   end
-  subgraph CLIENT["Operator client"]
-    UI["Dashboard / CLI"]
-    OT["Operator bearer token"]
-    OT --> UI
-  end
-  subgraph SERVER["Backend process"]
-    AUTH["HTTP auth + workflow gates"]
-    AK["Attestor key: approval"]
-    RK["Relayer key: EVM envelope"]
-    AUTH --> AK
-    AK --> RK
-  end
-  subgraph CHAIN["EVM chain"]
-    V["PolicyVault: giữ treasury tokens"]
-    AD["Allowlisted adapter"]
-    V --> AD
-  end
-  UI -->|"goal + token"| AUTH
-  O -->|"owner transactions: policy/session/pause"| V
-  RK -->|"signed tx chứa ApprovalV2 + Phi"| V
+  AI --> LLM["Configured external model APIs"]
+  G --> RPC["Fuji RPC / Chainlink contracts"]
+  EX --> RPC
+  REC --> RPC
+  ANVIL --> FRPC["Fuji source RPC: read-only fork access"]
+  RPC --> CHAIN["Public Fuji: vault / adapter / LFJ / tokens"]
 ```
 
-[Hình 3 — SVG](architecture/diagrams/03-trust.svg). Hai chữ ký có vai trò khác nhau. Attestor chứng nhận **nội dung được phép**; relayer ký **envelope giao dịch mạng**. Tài sản nằm trong vault, không nằm ở ví attestor hay relayer. Vì backend giữ cả hai khóa, compromise toàn process có thể ảnh hưởng cả hai vai trò; ba ví khác nhau chủ yếu phân biệt quyền và gas, không tự cung cấp hai bên ký độc lập.
+Control và execution là hai trách nhiệm logic, **không bắt buộc là hai API deployments**. Canonical composition inject `LocalExecutionSDK` và `VerifiedExecutionClient`, gọi execution trực tiếp trong process. `/execution/...` là HTTP facade cùng app cho consumer có backend API key; luồng nội bộ không vòng qua HTTP này.
 
-Public RPC và oracle là external inputs được kiểm scope/freshness/identity nhưng không được biến thành trustless inputs chỉ bằng hash. Snapshot đúng hash có thể vẫn mang giá sai nếu producer bị compromise. Private journal chứa signed raw transaction cần được bảo vệ như dữ liệu nhạy cảm có thể broadcast lại trước deadline.
+Một service vẫn có nhiều OS/thread units: CLI launcher process, Uvicorn child, monitor thread và Anvil child processes. Anvil fork là compute tạm, không phải node Fuji production, không ghi vào source chain.
 
-## 6. Luồng giao dịch V2.1
+### 2.2 Vì sao có các ngôn ngữ/công cụ này?
 
-1. Operator gửi `POST /v1/workflows/start` với goal/mandate ID. LOCAL/FUJI từ chối `scenario` fixture. API kiểm auth, schema và giới hạn request.
-2. Planner dùng provider chain hiện tại (hoặc explicit offline rules) trước khi mở TTL; strict schema + independent parser kiểm direction/amount/precision. Compiler lấy recipient/router/caps từ mandate tạo typed proposal. Alignment kiểm goal/amount, chain/vault, pair, router, recipient và injection. Availability/quota có thể chuyển sang provider được cấu hình; mơ hồ/sai amount/direction hoặc hết provider hợp lệ thì refuse/escalate, không tạo plan giả.
-3. Builder đọc context/allowlists/balances tại source block, kiểm cap/TTL và quote adapter theo manifest. LFJ yêu cầu quoter, reserves và adapter khớp. Builder encode canonical `exactInput`, cấp vault approval nonce và lưu build/quote/context bất biến. Nonce này khác relayer transaction nonce.
-4. Simulator tạo fork ở block build, đối chiếu hash/code/state, override attestor và gas balances **chỉ trong fork**, chạy cùng guarded vault entrypoint với fork-only test signer. V2 exploratory run dùng Phi ban đầu/minOut và zero-debit sentinel để đo effects, chưa phải approval thật.
-5. Thu balances/allowances của cả hai registry assets, receipt/logs/trace và stress outcomes. Simulation/evidence manifest, từng artifact và effect evidence đều được bind/hash; thiếu/không khớp không được coi COMPLETE.
-6. Workflow kiểm mode, hashes/build/fork context, chain facts và giá theo policy trước economic risk. Với LFJ, thiếu định giá độc lập cho faucet USDC trả `ORACLE_TOKEN_IDENTITY_MISMATCH` trước proof và ký. Fuji verifier kiểm chain/block/code qua verification RPC, cấu hình mặc định có thể dùng cùng provider.
-7. Proof adapter tạo full configured independent price bands và gọi một `PGSProofEngine`. Chỉ VERIFIED với Check/Compile/RiskBound đều UNSAT, assumptions/region SAT mới đủ điều kiện cho SDE.
-8. SDE kết hợp **tất cả** gate, không dùng proof thay alignment/risk. Lưu immutable decision, snapshot, effects/proof/Phi và audit. REPLAN tối đa hai lần: amount mới, intent/build/simulation/proof mới; không sửa calldata sau ký.
-9. Attestor nhận decision ID, lấy lại record bất biến, đọc lại balances/policy/nonce/session/oracle, reprove/hash compare, chạy final compiled-Phi/debit preflight. Vừa trước submit còn revalidate lại. Giá trị/phi/versions drift hoặc hết TTL → no sign/expire.
-10. Relayer nhận exact stored build + signed PDR; kiểm current attestor/domain/bindings, evidence/freshness/nonce, gọi live `estimate_gas`, ký envelope và ghi raw transaction journal **trước broadcast**. RPC không trả lời vẫn giữ hash/raw bytes để reconcile, không dựng trade mới.
-11. Vault verify và enforce atomically; receipt có status/confirmations/canonical block mới đủ để monitor/reconcile. Timeline không chuyển CONFIRMED chỉ vì có tx hash.
-
-**Final preflight có giới hạn rõ:** nó chạy exact compiled Phi/debit trên **pinned build block**, có cache theo build/proof/stress; không phải re-simulation toàn bộ tại latest block mỗi lần. Fresh context checks và live gas estimate là các bước riêng; vault mới là enforcement cuối tại inclusion.
-
-### 6.1 Sequence của một giao dịch thành công
-
-```mermaid
-sequenceDiagram
-  autonumber
-  actor U as Operator
-  participant API as FastAPI
-  participant W as Workflow
-  participant L as Configured planner provider chain
-  participant E as ExecutionService
-  participant F as Anvil fork tạm
-  participant P as Risk + Proof + SDE
-  participant D as Control DB
-  participant S as Attestor
-  participant J as Relayer + journal
-  participant V as Source chain / Vault
-  U->>API: start(goal, mandate_id), bearer token
-  API->>W: run(validated request)
-  W->>L: bounded goal hoặc cache hit không cần request
-  L-->>W: strict JSON direction + amount
-  W->>W: independent validation + proposal compiler + alignment
-  W->>E: build(exact proposal)
-  E->>V: read pinned context, quote, code, nonce
-  E-->>W: immutable build + calldata hash
-  W->>E: simulate(build)
-  E->>F: fork pinned block, guarded baseline/stresses
-  F-->>E: balances, allowances, receipts, effects
-  E-->>W: evidence root + artifacts
-  W->>P: verified facts + prices + session
-  P-->>W: risk PASS, proof VERIFIED, SDE APPROVE
-  W->>D: save immutable decision/proof/Phi
-  W->>S: attest(decision_id)
-  S->>D: reread + reserve within signing transaction
-  S->>W: revalidation callback
-  W->>V: current facts/session/oracle bindings
-  W->>E: final Phi preflight, pinned build block
-  E-->>W: preflight result
-  W-->>S: recomputed approved context
-  S-->>W: signed ApprovalV2 + Phi
-  W->>W: pre-submit revalidation
-  W->>J: execute(exact stored build, signed PDR)
-  J->>V: live estimateGas + current checks
-  J->>J: persist signed raw tx and deterministic hash
-  J->>V: broadcast signed transaction
-  V->>V: verify, charge counters, swap, postcheck atomically
-  J-->>W: tx hash, chưa phải confirmation
-  W-->>API: workflow / SUBMITTED
-  API-->>U: workflow_id + current status
-  U->>API: GET workflow, polling
-  API->>W: reconcile
-  W->>J: monitor(tx_hash)
-  J->>V: receipt + canonical block + confirmations
-  J-->>W: receipt facts
-  W->>D: terminal event + reconciled fees
-  W-->>U: CONFIRMED + audited timeline
-```
-
-[Hình 4 — SVG](architecture/diagrams/04-workflow.svg). Đây là happy path khái quát. Source RPC được đọc nhiều lần; không chỉ một lần duy nhất tại build. Các bước phải lưu/check bindings nhưng không có transaction ACID bao trùm từ DB đến blockchain. Mọi gate trước ký có thể dừng luồng; không phải request start nào cũng đến broadcast.
-
-### 6.2 Điều kiện dừng và replan
-
-SDE ưu tiên hard reasons → REJECT; nếu còn reason không thuộc tập recoverable → ESCALATE; chỉ có recoverable reasons → REPLAN. APPROVE yêu cầu không có blocking reason và đủ alignment/build/evidence/risk/proof tương ứng mode. Đây là precedence theo code, không phải mô hình đánh điểm trung bình cho phép một gate tốt bù gate thất bại.
-
-| Tình huống | Hành vi dự kiến | Có thể ký/gửi attempt đó? |
+| Công nghệ | Vai trò | Có cần trong backend serving? |
 | --- | --- | --- |
-| Sai recipient/router/token, unexpected transfer, replay | Hard reject | Không |
-| Amount/exposure/slippage hoặc required stress có thể sửa bằng amount | REPLAN nếu reason set chỉ recoverable và còn lượt | Không; attempt mới phải build/simulate/prove lại |
-| Thiếu RPC/evidence, stale price, UNKNOWN/timeout, input mơ hồ | Escalate/refuse theo stage; không mặc định APPROVE | Không |
-| Chênh context/hash/session khi revalidation | Refuse/expire hoặc cần reevaluate | Không dùng lại approval cũ để đổi call |
-| Inclusion state lệch nhưng signed Phi/budgets còn đúng | Vault có thể thực thi | Chỉ theo exact signed call |
-| Inclusion vi phạm signed Phi hoặc hết budget | Vault revert, gas vẫn tốn | Không có token/counter update của transaction đó |
-
-Reason codes và classification cụ thể do các module sở hữu; danh sách HARD/RECOVERABLE ở [decision/service.py](../backend/src/treasury_backend/modules/decision/service.py). Chưa có chức năng operator “force approve” trong dashboard để bỏ qua gate.
-
-## 7. Proof, đơn vị và phạm vi bảo đảm
-
-Token amounts/deltas dùng integer base units; USDC6 và WAVAX18. Giá/tiền dùng integer USD-e8 (`1 USD = 100000000`). JSON uint256 là decimal string; deltas là signed integer string. Python dùng exact `int`/`Fraction`; ABI giới hạn uint256/int256 và Solidity kiểm arithmetic. Registry đúng hai assets, sorted/unique, decimals được kiểm tại cấu hình chain.
-
-Với `d[a] = afterBalance - beforeBalance`, giá USD-e8 `p[a]`, payment credit bằng 0:
-
-```text
-L_e8 = -Σ d[a] × p[a] / 10^decimals[a]
-V_e8 =  Σ max(-d[a], 0) × p[a] / 10^decimals[a]
-ValuePolicy: L_e8 <= (relativeLossBps / 10000) × V_e8 + fixedLossUsdE8
-```
-
-### Các nghĩa vụ trong engine
-
-| Bước | Query / kết quả cần |
-| --- | --- |
-| Price assumptions | SAT: price band hợp lệ, dương, không vacuous |
-| Check simulated effects | Không tồn tại price trong band làm vi phạm relative policy hoặc remaining session eligibility → UNSAT |
-| Compile Phi | Outflow bound giữ nguyên; positive inflow floor theo tolerance, output không thấp hơn minOut; allowance caps bằng 0 |
-| Feasible region | SAT cho vùng outcome có thể thực thi trong bounded arithmetic và exact-input constraint |
-| Compile safety | Không tồn tại price làm lower-bound vector vi phạm policy → UNSAT; SAT có thể retry một lần tau=0, UNKNOWN không thành approve |
-| Certified debit | Exact worst-corner loss, clamp >=0, **ceil** lên USD-e8; Z3 kiểm `L > debit` → UNSAT; kiểm session/global headroom |
-
-MVP Phi chỉ gồm hai lower balance bounds và hai allowance caps sorted/unique. Không có maxDelta, receipt credits, ownership checks, payments hoặc runtime exposure được giả vờ enforce. Với price dương và `0 <= relativeLoss < 1`, policy residual giảm khi delta tăng; vì vậy lower-bound vector là worst case. Mở rộng policy vượt các giả định này cần proof mới.
-
-`ProofArtifactV2` chứa verdicts, feasibility flags, exact call/effects/policy/config/registry/oracle/session hashes, Phi/debit, query hashes, encoder/solver versions, hash source `proof.py + v2.py`, fallback và sanitized witness. SMT-LIB nằm ở file content-addressed, không nhận SMT script từ goal/LLM. Z3 mặc định timeout 1000 ms mỗi query (constructor cho 1..5000), có process lock; không có hard OS memory sandbox cho solver.
-
-`SAT` ở safety query là counterexample; `UNKNOWN`, timeout, invalid/missing data không cấp chữ ký. `SAT` của assumptions/feasible region lại là điều kiện chống proof rỗng. Không gộp hai ý nghĩa SAT này thành “pass”.
-
-Vault không chạy Z3, không verify một cryptographic SMT proof. Nó tin attestor đã chứng nhận đúng debit và enforce Phi/counters đã ký. Attestor compromise có thể ký debit sai trong hard owner limits. Oracle truth, price containment ở inclusion, truthful tokens/registry/RPC và code vault đúng là assumptions. Exposure 25% **chỉ pre-sign**, không suy ra từ Phi. Gas, oracle compromise, token lies và mọi dạng MEV không nằm trong theorem.
-
-### 7.1 Ví dụ số để kiểm chứng độc lập
-
-Ví dụ buy 200 USDC, mô phỏng nhận 10 WAVAX, nominal prices 1 và 20 USD; owner policy relative loss 3%, fixed loss 0; oracle bands ±1%; tolerance 0,4%; giả sử minOut không cao hơn 9,96 WAVAX và các gate khác đã pass. Đây cũng là cấu hình tạo reservation $4,792 trong local browser evidence trước đó, không phải báo giá thị trường.
-
-| Đại lượng | Giá trị |
-| --- | --- |
-| Input delta | `-200000000` USDC base units = -200 USDC |
-| Simulated output delta | `10000000000000000000` = +10 WAVAX |
-| Price bands | USDC [0,99; 1,01], WAVAX [19,80; 20,20] USD |
-| Compiled lower output | `10 × (1 - 0,004) = 9,96 WAVAX` = `9960000000000000000` base units |
-| Worst loss ở lower vector | `200 × 1,01 - 9,96 × 19,80 = 4,792 USD` |
-| Relative allowance tại corner đó | `3% × 202 = 6,06 USD`; loss 4,792 không vượt 6,06 |
-| Certified debit | `479200000 USD-e8`; các phân số không nguyên luôn được ceil khi charge |
-| Session/global usage sau một tx thành công | Tăng 4,792 USD; không tăng nếu whole tx revert |
-
-Theo ledger riêng, session $10 chỉ còn $5,208 sau giao dịch; global $20 còn $15,208. Đây chưa phải quyền chạy tiếp một trade giống hệt: exposure, spend, price freshness và mọi gate khác vẫn phải pass. Với vốn nominal $10.000 ban đầu, 115 WAVAX chiếm 23%; thêm 10 WAVAX đưa projected exposure lên 25%. Điều này giải thích tại sao proof pass không tự cho phép mọi giao dịch tiếp theo.
-
-MinOut là ràng buộc swap cố định; Phi có thể chặt hơn minOut. Nếu output nằm trên minOut nhưng dưới 9,96, V1 minOut có thể pass trong khi V2 Phi sẽ revert. Giá thực tại inclusion nằm ngoài bands thì theorem dựa trên bands không còn bảo đảm market-valued loss, dù token delta vẫn thỏa Phi.
-
-### 7.2 Tại sao proof và simulation đều cần?
-
-Simulation cung cấp effects tại một state cụ thể và bounded stress; nó không chứng minh mọi state tương lai. Proof kiểm các outcome được Phi cho phép trong modeled price region; nó không chứng minh calldata/registry/oracle đầu vào là trung thực. Vault enforce Phi tại execution; nó không tự diễn giải goal, chạy Z3 hoặc đọc market USD oracle. Ba lớp có nhiệm vụ bổ sung nhau, cùng phụ thuộc các bindings ở mục 15.
-
-## 8. ApprovalV2 và enforcement on-chain
-
-EIP-712 domain `TreasuryPolicyVault` dùng version **"2"**, chain ID và vault thực. Wire schema **1.1**. SDK **1.3.0** bổ sung Circle route, round provenance và batch reads. Legacy Approval/Phi ABI và golden vectors giữ tương thích; oracle hash mở rộng khi có feed evidence.
-
-Số `mandate.version` trên dashboard là phiên bản mandate, có thể bằng 1 trong deployment V2.1 mới. `rules-v1` và `mock-swap-v1` là version của parser/adapter, không có nghĩa workflow tự hạ cấp về vault V1. Cách xác nhận đường V2 là proof VERIFIED + Phi/session/debit + ApprovalV2 trên V2-enabled vault; MOCK fixture không có các thành phần này.
-
-| Signed fields | Binding |
-| --- | --- |
-| `intentHash`, `calldataHash` | Intent và exact adapter bytes |
-| `policyHash` | Active owner policy commitment, bao gồm version/config/chain/vault theo vault |
-| `evidenceRoot` | Canonical JSON simulation manifest và artifacts |
-| `proofContextHash` | ABI commitment của certificate, registry, oracle, effects, session snapshot, source/query/version |
-| `postConditionsHash` | `keccak256(abi.encode(Phi))` mà vault kiểm trực tiếp |
-| `sessionId`, `riskDebitUsdE8` | Session owner cấp và conservative reservation |
-| `nonce`, `deadline` | Replay/temporal scope của approval |
-| `adapter`, `tokenIn`, `tokenOut`, `amountIn`, `minAmountOut` | Exact restricted swap |
-
-Simulation manifest root và proof context hash có nội dung khác nhau; một hash proof ID có thể remap trong DB không thay thế được các commitments này. Signed bytes/ABI/domain được đối chiếu Python, viem và Foundry bằng golden vectors.
-
-Vault là một ordinary immutable contract, không có proxy upgrade. V2 activation **vĩnh viễn** khóa entrypoint V1 trên deployment đó; không thể thay ABI để nâng địa chỉ cũ thành contract mới. V1 compatibility chỉ còn trên deployment chưa bật V2.
-
-### Một transaction trong vault
-
-Kiểm pause/nonReentrant/current policy/expiry/current attestor/signature/domain/nonce; exact calldata, adapter/selector/pair/recipient/amount/minOut; session active/dates/policy và budget headroom; registry/Phi đúng toàn bộ hai assets/two allowance pairs. Sau đó snapshot balances, consume nonce và charge counters theo CEI, cấp allowance tạm, gọi adapter hạn chế, cleanup allowance, kiểm exact input delta + output/Phi bounds + residual allowances bằng 0 và emit events.
-
-Bất kỳ revert nào rollback token state, nonce, session/global/daily counters và logs của **transaction đó**. Gas vẫn mất ở relayer. Không có arbitrary target call/delegatecall hoặc Agent tự gọi owner admin methods.
-
-### Budget và session
-
-- `dailySpentUsdc`: chỉ đếm USDC **input** theo UTC day; reverse không bị đánh tráo thành USDC notional.
-- WAVAX→USDC có `max_wavax_per_swap` riêng; cấu hình hiện tại bằng 0 nên chiều bán bị khóa, UI hiển thị DISABLED.
-- `riskUsedUsdE8`: tổng certified debit trong một session; không refund khi profit, không phải realized PnL.
-- `globalDailyRiskUsedUsdE8`: tổng certified debit tất cả sessions theo `block.timestamp / 86400`.
-- Owner tạo/revoke session. Session ID không recycle/reset usage; đổi session không reset global/day hoặc daily USDC spend. Owner đổi policy làm sessions cũ không khớp active hash.
-- Session có thể kéo qua ngày; global cap reset theo UTC day, session usage vẫn giữ. Không claim một multi-day portfolio loss theorem.
-- Owner withdrawal riêng chỉ khi paused, invalidate policy và có event; owner là trusted administrator.
-
-### 8.1 Ranh giới nguyên tử của vault
-
-```mermaid
-flowchart TD
-  A["Agent / relayer gọi V2 entrypoint"] --> B["Validate signature, domain, nonce, policy, session, exact call"]
-  B --> C["Validate complete Phi / registry và budget headroom"]
-  C --> D["Snapshot balances; consume nonce; charge daily/session/global counters"]
-  D --> E["Temporary approval; call restricted adapter; clear approval"]
-  E --> F["Check exact input, output/Phi, all tracked balances, residual allowances"]
-  F --> G["Emit proof/execution events và commit transaction"]
-  B -. "bất kỳ check/call thất bại" .-> R["EVM REVERT: rollback toàn transaction; relayer mất gas"]
-  C -.-> R
-  D -.-> R
-  E -.-> R
-  F -.-> R
-```
-
-[Hình 5 — SVG](architecture/diagrams/05-vault.svg). Các budget updates trước external call nằm trong cùng EVM transaction; revert sẽ hoàn tác cả chúng. Đây là lý do SQL check hoặc hai off-chain processes cùng thấy “còn budget” không tự tạo double spend on-chain. Hai transactions cạnh tranh có thể một thành công, một revert; hệ thống không cam kết mọi approved transaction đều được thực thi thành công.
-
-## 9. State machine, monitor và recovery
-
-Luồng thực tế dùng `PROPOSED → ALIGNED → BUILT → SIMULATED → EVALUATED → PROVED → APPROVED → ATTESTED → SUBMITTING → SUBMITTED → CONFIRMED`. `PROVED` gộp các Check/Compile/RiskBound obligations, chi tiết từng verdict ở proof artifact; không tạo ba proof services riêng.
-
-| Trạng thái | Ý nghĩa |
-| --- | --- |
-| MISALIGNED / UNCERTAIN | Alignment event; SDE quyết định reject/escalate |
-| REPLAN_REQUIRED | Cần attempt mới; tối đa hai replans |
-| PROOF_REJECTED / PROOF_INCONCLUSIVE | Proof event; không được tự hiểu là approved |
-| REJECTED / ESCALATED / EXPIRED | Không đủ điều kiện ký/gửi tiếp |
-| SUBMITTING | Submission chưa có kết quả chắc chắn; giữ reservation |
-| SUBMITTED | Đã có hash, chưa đủ terminal receipt |
-| CONFIRMED | Receipt success, confirmations/canonical block và facts đã reconcile |
-| REVERTED + reason PROTECTED_REVERT | Rollback có guard reason xác định; gas là chi phí riêng |
-| RECEIPT_MISMATCH | Facts/identity không đúng; giữ in-flight block để review |
-
-`PENDING` là execution response khi chưa có receipt/canonical confirmations, workflow thường giữ SUBMITTED; không có status workflow `PROTECTED_REVERT` riêng. Reorg có thể đưa terminal workflow về SUBMITTED. Monitor revalidates receipt khi đọc workflow; hai protected reverts **khác attestation** liên tiếp cùng policy có thể quarantine signer. Receipt reconcile lặp không được đếm thành giao dịch mới.
-
-Canonical FastAPI đã chạy background read-only outcome worker trong lifespan (`modules/monitoring/worker.py`), mặc định tick tối đa 5 jobs rồi chờ 5 giây, có durable jobs/leases và reorg reconciliation. API/CLI/dashboard cũng có thể poll. Đây không phải durable workflow queue hay daemon tự ký/gửi lại. Demo User gas accounting dùng callback trên report của cùng monitor; pending không tự giải phóng hold. Chưa có auto fee-bump/replacement/cancel hoặc autonomous signing recovery.
-
-RPC gửi không rõ kết quả: giữ raw journal và hash; execution retry cùng idempotency/body dùng đúng signed raw bytes. Workflow không tự tạo trade mới. Nếu crash làm workflow còn SUBMITTING nhưng đã biết hash trong journal, dùng `POST /v1/workflows/{id}/recover` hoặc [recovery CLI](../tools/operations/README.md). Chỉ chấp nhận hash đã biết, khớp decision/build/chain; không ký/resend. Không xóa DB để gỡ pending/quarantine.
-
-### 9.1 State machine dùng cho review
-
-```mermaid
-stateDiagram-v2
-  [*] --> STARTED
-  STARTED --> EVALUATING
-  EVALUATING --> REPLAN_REQUIRED: recoverable
-  REPLAN_REQUIRED --> EVALUATING
-  EVALUATING --> REJECTED: hard violation
-  EVALUATING --> ESCALATED: uncertain
-  EVALUATING --> APPROVED: all gates pass
-  APPROVED --> ATTESTED: revalidate + sign
-  APPROVED --> EXPIRED: TTL / invalid
-  ATTESTED --> SUBMITTING: revalidate
-  ATTESTED --> EXPIRED: stale
-  SUBMITTING --> SUBMITTED: known hash
-  SUBMITTING --> EXPIRED: deadline + unused nonce
-  SUBMITTED --> SUBMITTED: pending
-  SUBMITTED --> CONFIRMED: canonical success
-  SUBMITTED --> REVERTED: canonical revert
-  SUBMITTED --> RECEIPT_MISMATCH: facts mismatch
-  note right of SUBMITTED
-    Khi query lại: CONFIRMED hoặc REVERTED
-    quay về SUBMITTED nếu reorg
-    hoặc không thể revalidate receipt.
-  end note
-```
-
-[Hình 6 — SVG](architecture/diagrams/06-states.svg) là sơ đồ logic rút gọn, **không phải enum workflow mới**: `EVALUATING` gom các events PROPOSED/ALIGNED/BUILT/SIMULATED/EVALUATED/PROVED, không phải stage lưu trong DB. Một số failure được facade ghi cùng reason codes thay vì chính xác một cạnh trong hình; source `authorization.py`/`monitoring.py` là nơi xác định transition thực. REPLAN_REQUIRED hết lượt không được vẽ thành approval tự động; workflow dừng ở verdict cuối.
-
-### 9.2 Sequence khi broadcast mất response
-
-```mermaid
-sequenceDiagram
-  participant W as Workflow
-  participant D as Control DB
-  participant J as Execution journal
-  participant R as RPC / chain
-  actor O as Operator
-  W->>D: SUBMITTING + decision reference
-  W->>J: execute(build, signed PDR)
-  J->>J: persist raw tx + hash H trước broadcast
-  J->>R: sendRawTransaction(raw)
-  R--xJ: timeout / response bị mất
-  Note over W,R: Chưa biết inclusion, không tạo trade mới hoặc nhả reservation tùy tiện
-  O->>W: recover(workflow_id, H), operator auth
-  W->>J: monitor(H), phải là submission đã biết
-  J->>R: query transaction / receipt / canonical block
-  J-->>W: identity + pending hoặc receipt facts
-  W->>D: bind H: SUBMITTING sang SUBMITTED
-  W->>D: reconcile nếu receipt đã terminal
-  W-->>O: current workflow, không sign/resend
-```
-
-[Hình 7 — SVG](architecture/diagrams/07-recovery.svg). Đây là recovery thủ công của một hash đã biết; không phải automatic recovery daemon. Nếu chỉ biết workflow mà chưa biết hash, operator cần đối chiếu execution journal/logs theo build/decision; không nhập một hash bất kỳ ngoài hệ thống. Receipt chưa rõ vẫn phải giữ trạng thái pending, không dùng lỗi mạng làm bằng chứng transaction chưa xảy ra.
-
-## 10. Persistence và observability
-
-| Kho | Dữ liệu | Tính chất |
-| --- | --- | --- |
-| Control SQLite | workflows, ordered events, decisions, attestations, proof_artifacts, compiled_postconditions | WAL; immutable decisions/proofs/Phi; unique references; signing reservation trong write transaction |
-| Control files | mandate/oracle snapshots, `.smt2` query files, private backend log, demo audit reports | Query filenames theo hash; JSON writer dùng atomic replace |
-| Planner SQLite/lock | `planner.sqlite3`, `planner.lock` cạnh control DB: draft cache, rolling call/token reservations, cooldown | Durable per data path; không giữ approvals hoặc chain state; failed API calls vẫn giữ quota reservation |
-| Execution SQLite | records, counters, idempotency, submissions | File lock + immutable records; journal có signed raw tx trước broadcast |
-| Execution artifacts | Canonical JSON manifests, trace/receipt/context/quote/preflight facts | Content-addressed bằng keccak; authenticated artifact reads |
-| Chain | Nonces, policy/session, token balances, daily/global risk usage | Authoritative; SQL không tạo competing budget ledger |
-
-Container paths: `/var/data/control/fuji` và `/var/data/execution`. Local paths theo profile `.control-data-v2/local`, `.execution-data-v2`. Chain state Anvil là ephemeral nếu node bị dừng; audit files giữ lại không thể tự khôi phục source chain. MOCK client receipts/state nằm trong memory và không phải durable chain ledger.
-
-Request correlation ID đi qua API, workflow và artifacts. Error bodies được sanitize, không echo key/PDR/request lạ. Proof introspection trả typed artifact/query hashes, không public toàn bộ SMT directory. Không có centralized log/metrics/alerting/backup scheduler; vận hành tự cấu hình ngoài hệ thống. Backup phải giữ control DB, execution DB/journal/artifacts nhất quán với chain; rollback code không đảo on-chain V2 activation.
-
-Gas gate dùng estimated simulation gas + observed reconciled execution expenses, quy đổi bằng giá nominal. Đây là operational eligibility estimate, **không phải hard on-chain gas budget**; exploratory/final gas và network fee có thể khác. Các tx do bên khác gửi hoặc chưa reconcile không tự thành expense history của app.
-
-### 10.1 Mô hình dữ liệu lưu trữ
-
-```mermaid
-erDiagram
-  WORKFLOWS ||--o{ EVENTS : timeline
-  WORKFLOWS ||--o{ DECISIONS : attempts
-  DECISIONS ||--o| ATTESTATIONS : reserves
-  DECISIONS ||--o| PROOF_ARTIFACTS : certifies
-  PROOF_ARTIFACTS ||--o| COMPILED_POSTCONDITIONS : binds_when_present
-  EXECUTION_RECORDS ||--o| SUBMISSIONS : build_id_logical
-  WORKFLOWS {
-    text id PK
-    text status
-    text body
-  }
-  EVENTS {
-    integer sequence PK
-    text workflow_id FK
-    text stage
-    integer created_at
-    text body
-  }
-  DECISIONS {
-    text id PK
-    text workflow_id FK
-    text intent_id UK
-    text build_id UK
-    text snapshot_id UK
-    text body
-  }
-  ATTESTATIONS {
-    text decision_id PK,FK
-    text scope
-    text nonce
-    text state
-    integer expires_at
-    text signed_pdr
-  }
-  PROOF_ARTIFACTS {
-    text context_hash PK
-    text decision_id FK,UK
-    text status
-    text body
-  }
-  COMPILED_POSTCONDITIONS {
-    text context_hash PK,FK
-    text post_conditions_hash
-    blob abi_blob
-  }
-  EXECUTION_RECORDS {
-    text kind PK
-    text id PK
-    text value
-  }
-  SUBMISSIONS {
-    text build_id PK
-    text request_hash
-    text tx_hash
-    text raw_tx
-    text value
-  }
-```
-
-[Hình 8 — SVG](architecture/diagrams/08-storage.svg). Schema rút gọn của hai SQLite databases; `EXECUTION_RECORDS` là bảng `records(kind,id,value)`. Quan hệ records–submissions là **logical binding qua build ID**, không phải foreign key giữa hai DB. Bảng execution `counters` và `idempotency` không vẽ để hình dễ đọc. ATTESTATIONS còn có UNIQUE(scope, nonce); không suy từ sơ đồ rằng mỗi workflow chỉ có một decision.
-
-Control decisions/proofs/Phi có SQLite triggers chặn update/delete; events được ghi tuần tự bởi app nhưng không có append-only tamper-proof ledger chống người quản trị sửa DB. Execution immutable records được app kiểm canonical bytes, không phải tất cả cùng dùng SQL triggers. Hash giúp phát hiện mismatch khi được kiểm tra với trusted commitment; hash và trigger không thay thế filesystem permissions hoặc external audit trail.
-
-## 11. API hiện tại
-
-Tất cả route dưới đây thuộc cùng origin; Swagger `/docs`, OpenAPI `/openapi.json` của running app là catalog chính xác.
-
-Các route `/v1/...` giữ wire API version cho compatibility; chúng vẫn xử lý proof/ApprovalV2 khi mandate bật V2. Trong MOCK không cấu hình operator token, operator endpoints có thể dùng không auth để phát triển local; LOCAL/FUJI bắt buộc service credentials. Execution router không được mount trong MOCK.
-
-| Route | Auth | Mục đích |
-| --- | --- | --- |
-| GET `/healthz`, `/health` | Public | Liveness/mode/transport; không bảo đảm oracle/session/RPC còn đủ điều kiện trade |
-| GET `/v1/fuji/wallet/{address}` | Operator bearer, mọi mode | Số dư và quan sát oracle tại cùng block Fuji, tùy chọn vault và receipt |
-| GET `/`, static `/assets`, `/src` | Public nếu bật bundled frontend | UI/config công khai, không nhúng keys/tokens |
-| POST `/v1/workflows/start` | Operator bearer | Chạy pipeline |
-| GET `/v1/workflows/{id}` | Operator bearer | Query và receipt reconciliation |
-| POST `/v1/workflows/{id}/recover` | Operator bearer | Bind known journaled tx cho SUBMITTING workflow |
-| GET `/v1/treasury` | Operator bearer | Mandate/portfolio/issues/session/balances |
-| POST `/v1/agent/propose`, `/v1/alignment/check` | Operator bearer | Typed planning/alignment |
-| POST `/v1/risk/evaluate`, `/v1/decisions` | Operator bearer | Read immutable saved assessment bằng bound references; không cho client tự approve |
-| POST `/v1/approvals/attest` | Internal bearer | Chỉ nhận decision ID đã lưu, không arbitrary signed payload |
-| GET `/v2/proofs/{context_hash}`, `/v2/treasury/sessions/{session_id}` | Operator bearer | Proof introspection/chain session |
-| GET `/execution/health` | Public | Execution module liveness |
-| GET `/execution/v1/chain/context`, `/execution/v1/portfolio/onchain-snapshot` | X-API-Key | Chain facts, không chứa oracle USD assertions |
-| POST `/execution/v1/build`, `/execution/v1/simulations`, `/execution/v1/executions` | X-API-Key + Idempotency-Key | Exact execution module operations |
-| POST `/execution/v2/simulations/preflight` | X-API-Key + Idempotency-Key | Isolated exact Phi preflight, không cấp production signature |
-| GET `/execution/v1/executions/{tx_hash}`, `/execution/v1/artifacts/{hash}` | X-API-Key | Receipt facts / canonical artifact bytes |
-
-MOCK không đăng ký execution router thật và có thể không yêu cầu operator token nếu không cấu hình token; chỉ dùng UI dev loopback. LOCAL/FUJI cần ba service credentials khác nhau, mỗi token ít nhất 24 ký tự. Body mutation tối đa **256 KiB** trước JSON parsing; response đọc qua client bound 1 MiB. Expensive simulation/preflight chung giới hạn 30 calls/60 giây/process, attestor 60 attempts/60 giây. Đây không phải rate limiter phân tán hoặc rate limit mọi endpoint.
-
-CORS chỉ bật exact origin allowlist, không thay auth. Frontend token chỉ giữ trong bộ nhớ tab; không localStorage/cookie/private key. Cùng app giữ router/module boundaries nhưng không còn network isolation của API execution trước đây.
-
-## 12. Cấu hình, triển khai và những thứ còn phải chuẩn bị
-
-### Cấu hình máy hiện tại
-
-Private env đã được cập nhật có ủy quyền; hiện khớp 104 tên biến với template và ba role ví có address/key tương ứng. Cấu hình có DeepSeek ưu tiên, fallback đã cấu hình, direct Chainlink và vault/LFJ trên Fuji thật; thêm scoped Demo User credential và gas allowance. Receipt và token/budget deltas trong audit trước đó thuộc pipeline trước bổ sung Demo User billing. Template giữ trống credentials; copy template không tự cấp key, funding hay owner authorization.
-
-| Nhóm | Biến / đầu vào |
-| --- | --- |
-| Admin deployment | `B_FUJI_OWNER_PRIVATE_KEY` hoặc alias owner cũ; chỉ máy quản trị |
-| Serving keys | `PACEVANT_ATTESTOR_KEY`, `B_FUJI_RELAYER_PRIVATE_KEY` |
-| Service credentials | `PACEVANT_OPERATOR_TOKEN`, `PACEVANT_INTERNAL_TOKEN`, `B_API_KEY` |
-| Network | `B_FUJI_RPC_URL`, `PACEVANT_FUJI_VERIFICATION_RPC`, `FUJI_TEST_WALLETS_ONLY=true` |
-| Owner risk approval | `TREASURY_OWNER_POLICY_APPROVED` và relative/fixed loss, oracle band, tolerance, session/global caps |
-| Limits | Reverse cap, max oracle age, session duration, drift/confirmations |
-| Storage/deployment | V2 manifest, control/execution data dirs; container persistent `/var/data` |
-| Frontend | `PACEVANT_SERVE_FRONTEND`, `PACEVANT_CORS_ORIGINS`; public `assets/config.js` khi static host khác origin |
-| Oracle | `TREASURY_ORACLE_MODE=chainlink`, `TREASURY_ORACLE_SOURCE_ID`, per-feed/source config cố định; TTL/state age riêng |
-| Planner | `PACEVANT_PLANNER_PROVIDER`, `GROQ_API_KEY`, model/timeouts/token/request caps/cache TTL; key chỉ trong private env |
-
-`TREASURY_A_PORT` còn là tên cấu hình cổng CLI để tương thích; container dùng `$PORT`. `TREASURY_B_PORT`, `PACEVANT_B_URL`, `PACEVANT_B_TOKEN` chỉ còn cho legacy tooling. [AI provider guide](integrations/DEEPSEEK_PRIORITY.md) và [live runbook](demo/FUJI_ITAG_LIVE.md) ghi cấu hình hiện tại. Chainlink dùng RPC và feed addresses đã xác minh, không cần market-feed API key riêng cho đường cấp quyền ký này.
-
-### Chạy local
-
-```powershell
-uv sync --locked
-uv run --locked python tools/contracts/bootstrap.py
-uv run --locked treasury init-env
-uv run --locked treasury local --once
-# Giữ dashboard:
-uv run --locked treasury local
-# Chỉ MOCK, không chain:
-uv run --locked python -m treasury_backend.api.serve
-```
-
-Native Foundry v1.7.1 cần cho build/local. Solidity compile trong build stage, ABI/bytecode/storage layout nằm trong `out/`; backend runtime giữ Python + Anvil, không cần Node/npm/Forge/solc. Hợp đồng sau deploy chạy trên chain, không chạy trong Render/Python.
-
-### Demo Fuji / hosted backend
-
-Đã có manifest V2 Fuji trong `deployments/treasury-fuji-v2.json`, public receipt và report. `deploy/runtime.env`/Compose mount manifest vẫn cần chuẩn bị riêng cho host, không chứa owner keys. Khi triển khai một host hoặc vault mới:
-
-1. Owner/relayer có test AVAX trên Fuji C-Chain; không kết luận 0,05 AVAX đủ cho mọi deployment chỉ từ một số dư cũ. Kiểm phí/funding khi thực hiện thật.
-2. RPC phục vụ recent historical state cho fork; kiểm verification endpoint và trace support nếu cần phân loại revert.
-3. Deploy vault mới bằng explicit owner command, ưu tiên `treasury fuji-demo --setup` cho live Circle profile; kiểm manifest/code/policy/session. Vault hiện tại đã deploy và receipt đã xác minh; không deploy lại chỉ để bật API.
-4. Tạo runtime env riêng từ [template](../deploy/runtime.env.example), điền actual values, không `${...}` aliases hoặc owner key; cấp durable disk và mount manifest.
-5. Một backend instance/worker; frontend Docker/Nginx hoặc static host riêng. Kiểm image startup, health, restart/persistence và normal/protected-revert Fuji receipts trước khi xác nhận hosted demo.
-
-Docker Desktop Linux engine local không hoạt động, nên image/Compose/Render smoke chưa được kiểm chứng. CI có jobs build/test images nhưng chưa có kết quả CI từ working tree này. [Deploy guide](../deploy/README.md), [Render/VPS](deployment/PYTHON_BACKEND_RENDER_VPS.md), [demo runbook](demo/AVALANCHE_FUJI_DEMO.md).
-
-### 12.1 Topology deploy đề xuất từ config hiện có
-
-```mermaid
-flowchart TB
-  B["Browser: static frontend"] --> EDGE["TLS / reverse proxy do hosting quản lý"]
-  EDGE --> N["Frontend Nginx: assets và API proxy"]
-  N --> API["backend:10000 - một FastAPI/Uvicorn"]
-  subgraph HOST["Backend host"]
-    L["Python launcher + demo heartbeat"] --> API
-    API --> A["Native Anvil fork processes tạm"]
-    API --> DISK["/var/data: control DB, execution DB, artifacts, journal"]
-    MAN["Readonly public deployment manifest"] --> L
-    ENV["Runtime secrets: attestor, relayer, service tokens"] --> L
-  end
-  API --> RPC["Fuji RPC / verification RPC"]
-  A --> RPC
-  RPC --> V["Fuji: vault và adapter theo manifest"]
-  ADMIN["Máy admin: Forge/solc + owner key"] -->|"deploy / renew / pause"| V
-```
-
-[Hình 9 — SVG](architecture/diagrams/09-deployment.svg). Topology dựa trên Dockerfiles/Compose, **chưa phải bằng chứng đã deploy**. Compose hiện publish frontend tại loopback `127.0.0.1:8080`; cần reverse proxy/TLS bên ngoài để public trên VPS. Static hosting riêng có thể bỏ Nginx ở giữa: browser gọi API URL public qua explicit CORS. Render/Docker runtime cần chạy native Anvil subprocess và durable disk; không dùng mô hình frontend-only/static service để chạy backend.
-
-Build contract và deploy contract khác nhau: Forge/solc tạo ABI/bytecode trong image build hoặc máy admin; owner gửi deployment transaction riêng. Startup container chỉ xác minh deployment đã có và phục vụ API, không compile lại, tự deploy hoặc tự renew session đã hết hạn. Session mặc định một giờ nên một service còn healthy vẫn có thể từ chối trade vì session/policy/oracle hết hiệu lực.
-
-### 12.2 Checklist vận hành cho reviewer
-
-| Giai đoạn | Điều cần kiểm tra | Hiện đã tự động hóa đến đâu? |
-| --- | --- | --- |
-| Prepare/start | Chain ID, manifest/code, owner policy/session/config, role addresses, credentials, storage | Có prepare/doctor/startup checks; health endpoint riêng chỉ là liveness |
-| Trước mỗi ký | Fresh prices/context, immutable bindings, reproof, session/headroom, final preflight | Có trong workflow; không có HSM/process isolation |
-| Sau broadcast | Pending/confirmations/canonical receipt, mismatch/reorg, actual execution fee | Có khi poll/query; chưa có background scheduler/alerts |
-| Hết session/policy | Owner renew từ máy quản trị, kiểm active hash và usage còn lại | Có explicit CLI; không tự nhả/reset global budget |
-| Restart/recovery | Mount đúng DB/artifacts/journal, không xóa reservation, đối chiếu known tx | Có durable files và recovery endpoint; chưa test host restart thực tế |
-| Backup/restore | SQLite-consistent snapshot/WAL handling, artifacts+journal, manifest và chain cross-check | Chưa có backup scheduler hoặc restore drill hoàn chỉnh |
-| Incident | Stop new goals, owner pause/revoke nếu cần, bảo toàn evidence, đọc chain trước resume | Có primitive pause/revoke; chưa có incident automation/dashboard riêng |
-
-Không đặt SLO/throughput mục tiêu từ các local timings. Simulation dùng process/RPC/trace và proof dùng serialized solver; benchmark trên máy không đại diện tài nguyên Render hoặc public RPC. Các bước xác định giới hạn CPU/RAM/disk, timeout toàn workflow và load shedding còn phải đo trên hosting cụ thể.
-
-## 13. Trạng thái so với V2.1 và phần còn lại
-
-| Hạng mục | Kết luận |
-| --- | --- |
-| Một authoritative SDE/proof/attestor/vault path | Có cho canonical V2 LOCAL/FUJI path; legacy V1 tools/test-only ablation được tách nhãn |
-| Check/Compile/Phi/certified debit, strict bindings | Implemented và local-tested |
-| Atomic spend/session/global caps, reverse hard cap | Implemented và local-tested; reverse bị disable theo config hiện tại |
-| Immutable audit, receipt/reorg/idempotency/recovery | Implemented/local-tested; đã sửa dedup quarantine và recovery tool sau gộp |
-| UI/proof/session display | Có ở LOCAL/FUJI; MOCK vẫn là V1 fixture, đã ghi rõ trong UI |
-| Optional on-chain exposure | Chưa implement, không thuộc core bắt buộc; luôn PRE-SIGN ONLY |
-| Fuji oracle và LFJ | Direct Chainlink → Circle/LFJ đã CONFIRMED; baseline/stress/final Phi, 14 public-chain checks và ba negative eth_calls pass; xem runbook/report live |
-| HSM | Chưa tích hợp |
-| Bounded planner + semantic checks | Real DeepSeek/Groq/Gemini/Xingchi APIs + independent amount/direction validation; Task Shield và ITAG semantic assessment có trace runtime. Không phải open-ended trading agent |
-| Fuji/hosting | Public Fuji workflow, receipt/checks/negative eth_calls đã pass; image/Compose/Render chưa smoke trên host | Không coi testnet receipt là xác nhận hosting/production |
-| CI / clean container build | Cấu hình có; chưa xác nhận remote run/fresh image build |
-| Quantitative evaluation | Có bounded local suites; không suy APR/BPR thực tế, không full-protocol B/C performance hoặc production throughput claim |
-
-Các thay đổi có chủ đích so với pseudo-layout/process trong plan: một FastAPI theo yêu cầu người dùng, signer không isolated process; event PROVED gộp obligations; session view đọc trực tiếp chain thay vì một SQL ledger authoritative mới; `/execution` prefix trong unified API, SDK/legacy standalone contract được giữ riêng. Đây là các khác biệt phải được ghi nhận, không coi tự động là đáp ứng mọi giả định của bản design gốc chưa cung cấp.
-
-Thứ tự phát triển tiếp: kiểm chứng image/host, demo nhiều lượt và adversarial coverage trên live profile; mở rộng oracle/DEX/HSM/HA theo scope riêng. Testnet reference USD và receipt Fuji không thay audit độc lập.
-
-## 14. Kiểm chứng và tài liệu bảo trì
-
-Lệnh kiểm tra chính:
-
-```powershell
-uv run --locked python -m pytest -q
-uv run --locked python tools/contracts/foundry.py forge test -vv
-npm run test:integration
-node tools/quality/check_frontend.mjs
-uv run --locked ruff check backend/src backend/tests tools
-uv run --locked python tools/quality/scan_secrets.py
-```
-
-Lượt review này có 157 Python tests đạt, một LOCAL ablation opt-in skip trong default suite, 49 Forge tests đạt, V1/V2 viem vectors và JS syntax đạt. Ablation opt-in và 128-case proof sweep được chạy/lưu riêng; [báo cáo audit](audit/V2_1_READINESS_REVIEW.md) ghi kết quả và provenance, tách kết quả mới khỏi benchmark lịch sử. Tests dùng Anvil/fixtures, không dùng Fuji user funds. Kết quả local không phải audit bảo mật độc lập hoặc bằng chứng production readiness.
-
-Các số test trên thuộc checkpoint audit trước Groq. Lượt mở rộng tài liệu chỉ kiểm diagrams/links; lượt tích hợp Groq sau đó thay planning/config/env và chạy suite mới, được ghi riêng tại [integration guide](integrations/GROQ_PLANNER_AND_ENV.md). Không trộn benchmark lịch sử với actual Groq/network latency mới.
-
-Tài liệu này là nơi đọc tổng thể hiện trạng. README từng module là hợp đồng phát triển cục bộ; thay interface/env/units/proof/ABI phải cập nhật cả nơi sở hữu và bản thiết kế này. Các guide A/B, inventory/migration và PoC cũ được giữ như lịch sử, không dùng làm catalog runtime hiện tại.
-
-## 15. Hợp đồng dữ liệu và bất biến xuyên module
-
-### 15.1 Các đối tượng nghiệp vụ
-
-| Đối tượng | Nguồn tạo / nơi sở hữu | Nội dung cốt lõi | Điều kiện để được tin |
-| --- | --- | --- | --- |
-| `Mandate` | Owner/operator prepare; `core/models.py` | Chain/vault/pair/router/recipient, limits, policy hash, registry, proof config, session ID | Phù hợp actual deployment và active on-chain config; file local không được tự thay owner policy |
-| `TransactionProposal` | Planning; protocol DTO | Intent ID, mandate reference, pair, amount, recipient, slippage, deadline | Alignment + exact builder kiểm tra; output planner chưa phải calldata được phép |
-| `BuiltTransaction` | Execution builder | Build/intent IDs, source block, exact bytes/hash, nonce, deadline, quote/snapshot refs | Immutable record, calldata decode/bindings, source code/context và policy khớp |
-| `SimulationEvidence` + `EffectEvidenceV2` | Simulator/evidence | Baseline/stresses, full before/after effects, code/block identity, artifacts | COMPLETE + content hashes + exact call + tracked asset coverage; source phải phù hợp mode |
-| `OraclePrice` / `OracleEvidence` | Oracle provider / proof adapter | Scope, source, observation time, prices/bands; block identity trong proof input | Source allowlist/hash, decimals, freshness, positive/full configured bands và scope khớp |
-| `PortfolioSnapshot` | Portfolio | Balances, nominal value, prices, timestamps, snapshot/history references | Chain/oracle/history bindings đúng; không dùng snapshot cũ ghép build mới |
-| `EconomicRiskAssessment` | Risk | PASS/FAIL/INCONCLUSIVE, violations, projected exposure và input refs | Khớp intent/build/snapshot; không nhận client-submitted PASS làm authoritative |
-| `ProofArtifactV2` | Shared proof engine | Status, three obligations, feasibility, hashes, Phi/debit, source/solver/encoder/query versions | VERIFIED, strict bindings, SAT feasibility, three UNSAT, current session/config |
-| `SecurityDecision` | SDE | Verdict/reasons, immutable input refs, policy/calldata/evidence/proof context, expiry | Chỉ saved decision ID được attestor reread và revalidate |
-| `SignedPDRV2` | Attestor | Domain, ApprovalV2, Phi, signature và typed-data hash | Current authorized attestor, exact domain/bytes/hashes, chưa hết hạn/nonce chưa dùng |
-| `ExecutionSubmission` / `ExecutionResult` | Relayer/monitor | Known tx hash, decision/build/chain identity, receipt/block/fees/deltas/session facts | Raw journal binding, canonical receipt/confirmations và workflow reconciliation |
-
-Nơi định nghĩa chính: [application models](../backend/src/treasury_backend/core/models.py), [domain DTOs](../backend/src/treasury_backend/core/domain.py), [protocol models](../packages/contracts-api/treasury_contracts/models.py), [V2 protocol](../packages/contracts-api/treasury_contracts/v2.py), [oracle DTO](../backend/src/treasury_backend/modules/oracle/models.py). Các lớp cùng tên ở boundary có thể là imports/re-exports; không suy rằng mỗi module có một format độc lập.
-
-### 15.2 Chuỗi commitments
-
-```mermaid
-flowchart TB
-  BUILD["BuiltTransaction: exact call + source identity"] --> CALL["Exact call / calldata commitments"]
-  ART["Canonical simulation artifacts"] --> MAN["Simulation manifest evidenceRoot"]
-  FX["Full tracked effects"] --> FXH["EffectEvidenceV2 hash"]
-  CFG["Policy config + registry + oracle + session snapshot"] --> CTX["Proof context hash"]
-  CALL --> CTX
-  FXH --> CTX
-  Q["SMT query hashes + source / encoder / solver versions"] --> CTX
-  PHI["Compiled Phi + certified debit"] --> CTX
-  PHI --> PH["ABI postConditionsHash"]
-  CALL --> APPROVAL["ApprovalV2 + EIP-712 domain"]
-  MAN --> APPROVAL
-  CTX --> APPROVAL
-  PH --> APPROVAL
-  APPROVAL --> SIG["Attestor signature"]
-  SIG --> VAULT["Vault: checks signature, bindings, Phi and counters"]
-```
-
-[Hình 10 — SVG](architecture/diagrams/10-commitments.svg) là quan hệ commitments ở mức khái niệm; encoding chính xác nằm trong shared SDK và golden vectors. `SimulationEvidence.evidence_root` là manifest commitment; field `ProofArtifactV2.evidence_root` bind **effects hash**. Hai field có tên giống nhau không được hoán đổi. `ApprovalV2.evidenceRoot` bind simulation root; `proofContextHash` mang proof context; `postConditionsHash` bind ABI Phi. Vault không tải files off-chain để reconstruct/verify tất cả commitments, nên signer vẫn là một trusted verifier.
-
-Canonical JSON dùng cho các execution artifacts; V2 commitments và Phi dùng typed ABI/EIP-712 tương ứng. Không tự đổi `json.dumps` spacing, field order, case normalization hoặc packed encoding ở một bên mà không cập nhật protocol tests. Các off-chain IDs như `workflow_id`/`build_id` phục vụ lookup; identity đủ để authorize phải là exact signed/hash-bound context, không phải một ID do client tự khai.
-
-### 15.3 Danh sách bất biến để code review
-
-| ID | Bất biến | Nơi enforce / evidence chính |
-| --- | --- | --- |
-| I01 | Không ký nếu không có immutable APPROVE đúng attempt và current context | `authorization.py`, signing, control tests |
-| I02 | V2 không approve khi thiếu proof hoặc bất kỳ safety query UNKNOWN/SAT | Decision/proof adapter/engine tests |
-| I03 | Call/Phi/session/policy/nonce/chain/expiry không được sửa sau ký | SDK hashes, relayer checks, Solidity mutation/golden tests |
-| I04 | Phi bao phủ đúng hai tracked assets và allowance pairs; không cho omission | Registry validation, full effects, vault checks |
-| I05 | Mỗi successful vault approval nonce chỉ được dùng một lần | Builder counters + on-chain usedNonce; rollback/replay tests |
-| I06 | Daily spend và risk caps enforce atomic trên chain, không dựa riêng SQL | Vault race/session/global/rollback tests |
-| I07 | Certified debit không âm, ceil đúng đơn vị, không refund vì profit | Exact arithmetic/proof tests, vault counters |
-| I08 | Chỉ confirmed canonical receipt với đúng facts mới thành CONFIRMED | Relayer monitor + workflow receipt/fee/reorg tests |
-| I09 | Broadcast uncertainty không tự tạo trade mới hoặc tự nhả reservation | Journal-before-send, idempotency/recovery tests |
-| I10 | Owner key không vào serving environment; attestor/relayer không phải owner | Operations/container role tests; không phải OS-level guarantee |
-| I11 | Không dùng MOCK evidence như REAL_LOCAL_SIM/REAL_FUJI_SIM | Mode/provenance checks, consumer tests |
-| I12 | Replan thay amount phải tạo intent/build/evidence/proof mới | Evaluation loop và workflow regression tests |
-
-Các invariants được kiểm trong declared scope; đây không phải tuyên bố model checking toàn bộ Python/Solidity. Bảng giúp reviewer yêu cầu counterexample hoặc test cụ thể khi một invariant chưa thuyết phục.
-
-### 15.4 Ví dụ tương tác API của người vận hành
-
-```http
-POST /v1/workflows/start
-Authorization: Bearer <operator-token>
-Content-Type: application/json
-
-{"mandate_id":"mandate_demo","goal":"Buy WAVAX with 200 USDC"}
-```
-
-Sau response, dùng `workflow_id` để `GET /v1/workflows/{workflow_id}`; không suy từ HTTP 200 rằng swap đã CONFIRMED. UI cần đọc `status`, reason codes và timeline. `POST /v1/decisions`/`risk/evaluate` chỉ trả immutable saved assessments theo bound references, không tạo chữ ký bằng một `verdict` client gửi lên. `/approvals/attest` là internal-token endpoint với decision ID; execution submit vẫn kiểm signed PDR và exact stored build.
-
-HTTP execution mutations dùng `Idempotency-Key`: cùng operation/key và body trả cùng result đã lưu; đổi body dưới cùng key bị từ chối. Không dùng key đó như capability vượt auth. Runtime OpenAPI là schema request/error chính xác; [SDK/OpenAPI compatibility](../packages/contracts-api/README.md) mô tả consumer standalone legacy. Danh sách API trong mục 11 áp dụng khi router được mount theo mode.
-
-## 16. Tính nhất quán, concurrency và cửa sổ lỗi
-
-### 16.1 Ba cơ chế không được đánh đồng
-
-| Cơ chế | Bảo vệ cái gì | Không bảo đảm điều gì? |
-| --- | --- | --- |
-| Control signing reservation / unique scope+nonce | Tránh app cấp các approval xung đột và giữ in-flight state | Không tự chứng minh tx đã mined; không thay on-chain nonce |
-| Execution lock / idempotency / raw journal | Serialize mutations trong deployment hiện tại, retry đúng operation/raw bytes | Không chống mọi duplicate user goal, không hỗ trợ HA/distributed locking |
-| Vault nonce / CEI / budgets / postconditions | Exact signed call chỉ thành công nếu on-chain điều kiện còn đúng; charge/rollback atomic | Không bảo đảm liveness, giá oracle đúng, gas rẻ hoặc operator nhận được response |
-
-Builder cấp **vault approval nonce** theo namespace và kiểm on-chain used state. Relayer dùng **EOA transaction nonce** của ví relayer theo chain. `Idempotency-Key` lại là identity của một operation ở service. Thay EOA nonce hoặc retry HTTP không được tùy tiện thay vault approval nonce/decision/call sau ký.
-
-SQLite control dùng `BEGIN IMMEDIATE` cho write operations; signing reservation gọi verification/sign callback trong transaction bảo vệ reservation. Revalidation có thể gọi RPC/preflight trong khoảng giữ lock, nên network chậm có thể kéo dài writer contention. Execution dùng file lock và SQLite WAL; Z3 có process-level lock. Đây là tradeoff có chủ đích của single-instance demo, chưa có bằng chứng throughput khi nhiều operator cùng chạy.
-
-### 16.2 Crash windows và cách phục hồi
-
-| Cửa sổ lỗi | Durable state có thể còn | Hành vi an toàn / giới hạn hiện tại |
-| --- | --- | --- |
-| Trước lưu decision | Build/artifacts có thể đã có; workflow chưa có approved record | Không ký lại từ artifact rời; query workflow và tạo evaluation mới nếu cần. Chưa có automatic cleanup orphan artifacts |
-| Sau lưu decision, trước ký | Immutable attempt/proof đã lưu | Attest phải reread/revalidate TTL/context; không tiếp tục bằng snapshot đã hết hạn |
-| Sau ký, trước submit | Attestation/reservation đã lưu | Không tự ký thêm conflicting approval; operator cần inspect state. Chưa có general job-resume daemon |
-| SUBMITTING nhưng chưa rõ execution result | Control reservation + có thể có submission journal | Query journal/chain, recover known hash; giữ uncertainty nếu RPC không đủ dữ liệu |
-| Raw journal đã ghi, response broadcast mất | Raw bytes/hash đã tồn tại; tx có thể pending/mined | Retry exact operation/raw bytes hoặc bind known hash bằng recovery; không tạo trade thay thế |
-| Chain đã mined, DB chưa ghi terminal | Receipt/public chain authoritative, workflow có thể SUBMITTED | Poll reconcile sau restart; actual fee được đọc lại. Không reset budgets từ DB |
-| DB ghi CONFIRMED nhưng reorg/RPC revalidation lỗi | Terminal event lịch sử vẫn tồn tại | Khi query, đưa về SUBMITTED với reason phù hợp; không tiếp tục trình bày finality cũ như chắc chắn |
-| Hết deadline nhưng submit không rõ | Raw journal có thể tồn tại | Chỉ expire unknown submission khi fresh chain timestamp qua deadline và nonce chưa dùng; thiếu RPC giữ pending |
-
-Không có two-phase commit giữa control DB, execution DB và chain; events lưu lịch sử và on-chain enforcement đóng các cửa sổ gây token/counter inconsistency. Backup/restore một DB đơn lẻ không bảo đảm resume đúng. Không được dùng xóa DB hoặc tăng nonce thủ công làm quy trình recovery tiêu chuẩn.
-
-### 16.3 Freshness có nhiều đồng hồ
-
-| Đồng hồ / giới hạn | Vai trò | Điểm cần phản biện |
-| --- | --- | --- |
-| Host clock | TTL/price freshness/control evaluation | Host lệch giờ có thể gây refuse hoặc đánh giá sai tuổi dữ liệu; chưa có clock-monitor service |
-| Oracle observation time | Original feed updatedAt, pinned observed_at riêng | Direct Chainlink kiểm round ở source block và latest; demo heartbeat chỉ dùng cho controlled profile |
-| Source block number/hash/timestamp | Pin fork và xác minh context | Block drift là bound số block, không thay mọi wall-clock checks |
-| Approval deadline: LOCAL 30s, owner Fuji profile 180s | Giới hạn inclusion của signed call | RPC chậm có thể làm expire; không tự tăng deadline sau ký |
-| Session/policy expiry | Thẩm quyền owner cấp | Service health không đồng nghĩa session active |
-| Chain UTC day | Reset global daily risk/USDC-day usage | Session usage không reset theo ngày; không dùng timezone máy cho counter on-chain |
-
-Latest reads không atomic cùng nhau: balances/session/oracle có thể thay đổi giữa các calls. Workflow fail closed khi phát hiện drift; vault enforce counters/Phi tại inclusion. Đây là bounded stale-state design, không phải consistent snapshot toàn hệ thống với zero race windows.
-
-## 17. Threat model và ma trận bảo vệ
-
-Đối thủ trong phạm vi gồm đầu vào goal/tool text sai lệch, client API không có quyền, người sửa/tái sử dụng payload, state/quote thay đổi giữa simulation và inclusion, RPC tạm lỗi, transaction cạnh tranh budget và receipt reorg. Backend host, owner, attestor và oracle producer không được giả định Byzantine rồi vẫn hứa bảo vệ đầy đủ. Bảng này tách attack được kiểm với trusted component bị compromise.
-
-| Đe dọa / failure | Kiểm soát hiện tại | Giới hạn / phản biện cần giữ |
-| --- | --- | --- |
-| Prompt injection/sai goal | Strict schema, independent parser, mandate/alignment, Task Shield/ITAG semantic checks; no arbitrary call signing | Semantic model có thể sai; không chứng minh chặn mọi injection, free-form trading vẫn ngoài scope |
-| Provider outage/auth/429/model drift | Durable local budgets/cache/cooldown, bounded output/timeout, configured provider rotation | Không bảo đảm quota bên ngoài hoặc availability; hết provider hợp lệ thì dừng, không fallback fixture |
-| Public client gọi sign trực tiếp | Operator/internal credentials riêng, immutable decision ID, attestor revalidation | Token không phải user identity/RBAC; host compromise đọc được các credentials |
-| Call/Phi bị thay sau approve | Canonical hashes, immutable record, signature bindings, exact relayer/vault checks | ABI/encoding implementation đúng vẫn là assumption; golden tests chỉ cover declared vectors/cases |
-| Replay trên chain/vault khác | EIP-712 domain, chain ID, verifying contract, nonce/deadline/policy | Không có replay protection cho arbitrary new user goals tạo lại ý định kinh tế |
-| Tracked asset bị bỏ sót | Exact two-asset registry và Phi/allowance coverage, restricted adapter | Mở thêm token/adapter không thể chỉ sửa UI; token có side effects lạ chưa thuộc model |
-| Drift vượt điều kiện được ký | Pre-sign revalidation + Phi/budgets tại inclusion | Có thể mất gas do protected revert; không bảo vệ mọi MEV hoặc oracle price ngoài band |
-| Race session/global/daily cap | Atomic on-chain budget charge và rollback | Off-chain approvals có thể mất liveness; không hứa mọi tx đã approve đều được mined |
-| RPC unavailable/stale | Mode/chain/block/code/freshness checks, safe pending, fail closed | Cùng provider cho verification không chống provider Byzantine phối hợp |
-| Oracle stale/outage/sai source | Strict DTO, scope/source hash/freshness, external timestamp giữ nguyên | Nguồn thật sai giá nhưng timestamp mới không tự bị phát hiện; chưa có deviation quorum |
-| Malicious adapter/approval drain | Restricted selector/pair/recipient, temporary approvals, cleanup, postchecks | Owner allowlisting/token semantics vẫn trusted; mock tests chưa audit DEX thật |
-| Reentrancy/callback | Vault ReentrancyGuard và CEI/postchecks | Không suy rộng sang adapter mới hoặc token độc hại chưa review |
-| Solver DoS/UNKNOWN | Bounded model/arrays/query timeout/process lock, refusal | Chưa có hard OS memory sandbox; auth/rate limit không bao trùm mọi endpoint |
-| Evidence/DB bị sửa | Content-addressed hashes, immutable decision/proof triggers, bind lại trước ký | DB admin/root có thể sửa triggers/code/keys; chưa có external tamper-evident log |
-| Backend hoặc attestor key compromise | Owner hard restrictions, current attestor rotation/pause/revoke | Attestor có thể chứng nhận debit sai; cùng process relayer nên không có independent dual control |
-| Owner key compromise | Owner actions có events/invalidation/paused withdrawal | Owner là trust root, không được claim chống hostile owner |
-| Frontend script/token compromise | Token chỉ trong tab memory, text rendering, CSP ở bundled HTML, redirect refusal | XSS/hosted assets compromise có thể lấy token; không có hardware-backed operator authentication |
-| Disk full/process kill/backup lỗi | Durable stores/journal, atomic artifact writes ở execution | Chưa có quota/retention/backup scheduler/load campaign; single instance là SPOF |
-
-Invariant của chứng minh phải đọc theo dạng điều kiện: **nếu** registry/tokens/effects/oracle/model và signed bindings đáng tin, **và** actual outcomes/prices nằm trong phạm vi đã xét, **thì** Phi + certified debit bảo đảm policy được mô hình hóa. Không chuyển mệnh đề đó thành “không thể mất tiền” hoặc “toàn bộ agent an toàn” ngoài các điều kiện nêu trên.
-
-## 18. Các quyết định thiết kế để nhóm phản biện
-
-| Quyết định hiện tại | Lý do chọn | Chi phí / lựa chọn khác cần cân nhắc |
-| --- | --- | --- |
-| Modular monolith, một FastAPI | Đơn giản deploy/env, module ownership rõ, không internal HTTP | Cùng failure/key boundary. Signer service riêng/HSM là hướng tăng isolation, chưa triển khai |
-| Python backend + native Anvil; Solidity on-chain | Dùng cùng Python orchestration/proof/SDK và EVM tooling | Vẫn cần native process/contract build; không phải pure Python runtime không binary |
-| Browser ES modules/static assets | Không cần Node build/server cho backend/frontend demo | Chưa có framework routing/component ecosystem; UI lớn hơn có thể cần tooling riêng |
-| Một pure proof engine trong SDK | Tránh công thức/encoding khác nhau giữa các caller | SDK không chỉ chứa HTTP client; đổi engine/source hash ảnh hưởng owner policy và versioning |
-| Restricted two-token swap | Làm rõ effects coverage, exact arithmetic và vault guard | Chưa general-purpose treasury: không arbitrary payments, LP, lending, NFTs hoặc cross-chain |
-| SMT off-chain, enforcement Phi on-chain | Không chạy solver trong EVM; ràng buộc outcome rẻ hơn on-chain proof verification | Cần tin attestor; chưa có independently verifiable SMT certificate trên chain |
-| Price bands độc lập | Worst-case reasoning rõ và conservative | Có thể tạo corner không tương quan với thị trường và refuse nhiều; không tự thu hẹp bands theo observed correlation |
-| Risk reservation tích lũy, không refund profit | Dễ kiểm bound/counters, tránh optimistic credit | Có thể giảm liveness dù realized PnL tốt; release/refund cần protocol chứng minh riêng |
-| Immutable non-proxy vault | Deployment semantics rõ, không admin proxy upgrade | Sửa contract cần deploy/migrate mới; không rollback on-chain V2 activation |
-| SQLite + files + locks | Ít hạ tầng, thuận tiện single instance/demo | Không HA/horizontal scale; writer contention/backup/retention phải quản lý |
-| Polling monitor | Dễ theo dõi từ dashboard/CLI, không broker | Không poll thì không auto reconcile/alert; thêm worker cần durable ownership và idempotent recovery |
-| Pinned/cached final preflight | So sánh exact build/proof/stress deterministically | Không fresh full-state replay; state lệch còn phụ thuộc latest checks và vault enforcement |
-
-Đây là các quyết định **đang có**, không phải khẳng định luôn tối ưu. Ví dụ user gộp backend để đơn giản deploy là một product constraint hiện tại; nếu mục tiêu chuyển thành custody quỹ thật, cần review lại signer isolation thay vì chỉ mở rộng cùng process.
-
-## 19. Kế hoạch mở rộng và tiêu chí chấp nhận
-
-Các hạng mục dưới đây gồm kết quả đã hoàn thành ở live cutover và các hướng mở rộng còn lại. Circle/Chainlink/public receipt đã có bằng chứng; Oracle/DEX khác, hosting và production vẫn cần nghiệm thu riêng.
-
-| Hạng mục | Nơi thay đổi chính | Điều kiện chấp nhận trước khi đổi trạng thái thành READY |
-| --- | --- | --- |
-| Fuji/hosted demo | Operations, manifests, deploy config/runbook | Actual deployment/code checks; normal + protected-revert hashes; restart/pending recovery, durable mount, TLS/proxy/CORS và smoke trên host |
-| Oracle cộng tác viên | `modules/oracle`, config/provider composition; proof/source commitments | Source/asset/decimals/provenance đúng; observation time trung thực; stale/outage/negative/duplicate/scope tests; owner config/session hash migration |
-| Public LFJ execution | Circle-USDC/WAVAX + Chainlink policy + deployed vault/session/funding | Đã có full public receipt và checks. LFJ faucet route vẫn cần nguồn định giá riêng |
-| Open-ended LLM agent | Planning ports/provider, alignment, workflow policy | Bounded planner và Shield/ITAG semantic checks đã có; free-form trading cần scope/owner authorization, tool isolation và ambiguity/injection tests riêng; không bypass proof/SDE |
-| Durable watcher | Workflows monitoring/operations/persistence | Restart-resume theo known hashes, leader ownership, bounded polling/backoff, canonical receipt/reorg/fee dedup và alerts; không tạo duplicate trades |
-| HSM/KMS hoặc signer riêng | Signing port, authorization contract, deployment/auth | Exact decision/bindings reverified tại signer boundary, rotation/audit/availability, không arbitrary digest signing API |
-| Multi-user/HA | API auth, persistence, execution locking/nonce manager, deploy | RBAC/audit identities; DB migration, distributed idempotency/locks, nonce coordination, worker ownership; failover/restore/load tests |
-| Runtime exposure guard | Policy/Phi/contract/math/oracle model | Định nghĩa nguồn giá/thời điểm exposure, tăng registry coverage, proof + Solidity enforcement tests; không đổi nhãn PRE-SIGN ONLY trước đó |
-
-Thay oracle source, proof engine source/encoder, registry hoặc policy semantics phải xem lại commitments/versioning/owner migration. Không áp dụng hot-swap library rồi dùng policy/session/signature cũ một cách mặc định. ABI/domain/version changes cần Python–viem–Solidity vectors mới và refusal tests giữa version cũ/mới.
-
-## 20. Hướng dẫn phản biện và các câu hỏi còn mở
-
-### 20.1 Cách ghi một nhận xét có thể xử lý được
-
-Mỗi nhận xét nên có: mục/diagram/invariant liên quan → assumption hoặc claim chưa thuyết phục → tình huống/counterexample → ảnh hưởng security/liveness/operability → đề nghị test hoặc lựa chọn khác. Phân biệt **bug so với code hiện tại**, **thiếu bằng chứng**, **giới hạn scope đã chấp nhận** và **đề xuất feature mới**; tránh đánh giá một interface tồn tại như thể đã có real integration.
-
-| Nhóm reviewer | Câu hỏi cần trả lời |
-| --- | --- |
-| Sản phẩm/treasury | Bounded planner + Shield/ITAG đã đủ cho use case chưa? Khi nào mở free-form agent, thêm DEX/assets/feeds? Có chấp nhận Fuji reverse disabled và exposure chỉ pre-sign? |
-| Backend/kiến trúc | Ownership module có rõ? Client port có quá phụ thuộc HTTP wire SDK? Synchronous request/SQLite lock có phù hợp tải kỳ vọng? Recovery còn cửa sổ nào cần durable job? |
-| Formal/math | Từ lower bounds đến policy có dựa đúng monotonicity/positive prices? Exact-input constraint và rounding/bands có sound? Có non-vacuity hoặc counterexample bị thiếu? |
-| Solidity/security | Hash/Phi/registry/approval checks đủ chưa? Budget CEI/rollback/replay/admin invalidation còn bypass nào? Trust attestor/owner/token có được chấp nhận? |
-| Oracle/market | Timestamps/provenance/precision được đảm bảo ở producer thế nào? Independent bands quá rộng/hẹp? Outage/disagreement xử lý ở đâu? |
-| DevOps | Hosting có chạy fork subprocess và giữ journal bền vững? Backup restore có cross-check chain? Ai renew/pause/rotate và quan sát pending? |
-| Frontend/UX | Người xem phân biệt MOCK/LOCAL/FUJI, reserved risk/realized loss/gas, pending/protected revert rõ chưa? Có thể vô tình submit goal lặp khi timeout không? |
-
-### 20.2 Các quyết định chưa chốt
-
-1. **Mục tiêu phát hành:** chốt demo nghiên cứu với mock assets hay public market execution; hai mục tiêu có acceptance gates khác nhau.
-2. **Risk model:** ai phê duyệt relative/fixed loss, bands/tolerance, session/global caps; có cần stress theo protocol thật thay fixed quotes không?
-3. **Signer trust:** cùng-process attestor/relayer có được chấp nhận ngoài demo không; nếu tách, signer cần tự verify bao nhiêu context?
-4. **Liveness:** có cần latest-block preflight, TTL dài hơn hoặc fee replacement; thay đổi đó ảnh hưởng freshness và replay model thế nào?
-5. **Oracle merge contract:** producer/file/provider và source identity cụ thể của cộng tác viên là gì; bằng chứng observation time và outage behavior ở đâu?
-6. **Persistence/ops:** cần bao nhiêu concurrent workflows, retention/quotas, background monitor, SLO và restore drill; khi nào SQLite không còn phù hợp?
-7. **Policy upgrades:** khi engine/source/ABI thay đổi, ai review và thực hiện owner policy/session/vault migration; rollback off-chain có còn tương thích chain không?
-8. **Evidence phát hành:** ai chạy/duyệt actual Fuji normal/revert, hosted restart và remote CI; lưu sanitized hashes/logs ở đâu?
-
-Tài liệu cung cấp source, local/fork tests và public Fuji evidence để phản biện. Các deployment/feature chưa kiểm chứng khác tiếp tục giữ nhãn đó. Dùng invariant I01–I12 và hình 1–10 làm tham chiếu; xem runbook/report live để phân biệt dữ liệu thực với counterfactual stress.
-
-## 21. Demo User, delegated access và gas credit hiện tại
-
-Luồng mới giữ nguyên modular monolith và các lớp bảo mật ở mục 6–8. [Thiết kế bổ sung đầy đủ](demo/DEMO_USER_GAS_CREDIT.md) có input/output, API, schema, fee formula, pending/revert/reorg, cách demo và phạm vi test.
+| Python 3.12 | API, use cases, model adapters, risk/proof bridge, CLI, monitor | Có |
+| Solidity | PolicyVault, LFJ adapter và interfaces | Contract đã deploy trên chain; artifacts cần cho ABI/code checks |
+| Native Anvil | EVM fork baseline/stress/preflight | Có khi bật execution/mô phỏng |
+| Native Forge / compiler | Build Solidity, local tests, deployment tooling | Build/development; không compile từng request |
+| Z3 library | SMT reasoning qua Python | Có cho proof path |
+| HTML/CSS/browser JavaScript | Frontend static ES modules | Chạy trong browser; không cần Node backend |
+| Node/viem scripts | Một số developer syntax/golden checks tương thích | Không là runtime dependency của backend deployed |
+
+Root Dockerfile compile Solidity ở build stage. Runtime Python/Anvil đọc ABI/artifacts đã build và gọi contract Fuji có sẵn; restart server không tự deploy, renew hoặc compile lại contract trên chain.
+
+### 2.3 Trust boundaries thực tế
 
 ```mermaid
 flowchart LR
-  U[Demo User: chọn account, không nhập mã] --> D[Auto-issued demo session + scoped API]
-  D --> I[Exact one-shot ITAG intent]
-  I --> W[Full existing security pipeline]
-  W --> S[Approved signed build]
-  S --> R[Relayer estimates gas]
-  R --> DB[Atomic gas hold + existing raw tx journal]
-  DB --> F[Fuji vault and LFJ]
-  F --> M[Existing read-only outcome monitor]
-  M --> L[Idempotent actual fee / reorg hold ledger]
-  L --> UI[Wallet AVAX riêng / credit / history / result]
+  subgraph CLIENT["Browser / không có wallet key"]
+    U["Public demo visitor"]
+    A["Operator credential"]
+  end
+  U --> DS["Public demo select: chỉ demo scope"]
+  A --> API["Operator HTTP gates"]
+  DS --> DEMO["Demo HTTP gates"]
+  subgraph SERVER["Backend host: cùng trust domain"]
+    DEMO --> WF["Workflow + verification"]
+    API --> WF
+    WF --> AT["Attestor key"]
+    AT --> REL["Relayer key + send journal"]
+  end
+  OWN["Owner admin process / owner key"] --> V["Vault holds treasury tokens"]
+  REL --> V
+  OR["Trusted oracle / RPC / token semantics"] --> WF
 ```
 
-| Ranh giới | Input | Output / invariant |
+Module separation không tạo physical key isolation. Attestor và relayer trong cùng backend; owner/deployer key được loại khỏi môi trường serving child/canonical hosted entrypoint. Native compiler/Anvil child environment được allowlist OS/path/cache/certificate để hạn chế secret inheritance; đây không phải OS sandbox, HSM hoặc filesystem isolation.
+
+## 3. Cấu trúc source và quyền sở hữu module
+
+```text
+backend/src/treasury_backend/
+  api/                 HTTP adapters, demo session, unified composition
+  config/              Control/execution/planning/demo settings
+  core/                Shared application types/errors; không import business modules
+  modules/
+    planning/          Goal -> bounded validated plan/proposal
+    alignment/         Wallet constraints + Task Shield
+    temporal/          ITAG: authenticated intent, graph, order/budget/history
+    portfolio/         Observed state và eligible decision snapshots
+    oracle/            Authoritative provider + reference Observatory
+    risk/              Economic checks
+    proof/             Mapping to shared PGS engine
+    decision/          SDE verdict fusion
+    signing/           Attestor
+    persistence/       Control DB, audit, reservations, projections
+    workflows/         Use-case coordination và revalidation
+    execution/         Chain / transaction / simulation / evidence / relaying
+    monitoring/        Read-only outcome worker/API
+    gas_credit/        Demo request identity + fee reservations/ledger
+    experience/        Deterministic amount-retry guidance
+  operations/          CLI, profiles, env/process wiring, deploy/prepare/renew/demo
+frontend/src/          app, api, shared, features/{treasury,intents,workflows,demo}
+packages/contracts-api/treasury_contracts/
+                       Wire DTOs, ABI/hashes, pure proof engine, read-only verifiers
+contracts/src/         PolicyVault.sol, adapters, interfaces, local mocks
+deployments/           Public manifest và owner renewal receipts
+deploy/                Hosting examples; không chứa private runtime env
+docs/                  Current design/index + labeled historical references/evidence
+```
+
+```mermaid
+flowchart LR
+  OPS["operations"] --> API["api composition"]
+  API --> WF["workflows"]
+  API --> EX["execution"]
+  API --> GAS["gas_credit port"]
+  WF --> F["Feature modules"]
+  WF --> PORT["Injected execution port"]
+  PORT --> EX
+  F --> CORE["core types"]
+  F --> SDK["treasury_contracts"]
+  CORE --> SDK
+  EX --> SDK
+```
+
+Dependency rules: feature modules không import ngược workflow coordinator; `core` không import features; control features không import execution internals; SDK không import backend. `api` là composition root để nối các port; `operations` quản lý process/deploy, không bị execution runtime import ngược. [Module map](../backend/MODULES.md) và `backend/tests/architecture` mô tả/enforce một phần các ranh giới này.
+
+Feature mới thường nằm trong một module. Thay signed field/ABI/hash/schema phải review đồng thời SDK/backend/contracts/tests; không thể giữ an toàn bằng cách chỉ sửa UI hoặc một folder riêng.
+
+## 4. Vai trò, tài sản, authentication và quyền
+
+### 4.1 Vai trò và nguồn chi phí
+
+| Role | Trách nhiệm | Giữ gì / trả gì? | Không được suy ra |
+| --- | --- | --- | --- |
+| Owner | Deploy/configure allowlists, policy/attestor, create/revoke session, pause/unpause, withdraw khi paused | Owner key ở admin CLI; gas cho admin writes | Không phải actor mà hệ thống bảo vệ chống lại nếu key bị compromise |
+| Operator | Tạo goals/intents, đọc treasury/history/graph, recovery theo hash | Operator Bearer; không cần wallet extension | Không tự force approve bằng JSON verdict |
+| Demo User | Một shared identity, yêu cầu bounded swaps và xem history của demo | Auto-issued demo Bearer; sponsor gas allowance | Không chứng minh ownership theo ví; không swap từ số dư ví Demo User |
+| Attestor | Ký immutable APPROVE sau revalidation/reservation | Private attestor key; offline signing không cần gas | Không phải solver được thực thi on-chain |
+| Relayer | Kiểm PDR/build và broadcast exact signed call | Private relayer key; AVAX thật để trả gas | Credit off-chain không thay thế relayer balance |
+| Vault | Giữ treasury tokens, enforce effects/caps atomically | Circle test USDC/WAVAX tại contract | Không giữ các SQL intent/task ledgers |
+
+Ba ví owner/attestor/relayer khác address và khác key. Gas revert vẫn do relayer trả. Demo User private key có thể tồn tại trong private `.env` nhưng **không dùng** cho đăng nhập/ký/trả gas và không forward vào canonical serving environment.
+
+### 4.2 Auth matrix
+
+| Surface | Credential | Quyền |
 | --- | --- | --- |
-| Chọn tài khoản | Public POST select, account_id=demo | Tự cấp HMAC-signed demo-only session 24 giờ; không trả server secret, không tạo giao dịch, không reset credit |
-| Demo API | Scoped Bearer, exact goal, Idempotency-Key | Durable request/workflow ID, authenticated intent và full pipeline; không có quyền operator/internal/execution |
-| Build binding | Workflow ID từ trusted API adapter + immutable build | Chỉ build thuộc accepted demo request được tính phí vào tài khoản demo |
-| Gas reserve | Signed gas limit × gas price, available credit và relayer pending balance | Commit cùng raw send journal; thiếu ngân sách/fee cap thì không broadcast |
-| Fee settlement | Canonical gas-verified receipt đủ confirmations | Charge gasUsed × effectiveGasPrice cho success/revert một lần; unknown/pending giữ hold |
-| Reorg | Canonical invalidation hoặc receipt đổi | Append reversal, giữ maximum, re-inclusion settle lại; không tự resend |
-| UI | Account/balances/credit/history DTOs | Private keys không tới browser; token trong tab memory, request ID có thể lưu sessionStorage |
+| `/health`, `/healthz`, static assets, `/v1/demo/config` | Public | Liveness/config public, không cấp quyền quản trị |
+| `POST /v1/demo/select` | Public khi demo enabled | Tự cấp session **chỉ account demo** |
+| Các `/v1/demo/*` protected routes | Session Bearer được cấp tự động | Bounded request, demo treasury view, account/history/workflows của demo |
+| Operator/control/ITAG/Shield/history APIs | `PACEVANT_OPERATOR_TOKEN` | Các use cases được route cho phép |
+| `/v1/approvals/attest` | `PACEVANT_INTERNAL_TOKEN` | Ký theo persisted decision ID, vẫn phải kiểm lại toàn bộ |
+| `/execution/...` protected routes | `B_API_KEY` qua `X-API-Key` | SDK facade, POST cần Idempotency-Key; vẫn cần valid signed PDR để execute |
 
-Gas credit hiện là sponsor allowance cấp sẵn trong execution SQLite, chưa phải khoản khách hàng đã nạp on-chain. Account address là identity/địa chỉ đọc số dư; swap vẫn dùng token vault, relayer trả gas. Initial allowance 0,001 AVAX, per-tx reservation cap 0,0001 AVAX; restart không cấp lại. Giá trị này tách khỏi số dư AVAX thực và certified risk/session budgets.
+Một app không có nghĩa một credential dùng được mọi quyền. Live startup yêu cầu ba service credentials khác nhau, tối thiểu 24 ký tự. Demo signing secret tối thiểu 32 ký tự và không trùng ba service credentials.
 
-Demo User chỉ chấp nhận USDC → WAVAX, yêu cầu ITAG và hardened/pipeline Shield, không nhận arbitrary recipient/calldata. Model/provider/oracle/risk/proof/Phi/nonce/deadline/session/caps vẫn bắt buộc. Không thêm contract, WalletConnect, Paymaster hay giao dịch ghi credit. Demo sends dùng estimateGas +10% +5000 gas; cùng request ID chỉ trả workflow cũ, journaled demo retry chỉ theo dõi hash.
+### 4.3 Chọn Demo User không nhập gì
 
-Các bảng mới `demo_account`, `demo_requests`, `demo_builds`, `demo_gas_reservations`, `demo_gas_events` nằm trong execution DB hiện tại. Control evidence và gas state có thể update ở hai transaction khác nhau; settlement idempotent và monitor có thể đọc/đối soát lại. Không giả định SQL transaction trải qua cả hai DB và blockchain. Backup ledger cùng execution journals/control history.
+Browser gửi `POST /v1/demo/select` với `{"account_id":"demo"}`. Backend tạo payload `{account_id, expires_at, nonce}` và HMAC-SHA256 với domain `pacevant-demo-session-v1:`. Response gồm `access_token`, `expires_at`, `scope:"demo"`, `token_type:"Bearer"`. Đây là token được cấp tự động; người dùng không nhập hoặc nhìn thấy key.
 
-Giới hạn: shared access một account, chưa có wallet-ownership login, customer deposit/payment/top-up/refund product. Unknown sends và crash trước workflow có thể cần operator review. Public Fuji receipt trước tính năng mới không chứng minh billing mới; [test report](audit/demo-user-gas-credit-validation.json) tách rõ Anvil/offline/public scope. Trong đợt triển khai này không gửi giao dịch Fuji.
+`PACEVANT_DEMO_ACCESS_TOKEN` giữ tên tương thích nhưng nay là **server-only session signing secret**. Giá trị env này không được trả cho browser, không được dùng trực tiếp làm Bearer demo. Session tự cấp sống 86.400 giây; hết hạn/reload có thể chọn lại. Chọn lại không reset credit, không tạo IntentSpec/workflow và không tự gửi swap.
+
+Token chỉ ở memory của tab; sessionStorage chỉ lưu random request ID để resume bằng GET. Không có session ownership DB, per-person revocation hoặc nhiều tài khoản. Khi demo enabled, bất kỳ visitor truy cập được API có thể chọn shared demo và cùng sử dụng finite allowance; đây là chủ đích của chế độ trình diễn, không phải production customer authentication.
+
+## 5. Đặc tả từng module: chức năng, input, output, trạng thái
+
+Trong mục này, **Implemented** nói về code tại baseline. **Local-tested**, **Fuji-evidenced** và **Not-yet-live-verified** chỉ nói về phạm vi evidence, không bảo đảm mọi request hiện tại pass. Nguồn test/evidence cụ thể ở mục 19.
+
+### 5.1 `api`, `config`, `core` và composition
+
+| Thành phần | Input | Function | Output / side effect | Trạng thái |
+| --- | --- | --- | --- | --- |
+| `api/app.py:create_app` | Control/Execution/Demo settings, optional injected service | Kiểm mode/RPC/credential alignment, create one app, wire SDK/monitor/ledger | FastAPI app, lifecycle, routes | Implemented; composition/local tests |
+| `api/control/` | JSON + Bearer, request ID | Auth, typed validation, sanitized error mapping; gọi use cases | DTOs/error envelope; no arbitrary signing | Implemented |
+| `api/demo.py` | Public selection; session + goal + request key | Scope demo, exact one-shot intent, stable workflow identity | Demo session/account/workflow views; DB request row | Local-tested; selection chưa có live swap evidence |
+| `api/demo_auth.py` | Secret + time; supplied session | Issue/verify HMAC, expiry/account/nonce bounds | Valid/invalid demo credential; no DB/chain write | Offline-tested |
+| `api/local_execution.py` | SDK method/payload + trusted workflow ID | Direct dispatch, schema/size/error contract; billing build binding | SDK response without internal HTTP hop | Local-tested; canonical path |
+| `config/` | Process env/profile | Validate modes, endpoints, model choices, budgets/flags | Typed settings hoặc startup refusal | Implemented |
+| `core/` | Shared application values | Address/hash/ID/UInt/DTO constraints, errors | Validated cross-module records | Implemented |
+
+Source: [composition](../backend/src/treasury_backend/api/app.py), [core types](../backend/src/treasury_backend/core/models.py), [domain snapshots](../backend/src/treasury_backend/core/domain.py).
+
+### 5.2 Planning — từ goal thành candidate swap
+
+**Source:** [module](../backend/src/treasury_backend/modules/planning/README.md), `provider.py`, `service.py`, `remote.py`, `rotation.py`; settings ở `config/planning.py`.
+
+- **Input:** bounded goal, ví dụ `Buy WAVAX with 0.000001 USDC`; mandate; chain-approved deadline; optional revised amount.
+- **Process:** remote parser trả direction/decimal amount; independent parser kiểm grammar, exact amount, direction và precision. Deterministic compiler lấy vault/router/tokens/recipient từ mandate.
+- **Output:** validated plan và `TransactionProposal` có intent ID, action, mandate version, chain/vault/router/token pair, amount, slippage, recipient, deadline, rationale có đơn vị.
+- **Persistence:** planner cache/quota/cooldown SQLite và file lock cạnh control data. Cache draft không chứa authorization/proof/signature.
+- **Failure:** unsupported/ambiguous goal, wrong amount/direction, invalid schema/provider unavailable đều fail closed; không sinh fixture plan.
+
+Current order là **DeepSeek → Groq → Gemini → Xingchi**. Mỗi configured provider tối đa một attempt trong planner request; local rolling quotas/cache/cooldowns được tách theo provider. Availability/auth/rate/quota/schema có thể chuyển provider; semantic amount/direction mismatch không được “thử đến khi model đồng ý”. Model actual được ghi trong PLANNED event; configured `rotate` không có nghĩa bốn API đều đã được gọi.
+
+**Trạng thái:** real provider adapters và live DeepSeek traces đã có. Goal grammar vẫn hẹp; không phải autonomous free-form agent tự chọn tools/strategies/assets. `rules` chỉ là offline option được cấu hình rõ, không fallback ngầm khi live model lỗi.
+
+### 5.3 Alignment / Task Shield
+
+**Source:** [module](../backend/src/treasury_backend/modules/alignment/README.md), `service.py`, `engine.py`, `runtime.py`, `state.py`, `serialization.py`.
+
+- **Input:** mandate/proposal/goal, authenticated user objectives, candidate assistant instruction/tool call, semantic view của tool output.
+- **Deterministic function:** kiểm amount/direction/pair/router/recipient/chain/vault và các vi phạm wallet constraints độc lập model.
+- **Semantic function:** extract authenticated objectives, đánh giá instruction có đóng góp cho task hay goal drift/injection, lưu config/revision/provider trace.
+- **Output:** `Alignment`; reports/check IDs, feedback, `task_shield_proof{session_id,revision,config_hash,check_ids,proposal,unresolved_feedback}`.
+- **Persistence:** `shield_sessions/messages/tasks/context/checks/events` trong control DB.
+
+Fuji dùng `wallet_pipeline`: proposal và build arguments được kiểm; fixed read/build/fork operations được gom output thành bounded batches và kiểm trước SDE/ký; execute call được kiểm riêng trước submission. `paper`/`wallet_hardened` giữ cách intercept từng tool. Unavailable trong live path không thành ALIGNED. Pending output chưa kiểm ngăn tạo approval proof; batch lỗi không xóa mất evidence. Successful output checks được bind và revalidate.
+
+Semantic view giữ natural-language strings/unknown trace keys; opaque hex/machine bytes dùng length/hash. Full raw artifacts vẫn được verify qua SDK/effects/proof. Không tuyên bố AI đã hiểu từng byte VM trace. User-task updates phải qua authenticated path; tool text không được trở thành user authorization.
+
+**Trạng thái:** implemented, scripted adversarial regressions và real-provider Fuji checks ở pipeline trước billing. Không có kết quả attack-detection accuracy thực tế cho model chỉ từ fixture tests. AI positive không ghi đè deterministic reject.
+
+### 5.4 Temporal / ITAG
+
+**Source:** [module](../backend/src/treasury_backend/modules/temporal/README.md), `intent_spec.py`, `verifier.py`, `graph_builder.py`, `semantic_evaluator.py`, `fusion.py`, `storage.py`, `explainer.py`.
+
+- **Input:** authenticated `IntentTerms`, mandate/scope hash, candidate/build, selected `spec_id/revision/step_id`, PRE snapshot, Shield reports và canonical history/reservations.
+- **Output:** `IntentSpec`, provenance Graph, deterministic ConstraintAssessment, semantic finding, HybridTemporalAssessment/hash, recovery explanation.
+- **State:** `PROPOSED/AUTHENTICATED/CANCELLED/SUPERSEDED`, revision history, workflow links và assessments trong control DB.
+- **Gates:** active revision/deadline, exact chain/vault/pair/router/recipient, per-step min/max, total budget/spent/reserved, completion replay, prerequisites/order, outcome verification.
+
+API hỗ trợ `ONE_SHOT_SWAP`, `BOUNDED_SWAP`, `ORDERED_TASK`; tối đa 12 steps và 8 prerequisites/step. Current Demo adapter tự tạo exact-amount one-shot. Hỗ trợ DTO/API nhiều steps không đồng nghĩa đã public-live test mọi hình thức plan.
+
+Graph tách node trust `AUTHENTICATED`, `VERIFIED_RECORD`, `UNTRUSTED`, `MODEL_JUDGMENT`, `UNVERIFIED`. Semantic evaluator dùng active Shield provider để nhận xét task contribution/goal drift, không tự cấp quyền. Citation repair bị giới hạn cho refs đã tồn tại thiếu node link; không được đổi core verdict/source/drift/task relationships để biến veto thành pass.
+
+```mermaid
+flowchart TD
+    U[Authenticated IntentSpec and revision] --> T[Task step and budget constraints]
+    H[Verified history and reserved spend] --> T
+    P[Candidate and pinned PRE facts] --> D[Deterministic temporal verifier]
+    T --> D
+    O[Tool outputs: untrusted as instructions] --> G[Provenance graph]
+    U --> G
+    P --> G
+    G --> S[Semantic evaluator and cited findings]
+    D --> F[Strict fusion]
+    S --> F
+    F --> A[Bound assessment and hash]
+    A --> R[Atomic latest revision and history recheck]
+    R --> E[Eligible for remaining security gates]
+```
+
+Assessment bind intent/graph/history/candidate/build/task revision/PRE links. Attestor reservation và transition sang SUBMITTING kiểm lại trong SQLite write transaction. Không gọi LLM bên trong write transaction; các bước chain/proof revalidation vẫn có thể giữ lock lâu.
+
+**Trạng thái:** implemented; local budget/order/cancellation/replay tests và one-shot public Fuji history evidence. Ledger authorization là off-chain, không phải graph/intent state machine chạy trong vault.
+
+### 5.5 Portfolio
+
+**Source:** [module](../backend/src/treasury_backend/modules/portfolio/README.md), `observations.py`, `service.py`.
+
+- **Input quan sát:** chain/vault, token identities/decimals, explicit block/hash, balances/context, history version, optional display oracle observations.
+- **Output quan sát:** immutable content-hashed `ObservedPortfolioSnapshot`; `authorization_eligible` luôn false.
+- **Input cấp quyền:** observation hợp lệ + exact build + owner policy + trusted price evidence.
+- **Output cấp quyền:** `VerifiedDecisionSnapshot` bind observation/hash/build/policy, raw oracle feeds và authorization scope.
+- **Failure:** missing identity/decimals/data, balance mismatch, invalid hash, stale state/history/source làm snapshot không đủ điều kiện ký.
+
+PRE/REVALIDATION không cần fetch thêm oracle chỉ để hiển thị dashboard. Authoritative Chainlink vẫn đọc riêng trong risk/proof. Exposure dùng projected balances và USD reference, là PRE-SIGN gate, không phải atomic on-chain allocation limit.
+
+**Trạng thái:** actual RPC observations/history/reconciliation implemented. Cached `/portfolio/current` là observation view, không phải authorization snapshot. Portfolio module có khả năng tính reverse trong controlled tests; route Fuji hiện vẫn chặn reverse.
+
+### 5.6 Oracle
+
+**Source:** [module](../backend/src/treasury_backend/modules/oracle/README.md), `chainlink.py`, SDK `oracle.py`; observational adapters trong `oracle/fuji/`.
+
+- **Input authoritative:** chain 43113 RPC, vault scope, pinned block hoặc latest, owner-bound source/feed config.
+- **Output:** `OraclePrice`, integer USD-e8, original `FeedObservation[]`, block/hash/time/source; không tự rewrite original timestamps.
+- **Validation:** exact token/feed/description/decimals/code, positive answer, round identity/answeredInRound, source hash, per-feed age, block/hash consistency.
+- **Observatory output:** provider observations với freshness/availability/eligibility flags; không thay authoritative source chỉ vì endpoint trả một con số.
+- **Fallback:** LOCAL/research có controlled writer/json interface; canonical live signing không lấy nominal 1/20 hoặc pool quote làm trusted USD oracle.
+
+**Trạng thái:** direct original Chainlink Fuji rounds có live evidence. Witnet/Pyth/CoinGecko là observational/reference adapters; không cam kết mọi provider đang online. Chi tiết source ở mục 7.
+
+### 5.7 Risk
+
+**Source:** [module](../backend/src/treasury_backend/modules/risk/README.md), `service.py:evaluate`.
+
+**Input:** mandate, proposal/build, verified simulation, decision snapshot, ChainBalances/ChainContext, clock. **Output:** `Evaluation(risk, suggested_amount)`; risk bind intent/build/snapshot và trả `PASS/FAIL/INCONCLUSIVE`, projected exposure, violations.
+
+Kiểm scope/hash, freshness/day, source/token identity, available balance, swap/daily spend, fair minimum output/slippage, loss policy, exposure và execution-cost budget. Dùng exact integer/Fraction; exposure làm tròn bảo thủ. Missing facts không thành PASS. Suggested amount là planning hint cho attempt mới; phải rebuild/simulate/prove lại và vẫn bị exact ITAG budget constraints giới hạn.
+
+**Trạng thái:** implemented + local boundary/rejection tests + live core evidence. Các trần economic off-chain khác với caps Solidity; xem coverage mục 17.
+
+### 5.8 Proof bridge / shared PGS engine
+
+**Source:** [bridge](../backend/src/treasury_backend/modules/proof/README.md), [pure engine](../packages/contracts-api/treasury_contracts/proof.py), [V2 encodings](../packages/contracts-api/treasury_contracts/v2.py).
+
+**Input:** exact build, measured effects, owner ProofPolicy, two-token Registry, validated OracleEvidence/intervals, SessionContext, time và optional query sink. **Output:** ProofArtifactV2 với feasibility/obligation verdicts, Phi/debit, SMT hashes, solver/encoder/source versions và call/effects/policy/registry/oracle/session commitments.
+
+Bridge chỉ map application facts; công thức/hash nằm ở shared SDK. Engine dùng Z3 Real + exact rationals, bounded integer deltas cho Phi feasibility, timeout mặc định 1000ms/query, cho cấu hình constructor đến 5000ms, process lock vì native default context không thread-safe. UNKNOWN/error/timeout/invalid inputs không tạo VERIFIED.
+
+**Trạng thái:** implemented; raw SMT queries và independent re-solving cho public core workflow đã lưu. Đây là off-chain bounded proof, không ZK và không full Solidity/DEX program verification; mục 10 nêu theorem/assumptions.
+
+### 5.9 Decision / SDE
+
+**Source:** [module](../backend/src/treasury_backend/modules/decision/README.md), `service.py:decide/simulation_issues`.
+
+**Input:** bound alignment, context/build/simulation/risk/proof/temporal assessment và clock. **Output:** immutable SecurityDecision với verdict, reason codes, expiry và các binding IDs/hashes. **Không giữ key.**
+
+Hard violations dẫn đến REJECT. Recoverable economic reasons có thể REPLAN. Unverified/missing/stale/inconclusive facts thường ESCALATE. APPROVE chỉ khi đủ mọi prerequisites và không còn blocking reason. Temporal verdict được fuse theo độ nghiêm ngặt, không lấy trung bình score để bù một gate fail bằng gate pass.
+
+| Nhóm kết quả | Ví dụ reason codes trong SDE | Hành động tiếp theo |
+| --- | --- | --- |
+| REJECT | `TASK_MISALIGNED`, `TOKEN_NOT_ALLOWED`, `ROUTER_NOT_ALLOWED`, `BAD_RECIPIENT`, `POLICY_REVOKED`, `UNEXPECTED_TRANSFER`, `UNAUTHORIZED_APPROVAL`, `UNSAFE_EXECUTION`, `NONCE_REPLAY` | Không ký/gửi; sửa yêu cầu hoặc điều tra nguyên nhân |
+| REPLAN nếu chỉ có recoverable reasons | `TOKEN_EXPOSURE_LIMIT`, `TRADE_SIZE_LIMIT`, `BAD_PRICE_OR_SLIPPAGE`, `REQUIRED_STRESS_NOT_SATISFIED` | Candidate mới chỉ khi còn quyền task và replan allowance; toàn bộ gate chạy lại |
+| ESCALATE khi reason ngoài recoverable hoặc thiếu bằng chứng | Ví dụ `SIMULATION_INCOMPLETE`, `HASH_MISMATCH`, `TASK_UNCERTAIN`, `RISK_INCONCLUSIVE`, `PROOF_REQUIRED`, stale/source failures | Dừng để có evidence mới/operator review; không tự approve |
+| APPROVE | Không còn blocking reasons; alignment ALIGNED, risk PASS, build/evidence/proof đủ và temporal không veto | Chỉ đủ điều kiện đi vào reservation/revalidation/attest, chưa là success transaction |
+
+Temporal có thể nâng mức nghiêm ngặt theo `APPROVE < REPLAN < ESCALATE < REJECT`. Ví dụ API key lỗi dẫn unavailable không thuộc nhóm “giảm amount để thử lại”. Danh sách trên phản ánh mapping SDE; module khác có thể từ chối trước khi tới SDE và trả code riêng.
+
+**Trạng thái:** implemented; source reason-code sets là thẩm quyền, không có UI force-approve để bỏ gate.
+
+### 5.10 Signing / Attestor
+
+**Source:** [module](../backend/src/treasury_backend/modules/signing/README.md), `service.py`, `typed.py`; workflow authorization thực hiện revalidation.
+
+**Input:** persisted APPROVE/bound bundle, revalidated proof/session/context, attestor key và atomic reservation scope. **Output:** SignedPDRV2 gồm domain, ApprovalV2, Phi, signature, typed-data hash và decision/build refs.
+
+Kiểm exact approved data, live policy/session/nonce, freshness, proof recomputation/final Phi preflight, Shield/ITAG revisions/history/PRE links và local in-flight reservation. Không ký request tự đưa `verdict=APPROVE`, không có arbitrary-bytes sign endpoint. Signature không thay deadline/build để “cứu” một attempt cũ.
+
+**Trạng thái:** local mutation/race/replay tests + Fuji signer evidence; key separation logic có, process isolation/HSM chưa có.
+
+### 5.11 Persistence
+
+**Source:** [module](../backend/src/treasury_backend/modules/persistence/README.md), `service.py`, `portfolio.py`; Shield/Temporal sở hữu additive tables của mình.
+
+**Input:** validated application records, state transition/reservation requests. **Output:** immutable workflow attempt/decision/proof/snapshot/outcome audit và current projections/jobs/history versions. **Side effects:** control SQLite WAL và content-addressed SMT query files.
+
+`BEGIN IMMEDIATE` linearize signing reservation, task/intent checks và SUBMITTING transition. Triggers bảo vệ một số evidence tables khỏi UPDATE/DELETE; projections và attestation states có thể cập nhật theo state machine. Database root/admin vẫn là trusted boundary; triggers không chống compromise host.
+
+**Trạng thái:** implemented + additive/idempotent migration/concurrency/reorg tests. Không có distributed transaction giữa control DB, execution DB và blockchain; xem mục 14.
+
+### 5.12 Workflows
+
+**Source:** [module](../backend/src/treasury_backend/modules/workflows/README.md), `service.py`, `evaluation.py`, `authorization.py`, `monitoring.py`, `client.py`, `evidence.py`, `fuji.py`.
+
+**Input:** WorkflowRequest hoặc trusted demo adapter cùng allocated workflow ID. **Output:** stable workflow ID/status, timeline/attempts/decision/submission/outcome. **Composition:** injected verified execution port; missing live client/fixture client trong LOCAL/FUJI bị chặn.
+
+`run` phối hợp plan → assessment → attest → submit → reconcile. Request start chạy đồng bộ phần lớn pipeline, không được mô tả như durable queue tự resume mọi bước. Demo wrapper thêm request idempotency; generic operator start không tự có exactly-once semantics. Scenario fixture chỉ ở MOCK.
+
+**Trạng thái:** core Fuji pipeline từng CONFIRMED; demo adapter mới có offline/Anvil evidence, chưa public-live billing receipt.
+
+### 5.13 Execution và từng submodule
+
+**Source:** [module](../backend/src/treasury_backend/modules/execution/README.md).
+
+| Thành phần | Input | Function | Output / persistence | Trạng thái |
+| --- | --- | --- | --- | --- |
+| `ExecutionService` | Typed request + Idempotency-Key | File lock/idempotent mutations, expensive request limit | Stable result/error; build binding cho demo | Implemented; one instance |
+| `chain/Chain` | RPC + settings + manifest | Chain/code/token/decimals/policy/session reads | Wire context/on-chain balances; mismatch blocks | Real Fuji verified in core evidence |
+| `transaction/Builder` | Proposal + pinned chain state | Allowlist/caps/recipient/deadline/route, exact quote/calldata/nonce | BuiltTransaction + immutable context/quote | USDC→WAVAX LFJ live-evidenced |
+| `simulation/Simulator` | Build ID/expected policy; preflight thêm proof/Phi/debit/session | Isolated Anvil exploratory effects, baseline/stress, final guarded checks | SimulationEvidence, raw artifacts, preflight ref | Concrete EVM; hypothetical fork scenarios |
+| `evidence/` | Receipts/logs/traces/pre-post state | Parse token facts, unauthorized approvals/transfers, bind completeness | Manifest/evidence root/effects V2 | Local regressions + public outcome verifiers |
+| `relaying/Relayer` | Stored build/evidence + SignedPDR | Exact signature/domain/call/current-state preflight; durable send | tx hash/status/raw journal; demo hold in same DB tx | Core Fuji evidenced; billing local-tested |
+| `storage.py` | Records/artifacts/idempotency/submissions | SQLite WAL/file lock, immutable records, hash-addressed artifacts | Execution DB + private raw bytes | Implemented; preserve on restart |
+
+Expensive simulation/preflight facade giới hạn 30 requests/60s trong process; đây không phải toàn hệ thống rate limit/WAF. Native RPC/header wrapper chấp nhận extended Avalanche extraData nhưng giữ block hash/number/timestamp checks. Runtime execution không nhận owner key và không tự deploy.
+
+Fuji LFJ reverse builder bị chặn rõ (`LFJ_UNSUPPORTED_ROUTE`). LOCAL/mock adapter reverse có test và cap riêng; không suy thành live reverse support.
+
+### 5.14 Monitoring / outcome reconciliation
+
+**Source:** [module](../backend/src/treasury_backend/modules/monitoring/README.md), `service.py:OutcomeMonitor`, `worker.py`, `api.py`; pure verifier ở SDK `outcomes*.py`.
+
+**Input:** durable job, saved build/PDR/evidence/PRE snapshot, known tx hash hoặc submission lookup, chain facts. **Output:** verified receipt/outcome, pre/post snapshots, attributed/residual deltas, gas expense, reason codes/history projection. **Side effect:** read-only chain calls và local DB updates, không ký/gửi lại.
+
+Worker bootstrap jobs từ durable submissions, claim SQLite lease và tick tối đa 5 jobs rồi chờ 5s. Delay sau poll được điều chỉnh; confirmed/reverted vẫn có thể được đối soát lại để phát hiện reorg. API/CLI/dashboard cũng có thể poll. Unavailable giữ uncertainty; mismatch không tự credit một outcome hợp lệ. Gas được dedup theo canonical transaction, không theo số poll.
+
+`fee_observer` callback đưa cùng verified report/invalidation sang gas ledger. Gas settlement độc lập với việc token-effects attribution cần review. Monitor không là fee-bump/cancel/rebroadcast daemon hoặc system tự tái khởi động workflow.
+
+**Trạng thái:** implemented/local-tested; canonical core receipt evidence có; hosting background/restart behavior chưa được nghiệm thu trên host thật.
+
+### 5.15 Gas credit
+
+**Source:** [module](../backend/src/treasury_backend/modules/gas_credit/README.md), `service.py:GasCreditLedger`.
+
+**Input:** fixed demo identity/scope, request key/goal, trusted workflow/build binding, signed transaction maximum fee, relayer balance và verified receipt report. **Output:** allocated/spent/reserved/available wei, request/transaction/history DTOs, refusal hoặc idempotent debit/reversal.
+
+Năm bảng `demo_*` nằm trong execution DB hiện tại. Reserve và raw send journal commit trong cùng DB transaction trước broadcast. Không có on-chain credit top-up hoặc token transfer để ghi phí. Actual fee success/revert là `gasUsed × effectiveGasPrice`; pending/unavailable giữ hold; reorg reverse charge và giữ maximum đến khi outcome được xác lập lại.
+
+**Trạng thái:** implemented; concurrency/receipt/reorg/restart tests + Anvil full-pipeline success/late-cap-refusal. Sponsor allowance không là chứng từ user deposit, không tự refill khi chọn account/restart/env initial credit đổi. Mục 13 mô tả kế toán và crash constraints.
+
+### 5.16 Experience / retry guidance
+
+**Source:** [module](../backend/src/treasury_backend/modules/experience/README.md), `service.py:next_amount`.
+
+**Input:** latest REPLAN, suggested amount, amount hiện tại và các amount đã thử. **Output:** amount nhỏ hơn hoặc `None`; với một số slippage/stress reasons giảm tối đa còn nửa amount. Không tạo giao dịch, không ký và không mutate build cũ.
+
+**Trạng thái:** deterministic rule, không RL hoặc học từ profit. Một attempt mới vẫn phải phù hợp exact one-shot ITAG terms; không được giảm amount để vượt quyền task đã xác thực. Mandate giới hạn tối đa hai economic replans; Shield replans là knob riêng, current demo đặt 0.
+
+### 5.17 Operations và shared SDK
+
+| Thành phần | Input → output | Trách nhiệm / trạng thái |
+| --- | --- | --- |
+| `operations/cli.py` | Explicit CLI command + profile → ready/blocked/report | doctor/prepare/serve/demo/deploy/renew/evidence; admin writes chỉ theo lệnh rõ |
+| `profiles.py/environments.py` | Root env + network → validated per-role runtime env | Canonical Fuji override modes/paths; exclude owner/demo-user key khỏi serving |
+| `contracts.py/owner_transactions.py` | Owner-approved config → receipts/manifest/session | Durable raw renewal journal, stable resume scope, no extra write after confirmed read failure |
+| `processes.py/services.py` | Settings/native tools → managed backend/Anvil processes | Lifecycle/logs, optional oracle writer cho controlled profile; live Chainlink reads trực tiếp |
+| `container.py` | Actual process env + mounted manifest/durable disk → one hosted service | Reject owner key, ignore root private env; no compile/deploy/renew at serving startup |
+| `treasury_contracts` SDK | Wire facts/RPC/evidence → models/hashes/proof/verified outcome | Version 1.3.1 package; v1 compatibility + ApprovalV2 domain version 2; không import backend |
+
+Sources: [operations](../backend/src/treasury_backend/operations/README.md), [SDK](../packages/contracts-api/README.md). SDK/package version, system V2.1, wire compatibility V1 và EIP-712 V2 là các version khác nhau, không được dùng thay thế nhau.
+
+## 6. Data contracts, identity, đơn vị và commitments
+
+### 6.1 Hợp đồng dữ liệu xuyên module
+
+| Record | Trường chính / input | Producer → consumer | Invariant |
+| --- | --- | --- | --- |
+| WorkflowRequest | `goal`, `mandate_id`, optional `scenario`, `temporal_intent{spec_id,revision,step_id}` | Operator API → coordinator | Scenario chỉ MOCK; required ITAG cần selection |
+| DemoGoal / DemoSelection | Chỉ `goal` hoặc literal `account_id=demo` | Browser → scoped adapter | Không nhận router/recipient/PDR hoặc arbitrary account |
+| Mandate | Version, addresses, policy/caps/stress/proof/registry/session | prepare từ owner config + chain → gates | Scope hiện tại, đúng active policy/hash/version |
+| IntentTerms | Kind, objective, mandate ID, deadline, total budget, steps | Authenticated API → Temporal | Positive budget, reachable completion, legal dependencies |
+| IntentSpec | Terms + spec ID/revision/status, chain/vault/pair/router, mandate/policy hash | Temporal → graph/verifier/signer | Authorization provenance và revision không tự đổi |
+| TransactionProposal | Action, intent ID, mandate version, addresses, exact amount/slippage/recipient/deadline | Compiler → alignment/builder | Recipient=vault và scope lấy từ trusted mandate |
+| BuiltTransaction | Build/intent IDs, nonce, calldata/hash, minOut, deadline, quote ref, adapter version | Builder → simulator/proof/relayer | Immutable exact candidate; đổi field phải rebuild |
+| SimulationEvidence | Baseline, stresses, fork/source/mode, COMPLETE status, refs/root, effects V2 | Simulator + verification → risk/proof/SDE | Hash/bindings/fork/code/token facts khớp |
+| ObservedPortfolioSnapshot | Chain/vault/block/hash/time, identities/balances, policy, history/content hash | Reader → history/UI | `authorization_eligible=false` |
+| VerifiedDecisionSnapshot | Observation ID/hash + price/source/feed rounds, build/policy bindings | Portfolio → risk/proof | Có authorization scope đúng mode/source; không tự promote từ cached display |
+| EconomicRiskAssessment | Bound IDs, result, projected exposure/max, violations | Risk → SDE | PASS cần đủ facts, không thiếu source/freshness |
+| Shield reports/proof | Status, source/message/tool/check IDs, revision/config, provider trace | Shield → graph/authorization | Pending evidence hoặc unresolved feedback chặn approval |
+| HybridTemporalAssessment | Semantic+deterministic results, graph/intent/history/candidate/build hashes, revisions/evidence refs | ITAG → SDE/storage/viewer | Current revision/history/task/PRE linkage khi reserve/submit |
+| ProofArtifactV2 | Status/three obligations/feasibility, Phi/debit, query/source/solver/version/hash bindings | PGS → SDE/attestor | VERIFIED không chỉ là một bool do client gửi |
+| SecurityDecision | Decision/intent/build/snapshot IDs, verdict/reasons, hashes, created/expires | SDE → immutable store/signing | Không sửa saved attempt thành approved |
+| SignedPDRV2 | Domain, ApprovalV2, Phi, signature, typed-data hash, decision/build refs | Attestor → relayer/vault | Exact signed call, same domain/chain/vault |
+| ExecutionSubmission | Known tx hash và pending/submitted status | Relayer → coordinator/monitor | Response success chưa chứng minh receipt success |
+| ExecutionReconciliation | Canonicality/verification/receipt status, tx/build/decision identity, gas, deltas/logs/allowances | Shared verifier → monitor/ledger | Unknown khác zero; signed intent/effects attribution phải được kiểm |
+
+Schema nguồn: [core models](../backend/src/treasury_backend/core/models.py), [domain](../backend/src/treasury_backend/core/domain.py), [temporal models](../backend/src/treasury_backend/modules/temporal/models.py), [shared wire models](../packages/contracts-api/treasury_contracts/models.py), [V2 models](../packages/contracts-api/treasury_contracts/v2.py). Bảng này là định nghĩa semantic, không thay schema khi encode calldata/signature.
+
+### 6.2 ID và hash không được đánh đồng
+
+| Identity | Định danh gì? |
+| --- | --- |
+| `spec_id` + revision + step_id | Quyền thực hiện task/step, có thể liên quan nhiều workflows |
+| `workflow_id` | Một lần coordinator xử lý request |
+| `intent_id` | Một proposal/candidate trong attempt, không phải IntentSpec |
+| `build_id` | Exact built swap; nonce/deadline/calldata thay thì build khác |
+| `decision_id` | Immutable đánh giá của một bound attempt |
+| `session_id` on-chain | Policy-bound authority/risk budget window của vault |
+| `session_id` Shield | Objective/check state off-chain; khác session vault |
+| Demo HMAC session | Browser access scope tự cấp; không là quyền on-chain |
+| Idempotency-Key demo | Một accepted goal → một workflow ID; different body conflicts |
+| Vault approval nonce | Replay guard cho ApprovalV2 |
+| Relayer account nonce | Transaction sequencing của ví relayer trên EVM |
+| tx hash | Hash signed EVM envelope, có thể đã biết trước broadcast |
+| evidence root / proof context / Phi hash / graph hash | Commitments cho từng loại dữ liệu; không dùng tráo nhau |
+
+### 6.3 Đơn vị và rounding
+
+| Dữ liệu | Quy ước |
+| --- | --- |
+| USDC | 6 decimals; `"1"` base unit = `0.000001 USDC` |
+| WAVAX | 18 decimals |
+| AVAX gas / credit | Integer wei, `10^18 wei = 1 AVAX` |
+| Reference USD, risk debit/limits | Integer USD-e8, `10^8 = 1 USD reference` |
+| Basis points | `10000 = 100%`; exposure `2500 = 25%` |
+| Amounts/uint256 qua JSON | Decimal strings; không float/JS Number cho tiền |
+| Token deltas | Signed integer base units; input âm, output dương |
+| Prices/proof | Exact int/Fraction/Z3 rationals; certified debit ceil nonnegative |
+| UTC day | Unix seconds `// 86400`; deadline không vượt day boundary trong current planner |
+
+USDC reference value là `balance × price_e8 / 10^6`; WAVAX value là `balance × price_e8 / 10^18`. Risk dùng common integer scale để so sánh exposure và làm tròn bảo thủ. Hiển thị UI có thể rút gọn số; giá trị trong DTO/ledger không lấy lại từ số đã format.
+
+### 6.4 Commitments và ApprovalV2
+
+```mermaid
+flowchart LR
+  B["Build / exact call / nonce / deadline"] --> PC["Proof context commitments"]
+  E["Measured effects + evidence root"] --> PC
+  O["Validated oracle rounds + intervals"] --> PC
+  P["Owner ProofPolicy + Registry"] --> PC
+  S["Session / global context"] --> PC
+  Q["Source / encoder / solver / SMT hashes"] --> PC
+  PC --> A["ApprovalV2 proofContextHash"]
+  PC --> PH["Phi hash + certified risk debit"]
+  PH --> A
+  A --> SIG["EIP-712 signature"]
+  SIG --> V["Vault binding / actual-effect checks"]
+```
+
+ApprovalV2 fields: `intentHash`, `calldataHash`, `policyHash`, `evidenceRoot`, `proofContextHash`, `postConditionsHash`, `sessionId`, `riskDebitUsdE8`, `nonce`, `deadline`, `adapter`, `tokenIn`, `tokenOut`, `amountIn`, `minAmountOut`. Domain: name `TreasuryPolicyVault`, version `2`, chainId và verifyingContract.
+
+Task Shield check IDs/ITAG assessment bind trong persisted approval bundle và revalidate off-chain. Không tự suy rằng contract có thêm field ITAG/gas-user identity hoặc execute lại semantic evaluator. Gas credit không thay ApprovalV2 ABI/Phi hoặc proof source hash.
+
+## 7. Nguồn dữ liệu và oracle
+
+### 7.1 Sổ nguồn dữ liệu trong từng mode
+
+| Data | MOCK | LOCAL | Current FUJI profile |
+| --- | --- | --- | --- |
+| Context/balances | Python fixture client | RPC thật tới local Anvil | Public Fuji RPC với address/ABI/code/pinned block checks |
+| Tokens/adapter | Receipt và amounts giả lập V1 | MockERC20/MockSwapAdapter trên EVM thật | Circle test USDC/WAVAX + deployed LFJSwapAdapter |
+| USD prices | Nominal fixture 1/20 | Controlled demo/source theo local policy | Direct original Chainlink rounds trên Fuji |
+| Swap execution | Fixture state update | Signed EVM tx trên Anvil | Signed relayer tx trên chain 43113 |
+| Proof | MOCK V1 không chứng minh full V2/Phi/session | Z3 V2 + EVM/Phi thật với local assumptions | Cùng engine + Chainlink reference policy/effects live fork |
+| Stress | Fixture statuses | Counterfactual quote/state trên fork | Counterfactual external-actor LFJ reserve shifts trên fork |
+| Receipt/hash/gas | Giả lập có nhãn MOCK | EVM local receipt | Public receipt/hash/logs/gas |
+| AI | Rules/fixtures hoặc real provider theo cấu hình | Fixture semantic tests hoặc real API tùy run | Configured real API; report trace mới là chứng cứ |
+
+Real AI + MOCK không làm receipt trở thành on-chain. Real EVM local không làm mock token thành token thị trường. Stress trên fork không phải sự kiện đã xảy ra trên public chain. Các nguồn/ý nghĩa này phải đi cùng hình demo và report.
+
+### 7.2 Exact authoritative oracle mapping
+
+Nguồn cấp quyền là `CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1`, defined trong [SDK oracle policy](../packages/contracts-api/treasury_contracts/oracle.py). RPC đọc feed contracts ở **Fuji chain 43113**, không gọi mainnet aggregator để cấp quyền trong path này.
+
+| Policy asset | Feed contract Fuji | Pair / max age |
+| --- | --- | --- |
+| Circle test USDC `0x5425890298aed601595a70AB815c96711a31Bc65` | `0x97fe42a7e96640d932bbc0e1580c73e705a8eb73` | USDC/USD, 86.400s |
+| Fuji WAVAX `0xd00ae08403B9bbb9124bB305C09058E32C39A48c` | `0x5498bb86bc934c8d34fda08e81d444153d0d06ad` | AVAX/USD, 600s |
+
+Validation giữ original round ID/answeredInRound/answer/startedAt/updatedAt, description/8 decimals/code/source identity, positive values, per-feed age và pinned observation block/time/hash. `oracle_source_hash` owner-bound cam kết exact mapping/heartbeat và semantics `TESTNET_REFERENCE_USD_NOT_REDEEMABLE`.
+
+**Feed contract trên Fuji** là network/provenance của read. **Giá tham chiếu USD** là semantics policy áp cho token testnet. Điều đó không làm token testnet redeem 1 USD hay khiến tỷ giá LFJ bằng Chainlink. Pool quote dùng reserves/thanh khoản, oracle là nguồn định giá độc lập theo policy; chênh lệch có thể lớn ở pool testnet nhỏ. Lợi nhuận theo reference USD không chứng minh profit có thể rút tiền thật.
+
+### 7.3 Oracle observations không phải authorization
+
+Fuji Observatory/wallet page đọc các nguồn Chainlink/Witnet/Pyth và reference HTTP adapter theo implementation. Output có availability/freshness và eligibility; source không đủ điều kiện không được thay vào proof chỉ vì giá hiển thị hợp lý. LFJ faucet USDC `0xB6076C93701D6a07266c31066B298AeC6dd65c2d` khác Circle test USDC, không được map cùng giá dựa vào symbol.
+
+`oracle.json` là file/cache hỗ trợ. Chỉ với exact live Chainlink source/token/policy đã xác minh, startup cache unavailable có thể được báo UNAVAILABLE để API vẫn trả trạng thái; không restamp giá cũ và signing vẫn direct-read fresh rounds. Source/scope/policy mismatch vẫn chặn prepare. Controlled nominal writer không được chạy đè live source.
+
+### 7.4 RPC, fork và giới hạn độc lập
+
+Profile cục bộ dùng PublicNode cho chain/control và verification RPC; chúng là hai code paths kiểm tra nhưng **không phải hai nhà vận hành RPC độc lập**. Anvil fork-source dùng `https://api.avax-test.network/ext/bc/C/rpc`. Snapshot/source hash, archive reads và bytecode checks là defense-in-depth, không thay light-client consensus verification hoặc chống coordinated Byzantine RPC.
+
+`rpc.evm_web3` dùng middleware chuẩn để hỗ trợ extended Avalanche extraData. Không sửa block hash/number/timestamp và không mở quyền write cho read-only transport. Fork mutations chỉ đi loopback Anvil; không gửi impersonation/mint/stress methods tới public source RPC.
+
+## 8. Luồng xử lý end-to-end hiện tại
+
+### 8.1 Trước khi người dùng vào
+
+Admin đã deploy vault/adapter, allowlist assets/router, approve policy và create session bằng owner transactions riêng. Public manifest/artifacts lưu code/address/receipt refs. `treasury serve --network fuji` kiểm profile/key roles/deployment/policy/session và viết mandate/config local; nó không tự deploy/renew/fund.
+
+Live startup có thể từ chối nếu session/policy hết hạn hoặc env owner config khác chain. `/health` OK chỉ là liveness/composition, không chứng minh mọi request đủ balances/exposure/budgets/freshness.
+
+### 8.2 Sequence của người dùng demo
+
+```mermaid
+sequenceDiagram
+  actor J as Judge
+  participant UI as Browser
+  participant D as Demo API
+  participant T as Temporal / ITAG
+  participant W as ControlPlane
+  participant A as Planner / Shield
+  participant E as Execution / Anvil
+  participant G as Oracle / Risk / Proof / SDE
+  participant S as Attestor
+  participant L as Relayer / Gas ledger
+  participant F as Fuji Vault / LFJ
+  participant M as Outcome Monitor
+  J->>UI: Chọn Demo User
+  UI->>D: POST select account_id=demo
+  D-->>UI: Auto-issued demo session
+  UI->>D: GET account + treasury
+  J->>UI: Chạy goal mẫu hoặc goal bounded mới
+  UI->>D: POST goal + Idempotency-Key
+  D->>L: Allocate durable request/workflow identity
+  D->>T: Authorize exact one-shot terms
+  D->>W: run same workflow pipeline
+  W->>A: Parse goal / authenticated tasks / check proposal
+  W->>E: Read context, build exact call, bind demo billing
+  E->>E: Pinned fork baseline + stresses
+  E-->>W: Raw artifacts + measured effects
+  W->>A: Flush all untrusted evidence batches
+  W->>T: Graph, deterministic + semantic assessment
+  W->>G: Direct rounds, economics, Z3 obligations, strongest verdict
+  G-->>W: Persist APPROVE or refusal
+  W->>S: Revalidate + atomic reservation + signature
+  W->>A: Check execute call
+  W->>W: Revalidate again, atomic SUBMITTING gate
+  W->>L: Execute exact signed build
+  L->>L: Estimate gas, reserve maximum + journal atomically
+  L->>F: Broadcast once
+  F-->>M: Canonical receipt / actual effects / gas
+  M->>L: Idempotent fee settlement or hold
+  M-->>UI: Reconciled status / timeline / histories
+```
+
+### 8.3 Các bước và output có thể kiểm tra
+
+| Bước | Input | Output quan sát được | Đã có public write? |
+| --- | --- | --- | --- |
+| Select | Literal demo account | Session credential, expiry/scope | Không |
+| Read account/treasury | Demo session | Wallet balance riêng, credit, mandate/observation | Không |
+| Accept request | Goal + request key | Stable workflow ID, RUNNING request row | Không |
+| Authorize intent | Exact amount + mandate | Authenticated IntentSpec/step/budget/revision | Không |
+| Plan | Goal | PLANNED runtime provider trace; Proposal | Không |
+| Align | Proposal + task set | ALIGNED hoặc feedback/reject/escalate | Không |
+| Build | Proposal + chain context | BUILT, exact calldata/hash/minOut/nonce/quote artifact | Không |
+| Simulate | Bound build | Baseline/stress receipts/effects; SIMULATED | Chỉ Anvil writes |
+| Assess | Evidence + direct oracle + history | ITAG_ASSESSED, risk, proof, SDE decision | Không |
+| Attest | APPROVE + revalidated bundle | ATTESTED, signature hash/nonce/expiry; private PDR record | Không |
+| Pre-submit | Execute-call check + current facts | SUBMITTING hoặc EXPIRED/refusal | Không |
+| Gas/journal | Signed call, estimate/credit/balance | Maximum hold + raw tx journal/hash | Chưa, cho đến khi commit xong |
+| Broadcast | Same signed envelope | SUBMITTED/PENDING/unknown hash state | Có, public write đầu tiên của workflow |
+| Reconcile | Receipt/tx/block/logs | CONFIRMED/REVERTED/mismatch/unavailable; fee debit | Đọc chain, ghi DB local |
+
+Planner remote resolution diễn ra trước mở approval deadline. Sau đó state/fork/model/revalidation có thể tốn đáng kể cửa sổ 300s. Không tự dời deadline của build đã ký hoặc kéo age policy để ép pass.
+
+### 8.4 Dừng, replan và sai lệch
+
+| Trigger | Hành vi |
+| --- | --- |
+| Goal không đúng grammar/exact amount | Refuse; không tạo plan giả |
+| Token/router/recipient/nonce/policy sai | Deterministic hard reject hoặc refusal tương ứng |
+| Tool injection/uninspected evidence | Shield blocks/escalates; không cấp approval proof |
+| Step hoàn tất/sai order/vượt intent budget | ITAG rejects; AI positive không sửa ledger |
+| Missing/stale/changed rounds, fork/code/hash mismatch | Escalate/re-evaluation, không ký bằng giá cache giả |
+| Risk/proof không pass | SDE không APPROVE; recoverable attempt phải rebuild/prove lại |
+| Expiry/cancellation sau ký trước gửi | Final deterministic/atomic gate chặn submission |
+| Thiếu gas credit/relayer funds hoặc vượt fee cap | FAILED_TO_SUBMIT trước journal/broadcast, không charge gas |
+| Public tx revert | Token/nonce/counters của tx rollback; relayer vẫn tốn gas |
+| Receipt/outcome chưa rõ | Giữ pending/hold/reservation; không tạo swap mới để chữa timeout |
+
+Demo exact one-shot có thể làm economic amount-reduction không phù hợp terms; hệ thống phải giữ quyền đã cấp, không xem replan là cách tự đổi user authorization.
+
+## 9. Mô phỏng EVM, stress và final guarded preflight
+
+### 9.1 Hai giai đoạn, không có vòng chứng minh giả
+
+V2 simulator chạy exploratory guarded call với fork-only signer, Phi ban đầu dựa trên restricted exact input/minOut và debit sentinel để đo effects. Sau đó proof engine từ effects tạo Phi/debit được chứng nhận. Final guarded preflight chạy lại exact signed conditions đó trên fork và required stresses trước khi ký/gửi.
+
+Exploratory call không phải final attestor authorization và không được đưa thẳng lên public Fuji. Final preflight không thay expected Phi/debit để làm success; nếu guard cuối fail thì không có approved executable envelope.
+
+### 9.2 Fork setup và kiểm state
+
+Simulator pin block number/hash, kiểm bytecode/token balances/policy/quote khớp build context. Anvil là loopback process riêng. Override attestor storage dùng compiler layout, tạo ephemeral signer/relayer và cấp gas **trong fork**. Mỗi scenario restore snapshot rồi mới stress, tránh scenario sau kế thừa state thay đổi của scenario trước.
+
+Các thuật ngữ “real simulation” nghĩa EVM chạy thật trên state fork, không nghĩa mọi setup transaction từng tồn tại trên public chain. Raw evidence ghi source/fork/overrides và `source_writes=false` cho public source.
+
+### 9.3 Baseline và stress policy
+
+| Scenario | Thao tác | Điều kiện kỳ vọng hiện tại |
+| --- | --- | --- |
+| Baseline | Exact intended call trên pinned state | SUCCESS, exact input delta, output ≥ minOut, no unexpected transfer/approval |
+| Mild reserve shift | Khoảng 20 bps bất lợi theo bounded scenario | SUCCESS_REQUIRED |
+| Adverse reserve shift | Khoảng 200 bps bất lợi | Safe success hoặc protected min-output revert theo requirement |
+| LOCAL mock stress | Owner quote multiplier bị chỉnh trong isolated fork | Controlled fixture economics, không AMM thị trường |
+| Fuji LFJ stress | Hypothetical external actor được cấp token/funds trên fork rồi swap qua LFJ để thay reserves | Measured shift/route phải đạt; không đạt → INCONCLUSIVE |
+
+Circle mint/impersonation trong stress chỉ cho actor giả định ở Anvil, không mint vào vault và không thay actual public treasury balance/feed/policy. Đây là stress scenario design, không lịch sử MEV/mempool đầy đủ hoặc lợi nhuận giao dịch có thật.
+
+### 9.4 Evidence và completeness
+
+Evidence gồm receipt/logs/trace/facts, exact before/after balances/allowances, scenario/config hashes, fork/code identity, manifest và artifact refs. Execution tạo content-addressed bytes; verified client kiểm canonical hashes/build/effects/report consistency độc lập với việc LLM nói ALIGNED.
+
+`COMPLETE` yêu cầu đủ baseline/stresses/facts; timeout, malformed/incomplete traces, unsupported effects, không đạt reserve impact hoặc facts bất nhất không được đổi thành successful fixture. Raw artifacts có thể lớn; semantic view để LLM đọc không thay full artifact verification.
+
+**Giới hạn:** bounded scenarios, adapter/token assumptions, RPC archive/trace availability, compute/latency, gas estimation tại thời điểm khác inclusion. Không mô phỏng toàn bộ hành vi thị trường, mọi token/DEX hoặc adversarial ordering có thể có.
+
+## 10. Risk, proof, Phi và phạm vi chứng minh
+
+### 10.1 Risk economics trước ký
+
+Với two-token portfolio, risk kiểm: available input, per-swap/daily spend, projected WAVAX reference exposure, fair min output từ independent reference price, value-loss policy và daily execution-cost budget. Actual fork output là input của projected balances; pool quote không được tự đóng vai USD valuation.
+
+Execution gas cost là relayer expense, không trừ token balances để giả thành swap loss. Gas credit là một check riêng trước broadcast. Exposure 25% được đo **PRE-SIGN**, không có oracle exposure ratio được vault tái tính atomically ở inclusion.
+
+### 10.2 Toán trong PGS engine
+
+Cho token `i` có decimals `d_i`, signed delta `Δ_i` theo base units và giá `p_i` theo USD-e8:
+
+```text
+L(p) = - Σ (Δ_i * p_i / 10^d_i)               # reference value loss, USD-e8
+V(p) = - Σ min(Δ_i * p_i / 10^d_i, 0)        # outgoing value, USD-e8
+ValuePolicy: L(p) <= rho * V(p) + epsilon
+rho = max_relative_loss_bps / 10000
+epsilon = fixed_loss_usd_e8
+price assumptions: 0 < low_i <= p_i <= high_i
+```
+
+Positive independent price intervals được tạo theo owner oracle band từ validated nominal rounds. Hai token registry phải sorted/unique và decimals đúng; payment credit bằng zero trong swap-only model. Khẳng định là có điều kiện với intervals, không dự đoán giá thực tương lai luôn nằm trong band.
+
+### 10.3 Query obligations
+
+| Query | Điều kiện được hỏi | Kết quả cần |
+| --- | --- | --- |
+| Assumptions feasibility | Price assumptions có nghiệm | SAT; tránh vacuous proof |
+| Check mode | Tồn tại price trong bands làm measured effects vi phạm ValuePolicy hoặc remaining session room? | UNSAT |
+| Compiled-region feasibility | Integer post-state region của Phi có khả thi, exact input/uint/int bounds đúng? | SAT |
+| Compile mode | Tồn tại price trong bands khiến lower-bound region vi phạm ValuePolicy? | UNSAT |
+| Risk bound | Tồn tại price trong bands làm lower-bound loss vượt debit đã tính? | UNSAT |
+
+Chuỗi năm query thường là SAT/UNSAT/SAT/UNSAT/UNSAT; thử tolerance rồi fallback τ=0 có thể làm query list dài hơn. Không hardcode “luôn năm query” làm hợp đồng mọi attempt. UNKNOWN/error không thành pass.
+
+Phi lower bounds giữ negative input delta exact, giảm positive output theo tolerance nhưng không thấp hơn minOut; allowance caps bằng zero. Engine thử configured tolerance rồi τ=0 nếu cần, không nới policy. Worst-case risk debit là ceil của nonnegative worst reference loss tại interval corners theo dấu delta; phải nằm trong remaining session/global risk room.
+
+Chi tiết implementation để reviewer không suy quá rộng: compiled-region query kiểm **tồn tại** integer deltas khả thi theo lower bounds/balances; CompileMode query sau đó dùng vector lower bounds, không nhét toàn bộ EVM vào solver. Suy rộng từ lower corner sang allowed actual effects dựa trên swap-only two-token structure: input delta cố định exact, output chỉ tăng so với lower bound, mọi giá dương nên tăng output không làm value loss xấu hơn. Nếu mở rộng assets, allowance semantics, fee-on-transfer hoặc nhiều chiều tự do khác, phải kiểm lại lập luận đơn điệu và model; không tự coi engine hiện tại đã bao phủ.
+
+### 10.4 Ví dụ toán để reviewer kiểm độc lập
+
+Đây là **ví dụ giải thích**, không phải balance/quote/live evidence:
+
+```text
+Δ_USDC = -100 USDC; Δ_WAVAX = +5 WAVAX
+reference bands: USDC [0.99,1.01], WAVAX [19.8,20.2] USD
+worst loss = 100*1.01 - 5*19.8 = 2 USD reference
+relative cap 3%, fixed cap 0: outgoing worst-case 101 USD, cap = 3.03 USD
+```
+
+Measured effects có thể thỏa policy, nhưng compiled output tolerance tạo lower bound ít WAVAX hơn; Compile phải kiểm lại bound region. Kết quả nào thực tế được approve phải đọc exact integer effects/price bands/Phi/query hashes trong report của attempt đó, không thay bằng ví dụ.
+
+### 10.5 Theorem không bao phủ gì?
+
+- Không verify toàn bộ Solidity/DEX source hoặc mọi execution path bằng SMT.
+- Không chứng minh oracle truth, RPC consensus, token không nói dối hoặc giá inclusion luôn trong bands.
+- Không chứng minh lợi nhuận, khả năng redeem USD, APR/BPR thật hay full MEV coverage.
+- Không biến LLM semantic correctness thành theorem; signer/owner/token/registry/source vẫn trusted.
+- Không enforce on-chain ITAG task graph, demo identity, off-chain exposure hoặc customer billing.
+- Không loại gas/revert/resource/hosting failure bằng proof giá trị token.
+
+Vault tin attestor đã làm đúng off-chain checks, rồi enforce chữ ký/bindings/Phi/caps trên actual balances. Attestor key compromise là rủi ro thật; theorem phải luôn được trình bày cùng assumptions này.
+
+## 11. Ký, broadcast và enforcement trên Solidity
+
+### 11.1 Từ decision đến signed approval
+
+`APPROVE` là kết quả đánh giá, chưa phải chữ ký và chưa phải giao dịch. Attestor chỉ ký decision đã lưu, còn hợp lệ và chưa tiêu thụ. Endpoint attest không nhận một payload tự khai rằng proof đã pass để ký trực tiếp.
+
+1. Đọc decision, proposal, exact build, PRE snapshot, simulation evidence, compiled Phi, proof và ITAG context đã lưu.
+2. Đọc lại chain scope, deployed code, policy/session, nonce, số dư và oracle; đối chiếu với commitments. Chạy lại các kiểm tra proof/freshness/final guarded preflight tương ứng.
+3. Giữ reservation chống hai approval cùng dùng nonce/risk headroom. Revision intent thay đổi hoặc PRE không còn đúng thì từ chối và đánh giá lại, không sửa âm thầm signed payload.
+4. Tạo EIP-712 ApprovalV2 đúng chain/vault/domain. Persist attestation và trạng thái trước khi trả signed PDR.
+5. Trước `SUBMITTING`, kiểm tra lại execute Shield, deadline và các gate cuối. Signed approval hết hạn không được kéo dài bằng cách sửa timestamp rồi dùng chữ ký cũ.
+
+Trong deploy hiện tại, attestor và relayer cùng backend; tách module giúp quản lý code nhưng không tạo ranh giới bảo mật cấp máy hoặc cấp tổ chức.
+
+### 11.2 Relayer xử lý gì?
+
+Input là build đã biết và signed PDR đã bind đúng build/calldata/chain/vault/nonce. Relayer xác minh payload, freshness, signature và trạng thái trước khi tạo giao dịch. Với demo, build còn phải liên kết được về workflow/request đã tiếp nhận. `estimateGas` dùng chính giao dịch dự kiến; estimate thất bại thì không gửi với một gas limit tùy ý.
+
+Current demo margin là `ceil(estimate * 110 / 100) + 5000`; operator path thường dùng `floor(estimate * 120 / 100) + 10000`. Đây là công thức chọn limit, **phí thực tế vẫn theo gasUsed**. Limit cao làm reserve lớn hơn nhưng không đồng nghĩa đốt toàn bộ limit. Mức limit thấp hơn cũng có nguy cơ out-of-gas; không tự hạ dưới estimate để đẹp số.
+
+Signed raw transaction và hash được journal bền vững trước lần broadcast đầu. Gửi RPC bị timeout sau khi đã có signed bytes là tình huống **chưa biết đã gửi hay chưa**, không phải bằng chứng chưa gửi. Demo chỉ theo dõi cùng hash, không tự tạo giao dịch khác hoặc tự retry broadcast. Operator compatibility path vẫn có cơ chế recovery/rebroadcast cùng bytes; không áp dụng semantics đó cho nút demo.
+
+### 11.3 Vault V2 kiểm tra trước và sau external call
+
+| Thời điểm | Điều kiện enforce | Khi sai |
+| --- | --- | --- |
+| Nhận approval | Domain/chain/vault, approved attestor, chữ ký, policy hash, session, deadline/TTL, nonce | Revert trước external swap |
+| Parse swap | Exact selector/ABI/call size, token/router được phép, đúng adapter, exact amount, minOut, recipient là vault | Revert |
+| Trước external call | Session hoạt động, amount/risk/daily caps, Phi cấu trúc hợp lệ; reserve/cập nhật counters trong cùng transaction | Revert nếu vượt cap |
+| External swap | Cấp allowance cần thiết, gọi adapter/LFJ; adapter không cho tùy ý recipient/path | Revert nếu swap thất bại |
+| Sau swap | Đọc actual balances, kiểm exact input delta và Phi output bounds; dọn allowance | Revert nếu postcondition sai |
+| Commit EVM | Chỉ commit token effects, nonce/counters và event khi toàn transaction thành công | Receipt status success |
+
+```mermaid
+flowchart LR
+    A[Signed ApprovalV2] --> B[Signature policy session nonce caps]
+    B --> C[Canonical calldata and allowed adapter]
+    C --> D[Reserve counters and call LFJ]
+    D --> E[Actual balance deltas and Phi]
+    E --> F[Commit events and state]
+    B -. failure .-> R[EVM revert]
+    C -. failure .-> R
+    D -. failure .-> R
+    E -. failure .-> R
+    R --> G[Token state and counters rollback; gas consumed]
+```
+
+“Revert transaction khi vi phạm policy” nghĩa là EVM rollback trong chính transaction đó. Không phải hệ thống có thể hoàn tác một transaction đã success bằng giao dịch bù sau này. Off-chain rejection trước broadcast không tạo transaction để revert và không tốn gas public chain. Fork revert chỉ là bằng chứng mô phỏng, không phải receipt revert Fuji.
+
+### 11.4 Phần Solidity không kiểm độc lập
+
+Vault không chạy Z3, không gọi LLM, không truy vấn Chainlink và không đọc ITAG database. Phi, oracle commitment và risk debit được attestor chứng thực; vault enforce phần payload/caps/postcondition đã ký. Exposure portfolio và ý nghĩa tự nhiên của goal là gate off-chain. Không trình bày các kiểm tra này như một trustless on-chain verifier.
+
+## 12. Session, thời gian và các ngân sách
+
+### 12.1 Bốn đối tượng thường bị gọi chung là session
+
+| Đối tượng | Nơi quản lý | Hết hạn có tác dụng gì? | Cách tiếp tục |
+| --- | --- | --- | --- |
+| Demo web session | HMAC credential do API cấp, browser memory; 24 giờ | Request demo bị từ chối auth | Chọn lại account; không reset credit |
+| On-chain proof session | PolicyVault, owner tạo; cấu hình duration 86400 giây | Approval không thể thực thi với session hết hạn/revoked | Owner renew-session; có giao dịch và phí |
+| Temporal intent / task | Control SQLite, deadline/steps/budget/revision | Task không được cấp quyền cho bước mới | Tạo task hợp lệ mới, không bypass task cũ |
+| Approval | Signed payload, TTL tối đa 300 giây hiện tại | Không được ký/gửi/thực thi sau deadline | Đánh giá lại bằng evidence mới |
+
+Các con số là **cấu hình/profile đã đọc**, không khẳng định session trên chain vẫn đang active tại thời điểm người đọc mở tài liệu. Thay env không gia hạn session đã tạo hoặc sửa policy trên chain. Browser reload/chọn account không tạo session Solidity.
+
+Deadline thực tế là min của `now + TTL`, `chain block time + TTL`, expiry mandate/policy/session và cuối ngày UTC trừ một giây. Vì vậy session 24 giờ không biến approval thành 24 giờ. Chuỗi model/RPC/fork kéo dài vẫn có thể khiến approval hết hạn; code kiểm tra lại sau preflight và trước submit.
+
+### 12.2 Các hạn mức độc lập
+
+| Hạn mức | Đơn vị | Nơi enforce | Profile/snapshot đang có |
+| --- | --- | --- | --- |
+| Mandate max swap / daily spend | USDC base units, hiển thị USDC | Planner validation, risk và vault theo policy tương ứng | 500 / 1000 USDC |
+| Portfolio exposure | bps | PRE-sign risk; chưa on-chain | 2500 bps = 25% |
+| Relative loss cap | bps của outgoing notional | Proof + Phi/risk attestation | 300 bps |
+| Fixed loss cap | USD | Proof policy | 0 USD |
+| Session risk debit | Certified USD loss, fixed-point | Vault session counters + off-chain reservation | Limit 10 USD |
+| Global daily risk debit | Certified USD loss, fixed-point; ngày UTC | Vault global counter + off-chain reservation | Limit 20 USD |
+| Intent total budget | Exact token units của task | ITAG transaction/reservation/history | Demo one-shot bằng exact requested amount |
+| Gas reference budget | USD tham chiếu | Economic risk, khác với receipt billing | 50 USD/ngày trong mandate |
+| Demo gas credit / per-tx cap | Integer wei | Execution SQLite + relayer trước broadcast | 0.001 / 0.0001 AVAX |
+| Relayer spendability | Native AVAX on-chain | Pending balance check + EVM | Phải đọc RPC lúc chuẩn bị gửi |
+
+Risk debit không phải tổng vốn swap và không phải phí gas. Có 10 USD session risk không có nghĩa chỉ swap được 10 USD. Không xóa DB hoặc reset intent để làm biến mất chi tiêu đã thực thi. Hai protected reverts khác nhau trong scope policy có thể kích hoạt quarantine; cần owner/operator kiểm tra nguyên nhân, không tự tắt guard.
+
+## 13. Gas credit: allocation, reserve, settlement và reorg
+
+### 13.1 Mô hình tiền
+
+Gas credit demo là **hạn mức sponsor được cấp nội bộ**, chưa có tiền khách nạp hoặc quyền rút AVAX. Relayer trả AVAX thật trên chain. Demo wallet AVAX chỉ hiển thị số dư riêng; swap sử dụng token trong vault. Không phát sinh transfer AVAX/ERC20 phụ khi chọn account, giữ chỗ hay trừ phí.
+
+```text
+maximum_hold_wei = signed_transaction.gasLimit * signed_transaction.gasPrice
+actual_fee_wei   = receipt.gasUsed * receipt.effectiveGasPrice
+available_wei    = allocated_wei - settled_fees_wei - active_holds_wei
+```
+
+Scope account bao gồm chain, vault, relayer và demo address. Allocation được insert một lần trong DB, không được cộng lại khi restart, đổi initial-credit env hoặc chọn lại account. Tất cả tiền là số nguyên wei, không dùng float để settlement.
+
+### 13.2 Giao dịch kế toán nguyên tử
+
+`bind_build` nhận workflow identity đáng tin từ adapter nội bộ. Trong cùng execution SQLite transaction, relayer reserve maximum cost và persist raw transaction journal. Một lỗi giữa hai insert rollback cả hai. Check credit, per-tx fee cap và relayer pending AVAX trước broadcast. Thiếu ngân sách trả lỗi submit đã biết; không tạo hold dở dang rồi giả như đang pending.
+
+```mermaid
+stateDiagram-v2
+    [*] --> BoundBuild
+    BoundBuild --> Refused: Insufficient credit or fee cap or balance
+    BoundBuild --> Reserved: Atomic hold and send journal
+    Reserved --> Pending: Broadcast or unknown send outcome
+    Pending --> Settled: Canonical verified receipt with confirmations
+    Pending --> Pending: RPC unavailable or not yet confirmed
+    Settled --> Settled: Same receipt polled again
+    Settled --> ReorgHold: Old receipt invalidated; append reversal
+    ReorgHold --> Settled: Verified re-inclusion
+    ReorgHold --> ReorgHold: No verified replacement receipt
+```
+
+### 13.3 Quy tắc settlement
+
+| Kết quả quan sát | Kế toán | Workflow/security |
+| --- | --- | --- |
+| Reject trước broadcast | Không tính phí public gas | Giữ reason code |
+| Pending, unavailable hoặc unknown send | Giữ maximum hold | Không báo success/zero fee |
+| Success đủ confirmations, gas identity verified | Trừ actual fee một lần; nhả phần hold dư | Chỉ CONFIRMED nếu outcome checks cũng pass |
+| Revert đủ confirmations | Cũng trừ actual gas một lần | REVERTED; token effects rollback |
+| Effects MISMATCH nhưng gas verified | Có thể ghi phí thực đã trả | Không biến thành success |
+| Receipt/block bị reorg | Append reversal và giữ maximum trong REORG_HOLD | Projection cũ không còn authoritative |
+| Deep reorg sau khi credit dư đã dùng | Available có thể âm, chặn gửi mới | Cần review, không xóa lịch sử |
+
+Charge yêu cầu đúng chain/vault/build/relayer/hash, receipt canonical, gas verified và confirmation threshold hiện tại 2. Tx/build uniqueness và append-only ledger events chống trừ trùng. Fee observer chạy trước control projection; hai DB không có distributed transaction, nên reconciliation phải idempotent để replay an toàn sau crash.
+
+Chưa có payment, top-up/refund API, auto-cancel dropped transaction hoặc tự nhả hold khi “đợi lâu”. Không có cam kết 0.05 AVAX chạy được số lượt cố định: số lượt còn phụ thuộc estimate/actual gas, gas price, nguồn vốn vault, session, pool và latency. Phần allocation 0.001 AVAX là giới hạn demo đang cấu hình, không phải toàn bộ AVAX vật lý của hệ thống.
+
+## 14. Persistence, state machines và recovery
+
+### 14.1 Storage map
+
+| Storage | Nội dung chính | Vai trò authoritative / nhạy cảm |
+| --- | --- | --- |
+| `.control-data-v2/fuji/control.sqlite3` | Workflows/events, decisions, attestations, proof/Phi, ITAG graph/revisions/reservations, portfolio/monitor projections | Quyền đã xét/ký, lịch sử điều phối; không thay thế chain state |
+| Control profile planner/cache directories | Provider request budgets, cache/cooldown, audit-safe records | Availability/quota; cache không thay live revalidation |
+| Control proof/query files | Exact SMT queries và commitments | Bằng chứng tái kiểm; giữ cùng decision |
+| `.execution-data-fuji-v2/state.sqlite3` | Records/counters/idempotency, submissions/raw tx, demo request/build/account/hold/ledger | Signed send identity và billing; raw signed tx là dữ liệu nhạy cảm |
+| Execution artifacts directory | Content-addressed build/simulation/preflight data | Chống sửa nội dung bằng hash; không phải proof rằng nguồn RPC đúng |
+| Deployment/mandate/policy manifests của profile | Addresses, session, policy, owner-operation journal | Cấu hình/snapshot, cần đối chiếu chain khi vận hành |
+| Public Fuji | Code, owner/policy/session/counters/nonces, balances, tx/receipt/logs | Kết quả EVM; canonicality có thể đổi khi reorg |
+
+Execution tables gốc là `records`, `counters`, `idempotency`, `submissions`; gas credit thêm `demo_account`, `demo_requests`, `demo_builds`, `demo_gas_reservations`, `demo_gas_events` trong cùng DB. Control có `workflows`, `events`, `decisions`, `attestations`, `proof_artifacts`, `compiled_postconditions`; portfolio thêm snapshot/link/status/version/monitor/outcome tables. Xem source schema thay vì tự viết SQL theo tài liệu này khi migration.
+
+### 14.2 State và các điểm không được suy diễn success
+
+```mermaid
+flowchart TD
+    A[PLANNED and evaluation stages] --> D{SDE decision}
+    D -->|approve| R[Signing reservation and revalidation]
+    D -->|reject or escalate| STOP[Stop with reason codes]
+    R --> T[ATTESTED]
+    T --> S[SUBMITTING]
+    S --> U[SUBMITTED or unresolved send state]
+    U --> M[Read-only outcome reconciliation]
+    M --> C[CONFIRMED]
+    M --> V[REVERTED]
+    M --> X[RECEIPT_MISMATCH or pending review]
+    C --> M
+    V --> M
+```
+
+Sơ đồ trên là nhóm giai đoạn để đọc luồng, không phải exhaustive enum cho mọi event. `ATTESTED` không có nghĩa đã broadcast, `SUBMITTED` không có nghĩa mined, receipt success không đủ nếu effects/bindings không khớp. Reorg có thể làm outcome projection trước đó mất hiệu lực.
+
+### 14.3 Concurrency và crash windows
+
+| Cửa sổ | Hành vi an toàn hiện tại | Giới hạn vận hành |
+| --- | --- | --- |
+| Hai request demo cùng key | Durable mapping về cùng workflow; khác body bị conflict | Giữ key sau HTTP timeout |
+| Hai request demo khác key đang chạy | Shared-account in-flight guard chặn chồng luồng | Không phải scheduler multi-user |
+| Hai signer cùng scope/nonce | `BEGIN IMMEDIATE`, unique reservation, kiểm latest intent/PRE/headroom | SQLite write lock có thể giữ lâu khi revalidation chain/proof/preflight; không mở rộng bằng nhiều workers tùy ý |
+| Crash sau nhận demo request nhưng trước control workflow | STARTING_OR_REVIEW_REQUIRED; không tự tạo workflow mới | Cần operator kiểm tra state/journal |
+| Crash sau journal trước/sau RPC send | Có exact hash/raw bytes để tra cùng giao dịch | Demo không tự rebroadcast; giữ hold nếu chưa xác minh |
+| Crash sau fee settlement trước projection control | Idempotent observer + outcome replay | Không có atomic commit liên DB |
+| Receipt sau restart/reorg | Durable monitor jobs, canonical receipt verification | Không chứng minh finality tuyệt đối ở depth 2 |
+| Owner renew RPC timeout | Persist owner operation identity trước send; recovery theo journal | Không tạo session mới liên tiếp để “thử lại” mù |
+
+Background monitor là một thread read-only: tick tối đa 5 job rồi chờ khoảng 5 giây; job backoff/state bền vững. Không phải durable queue để tiếp tục toàn bộ một workflow bị dừng giữa model/proof/signing. Code bắt lỗi tick để worker còn sống; cần theo dõi durable job/error state, không chỉ nhìn thread/health alive.
+
+Back up cả control DB, execution DB, manifests, artifacts và proof files nhất quán. Không commit chúng vào Git hoặc chỉ backup một DB rồi reset DB kia. Chưa có hosted backup/restore drill, multi-instance HA hoặc automatic schema rollback được chứng minh trong evidence hiện có.
+
+## 15. API, frontend và error contracts
+
+### 15.1 API surface hiện tại
+
+Danh mục route/method/auth/source trích từ source: [current-api-catalog.json](current-api-catalog.json). Đây là inventory, không thay runtime `/openapi.json` và Pydantic schemas. API paths còn `/v1` để compatibility không có nghĩa workflow đang chạy thiết kế V1; proof/domain V2 và hệ thống V2.1 có version độc lập.
+
+| Nhóm | Route chính | Auth | Ý nghĩa input → output |
+| --- | --- | --- | --- |
+| Liveness / UI | `/health`, `/healthz`, `/`, `/assets`, `/src` | Public | Process/config summary hoặc static dashboard; không chứng nhận funding/readiness |
+| Demo bootstrap | `GET /v1/demo/config`, `POST /v1/demo/select` | Public khi enabled | Fixed account → public metadata / expiring demo-only session |
+| Demo usage | `/v1/demo/account`, `/treasury`, `/workflows`, `/requests/{key}` | Minted demo Bearer | Goal/request identity → same gated workflow, scoped state/billing |
+| Operator workflow | `POST /v1/workflows/start`, `GET /v1/workflows/{id}`, `POST .../{id}/recover` | Operator Bearer; intent origin có thêm kiểm tra | WorkflowRequest / known tx hash → persisted workflow hoặc recovery |
+| Evaluation | `/v1/agent/propose`, `/v1/alignment/check`, `/v1/risk/evaluate`, `/v1/decisions` | Operator | Typed candidate/evidence IDs → proposal/alignment/risk/decision; không tự cho quyền execution |
+| Attest | `POST /v1/approvals/attest` | Internal Bearer | Saved decision ID → revalidated signed PDR |
+| Shield management | `/v1/task-shield/sessions/...` | Operator Bearer | Authenticated objective updates, inspect/tool checks, audit; không cấp ví/quyền owner |
+| ITAG management/viewer | `/v1/itag/intents/...`, `/v1/itag/assessments/...`, static `/itag` | Operator Bearer cho data; static page public | Terms/revision/cancel → persisted intent; graph/findings/history giải thích assessment |
+| Dashboard/query | `/v1/treasury`, portfolio/history/outcomes, `/v1/fuji/wallet/{address}` | Operator | Scope/page/address → observed portfolio, Chainlink/DEX information và histories |
+| Proof/session | `/v2/proofs/{context_hash}`, `/v2/treasury/sessions/{session_id}` | Operator | Known scope/hash → saved proof / on-chain session observation |
+| Execution | `/execution/v1/chain/context`, `/portfolio/onchain-snapshot`, `/build`, `/simulations`, `/executions`, `/artifacts/{hash}`, `/execution/v2/simulations/preflight` | X-API-Key, trừ execution health | Exact typed request → build/evidence/journal/receipt/reconciliation/artifact |
+
+Trong bảng, execution portfolio/build/simulation/execution suffix đều nằm dưới `/execution/v1`; xem catalog cho full path. Internal workflow dùng in-process SDK; API execution còn đó cho compatibility/admin. Demo credential không được đổi thành operator/internal/X-API-Key.
+
+### 15.2 Request, response và lỗi
+
+Demo start nhận `{ "goal": "Buy WAVAX with 0.000001 USDC" }` và `Idempotency-Key`; không nhận arbitrary calldata, router, private key, recipient hay mandate thay thế. Response có workflow identity/status/timeline và dữ liệu liên quan; transaction hash có thể chưa có nếu bị chặn trước submit. POST start là synchronous pipeline nên HTTP timeout không đủ để suy ra workflow thất bại.
+
+Lỗi API có envelope `error` với code, message đã kiểm soát, retryability/correlation metadata tùy handler. Không tự retry mọi lỗi có retryable=true bằng một POST goal mới. Validation/auth/scope failures là client errors; unavailable provider/RPC là hạ tầng hoặc insufficient evidence, không được biến thành APPROVE. Business rejection phải đọc reason codes/timeline; HTTP 200 không tự đồng nghĩa transaction success.
+
+### 15.3 Frontend hiện có
+
+Frontend ES modules chia `api`, `shared`, `features/demo`, `features/workflows`, `features/treasury`, `features/intents`. Canonical backend có thể serve trực tiếp dashboard/static assets cùng origin. Trang demo chọn account tự lấy credential trong memory, goal mẫu điền sẵn, request ID trong sessionStorage để GET-resume; token/private key không nằm trong bundle hoặc localStorage.
+
+UI phân biệt demo wallet AVAX, allocated/spent/reserved/available gas credit, receipt fee equation, ledger history và transaction/explorer links. Các màn operator vẫn cần operator token; ban giám khảo sử dụng demo view không cần nhập token. Đổi tab/operator không được tự nâng demo quyền. Frontend rendering không phải một security gate; quyết định nằm server/vault.
+
+Có CSP và headers theo source API; cross-origin hosting cần CORS origins cụ thể và cho phép `Authorization`, `Content-Type`, `Idempotency-Key`. CORS không thay authentication, rate limiting hoặc firewall. Chưa có bằng chứng visual browser end-to-end cho bản chọn account một nút; có offline API và JavaScript syntax checks.
+
+## 16. Cấu hình, startup và deployment
+
+### 16.1 Nguồn cấu hình và độ ưu tiên
+
+`.env` là cấu hình private tại máy operator; `.env.example` mô tả tên biến và giá trị khởi tạo an toàn. Hai file có **104 tên biến trùng tập hợp** trong lần rà soát. Không sao chép private `.env` cho reviewer. [Inventory đã lọc](current-system-inventory.json) chỉ ghi giá trị không bí mật, booleans presence và fingerprint source; không chứa private key/API credential.
+
+CLI `Profile.load` + `backend_environment` dựng effective configuration theo `--network`, chọn manifest/data dir, đồng bộ mode/control-execution RPC và chỉ forward biến cần thiết. Vì vậy không đọc một biến `B_MODE` hoặc `PACEVANT_MODE` riêng trong `.env.example` rồi kết luận effective Fuji runtime. Direct Uvicorn không qua CLI có defaults khác; đường chạy canonical là `treasury serve --network fuji`.
+
+| Nhóm env | Tên quan trọng | Cách dùng và lưu ý |
+| --- | --- | --- |
+| Identity/keys | `B_FUJI_OWNER_PRIVATE_KEY`, `PACEVANT_ATTESTOR_KEY`, `B_FUJI_RELAYER_PRIVATE_KEY`, `TREASURY_*_ADDRESS` | Owner chỉ ở operator tools; attestor/relayer cho backend cần thiết; địa chỉ phải khớp key/manifest |
+| Legacy aliases | `DEPLOYER_PRIVATE_KEY`, `AGENT_PRIVATE_KEY`, `AGENT_ADDRESS`, `PACEVANT_B_URL`, `PACEVANT_B_TOKEN`, `TREASURY_B_PORT` | Còn để compatibility; B port/URL không có nghĩa đang deploy hai backend |
+| Service auth | `PACEVANT_OPERATOR_TOKEN`, `PACEVANT_INTERNAL_TOKEN`, `B_API_KEY` | Ba credential khác nhau, mỗi cái ít nhất 24 ký tự; không frontend-hardcode |
+| Demo auth/billing | `PACEVANT_DEMO_ENABLED`, `PACEVANT_DEMO_ACCESS_TOKEN`, `PACEVANT_DEMO_INITIAL_CREDIT_WEI`, `PACEVANT_DEMO_MAX_TX_FEE_WEI`, `TREASURY_DEMO_USER_ADDRESS` | Secret demo ≥32 ký tự, chỉ server ký session; allocation không auto top-up |
+| Demo reserved key | `TREASURY_DEMO_USER_PRIVATE_KEY` | Có thể được giữ private để dùng sau; không cần cho demo hiện tại, không forward vào runtime |
+| RPC/fork | `FUJI_RPC_URL`, `B_FUJI_RPC_URL`, `PACEVANT_CHAIN_RPC_URL`, `PACEVANT_FUJI_VERIFICATION_RPC`, `TREASURY_FUJI_FORK_RPC_URL` | Scope phải cùng chain, fork archive/read khả dụng; kiểm freshness/hash |
+| Manifests/data | `TREASURY_FUJI_DEPLOYMENT_FILE`, `TREASURY_FUJI_DATA_DIR`, `TREASURY_CONTROL_DATA_DIR`, `PACEVANT_MANDATE_FILE`, `PACEVANT_ORACLE_FILE` | Profile chọn đường dẫn đúng; không mount read-only DB đang cần ghi |
+| Policy/session | `TREASURY_OWNER_POLICY_APPROVED`, `TREASURY_SESSION_DURATION_SECONDS`, `TREASURY_APPROVAL_TTL_SECONDS`, `TREASURY_MAX_*`, `TREASURY_ORACLE_*`, `TREASURY_POSTCONDITION_TOLERANCE_BPS`, `TREASURY_SESSION_RISK_LIMIT_USD`, `TREASURY_GLOBAL_DAILY_RISK_LIMIT_USD` | Owner tools tạo policy/session; đổi env không tự đổi on-chain policy |
+| Chain validation | `TREASURY_FUJI_MAX_BLOCK_DRIFT`, `TREASURY_FUJI_CONFIRMATIONS`, effective `B_MAX_BLOCK_DRIFT`, `B_MAX_TTL`, `B_FRESHNESS_SECONDS` | Profile hiện 200 blocks, 2 confirmations, 300s TTL/age; drift validator có upper bound |
+| AI planner | `PACEVANT_PLANNER_PROVIDER`, `PACEVANT_AI_ROTATION_ORDER`, `DEEPSEEK_*`, `GROQ_*`, `GEMINI_*`, `XINGCHI_*` | Real HTTP adapters, durable quotas/cache/cooldown; không guarantee provider free quota/latency |
+| Shield/ITAG | `PACEVANT_SHIELD_*`, `PACEVANT_REQUIRE_ITAG` | Bật required ITAG và wallet_pipeline hiện tại; không dùng legacy_fixture trong live demo |
+| Web | `PACEVANT_SERVE_FRONTEND`, `PACEVANT_CORS_ORIGINS`, `TREASURY_A_PORT` | Same-origin đơn giản nhất; hosted entrypoint có PORT riêng |
+
+Tất cả tên đầy đủ xem `.env.example`; không suy rằng các effective `B_*` bổ sung phải xuất hiện thành biến private mới vì composition có thể tự tính chúng. Chưa phát hiện thiếu **tên biến** trong cặp env hiện có; presence không chứng minh API key còn hạn, RPC còn phục vụ, số dư đủ hoặc session chưa hết hạn. Lần làm docs này không điền/đổi secret.
+
+### 16.2 Startup và lifecycle
+
+```mermaid
+sequenceDiagram
+    participant O as Operator CLI
+    participant P as Profile and prepare
+    participant A as Unified FastAPI
+    participant E as Execution runtime
+    participant C as Control and stores
+    participant M as Read-only monitor
+    O->>P: serve --network fuji
+    P->>P: Validate manifests/config; prepare local metadata
+    P->>A: Spawn owner-free environment
+    A->>E: Start chain/build/simulation/relay dependencies
+    A->>C: Open control lifecycle
+    A->>E: Attach shared gas ledger when enabled
+    A->>M: Start durable outcome polling
+    A-->>O: Liveness ready
+    Note over A,M: Ready endpoint does not imply session/funding/provider readiness
+```
+
+Readiness có nhiều lớp: imports/config → manifest/code/chain scope → session/policy/funds/oracle → model availability → full security evaluation → inclusion/outcome. `/health` chỉ là lớp đầu. Process có thể healthy nhưng swap bị từ chối đúng vì exposure/caps/oracle/staleness.
+
+### 16.3 Deploy sau này
+
+Backend cần Python, native Anvil, compiled Solidity artifacts, network RPC/model access và persistent disk. Dockerfile root dùng build stage Foundry để compile, Python dependency lock để cài; runtime không cần Node backend hoặc compile Solidity mỗi lần có request. Solidity được deploy lên Avalanche; Render/VPS chạy backend, không thay blockchain bằng server.
+
+Frontend có thể serve chung backend hoặc static/Nginx riêng. Mô hình đơn giản hiện phù hợp **một backend instance + persistent volume**. Không scale nhiều replicas dùng SQLite local và nonce journal riêng. `serve-container` là hosted entrypoint; secret runtime không có owner/deployer key. Native child environment allowlist không ngăn process đọc filesystem, do đó không coi nó là secret vault/HSM.
+
+**Known deployment documentation gap:** `deploy/runtime.env.example` là template hosting cũ, có TTL/session/provider defaults và thiếu các flag demo/ITAG/Shield mới. File được đánh dấu `HISTORICAL_TEMPLATE`; không copy nguyên để chạy profile Fuji hiện tại. Không có Docker/Render/VPS end-to-end hosting smoke evidence trong bộ bằng chứng được rà soát. Xem [deploy README](../deploy/README.md) cho phạm vi và điều kiện phải đối chiếu trước khi host.
+
+## 17. Threat model, invariants và coverage
+
+### 17.1 Tài sản và giả định tin cậy
+
+Tài sản bảo vệ là token trong vault, ngân sách session/daily/intent, native AVAX của relayer, signing keys, tính đúng đắn của ledger và lịch sử quyết định. Đối thủ có thể đưa goal/tool text độc hại, replay request/approval, sửa calldata/evidence, gây concurrent request, cung cấp stale RPC/model output hoặc lợi dụng state đổi giữa simulation và inclusion.
+
+Owner quản trị policy và session nên là trusted authority. Attestor là trusted policy/proof bridge. Token/adapter được allowlist; không có tuyên bố hỗ trợ fee-on-transfer/rebasing/malicious ERC20 bất kỳ. Chainlink/RPC providers và model endpoints là dependencies bên ngoài; cross-check giúp phát hiện một số sai lệch nhưng không loại hết provider compromise.
+
+### 17.2 Invariant → vị trí enforce → giới hạn
+
+| Invariant | Enforcement | Giới hạn còn lại |
+| --- | --- | --- |
+| Goal không cấp quyền tùy ý cho recipient/router | Trusted mandate/compiler, bounded planner validation, canonical ABI, vault checks | Owner/attestor/allowlist compromise vẫn quan trọng |
+| Tool output không trở thành user authorization | ITAG trust class + Shield interception + deterministic gates | Semantic model có thể sai; LLM judge không phải theorem |
+| Approval bind đúng exact effect envelope | Build/calldata/evidence/proof commitments + signed Phi + on-chain balance checks | SMT chỉ chứng minh bounded abstraction |
+| Approval không replay | Vault nonce/domain/session/deadline; DB unique reservations | Chữ ký chưa dùng còn có hiệu lực đến deadline nếu mọi guard vẫn hợp lệ |
+| Không vượt budget do request đồng thời | SQLite immediate transaction + reserved headroom + vault atomic counters | Một process/trust domain, lock contention và conservative stuck state |
+| Không ký trên stale/mutated evidence | Pin block/hash, live revalidation, round checks, preflight, freshness after expensive work | State vẫn có thể đổi sau ký; final Phi/caps bảo vệ phần on-chain |
+| Không broadcast demo thiếu gas credit | Atomic reserve+journal, actual estimate/gasPrice/cap/balance | Sau send-unknown phải giữ hold; chưa có auto cleanup |
+| Không charge receipt hai lần | Unique tx/build + idempotent ledger + canonical gas validation | Deep reorg có thể đưa credit âm; chặn tiếp và review |
+| Success chỉ dựa vào verified outcome | Receipt/tx/log/state/effect/bindings + canonical block + confirmations | Depth 2 không phải finality tuyệt đối |
+| Private keys không ở frontend | Server env boundary, scoped session, allowlisted child env | Chưa HSM, cùng máy có quyền filesystem vẫn nhạy cảm |
+| Policy violation không giữ swap effects | Atomic Solidity revert | Gas vẫn trả; không đảo được transaction success đã final |
+
+### 17.3 Những phản biện hợp lý
+
+Hệ thống không trustless hoàn toàn vì attestor chứng thực oracle/proof. Một LLM thứ hai không tự chứng minh model thứ nhất đúng. Hai RPC URL cùng nhà cung cấp không tương đương hai nguồn độc lập. Full pipeline chậm có thể thường xuyên hết 300 giây. Budget guard giảm tổn thất theo mô hình/policy, không bảo đảm strategy có lời. Public demo là shared sponsor account nên người ngoài có thể tiêu quota/credit đã cấp; chưa có rate-limit/auth user production hoàn chỉnh. Các điểm này cần nêu cùng kết quả demo, không giấu dưới cụm “100% dữ liệu thật”.
+
+## 18. Mock, giả định, thiếu sót và vấn đề còn mở
+
+### 18.1 Phân loại đúng từng phần
+
+| Phần | Trạng thái hiện tại | Có thể nói gì / không thể nói gì? |
+| --- | --- | --- |
+| Fuji token balances, LFJ route/quote/reserves, Chainlink rounds | Real on-chain đọc ở pinned block trong live path | Có provenance; không khẳng định test token đổi được USD thật |
+| Fuji swap receipt của core | Có historical transaction kiểm được | Chứng minh phiên bản/checkpoint đó đã thực thi; không chứng minh mọi request tương lai |
+| Planner/Shield/ITAG semantic | Real model HTTP adapters trong live profile | Có model traces ở lần chạy core; không guarantee endpoint/key/quota hiện tại |
+| Risk/SMT/signature/vault | Real deterministic computation/solver/crypto/EVM | Không phải số pass dựng sẵn trong Fuji path |
+| Baseline/adverse stress | Real EVM execution trên **fork với hypothetical perturbation** | Scenario mô phỏng, không phải MEV quan sát trên Fuji |
+| LOCAL mode | Real Anvil EVM, demo token/adapter/prices và có thể test semantic fixtures | Useful integration test, không phải public Fuji evidence |
+| MOCK mode, test fixtures, evaluation corpus | Còn có chủ đích cho offline tests/research | Không dùng chúng để kể là live data |
+| Prepaid-style gas credit | Real DB accounting of verified fees, sponsor allocation | Chưa có customer-funded deposit/payment service |
+| Demo wallet | Real public address, identity hiển thị | Không có wallet ownership login; private key chưa tham gia |
+| USD valuation | Real feed observation + policy asset mapping/bands | Reference assumption cho test asset, không phải redeemability/pool spot guarantee |
+| Reverse swap | Schema/local tests có phần liên quan; **Fuji route bị chặn** | Không demo như live feature |
+| Multi-user/strategy yield/DeFi adapters ngoài current route | Chưa có production implementation trong scope này | Không coi account selector một user là multi-user service |
+
+### 18.2 Các việc chưa được xác nhận hoặc chưa hoàn thiện
+
+| Mức / mục | Tác động | Cần làm khi thực sự demo/deploy, không thực hiện trong đợt docs |
+| --- | --- | --- |
+| Runtime freshness | Process cũ có thể chưa load one-click auth ở HEAD | Restart canonical backend rồi kiểm version/routes; không suy code trên đĩa = process đang chạy |
+| Session/policy current state | Session snapshot có expiry hữu hạn | Read chain; renew bằng owner nếu cần và được phép |
+| Treasury funding/exposure | Lượt audit trước vault rất ít Circle USDC, WAVAX chiếm tỷ trọng lớn | Top-up đúng Circle USDC hoặc điều chỉnh policy có lý do; không tắt exposure guard để ép pass |
+| Demo public Fuji billing | Chưa có full demo-user transaction Fuji trong evidence | Khi được phép, chạy một lượt nhỏ để kiểm request→receipt→ledger; hiện chỉ offline/Anvil |
+| Browser UX | Chưa hoàn thành visual end-to-end cho one-click | Kiểm chọn account, resume, fee display, lỗi pending trên browser |
+| Provider availability/latency | Free quotas/fallbacks có thể làm lâu hoặc reject | Health/readiness riêng, quota thực tế; không fallback sang fabricated approval |
+| Gas hold recovery | Unknown/dropped tx có thể giữ hạn mức lâu | Operator đối chiếu journal/chain, cần thiết kế cancel/release có bằng chứng trước khi mở production |
+| Single instance/SQLite | Lock contention và crash windows | Monitoring/backup/restore drill; chưa HA |
+| Hosting template | Env mẫu deploy cũ chưa đủ current flags | Tạo runtime env owner-free từ canonical config; hosted smoke trước khi công bố |
+| Security assurance | Tests nội bộ, chưa independent audit | Audit contract/key handling/threat assumptions nếu giữ tài sản có giá trị |
+
+Không tìm thấy lý do để thay thế live gates bằng mock nhằm làm demo dễ hơn. Cũng không kết luận “không còn bất kỳ mock code nào”: code test/offline có mock là bình thường; điều quan trọng là mode/entrypoint và provenance của **lượt đang demo**.
+
+## 19. Bằng chứng và mức kiểm chứng
+
+### 19.1 Ledger bằng chứng theo checkpoint
+
+| Checkpoint | Bằng chứng có | Phạm vi không chứng minh |
+| --- | --- | --- |
+| Core Fuji security / `3fba479` | [Live validation JSON](audit/system-security-live-validation.json), [review](audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md), [SMT queries/verifier](audit/system-security-live-proof/README.md) | Không bao gồm implementation gas credit/one-click về sau |
+| Demo gas ledger / `e5668bd` | [Validation JSON](audit/demo-user-gas-credit-validation.json): 457 passed, 4 skipped trong full Python suite; ledger 17; Anvil pipeline hai case; JS syntax | Không có public Fuji write, không visual browser demo |
+| One-click selection / `3f9f9af` | [Validation JSON](audit/demo-account-selection-validation.json): 30 offline checks, 11 JS syntax files, lint/secret scan tại checkpoint | Không swap Fuji, không chứng nhận runtime đã restart |
+| Lần chuẩn hóa docs này | Static source/config inventory, route catalog, doc links/classification và artifact preservation | Không RPC readiness/model call/full workflow mới |
+
+Số focused tests có thể là tập con hoặc lượt lặp của full suite; không cộng để quảng bá thành tổng test độc lập. `skipped` không phải `passed`. Dependency compatibility checks không phải dependency CVE audit.
+
+### 19.2 Một transaction core Fuji đã được ghi nhận
+
+- Workflow: `workflow_b813ce97ad0542e9b1b667e4e5e07788`.
+- Transaction: [`0xf975361607032ec0709140d32c6d5e98a266f8df6917226e1d6ecb6cf6361b10`](https://testnet.snowtrace.io/tx/0xf975361607032ec0709140d32c6d5e98a266f8df6917226e1d6ecb6cf6361b10).
+- Block `61371323`, gas used `356377`, recorded inclusion timestamp `1795164309`, signed deadline `1795164349`: còn 40 giây ở inclusion.
+- Timeline PLANNED→CONFIRMED khoảng 271 giây theo persisted events; không phải HTTP stopwatch hay latency SLA.
+- Báo cáo lưu 14 public-chain checks và ba negative `eth_call` kiểm replay, altered calldata, unauthorized signer. Negative eth_call là read-only, không phải ba transaction revert đã trả gas.
+- Exact SMT artifacts được rehash/resolve độc lập thành SAT/UNSAT/SAT/UNSAT/UNSAT ở lượt này; không phải mọi trường hợp đều có đúng năm queries.
+- Có actual ITAG-history rejection cho reuse/completed step hoặc vượt budget. Semantic traces thuộc real provider tại checkpoint; scripted semantic outputs của Anvil tests là loại bằng chứng khác.
+
+Đây là reference tới artifact đã lưu, không tuyên bố đã browse explorer hoặc kiểm lại canonical chain trong lần viết docs này. Receipt độc lập với narrative: reviewer có thể tự đọc transaction/block/logs và re-run SMT khi muốn.
+
+### 19.3 Giữ nguyên bằng chứng
+
+JSON/SMT/SVG lịch sử được giữ nguyên bytes. Classification nằm trong [DOCUMENTATION_MANIFEST.json](DOCUMENTATION_MANIFEST.json) và banner Markdown, không sửa một receipt/query cũ để làm nó trông mới hơn. Mỗi artifact có SHA-256 để phát hiện thay đổi; hash toàn vẹn không tự xác nhận tính đúng của nội dung.
+
+Inventory source lưu hash runtime files tại baseline. Docs-only commit tiếp theo có thể khác hash commit mà không thay code; cần nhìn source fingerprint và Git diff. Không dùng ngày commit docs làm ngày chạy Fuji mới.
+
+### 19.4 Public deployment/address snapshot để reviewer tra cứu
+
+Các địa chỉ dưới đây lấy từ cấu hình/manifest đã lưu ở baseline; không phải kết quả kiểm chain lại trong đợt docs. Trường `router` trong treasury build/manifest là **adapter được vault gọi**, khác LFJ router mà adapter gọi tiếp.
+
+| Đối tượng | Địa chỉ / identifier |
+| --- | --- |
+| Network | Avalanche Fuji C-Chain, chain ID `43113` |
+| PolicyVault | `0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D` |
+| Approved LFJ adapter / treasury router | `0x497d967d003717FA49ce16ac6FFf73a399aFe5D4` |
+| LFJ router V2.2 | `0x18556DA13313f3532c54711497A8FedAC273220E` |
+| LFJ quoter | `0x9A550a522BBaDFB69019b0432800Ed17855A51C3` |
+| Pair đang dùng | `0x8436B8c75ed2F015a80b8472526dd1A79BF54E38` |
+| Factory | `0xF5c7d9733e5f53abCC1695820c4818C59B457C2C` |
+| Pair semantics | LFJ V1, route version `0`, `bin_step=0`; không phải Liquidity Book bin pool |
+| Owner | `0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b` |
+| Attestor | `0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989` |
+| Relayer | `0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C` |
+| Demo User | `0xf23bE4A69B162DdC0F7D5456172212d294b233c7` |
+| Session snapshot | `0x9eb4d7b5afe9e3e516d0b31efa451f0823fbc97bf13a63e81361106c0eed9098` |
+| Session creation transaction | `0x1b3886be791ed08ee97aaf80f2bdbb0fba74c0fa540cd8da66e9ca09b589c5e1`, block `61370413` |
+| Policy commitment snapshot | `0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c` |
+
+Token/feed addresses nằm ở mục 7. Session/policy/address snapshot giúp tra cứu, không khẳng định expiry/funding/permissions còn hợp lệ lúc đọc. Đừng lấy LFJ router làm approved adapter hoặc dùng faucet USDC khác địa chỉ để nạp vault.
+
+## 20. Vận hành demo và chuẩn bị phản biện
+
+### 20.1 Đọc/kiểm trước, không gửi transaction
+
+Trình tự đề xuất cho operator khi chuẩn bị, **các lệnh dưới đây không được chạy trong lần làm docs này**:
+
+```powershell
+# Validate local config/manifest; no public transaction
+uv run --locked treasury doctor --network fuji
+
+# Additional read-only RPC/session/funding checks
+uv run --locked treasury doctor --network fuji --live
+
+# Read-only LFJ/Chainlink preflight; does not run a swap
+uv run --locked treasury lfj-preflight
+```
+
+Doctor/live/preflight không thay full pipeline. Nếu báo thiếu vốn/session/oracle stale thì giải quyết nguyên nhân trước khi demo. Không dùng các lệnh `deploy`, `renew-session`, `renew-policy`, `demo`, `fuji-demo` hoặc `fuji-demo --setup` như liveness checks: chúng có thể ký/gửi transaction; `--setup` còn có owner setup/funding writes.
+
+### 20.2 Cách demo cho ban giám khảo
+
+1. Operator chuẩn bị runtime/profile/funds/session, chạy `uv run --locked treasury serve --network fuji`. Lệnh serve chuẩn bị metadata và khởi động API/monitor, không tự chạy goal swap; browser thao tác mới khởi chạy workflow.
+2. Mở dashboard tại `http://127.0.0.1:8000` nếu dùng default port. Chọn **PaceVant - Demo User**. Không nhập key/token, không Connect Wallet.
+3. Xem wallet AVAX và sponsor gas credit là hai con số khác nhau; kiểm remaining credit và trạng thái pending cũ.
+4. Khi được phép thực hiện demo thật, bấm goal nhỏ đã điền sẵn. UI gửi request identity một lần, toàn bộ Shield/ITAG/oracle/risk/proof/attest/preflight vẫn hoạt động.
+5. Đọc timeline và reason codes. Nếu timeout, dùng resume/GET theo request ID; không bấm tạo nhiều request mới để “thử”.
+6. Khi receipt verified đủ confirmations, xem transaction, token outcome, actual fee, hold release và ledger. Nếu bị policy chặn, trình bày đó là từ chối trước broadcast, không gán tx hash giả.
+
+Goal mẫu cực nhỏ không bảo đảm pass với mọi portfolio/pool hiện tại. Decimals, minimum quote, exposure và gas economics đều có thể làm reject hợp lý. Owner thay policy hoặc thêm token là hành động riêng; không để AI judge tự thay để ép thành công.
+
+### 20.3 Những case có thể giải thích và bằng chứng cần có
+
+| Case phản biện | Quan sát đúng | Cách demo ít tốn phí |
+| --- | --- | --- |
+| Happy path swap | Full timeline + signed commitments + Fuji receipt + verified effects | Một lượt swap nhỏ khi sẵn sàng |
+| Sai recipient/token/router hoặc malformed input | Server/vault reject, không arbitrary transfer | Offline/API validation hoặc eth_call có scope |
+| Vượt intent budget/reuse completed step | ITAG deterministic reject trước ký | Dùng test/historical history evidence; không tiêu gas để gây lỗi |
+| Stale oracle/session hết hạn | Refuse signing/execution | Read-only state + test; không sửa dữ liệu thật giả stale |
+| Vi phạm Phi ở inclusion | EVM revert rollback token effects, gas vẫn mất | Anvil/eth_call trước; chỉ public revert nếu có lý do và cho phép |
+| Double click/HTTP timeout/pending | Cùng request/workflow/tx, không debit trùng | Test offline/Anvil + GET resume |
+| Fee cap không đủ | FAILED_TO_SUBMIT trước broadcast | Existing negative Anvil evidence, không cố gửi đắt |
+| Reorg | Invalidate outcome, reverse charge, retain hold | Local controlled test; không giả nhận đã tạo reorg Fuji |
+
+### 20.4 Câu trả lời ngắn nên thống nhất
+
+- **“Có thật trên testnet không?”** Có core Fuji transaction/evidence; model/oracle/DEX live path dùng dependencies thật. Demo-user billing/one-click có offline/Anvil validation, chưa có Fuji end-to-end riêng.
+- **“Giá có thật không?”** Chainlink round là dữ liệu thật trên Fuji; áp USD cho test assets là policy reference. Không chứng minh test asset redeem bằng USD hoặc pool giá phải trùng feed.
+- **“Có lời không?”** Không suy profitability kinh tế từ faucet token/testnet liquidity. Demo tập trung vào kiểm soát quyền, rủi ro, proof/enforcement và accounting.
+- **“Ai giữ tiền/ai trả gas?”** Token ở vault, relayer trả native gas, demo chỉ dùng sponsor allowance nội bộ; Demo User không ký bằng private key.
+- **“Vì sao vẫn có Node?”** Không cần Node để chạy backend; frontend là JavaScript browser, Node chỉ optional tooling kiểm syntax/cross-language compatibility.
+- **“Production-ready chưa?”** Có implementation và bằng chứng chạy lõi; chưa multi-user/payment/HA/hosting smoke/independent audit. Không dùng bản demo để cam kết production custody.
+
+## 21. Mở rộng và quy trình bảo trì thiết kế
+
+### 21.1 Ranh giới phát triển
+
+Đổi planner/provider làm trong planning/alignment adapters, giữ output schema và independent amount/direction validation. Thêm DEX làm trong execution/dex và adapter contract tương ứng, cập nhật registry/source/Phi mapping/tests; không cho model tự cung cấp router. Thêm oracle cần định nghĩa asset identity, decimals, round/freshness/provenance và policy trust trước khi mở signing. Thêm multi-user cần ownership/auth, vault scope, budget isolation, request namespace và payment semantics; không chỉ thêm nhiều lựa chọn vào account selector.
+
+Đổi proof model/Phi/domain/ABI phải phối hợp shared SDK, Solidity, execution và control. Chạy meaningful compatibility/hash/negative tests tương ứng. Không sửa riêng một README để tuyên bố hỗ trợ đường reverse hoặc asset mới. Xem [backend module map](../backend/MODULES.md), [contribution rules](../CONTRIBUTING.md) và README tại module cần sửa.
+
+### 21.2 Quy tắc tài liệu
+
+1. Duy trì một canonical as-built design tại file này. Cập nhật baseline, scope và evidence sau mỗi thay đổi ảnh hưởng luồng/trust/input-output.
+2. Mọi runbook hiện hành phải link design và nói rõ thao tác nào đọc, thao tác nào gửi transaction. Evidence luôn kèm checkpoint/mode/tx scope.
+3. Design/guide cũ giữ banner `HISTORICAL_*`, không mở đầu bằng câu tự nhận hiện hành. Tài liệu research/spec tương lai không chứng nhận implementation.
+4. Không sửa bytes của receipt/query để đổi narrative. Thêm artifact mới và manifest classification thay vì tái dùng tên cũ cho lượt chạy khác.
+5. Module README mô tả local interfaces; design là nơi tổng hợp trust/flows. Khi mâu thuẫn, source/config thực và scoped evidence quyết định, sau đó sửa docs.
+6. Không commit private env, raw signed tx, private DB/log hoặc keys để làm “bằng chứng minh bạch”. Dùng sanitized inventory với allowlist.
+
+Phần còn mở được công khai ở mục 18; quyết định một demo đang sẵn sàng phải dựa trên readiness của lần chạy đó, không dựa duy nhất vào một câu kết luận trong tài liệu.

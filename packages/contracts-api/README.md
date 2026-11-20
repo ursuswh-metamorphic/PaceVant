@@ -1,5 +1,7 @@
 # Shared contracts SDK (current package 1.3.1)
 
+> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 Runtime block compatibility lives in `rpc.evm_web3(provider)`: native Web3 middleware accepts Avalanche extended header extraData while preserving block hash, timestamp and number checks, including Anvil fork headers. `readonly_web3` still enforces its RPC method allowlist and chain identity; middleware does not permit signing or broadcast. `toolchain.native_tool_environment()` restricts native compiler/Anvil child environment variables to OS/path/cache/certificate settings.
 
 Current SDK package version: **1.3.1**, pinned consistently by the root project. Added `ExecutionReconciliation`, `outcomes.py`/`outcomes_v2.py` (read-only V1/V2 receipt/build/PDR/proof verification), `readonly.py` (bounded read-only RPC) and `token_facts.py` (shared receipt parser). `ExecutionClient.snapshot(block_number)`, `.reconciliation(tx_hash)` and `.submission_for_build(build_id)` serve portfolio/outcome monitoring. V2 signed domain and existing proof-engine hashes are unchanged. The unified remote base URL is `http://127.0.0.1:8000/execution`; normal backend workflows use an in-process adapter. The v1.1/1.2 notes below describe the original wire/LFJ additions, not the current package version.
@@ -34,7 +36,7 @@ Use `treasury_contracts.onchain.read_approval_state(rpc_url, built)` to read the
 
 `ExecutionClient` is synchronous and supports a context manager. `context`, `snapshot`, `execute` return validated dictionaries; `build`, `simulate`, `result` return models. HTTP failures raise `ExecutionAPIError` (also `httpx.HTTPStatusError`) with `.code`, `.retryable`, `.status_code`, `.correlation_id`; transport failures remain httpx exceptions. Set `request_id=workflow_id` on the client to propagate correlation.
 
-Build/simulation retries with the same key/body reuse immutable records. Execution retries use the same journaled signed bytes and hash while returning current status; a dropped RPC broadcast can be retried with the same key. Always poll `result(tx_hash)` instead of assuming POST success means CONFIRMED.
+Build/simulation retries with the same key/body reuse immutable records. Execution retries use the same journaled signed bytes and hash while returning current status. The operator compatibility path can rebroadcast the same bytes after checking an absent transaction; **billed Demo User retries are read-only and never automatically rebroadcast**. Always poll `result(tx_hash)` instead of assuming POST success means CONFIRMED.
 
 Read the historical [A/B handoff](../../docs/06_AB_INTEGRATION_HANDOFF.md), [AI merge prompt](../../docs/07_AI_MERGE_PLAYBOOK.md), and [compatibility audit](../../docs/08_AB_COMPATIBILITY_AUDIT.md). Run `uv run --locked pytest backend/tests/execution/test_consumer_contract.py -q` after compiling for a real HTTP test from a separate isolated consumer process. This test has a local ephemeral signer and does not implement or certify the control module's production SDE.
 

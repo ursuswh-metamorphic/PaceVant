@@ -1,5 +1,7 @@
 # Module map and collaboration rules
 
+> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 This is a modular monolith served by one FastAPI/Uvicorn process. Folders are divided by responsibility rather than person A/B. The API composition injects an in-process execution adapter into workflow; module boundaries remain explicit without an internal HTTP hop. See [single-app architecture](../docs/architecture/UNIFIED_BACKEND.md).
 
 | Capability | Folder | Public interface / output |
@@ -20,7 +22,7 @@ This is a modular monolith served by one FastAPI/Uvicorn process. Folders are di
 | Use cases/monitoring | `modules/workflows` | `ControlPlane` |
 | Chain/build/simulate/relay | `modules/execution` | `Chain`, `Builder`, `Simulator`, `Relayer` |
 
-All paths above are relative to `backend/src/treasury_backend`. Each folder has its own README, including the five execution subcomponents.
+All paths above are relative to `backend/src/treasury_backend`. Each folder has its own README, including execution chain, dex, transaction, simulation, evidence and relaying subcomponents.
 
 ## Dependency direction
 

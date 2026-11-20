@@ -1,5 +1,8 @@
 > Imported technical reference from `origin/main` at `08c35df`. Adapted paths below use the modular Python backend. Historical test counts/live metrics in this document belong to upstream; see [current merge verification](integrations/MAIN_SYNC_2026_11_20.md) for this checkout. The current `.env` explicitly sets Task Shield to `disabled`; `paper`/`wallet_hardened` are opt-in. The current Fuji Circle-USDC/Chainlink/PDR-V2 authorization path is supported; blanket Fuji valuation blockers below describe upstream faucet-USDC only.
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 # Task Shield in PaceVant
 
 This extends the existing `treasury_backend.modules.alignment` module and rules planner. It does not add an independent verifier agent or agent framework. Source: [Jia et al., ACL 2025](https://aclanthology.org/2025.acl-long.1435/), Sections 3–4, Appendix B.1/B.2, C.4 and E Figures 4–7. Prompts are attributed adaptations, not byte-identical copies. [Repository inspection/plan](TASK_SHIELD_INSPECTION.md) · [Implementation and validation report](TASK_SHIELD_REPORT.md).

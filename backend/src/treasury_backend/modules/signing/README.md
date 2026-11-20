@@ -1,5 +1,7 @@
 # signing
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 Live Fuji revalidation supplies the owner-configured on-chain TTL (1–300 seconds; current profile 300) together with the verified proof/session. LOCAL defaults to 30. The signer checks the immutable decision and exact build deadline against that verified window after final Phi preflight. It does not invent a new deadline or authorize from unverified API/file prices. Demo User gas credit is a separate relayer budget check; it never bypasses signing or changes treasury risk budgets.
 
 Issue a typed approval only for a persisted, bound, revalidated approved decision.

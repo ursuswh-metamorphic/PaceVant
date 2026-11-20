@@ -1,5 +1,7 @@
 # Fork simulation module
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 For the live Circle route, `lfj_stress.py` provisions a **hypothetical external actor only on isolated loopback Anvil**: impersonate the existing Circle masterMinter, configure/mint to that actor, then trade through the real LFJ router/pool. Setup preserves the treasury's pinned balance, feed rounds, policy and counters. Actor funding is a scenario assumption, not historical liquidity or live funding. Artifacts record setup transactions and the achieved 20/200-bps shift. The legacy faucet route retains its earlier guarded-treasury stress model. Missing impact/setup cannot yield a verified simulation.
 
 A cold fork may lazily read many public historical slots in one EVM call. The local Anvil request timeout is bounded separately at at least 60 seconds; source reads remain bounded. This changes neither timestamps nor approval freshness. See the [live runbook](../../../../../../docs/demo/FUJI_LIVE_END_TO_END.md).

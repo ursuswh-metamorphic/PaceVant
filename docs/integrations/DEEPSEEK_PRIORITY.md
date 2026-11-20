@@ -1,5 +1,8 @@
 # DeepSeek chính thức và thứ tự ưu tiên AI
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Theo yêu cầu operator, `.env` và `.env.example` dùng thứ tự **DeepSeek → Groq → Gemini → Xingchi**. Khóa thật chỉ nằm trong `.env`; template có `DEEPSEEK_API_KEY=` rỗng. Không đưa khóa vào frontend, execution-only environment, owner deployment environment, log hoặc báo cáo.
 
 ## Model và protocol

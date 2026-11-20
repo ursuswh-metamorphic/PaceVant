@@ -1,5 +1,8 @@
 > Imported technical reference from `origin/main` at `08c35df`. Adapted paths below use the modular Python backend. Historical test counts/live metrics in this document belong to upstream; see [current merge verification](integrations/MAIN_SYNC_2026_11_20.md) for this checkout. The current `.env` explicitly sets Task Shield to `disabled`; `paper`/`wallet_hardened` are opt-in. The current Fuji Circle-USDC/Chainlink/PDR-V2 authorization path is supported; blanket Fuji valuation blockers below describe upstream faucet-USDC only.
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 # Task Shield inspection and implementation plan
 
 Baseline: main `53180f7b1af3202bba24dfbfd871612cd4c4d786`. No repository AGENTS.md. Existing A is Python/FastAPI; B is Python/FastAPI/Web3; PolicyVault and adapters are Solidity. Shared SDK 1.3.0, EIP-712 and portfolio/outcome v2 must remain intact. No Temporal Action Graph implementation exists to preserve or extend.

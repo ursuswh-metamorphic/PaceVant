@@ -1,5 +1,8 @@
 # Chạy Control Plane A với Execution Plane B
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 A gọi B qua HTTP bằng SDK `treasury_contracts` v1.1. B dùng chain ID `31337` trên Anvil và `43113` trên Fuji. A đối chiếu chain, block, Vault và policy với RPC đã cấu hình. Chứng cứ `REAL_LOCAL_SIM` dành cho Local. Profile Fuji yêu cầu `FORK_SIM` khớp chain, canonical fork block và bytecode.
 
 ## Khởi động

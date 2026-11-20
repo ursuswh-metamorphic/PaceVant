@@ -1,5 +1,8 @@
 # Hình thiết kế hệ thống V2.1
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 The ten SVGs below are the original review set. Current Demo User gas-credit diagrams are maintained as Mermaid in [the feature design](../../demo/DEMO_USER_GAS_CREDIT.md) and system-design section 21; they are not included in these historical SVG exports. The feature document also distinguishes the existing background outcome worker from a durable workflow queue.
 
 SVG được render từ 10 khối Mermaid trong [system design hiện tại](../../AI_Treasury_Security_System_Design_v2.1.md), theo thứ tự xuất hiện. Đây là engineering diagrams của code/config hiện có; topology deploy mô tả cấu hình dự kiến, không xác nhận đã có hosting/Fuji deployment.

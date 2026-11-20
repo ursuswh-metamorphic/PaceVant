@@ -1,5 +1,8 @@
 # Hệ thống hiện tại: ví, luồng xử lý và vai trò Python/Node.js
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > Tài liệu đầy đủ và ưu tiên hiện nay: [System design V2.1](AI_Treasury_Security_System_Design_v2.1.md). [Báo cáo rà soát mới](audit/V2_1_READINESS_REVIEW.md) phân biệt LOCAL thực thi thật, MOCK V1 fixture, code compatibility và phần Fuji/hosting/oracle thực chưa kiểm chứng. Bài này giữ vai trò giải thích ví và luồng thao tác.
 
 Tài liệu bám theo mã V2.1 đang có trong repository. Hướng dẫn thao tác: [local/Fuji demo](demo/AVALANCHE_FUJI_DEMO.md). Cấu hình đã chuẩn bị trên máy hiện tại: [environment status](demo/ENVIRONMENT_STATUS.md). Đây là demo treasury với hai token mock, một adapter allowlist và một PolicyVault; chưa tích hợp DEX hay oracle giá thị trường thật.

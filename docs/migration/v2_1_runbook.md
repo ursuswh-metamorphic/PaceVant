@@ -1,5 +1,8 @@
 # V2.1 local use and explicit Fuji cutover
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 **Current operator entrypoint:** [complete local/Fuji demo runbook](../demo/AVALANCHE_FUJI_DEMO.md). The current runtime is one FastAPI with an injected execution module; see [single-app architecture](../architecture/UNIFIED_BACKEND.md). The `treasury:*` commands automate the deployment-derived mandate, controlled oracle heartbeat, separated service environments and real A/B workflow described below. See [environment status](../demo/ENVIRONMENT_STATUS.md) for missing owner inputs. Manual commands below remain useful for low-level integration; use isolated manifests/data directories.
 
 Install existing pinned dependencies and run checks:

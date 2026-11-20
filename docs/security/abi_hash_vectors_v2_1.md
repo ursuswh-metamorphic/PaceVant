@@ -1,5 +1,8 @@
 # Canonical V2.1 ABI and signature bindings
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Authoritative models: `packages/contracts-api/treasury_contracts/v2.py`; Solidity: `contracts/src/PolicyVault.sol`. Golden fixture: `fixtures/v2_1/golden.json`. Regenerate with `npm run golden:v2`; test with `npm run test:integration` and Foundry `testGoldenPythonAbiAndEip712`.
 
 EIP-712 domain: `TreasuryPolicyVault`, version **2**, actual chain ID, actual vault address. V1 keeps domain version 1 only for legacy deployments. Once V2 is activated, legacy execution is permanently rejected.

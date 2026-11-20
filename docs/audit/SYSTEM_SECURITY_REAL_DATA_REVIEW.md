@@ -1,5 +1,8 @@
 # Rà soát hệ thống thực, kiến trúc và security V2.1
 
+> **DOC STATUS: HISTORICAL_AUDIT - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Ngày rà soát: 20/11/2026. Checkpoint trước rà soát: `4f3d0ad`, nhánh dự phòng `backup/pre-system-audit-4f3d0ad`. Đã fetch `origin/main`: `70bf6c7`, không có commit main mới chưa nằm trong codebase. Đây là đánh giá source, cấu hình, regression và bằng chứng thực thi; không phải chứng nhận audit bảo mật độc lập.
 
 ## 1. Kết luận và phạm vi

@@ -1,5 +1,8 @@
 # Xác minh refactor module — 19/11/2026
 
+> **DOC STATUS: HISTORICAL_AUDIT - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > Báo cáo dưới đây ghi nhận lần refactor trước khi gộp API. Checkpoint runtime một FastAPI nằm trong [UNIFIED_VALIDATION.md](UNIFIED_VALIDATION.md); kết quả audit cuối nằm tại [readiness review](../audit/V2_1_READINESS_REVIEW.md).
 
 Checkpoint trước refactor: `19aa935`, nhánh `feat/pgs-implement-paper`. Công việc refactor nằm trên `refactor/modular-backend-frontend`. [Kiến trúc](MODULE_ARCHITECTURE.md), [bản đồ module](../../backend/MODULES.md), [deploy](../../deploy/README.md).

@@ -1,5 +1,7 @@
 # Demo User và gas credit — thiết kế, API và cách demo
 
+> **DOC STATUS: CURRENT_RUNBOOK** - reviewed against source `3f9f9af`, 2026-11-20. See [current system design](../AI_Treasury_Security_System_Design_v2.1.md) for security assumptions and evidence limits. No new Fuji transaction was run for this documentation review.
+
 Phiên bản sau checkpoint `3fba479`, ngày 20/11/2026. Đây là bổ sung cho [system design V2.1](../AI_Treasury_Security_System_Design_v2.1.md); giữ một Python/FastAPI backend, Solidity/ABI/proof engine và toàn bộ pipeline bảo mật hiện có. Không cần contract mới, WalletConnect, Paymaster hoặc thêm API server.
 
 ## 1. Người dùng sử dụng gì?

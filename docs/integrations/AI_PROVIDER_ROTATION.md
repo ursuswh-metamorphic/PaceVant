@@ -1,5 +1,8 @@
 # AI provider failover — 20/11/2026
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 The Python planning module supports Gemini, Groq and user-confirmed Xingchi. This change affects bounded goal extraction only; it does not add a free-form agent, change trading policy, replace oracle data, or grant models signing authority.
 
 ## Private configuration

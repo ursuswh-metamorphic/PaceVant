@@ -1,5 +1,8 @@
 # Original V1 versus V2.1 through the full A/B protocol
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Measured 2026-11-19 with `npm run benchmark:protocol`, equivalent to `uv run --locked python scripts/evaluate-protocol.py`. [Raw measured rows](v2_1_full_protocol_results.json). Fourteen real workflows, seven per configuration, with immutable-decision attestation, durable raw-transaction journal, source-chain mining and receipt reconciliation. All expected outcome assertions passed. Report metadata is derived from preserved workflow and SQLite build-context records. No user `.env` is loaded and no Fuji transaction is sent.
 
 ## Isolation and provenance

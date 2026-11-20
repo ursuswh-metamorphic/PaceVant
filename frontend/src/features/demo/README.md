@@ -1,5 +1,7 @@
 # Demo User UI
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 One predefined identity is shown by `/v1/demo/config`. Clicking Select calls public `POST /v1/demo/select` to obtain a signed demo-only session automatically; visitors enter no code, token, wallet key or connection details. Session credentials stay in tab memory, not local/session storage, URL, static config or bundled source. The server signing secret never leaves the backend. Only a random idempotency/request ID is saved in sessionStorage so a lost response/reload can resume through a GET. Selection itself never creates a workflow or transaction. All visitors who select the demo share its finite credit/history.
 
 The API supplies gas credit allocation, available/reserved/spent amounts, actual gas receipt fields, immutable debit/reversal history, transactions and request history. Render with DOM textContent and BigInt wei arithmetic. The demo wallet AVAX balance is a separate on-chain read; unavailable remains unknown, never zero. Credit is explicitly labeled as a sponsor-funded demo allowance, not a verified cash deposit.

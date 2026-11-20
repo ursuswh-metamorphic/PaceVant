@@ -1,5 +1,7 @@
 # Oracle
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 `chainlink.py` is the live Fuji provider. It reads the two allowlisted contract feeds directly at the simulation block, checks exact metadata, positive/completed rounds, original timestamps and pinned block/hash, then returns `OraclePrice` with `FeedObservation` provenance. It does not approve transactions. Workflow composition selects it from the owner-approved source hash, not from a file's claimed source name.
 
 The shared policy in `treasury_contracts/oracle.py` maps Circle test USDC to USDC/USD (86400-second age) and Fuji WAVAX to AVAX/USD (600 seconds). Its canonical configuration hash is committed by the owner proof policy. These are **testnet reference USD valuations**, not redeemable/mainnet prices for the test assets. Every original round is included in the oracle evidence hash. `price_timestamp` retains the oldest updatedAt; `oracle_observed_at` is the pinned block time. Block/session freshness remains a separate bounded policy.

@@ -1,5 +1,7 @@
 # monitoring
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 `fee_observer` is an optional injected callback for demo gas billing. It receives the same verified reconciliation report and canonical invalidation flag used by the monitor; it performs no chain writes. Pending/unavailable reports retain the reservation, confirmed success/revert receipts settle actual gas, and reorgs reverse the old debit and hold funds until re-established. Gas settlement is independent of whether token effects need review. [Demo billing details](../../../../../docs/demo/DEMO_USER_GAS_CREDIT.md).
 
 Read-only reconciliation of durable workflow submissions. `service.py:OutcomeMonitor` polls receipt/build/PDR facts through an injected read client. `worker.py:start_monitor` runs it in the unified FastAPI lifespan; `api.py` provides authenticated portfolio/outcome history routes.

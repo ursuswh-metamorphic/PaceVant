@@ -1,5 +1,7 @@
 # portfolio
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 `observations.py:PortfolioReader` now acquires native and token balances at an explicit block/hash, checks token identity/decimals, optionally compares the independent execution reader, and creates an immutable content-hashed `ObservedPortfolioSnapshot`. This observation alone never authorizes a trade. `decision_snapshot` binds it to validated prices, build, owner policy and history version; V2 Fuji uses Circle USDC/WAVAX with the existing direct Chainlink source, including reverse swaps. Faucet-token prices remain ineligible.
 
 Portfolio history is persisted by `modules/persistence/portfolio.py` and exposed by `modules/monitoring/api.py`. Oracle observations shown for information remain distinct from the authoritative provider used for approval. Tests: `uv run --locked pytest backend/tests/control/test_portfolio_state.py -q`. [Integration and limitations](../../../../../docs/integrations/MAIN_SYNC_2026_11_20.md).

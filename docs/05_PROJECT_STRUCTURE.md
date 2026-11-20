@@ -1,5 +1,8 @@
 # Cấu trúc repository hiện tại
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Dự án đã chuyển từ `apps/control-plane`, `apps/execution-plane` và `apps/dashboard` sang một backend Python chia module và một frontend độc lập.
 
 - [Kiến trúc và bảng đường dẫn trước/sau](architecture/MODULE_ARCHITECTURE.md).

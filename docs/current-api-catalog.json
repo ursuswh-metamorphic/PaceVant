@@ -1,0 +1,772 @@
+{
+  "schema_version": "current-api-catalog-v1",
+  "source_commit": "3f9f9af91310040bd43eb3895d145a0fc46d776c",
+  "review_date": "2026-11-20",
+  "extraction": "AST of handlers installed by canonical app; no runtime/network calls",
+  "scope": "FUJI auth; MOCK can relax selected operator checks. Legacy standalone factories are excluded. Input annotations are source references, not complete JSON Schema.",
+  "framework_routes": [
+    "GET /docs",
+    "GET /redoc",
+    "GET /openapi.json",
+    "GET /docs/oauth2-redirect"
+  ],
+  "static_mounts": [
+    "/assets",
+    "/src (when serve_frontend)"
+  ],
+  "route_count": 57,
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth_fuji": "public",
+      "handler": "dashboard",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 252,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/execution/health",
+      "auth_fuji": "public",
+      "handler": "health",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 116,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "GET",
+      "path": "/execution/v1/artifacts/{content_hash}",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "get_artifact",
+      "input_annotations": {
+        "content_hash": "str"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 172,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "POST",
+      "path": "/execution/v1/build",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "build",
+      "input_annotations": {
+        "p": "TransactionProposal",
+        "idempotency_key": "str | None"
+      },
+      "response_model": "BuiltTransaction",
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 140,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "GET",
+      "path": "/execution/v1/chain/context",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "context",
+      "input_annotations": {},
+      "response_model": "ChainContext",
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 120,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "POST",
+      "path": "/execution/v1/executions",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "execute",
+      "input_annotations": {
+        "p": "ExecutionRequest",
+        "idempotency_key": "str | None"
+      },
+      "response_model": "ExecutionSubmission",
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 156,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "GET",
+      "path": "/execution/v1/executions/{tx_hash}",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "result",
+      "input_annotations": {
+        "tx_hash": "str"
+      },
+      "response_model": "ExecutionResult",
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 168,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "GET",
+      "path": "/execution/v1/executions/{tx_hash}/reconciliation",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "reconciliation",
+      "input_annotations": {
+        "tx_hash": "str"
+      },
+      "response_model": "ExecutionReconciliation",
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 136,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "GET",
+      "path": "/execution/v1/portfolio/onchain-snapshot",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "snapshot",
+      "input_annotations": {
+        "block_number": "int | None"
+      },
+      "response_model": "OnchainSnapshot",
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 128,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "POST",
+      "path": "/execution/v1/simulations",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "simulate",
+      "input_annotations": {
+        "p": "SimulationRequest",
+        "idempotency_key": "str | None"
+      },
+      "response_model": "SimulationEvidence",
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 148,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "GET",
+      "path": "/execution/v1/submissions/by-build/{build_id}",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "submission",
+      "input_annotations": {
+        "build_id": "str"
+      },
+      "response_model": "ExecutionSubmission",
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 132,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "POST",
+      "path": "/execution/v2/simulations/preflight",
+      "auth_fuji": "execution_x_api_key",
+      "handler": "preflight",
+      "input_annotations": {
+        "p": "PreflightV2Request",
+        "idempotency_key": "str | None"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/execution.py",
+      "line": 160,
+      "condition": "execution_enabled"
+    },
+    {
+      "method": "GET",
+      "path": "/fuji-wallet",
+      "auth_fuji": "public_static_page",
+      "source": "backend/src/treasury_backend/api/fuji.py",
+      "line": 38,
+      "condition": "serve_frontend"
+    },
+    {
+      "method": "GET",
+      "path": "/fuji-wallet.html",
+      "auth_fuji": "public_static_page",
+      "source": "backend/src/treasury_backend/api/fuji.py",
+      "line": 39,
+      "condition": "serve_frontend"
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "auth_fuji": "public",
+      "handler": "health",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/app.py",
+      "line": 99,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "auth_fuji": "public",
+      "handler": "health",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 164,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/itag",
+      "auth_fuji": "operator_bearer",
+      "handler": "viewer",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 148,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/itag-viewer.css",
+      "auth_fuji": "operator_bearer",
+      "handler": "viewer_style",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 161,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/itag-viewer.js",
+      "auth_fuji": "operator_bearer",
+      "handler": "viewer_script",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 157,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/agent/propose",
+      "auth_fuji": "operator_bearer",
+      "handler": "propose",
+      "input_annotations": {
+        "payload": "WorkflowRequest"
+      },
+      "response_model": "TransactionProposal",
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 176,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/alignment/check",
+      "auth_fuji": "operator_bearer",
+      "handler": "align",
+      "input_annotations": {
+        "payload": "AlignmentRequest"
+      },
+      "response_model": "Alignment",
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 182,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/approvals/attest",
+      "auth_fuji": "internal_bearer",
+      "handler": "attest",
+      "input_annotations": {
+        "payload": "AttestRequest"
+      },
+      "response_model": "SignedPDR | SignedPDRV2",
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 205,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/decisions",
+      "auth_fuji": "operator_bearer",
+      "handler": "decision",
+      "input_annotations": {
+        "payload": "DecisionRequest"
+      },
+      "response_model": "SecurityDecision",
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 197,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/demo/account",
+      "auth_fuji": "demo_bearer",
+      "handler": "account",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 87,
+      "condition": "demo_enabled for use (config remains public)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/demo/config",
+      "auth_fuji": "public",
+      "handler": "public_config",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 46,
+      "condition": "demo_enabled for use (config remains public)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/demo/requests/{key}",
+      "auth_fuji": "demo_bearer",
+      "handler": "resume",
+      "input_annotations": {
+        "key": "RequestKey"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 134,
+      "condition": "demo_enabled for use (config remains public)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/demo/select",
+      "auth_fuji": "public",
+      "handler": "select_account",
+      "input_annotations": {
+        "payload": "DemoSelection"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 38,
+      "condition": "demo_enabled for use (config remains public)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/demo/treasury",
+      "auth_fuji": "demo_bearer",
+      "handler": "treasury",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 126,
+      "condition": "demo_enabled for use (config remains public)"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/demo/workflows",
+      "auth_fuji": "demo_bearer",
+      "handler": "start",
+      "input_annotations": {
+        "payload": "DemoGoal",
+        "idempotency_key": "Annotated[RequestKey, Header()]"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 145,
+      "condition": "demo_enabled for use (config remains public)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/demo/workflows/{workflow}",
+      "auth_fuji": "demo_bearer",
+      "handler": "workflow",
+      "input_annotations": {
+        "workflow": "Id"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 130,
+      "condition": "demo_enabled for use (config remains public)"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/fuji/wallet/{address}",
+      "auth_fuji": "operator_bearer",
+      "handler": "wallet",
+      "input_annotations": {
+        "address": "str",
+        "vault": "str | None",
+        "tx_hash": "str | None"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/fuji.py",
+      "line": 23,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/history/transactions",
+      "auth_fuji": "operator_bearer",
+      "handler": "transactions",
+      "input_annotations": {
+        "chain_id": "int",
+        "vault_address": "Address",
+        "limit": "Annotated[int, Query(ge=1, le=100)]"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/monitoring/api.py",
+      "line": 57,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/itag/assessments/{digest}",
+      "auth_fuji": "operator_bearer",
+      "handler": "assessment",
+      "input_annotations": {
+        "digest": "Hash"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 89,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/itag/assessments/{digest}/nodes/{node_id}",
+      "auth_fuji": "operator_bearer",
+      "handler": "node",
+      "input_annotations": {
+        "digest": "Hash",
+        "node_id": "str"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 117,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/itag/intents",
+      "auth_fuji": "operator_bearer",
+      "handler": "create",
+      "input_annotations": {
+        "terms": "IntentTerms",
+        "proposed": "bool"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 32,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/itag/intents/{spec_id}",
+      "auth_fuji": "operator_bearer",
+      "handler": "intent",
+      "input_annotations": {
+        "spec_id": "Id"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 53,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/itag/intents/{spec_id}",
+      "auth_fuji": "operator_bearer",
+      "handler": "revise",
+      "input_annotations": {
+        "spec_id": "Id",
+        "change": "Replacement"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 39,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/itag/intents/{spec_id}/cancel",
+      "auth_fuji": "operator_bearer",
+      "handler": "cancel",
+      "input_annotations": {
+        "spec_id": "Id",
+        "change": "Revision"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 49,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/itag/intents/{spec_id}/history",
+      "auth_fuji": "operator_bearer",
+      "handler": "history",
+      "input_annotations": {
+        "spec_id": "Id",
+        "limit": "Annotated[int, Query(ge=1, le=100)]"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/temporal/api.py",
+      "line": 69,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/portfolio/current",
+      "auth_fuji": "operator_bearer",
+      "handler": "current",
+      "input_annotations": {
+        "chain_id": "int",
+        "vault_address": "Address"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/monitoring/api.py",
+      "line": 18,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/portfolio/history",
+      "auth_fuji": "operator_bearer",
+      "handler": "history",
+      "input_annotations": {
+        "chain_id": "int",
+        "vault_address": "Address",
+        "limit": "Annotated[int, Query(ge=1, le=100)]",
+        "before": "Annotated[int | None, Query(ge=0)]"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/monitoring/api.py",
+      "line": 35,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/portfolio/observe",
+      "auth_fuji": "operator_bearer",
+      "handler": "observe",
+      "input_annotations": {
+        "chain_id": "int",
+        "vault_address": "Address"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/monitoring/api.py",
+      "line": 30,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/portfolio/snapshots/{snapshot_id}",
+      "auth_fuji": "operator_bearer",
+      "handler": "snapshot",
+      "input_annotations": {
+        "snapshot_id": "Id"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/monitoring/api.py",
+      "line": 50,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/reconciliations/{decision_id}",
+      "auth_fuji": "operator_bearer",
+      "handler": "reconciliation",
+      "input_annotations": {
+        "decision_id": "Id",
+        "limit": "Annotated[int, Query(ge=1, le=100)]"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/monitoring/api.py",
+      "line": 69,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/risk/evaluate",
+      "auth_fuji": "operator_bearer",
+      "handler": "evaluate_risk",
+      "input_annotations": {
+        "payload": "RiskRequest"
+      },
+      "response_model": "EconomicRiskAssessment",
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 193,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/task-shield/sessions",
+      "auth_fuji": "operator_bearer",
+      "handler": "create",
+      "input_annotations": {
+        "payload": "SessionRequest"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/alignment/api.py",
+      "line": 39,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/task-shield/sessions/{id_}",
+      "auth_fuji": "operator_bearer",
+      "handler": "session",
+      "input_annotations": {
+        "id_": "Id"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/alignment/api.py",
+      "line": 57,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/task-shield/sessions/{id_}/audit",
+      "auth_fuji": "operator_bearer",
+      "handler": "audit",
+      "input_annotations": {
+        "id_": "Id",
+        "limit": "Annotated[int, Query(ge=1, le=100)]"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/alignment/api.py",
+      "line": 61,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/task-shield/sessions/{id_}/check-content",
+      "auth_fuji": "operator_bearer",
+      "handler": "content",
+      "input_annotations": {
+        "id_": "Id",
+        "payload": "InspectRequest"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/alignment/api.py",
+      "line": 65,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/task-shield/sessions/{id_}/check-tool",
+      "auth_fuji": "operator_bearer",
+      "handler": "tool",
+      "input_annotations": {
+        "id_": "Id",
+        "payload": "ToolRequest"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/alignment/api.py",
+      "line": 79,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/task-shield/sessions/{id_}/user-messages",
+      "auth_fuji": "operator_bearer",
+      "handler": "update",
+      "input_annotations": {
+        "id_": "Id",
+        "payload": "TaskUpdate"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/modules/alignment/api.py",
+      "line": 53,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/treasury",
+      "auth_fuji": "operator_bearer",
+      "handler": "treasury",
+      "input_annotations": {},
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 217,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/workflows/start",
+      "auth_fuji": "operator_bearer",
+      "handler": "workflow_start",
+      "input_annotations": {
+        "payload": "WorkflowRequest"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 168,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/workflows/{id}",
+      "auth_fuji": "operator_bearer",
+      "handler": "workflow",
+      "input_annotations": {
+        "id": "Id"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 209,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/workflows/{id}/recover",
+      "auth_fuji": "operator_bearer",
+      "handler": "recover",
+      "input_annotations": {
+        "id": "Id",
+        "payload": "SubmissionRecoveryRequest"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 213,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v2/proofs/{context_hash}",
+      "auth_fuji": "operator_bearer",
+      "handler": "proof",
+      "input_annotations": {
+        "context_hash": "Hash"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 232,
+      "condition": "canonical composition"
+    },
+    {
+      "method": "GET",
+      "path": "/v2/treasury/sessions/{session_id}",
+      "auth_fuji": "operator_bearer",
+      "handler": "session",
+      "input_annotations": {
+        "session_id": "Hash"
+      },
+      "response_model": null,
+      "source": "backend/src/treasury_backend/api/control/__init__.py",
+      "line": 236,
+      "condition": "canonical composition"
+    }
+  ],
+  "source_files_sha256": {
+    "backend/src/treasury_backend/api/app.py": "396f05d425b1df7f96f371da44f2ef4d9f1d163e347241f8c94b2d28f5fb2161",
+    "backend/src/treasury_backend/api/control/__init__.py": "157c54869861767b931ee53a8d0f675354e0ed87ae43efaefe7eafc1d10e4eeb",
+    "backend/src/treasury_backend/api/demo.py": "6d2ce073ced80a7fc0bfa7ff2d6f373b73939f91174f4e905dba4624415d2c6c",
+    "backend/src/treasury_backend/api/execution.py": "f2925abb19f674db32d303d8ade99fe78fa6fd83abd75ded1dff0eb245e1df52",
+    "backend/src/treasury_backend/api/fuji.py": "83cb097a471c64587a24df6f5065c63a1286b5c274330264fac892af1a5371be",
+    "backend/src/treasury_backend/modules/alignment/api.py": "62974cb2e1f15cb8cc6e5d08810c669e592bb94af1c866ca5322cf97e9fe22d5",
+    "backend/src/treasury_backend/modules/monitoring/api.py": "dbb6239c5d3f2b6a8b99275d614141c7309fa47a25f9fdc938a8190197e8fbe1",
+    "backend/src/treasury_backend/modules/temporal/api.py": "893723a6bfe3c46e722ec7cd8db7a76b607d346c71012fd70f2d480cab59e1ae"
+  },
+  "source_files_lf_sha256": {
+    "backend/src/treasury_backend/api/app.py": "396f05d425b1df7f96f371da44f2ef4d9f1d163e347241f8c94b2d28f5fb2161",
+    "backend/src/treasury_backend/api/control/__init__.py": "e960e3caeac4b2e9a1fda3c12c1e4e8a1eda7cd38c4b5d6088d7afdac5e46552",
+    "backend/src/treasury_backend/api/demo.py": "6d2ce073ced80a7fc0bfa7ff2d6f373b73939f91174f4e905dba4624415d2c6c",
+    "backend/src/treasury_backend/api/execution.py": "f2925abb19f674db32d303d8ade99fe78fa6fd83abd75ded1dff0eb245e1df52",
+    "backend/src/treasury_backend/api/fuji.py": "83cb097a471c64587a24df6f5065c63a1286b5c274330264fac892af1a5371be",
+    "backend/src/treasury_backend/modules/alignment/api.py": "62974cb2e1f15cb8cc6e5d08810c669e592bb94af1c866ca5322cf97e9fe22d5",
+    "backend/src/treasury_backend/modules/monitoring/api.py": "dbb6239c5d3f2b6a8b99275d614141c7309fa47a25f9fdc938a8190197e8fbe1",
+    "backend/src/treasury_backend/modules/temporal/api.py": "893723a6bfe3c46e722ec7cd8db7a76b607d346c71012fd70f2d480cab59e1ae"
+  }
+}

@@ -1,4 +1,7 @@
-﻿# Trạng thái môi trường demo — cập nhật 19/11/2026
+# Trạng thái môi trường demo — cập nhật 19/11/2026
+
+> **DOC STATUS: HISTORICAL_RUNBOOK - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
 
 > Cập nhật mới sau audit: đã thay ba cặp ví bằng values người dùng cấp, kiểm key/address khớp, bật real Groq và đồng bộ tên biến giữa `.env`/`.env.example`/initializer. Real Groq + full LOCAL proof/receipt đạt; chưa gửi Fuji transaction. Các kết quả env/funding/RPC bên dưới là checkpoints trước thay ví, cần đọc lại trước khi chạy Fuji. [Groq/env integration](../integrations/GROQ_PLANNER_AND_ENV.md), [system design](../AI_Treasury_Security_System_Design_v2.1.md).
 

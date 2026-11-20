@@ -1,5 +1,8 @@
 # Fuji: chạy luồng V2.1 có Task Shield và ITAG
 
+> **DOC STATUS: HISTORICAL_RUNBOOK - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > **Current system review:** [architecture, real-data ledger, security fixes and evidence](../audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md). The Fuji session is now 24 hours and block drift is 200 blocks; approval TTL and snapshot age remain 300 seconds. Older receipts/test counts below retain their historical scope.
 
 Latest audited run: `workflow_b813ce97ad0542e9b1b667e4e5e07788`, Fuji block **61371323**, [confirmed transaction](https://testnet.snowtrace.io/tx/0xf975361607032ec0709140d32c6d5e98a266f8df6917226e1d6ecb6cf6361b10). [New public checks](../audit/system-security-live-validation.json) and [independently verified proof queries](../audit/system-security-live-proof/README.md) belong to the hardened code and current 24-hour session. Open `/?workflow=workflow_b813ce97ad0542e9b1b667e4e5e07788` to display this result without another trade. Historical receipts below remain separate checkpoints.

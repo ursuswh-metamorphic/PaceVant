@@ -1,5 +1,8 @@
 # Backend Python trên Render hoặc VPS, không cần Node.js
 
+> **DOC STATUS: HISTORICAL_RUNBOOK - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Backend FastAPI thống nhất, CLI vận hành và build launcher hiện chạy bằng Python. Solidity giữ nguyên. Node/npm chỉ còn là lựa chọn cho các lệnh development cũ và golden tests đối chiếu `viem`; Docker backend không cài hoặc gọi Node.js/npm.
 
 ## Compile Solidity ở đâu?

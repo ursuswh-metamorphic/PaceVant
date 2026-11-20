@@ -1,5 +1,7 @@
 # Frontend
 
+> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 The optional ITAG evidence viewer is served at `/itag` by the unified backend; its static files are `itag.html`, `itag-viewer.js`, and `itag-viewer.css`. It loads authenticated assessment/node APIs with an operator token kept in tab memory. It is hidden when `PACEVANT_SERVE_FRONTEND=false`. It inspects existing assessments; it does not create intents or authorize transactions. See [ITAG integration](../docs/integrations/ITAG_MAIN_SYNC.md).
 
 Static HTML/CSS and browser ES modules. No Node.js server, bundler or wallet extension is required to use the dashboard. Node is optional for developer syntax/vector checks only.
@@ -17,7 +19,7 @@ Static HTML/CSS and browser ES modules. No Node.js server, bundler or wallet ext
 
 `uv run --locked treasury local` serves this directory at http://127.0.0.1:8000 through the unified Python API. `uv run --locked python -m treasury_backend.api.serve` runs MOCK without chain access. Do not open index.html through file:// because ES module loading requires HTTP.
 
-The operator token is entered in the connect form and kept only in tab memory, never config.js or browser persistence. LIVE/FUJI actions call authenticated backend endpoints. No owner/attestor/relayer keys belong in frontend code or hosting variables.
+Judges choose **PaceVant - Demo User** without entering a token or connecting a wallet. The browser obtains a demo-scoped expiring session automatically and keeps it in tab memory. See [demo runbook](../docs/demo/DEMO_USER_GAS_CREDIT.md). The separate operator view still accepts an operator token in memory. No owner/attestor/relayer/Demo User keys belong in frontend code or public hosting variables.
 
 ## Independent deployment
 

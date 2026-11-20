@@ -1,8 +1,10 @@
 # planning
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 The current Fuji env/template prioritizes `deepseek,groq,gemini,xingchi`. `DeepSeekPlanner` calls only `https://api.deepseek.com/chat/completions` with reviewed `deepseek-flash`, thinking disabled, bounded max_tokens and strict local amount/direction validation. `DEEPSEEK_API_KEY` is private; only control/unified runtime receives it. See [DeepSeek integration](../../../../../docs/integrations/DEEPSEEK_PRIORITY.md).
 
-Legacy-compatible provider failover remains available: `PACEVANT_PLANNER_PROVIDER=rotate`, with default order `gemini,groq,xingchi`. Google uses native Gemini `generateContent` with `gemma-4-26b-a4b-it`; the user-confirmed Xingchi endpoint uses `/v1/responses` with model ID `gpt-6.1-sol`. Groq strict-schema behavior remains available as a standalone provider. See [rotation configuration and live validation](../../../../../docs/integrations/AI_PROVIDER_ROTATION.md).
+`PACEVANT_PLANNER_PROVIDER=rotate` uses the configured order; the current profile/template sets `deepseek,groq,gemini,xingchi`. The settings class retains a legacy fallback default `gemini,groq,xingchi` only when that variable is absent. Native Gemini `generateContent` uses configured `GEMINI_MODEL` (current profile `gemini-3.1-flash-lite`; an older allowed default is `gemma-4-26b-a4b-it`). The user-confirmed Xingchi endpoint uses `/v1/responses` with `gpt-6.1-sol`. Groq remains available standalone. Earlier [rotation validation](../../../../../docs/integrations/AI_PROVIDER_ROTATION.md) is checkpoint-scoped.
 
 `remote.py` provides native wire adapters; `rotation.py` orchestrates bounded failover and request-local trace metadata. `PLANNED` timeline events record actual provider/model and sanitized attempt reasons. The workflow's top-level provider `rotate` identifies configuration, not a claim that every provider was called.
 
@@ -41,4 +43,4 @@ uv run --locked python -m pytest backend/src/treasury_backend/modules/planning/t
 
 Add focused tests under this module's `tests/` directory for new feature logic; pytest discovers them automatically. Existing regression tests remain under `backend/tests/`. Chain integration tests require native Foundry and compiled contracts; use [backend setup](../../../../README.md).
 
-[Groq/env integration](../../../../../docs/integrations/GROQ_PLANNER_AND_ENV.md) records current config, real API/LOCAL validation and remaining mocks.
+[Earlier Groq/env integration](../../../../../docs/integrations/GROQ_PLANNER_AND_ENV.md) records its original API/LOCAL checkpoint. Use the current design/inventory for effective provider order and readiness limits.

@@ -1,5 +1,7 @@
 # Shared application kernel
 
+> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 Contains typed mandate, goal, balances/context, portfolio, risk and decision records plus `ControlError` and duplicate-key-rejecting JSON parsing. It depends only on shared protocol/libraries, never feature modules. Place feature-specific models in that feature (for example oracle prices in `modules/oracle/models.py`). Changes affect multiple modules and need compatibility review.
 
 See [backend setup](../../../README.md), [module boundaries](../../../MODULES.md) and [environment/deployment](../../../../deploy/README.md).

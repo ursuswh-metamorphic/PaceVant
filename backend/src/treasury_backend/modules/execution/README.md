@@ -1,10 +1,13 @@
 # Execution
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 Owns chain interaction, exact calldata, fork simulation, extraction and durable relay. It receives a signed approval; the execution module receives only relayer configuration. The unified process also holds the attestor key in the signing module; there is no process-level key isolation. The serving runtime never receives the owner key.
 
 | Component | Responsibility | Entrypoint |
 | --- | --- | --- |
 | [chain](chain/README.md) | RPC, deployed contract/context reads | `Chain` |
+| [dex](dex/README.md) | Exact LFJ token/route/quote identities | `LFJClient` and verified V1 route |
 | [transaction](transaction/README.md) | Immutable nonce-bound calldata | `Builder` |
 | [simulation](simulation/README.md) | Native Anvil fork, exact guarded execution | `Simulator` |
 | [evidence](evidence/README.md) | Receipt/trace/token fact extraction | `token_facts`, `assess` |

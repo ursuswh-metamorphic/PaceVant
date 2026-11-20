@@ -1,5 +1,8 @@
 # V2.1 policy coverage
 
+> **DOC STATUS: HISTORICAL_REFERENCE - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Scope: controlled mock USDC6/WAVAX18, one owner-selected exact-input adapter, chain 31337 locally or 43113 after explicit owner-approved configuration. This is unaudited research software.
 
 | Rule | Before signing | Runtime | Formally proved? | Claim |

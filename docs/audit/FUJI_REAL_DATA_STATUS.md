@@ -1,5 +1,8 @@
 # Kiểm tra thực trạng dữ liệu Fuji — 20/11/2026
 
+> **DOC STATUS: HISTORICAL_AUDIT - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](../AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](../README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 Lượt rà soát mới nhất: 20/11/2026, đối chiếu public Fuji tại block **61345272**. Phạm vi: composition/config, planning/alignment, oracle/portfolio, risk/proof/signing, builder/simulation/evidence/relayer/storage, Solidity, frontend và deployment. Chạy kiểm tra tập trung; không gửi giao dịch mới, không gọi lại Groq, không chạy full suite. Bằng chứng chỉ đọc mới nhất: [fuji-reaudit-validation.json](fuji-reaudit-validation.json). Báo cáo này không phải audit bảo mật độc lập hoặc bảo đảm đã tìm mọi lỗi.
 
 ## Kết quả

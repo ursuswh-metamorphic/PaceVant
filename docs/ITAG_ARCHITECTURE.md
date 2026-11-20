@@ -1,5 +1,8 @@
 > Technical reference imported from main@70bf6c7. Upstream metrics and 30-second TTL statements describe that branch. See [current modular integration and limitations](integrations/ITAG_MAIN_SYNC.md) for this checkout.
 
+> **DOC STATUS: HISTORICAL_DESIGN - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 # Intent-Aware Temporal Action Graph
 
 ITAG layers per-intent authorization over the existing Task Shield, simulation, portfolio observation, Economic Risk, SDE and EIP-712 signing flow. The PolicyVault contract and PDR wire format are unchanged.

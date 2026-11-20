@@ -1,5 +1,8 @@
 # Triển khai và bàn giao phần B — Execution Plane v1.1
 
+> **DOC STATUS: HISTORICAL_RUNBOOK - OLD / SUPERSEDED.** Retained checkpoint/reference only; not current system state, readiness or operating instructions.
+> Use the [current system design](AI_Treasury_Security_System_Design_v2.1.md) and [documentation index](README.md). Addresses, defaults, test counts and limitations below belong to their original checkpoint. Raw evidence keeps its original scope.
+
 > Historical / compatibility document. For the current runtime use [V2.1 system design](AI_Treasury_Security_System_Design_v2.1.md) and [readiness audit](audit/V2_1_READINESS_REVIEW.md). Old A/B layouts, PoC evidence and removed pre-refactor paths describe their original checkpoint; they are not current deployment instructions or new validation evidence. References to removed artifacts are retained as plain code text.
 
 Mã mới bám `03_SHARED_INTEGRATION_CONTRACT.md` và guide B ngày 16/11/2026. `PolicyVault` chỉ swap mock USDC → mock WAVAX; không phải smart account ERC-4337. Phần A vẫn sở hữu Planner, Shield, exposure/risk, SDE, attestor và dashboard.

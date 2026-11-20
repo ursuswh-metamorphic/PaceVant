@@ -1,5 +1,7 @@
 # persistence
 
+> **DOC STATUS: MODULE_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../../../../../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+
 `portfolio.py` adds idempotent SQLite tables for immutable observed snapshots/events/links, per-treasury history versions, monitor jobs/leases, outcome observations and replaceable current projections. Existing workflows, proof records and attestations stay intact. Gas accounting uses canonical outcome projections with deduplicated legacy-event fallback. Reorgs invalidate observations instead of rewriting history. Objective revision is checked in the same write transaction that transitions an attestation from ATTESTED to SUBMITTING; Task Shield owns its additive `shield_*` tables.
 
 Persist control workflows, attempts, decisions, proof records, spend reservations and audit history.
