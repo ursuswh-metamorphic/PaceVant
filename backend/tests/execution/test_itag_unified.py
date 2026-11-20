@@ -66,7 +66,7 @@ def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, ou
     class DataFixtureProvider(ReplayProvider):
         def complete(self, messages):
             data = json.loads(messages[1]["content"])
-            if bounded and "evidence_catalog" in data:
+            if bounded and "entries" in data.get("evidence_catalog", {}):
                 catalog = data["evidence_catalog"]
                 scope = next(e for e in catalog["entries"] if e["scope_role"] == "ACTIVE_OPERATOR_INTENT")
                 return Completion(json.dumps({

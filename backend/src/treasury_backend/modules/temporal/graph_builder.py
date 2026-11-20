@@ -277,4 +277,8 @@ def build_graph(
                         [check_id, result["instruction"]["instruction_id"], task_id],
                         "MODEL_INFERENCE",
                     )
+        for finding in check.get("semantic_findings", []):
+            if finding["verdict"] == "ALIGNED" and finding["task_id"] in task_ids:
+                graph.link(source_id, finding["task_id"], "CONTRIBUTES_TO",
+                           [check_id, finding["task_id"]], "MODEL_INFERENCE")
     return graph.finish()

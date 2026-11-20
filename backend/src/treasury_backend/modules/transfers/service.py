@@ -299,6 +299,7 @@ class TransferService:
             TaskUpdate(message_id="user_" + session, content=task.objective, expected_revision=0),
             authenticated=True,
         )["tasks"]
+        shield.state.transfer_scope(session, task)
         report = shield.check(
             session,
             Message(

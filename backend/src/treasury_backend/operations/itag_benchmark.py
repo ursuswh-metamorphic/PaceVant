@@ -9,6 +9,7 @@ from treasury_backend.modules import alignment, portfolio
 from treasury_backend.modules import decision as sde
 from treasury_backend.modules import planning as planner
 from treasury_backend.modules import risk as economic_risk
+from treasury_backend.modules.alignment import prompts
 from treasury_backend.modules.alignment.engine import TaskShield
 from treasury_backend.modules.alignment.provider import Completion
 from treasury_backend.modules.alignment.types import Message, TaskUpdate
@@ -38,6 +39,15 @@ class ReplayProvider:
 
     def complete(self, messages):
         data = json.loads(messages[1]["content"])
+        if messages[0]["content"] == prompts.HYBRID_SEMANTIC:
+            blocked = IRRELEVANT_ACTION in json.dumps(data["candidate"])
+            return Completion(json.dumps(dict(
+                task_id=data["bound_task_id"], action_ref=data["action_ref"],
+                finding_type="GOAL_DRIFT" if blocked else "OBJECTIVE_ALIGNMENT",
+                verdict="MISALIGNED" if blocked else "ALIGNED",
+                evidence_refs=[next(iter(data["evidence_catalog"])), data["action_ref"]],
+                explanation="Scripted hybrid semantic regression; no claim of LLM accuracy.",
+            )))
         if messages[0]["content"] == PROMPT:
             candidate, task = data["candidate_action_id"], data["active_task_ids"][0]
             action = next(n for n in data["graph"]["nodes"] if n["node_id"] == candidate)
@@ -262,6 +272,11 @@ def run_case(store, config, case, mandate, fixture, provider=None, *, capture=Fa
             TaskUpdate(message_id=message_id, content=user_goal, expected_revision=0),
             authenticated=True,
         )["tasks"]
+        from treasury_backend.core.models import IntentSelection
+
+        shield.state.swap_scope(session, spec, IntentSelection(
+            spec_id=spec.spec_id, revision=spec.revision,
+            step_id="second" if ordered else "swap"), NOW) if spec.status == "AUTHENTICATED" else None
         with store.connection() as conn:
             extraction = json.loads(
                 conn.execute(

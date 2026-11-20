@@ -1,0 +1,35 @@
+{
+  "runs": [
+    {
+      "run": "hybrid-smoke",
+      "requests": 6,
+      "reported_tokens": 11953,
+      "published_final_D": false
+    },
+    {
+      "run": "hybrid-final-run",
+      "requests": 368,
+      "reported_tokens": 406483,
+      "published_final_D": false
+    },
+    {
+      "run": "hybrid-validated-run",
+      "requests": 367,
+      "reported_tokens": 403409,
+      "published_final_D": false
+    },
+    {
+      "run": "hybrid-release-run",
+      "requests": 367,
+      "reported_tokens": 403422,
+      "published_final_D": false
+    },
+    {
+      "run": "hybrid-reviewed-run",
+      "requests": 367,
+      "reported_tokens": 403573,
+      "published_final_D": true
+    }
+  ],
+  "note": "Final D report excludes development inference. Authored semantic smoke and LOCAL planner/semantic usage are additional and are not aggregated here."
+}

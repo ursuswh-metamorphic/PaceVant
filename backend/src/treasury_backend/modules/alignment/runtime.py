@@ -29,7 +29,9 @@ class ShieldRuntime:
         # Inspect the returned data, not a replay of our already-authorized call.
         # Preserve call arguments separately as an immutable operational audit event.
         self.shield.state.event(
-            self.session_id, "PIPELINE_DATA_OPERATION", int(self.shield.clock()),
+            self.session_id,
+            "PIPELINE_DATA_OPERATION",
+            int(self.shield.clock()),
             {"tool_name": name, "arguments": semantic_value(arguments)},
         )
         self.pending_outputs.append({"tool_name": name, "output": semantic_value(value)})
@@ -40,18 +42,24 @@ class ShieldRuntime:
         for record in pending:
             if group and len(json.dumps(group + [record], ensure_ascii=False)) > 14000:
                 self._data_group(group)
-                del self.pending_outputs[:len(group)]
+                del self.pending_outputs[: len(group)]
                 group = []
             group.append(record)
         if group:
             self._data_group(group)
-            del self.pending_outputs[:len(group)]
+            del self.pending_outputs[: len(group)]
 
     def _data_group(self, records):
         call_id = "data_batch_" + uuid4().hex
-        self.output("verified_execution_evidence", call_id,
-                    {"tool_name": "verified_execution_evidence", "arguments": {"source_tools": [r["tool_name"] for r in records]}},
-                    {"type": "UNTRUSTED_READ_ONLY_EVIDENCE_BATCH", "records": records})
+        self.output(
+            "verified_execution_evidence",
+            call_id,
+            {
+                "tool_name": "verified_execution_evidence",
+                "arguments": {"source_tools": [r["tool_name"] for r in records]},
+            },
+            {"type": "UNTRUSTED_READ_ONLY_EVIDENCE_BATCH", "records": records},
+        )
 
     def _require(self, report):
         self.attempt_checks.append(report.check_id)
@@ -119,7 +127,10 @@ class ShieldRuntime:
                 "feedback": report.feedback.model_dump(mode="json") if report.feedback else None,
             },
         )
-        if report.status == "UNAVAILABLE" or self.shield.config.mode in {"wallet_hardened", "wallet_pipeline"}:
+        if report.status in {"UNAVAILABLE", "UNCERTAIN"} or self.shield.config.mode in {
+            "wallet_hardened",
+            "wallet_pipeline",
+        }:
             self._require(report)
             return report
         if report.feedback:

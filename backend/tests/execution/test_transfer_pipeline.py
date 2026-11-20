@@ -244,8 +244,45 @@ def test_unauthorized_recipient(transfer_app):
         .json()
     )
     assert result["status"] in {"REJECTED", "ESCALATED"}
+    assert result["shield"]["algorithm"] == "hybrid-v1"
+    assert result["shield"]["status"] == "MISALIGNED"
+    assert any(c["constraint_type"] == "RECIPIENT" and c["status"] == "FAIL" for c in result["shield"]["constraints"])
     assert not result.get("signed") and not result.get("tx_hash")
     assert chain.usdc.functions.balanceOf(stranger).call() == 0
+
+
+@pytest.mark.parametrize("failure", ["UNCERTAIN", "INVALID_JSON", "FABRICATED_EVIDENCE"])
+def test_hybrid_semantic_failure_cannot_sign_or_execute(transfer_app, failure):
+    from treasury_backend.modules.alignment import prompts
+
+    client, chain, _, recipient, provider, _ = transfer_app
+    task = authorize(client, chain, recipient)
+    original = provider.complete
+
+    def fail(messages):
+        if messages[0]["content"] != prompts.HYBRID_SEMANTIC:
+            return original(messages)
+        if failure == "INVALID_JSON":
+            return Completion("not valid JSON")
+        data = json.loads(messages[1]["content"])
+        return Completion(json.dumps(dict(
+            task_id=data["bound_task_id"], action_ref=data["action_ref"],
+            verdict="UNCERTAIN" if failure == "UNCERTAIN" else "ALIGNED",
+            finding_type="UNRESOLVED" if failure == "UNCERTAIN" else "OBJECTIVE_ALIGNMENT",
+            evidence_refs=[next(iter(data["evidence_catalog"])),data["action_ref"]]
+                          + (["invented"] if failure == "FABRICATED_EVIDENCE" else []),
+            explanation="Scripted invalid semantic evidence for LOCAL security validation.",
+        )))
+
+    provider.complete = fail
+    nonce = chain.w3.eth.get_transaction_count(chain.deployment["relayer"])
+    result = client.post("/v1/transfers", json=dict(task_id=task.task_id if hasattr(task,"task_id") else task["task_id"],
+                         revision=1, request_id="semantic-failure", goal="Pay Alice 20 USDC.")).raise_for_status().json()
+    assert result["status"] == "ESCALATED"
+    assert result["shield"]["status"] == "UNCERTAIN"
+    assert not result.get("signed") and not result.get("approval") and not result.get("tx_hash")
+    assert chain.w3.eth.get_transaction_count(chain.deployment["relayer"]) == nonce
+    assert chain.usdc.functions.balanceOf(recipient).call() == 0
 
 
 def test_cumulative_budget(transfer_app):

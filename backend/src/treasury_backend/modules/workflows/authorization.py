@@ -98,7 +98,7 @@ class AuthorizationPipeline:
 
             if proof["proposal"] != safe_value(approved.proposal):
                 raise ControlError("TASK_SHIELD_PROPOSAL_MISMATCH")
-            self.shield.validate(proof["session_id"], proof["check_ids"], proof["revision"])
+            self.shield.validate(proof["session_id"], proof["check_ids"], proof["revision"], proposal=approved.proposal)
             from treasury_backend.modules.portfolio.observations import content_hash
 
             session = self.shield.state.session(proof["session_id"])

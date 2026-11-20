@@ -48,28 +48,39 @@ class TaskState:
             )
             conn.execute(
                 "INSERT INTO shield_events(session_id,kind,created_at,body) VALUES(?,?,?,?)",
-                (id_, "MANDATE_PROTOCOL_SCHEMA", now, pack({
-                    "mandate_hash": content_hash(mandate.model_dump()),
-                    "chain_id": mandate.chain_id,
-                    "vault": mandate.vault_address,
-                    "configured_adapter": mandate.router,
-                    "assets": [
-                        {"address": mandate.token_in, "symbol": "USDC", "decimals": 6},
-                        {"address": mandate.token_out, "symbol": "WAVAX", "decimals": 18},
-                    ],
-                    "authority": "Protocol metadata only; does not authorize additional actions",
-                })),
+                (
+                    id_,
+                    "MANDATE_PROTOCOL_SCHEMA",
+                    now,
+                    pack(
+                        {
+                            "mandate_hash": content_hash(mandate.model_dump()),
+                            "chain_id": mandate.chain_id,
+                            "vault": mandate.vault_address,
+                            "configured_adapter": mandate.router,
+                            "assets": [
+                                {"address": mandate.token_in, "symbol": "USDC", "decimals": 6},
+                                {"address": mandate.token_out, "symbol": "WAVAX", "decimals": 18},
+                            ],
+                            "authority": "Protocol metadata only; does not authorize additional actions",
+                        }
+                    ),
+                ),
             )
         return self.session(id_)
 
     def create_evaluation(self, id_, protocol_schema, now):
         """Create an isolated offline session. This grants no wallet mandate or signing scope."""
-        schema={**protocol_schema, "authority":"OFFLINE_BENCHMARK_INPUT_ONLY"}
+        schema = {**protocol_schema, "authority": "OFFLINE_BENCHMARK_INPUT_ONLY"}
         with self.store.connection(write=True) as conn:
-            conn.execute("INSERT INTO shield_sessions VALUES(?,?,?,?,0,?)",
-                         (id_,None,"OFFLINE_BENCHMARK",content_hash(schema),now))
-            conn.execute("INSERT INTO shield_events(session_id,kind,created_at,body) VALUES(?,?,?,?)",
-                         (id_,"MANDATE_PROTOCOL_SCHEMA",now,pack(schema)))
+            conn.execute(
+                "INSERT INTO shield_sessions VALUES(?,?,?,?,0,?)",
+                (id_, None, "OFFLINE_BENCHMARK", content_hash(schema), now),
+            )
+            conn.execute(
+                "INSERT INTO shield_events(session_id,kind,created_at,body) VALUES(?,?,?,?)",
+                (id_, "MANDATE_PROTOCOL_SCHEMA", now, pack(schema)),
+            )
         return self.session(id_)
 
     def protocol_schema(self, id_):
@@ -90,6 +101,132 @@ class TaskState:
                 (id_,),
             ).fetchall()
         return {**dict(row), "tasks": [json.loads(r[0]) for r in tasks]}
+
+    def active_intents(self, id_):
+        from treasury_backend.modules.alignment.hybrid_types import IntentEnvelope
+
+        session = self.session(id_)
+        active = {t["instruction_id"] for t in session["tasks"]}
+        with self.store.connection() as conn:
+            rows = conn.execute(
+                "SELECT body FROM shield_events WHERE session_id=? AND kind IN ('AUTHENTICATED_INTENT','AUTHENTICATED_TRANSFER_SCOPE','AUTHENTICATED_SWAP_SCOPE') ORDER BY seq DESC",
+                (id_,),
+            ).fetchall()
+        result, seen = [], set()
+        for row in rows:
+            intent = IntentEnvelope.model_validate_json(row[0])
+            ids = set(intent.task_ids)
+            if ids <= active and not ids & seen:
+                result.append(intent)
+                seen.update(ids)
+        return result
+
+    def swap_scope(self, id_, spec, selection, now):
+        """Intersect the existing authenticated ITAG scope; never replace user constraints."""
+        from treasury_backend.modules.alignment.hybrid_types import Constraint
+
+        schema = self.protocol_schema(id_)
+        if (
+            spec.status != "AUTHENTICATED"
+            or spec.authorization_source != "OPERATOR_API"
+            or spec.revision != selection.revision
+            or spec.spec_id != selection.spec_id
+            or spec.chain_id != schema["chain_id"]
+        ):
+            raise ControlError("TASK_SHIELD_INVALID_ITAG_SCOPE")
+        step = next((s for s in spec.terms.steps if s.step_id == selection.step_id), None)
+        if step is None:
+            raise ControlError("TASK_SHIELD_INVALID_ITAG_SCOPE")
+        intent = self.active_intents(id_)[0]
+        constraints = list(intent.constraints)
+        for kind, operator, value, unit in (
+            ("OPERATION", "EQ", "SWAP", ""),
+            ("TOKEN_IN", "EQ", spec.token_in, "ADDRESS"),
+            ("TOKEN_OUT", "EQ", spec.token_out, "ADDRESS"),
+            ("CHAIN", "EQ", spec.chain_id, "CHAIN_ID"),
+            ("ROUTER", "EQ", spec.router, "ADDRESS"),
+            ("RECIPIENT", "EQ", spec.vault_address, "ADDRESS"),
+            ("AMOUNT_BASE_UNITS", "LE", step.max_amount, "BASE_UNITS"),
+            ("MIN_AMOUNT_BASE_UNITS", "GE", step.min_amount, "BASE_UNITS"),
+            ("DEADLINE", "LE", spec.terms.deadline, "UNIX_SECONDS"),
+        ):
+            constraints.append(
+                Constraint(
+                    constraint_id=f"{spec.spec_id}:{spec.revision}:{selection.step_id}:{kind}",
+                    kind=kind,
+                    operator=operator,
+                    value=str(value),
+                    unit=unit,
+                    source_message_id=intent.source_message_id,
+                    task_id=intent.task_id,
+                    revision=intent.revision,
+                    source_span=f"Authenticated IntentSpec {spec.spec_id}:{spec.revision} step {selection.step_id}: {kind}",
+                    extraction_method="AUTHENTICATED_ITAG_SCOPE",
+                )
+            )
+        unresolved = list(intent.unresolved)
+        if spec.terms.objective == intent.original_text:
+            unresolved = [
+                u
+                for u in unresolved
+                if u not in {"MISSING_EXPLICIT_ASSET_OR_AMOUNT", "UNRESOLVED_OPERATION"}
+            ]
+            constraints = [
+                c for c in constraints if c.kind != "OPERATION" or c.value != "UNRESOLVED"
+            ]
+        intent = intent.model_copy(
+            update={
+                "operation": "SWAP",
+                "constraints": constraints,
+                "unresolved": unresolved,
+                "authorization_ref": content_hash(spec.model_dump(mode="json")),
+            }
+        )
+        self.event(id_, "AUTHENTICATED_SWAP_SCOPE", now, intent)
+
+    def transfer_scope(self, id_, task):
+        """Internal adapter for the existing operator-authenticated TransferTask.
+
+        Called only after TransferService loads/revalidates its persisted task. No HTTP
+        intent update, assistant/tool message or candidate can call this authorization adapter.
+        """
+        from treasury_backend.modules.alignment.hybrid_types import Constraint
+
+        intent = self.active_intents(id_)[0]
+        constraints = [
+            Constraint(
+                constraint_id=f"{task.task_id}:{task.revision}:{kind}",
+                kind=kind,
+                operator=operator,
+                value=str(value),
+                unit=unit,
+                source_message_id=intent.source_message_id,
+                task_id=intent.task_id,
+                revision=intent.revision,
+                source_span=f"Operator-authenticated TransferTask {task.task_id} revision {task.revision}: {kind}",
+            )
+            for kind, operator, value, unit in (
+                ("OPERATION", "EQ", "TRANSFER", ""),
+                ("TOKEN_IN", "EQ", task.token, "ADDRESS"),
+                ("RECIPIENT", "EQ", task.recipient, "ADDRESS"),
+                ("CHAIN", "EQ", task.chain_id, "CHAIN_ID"),
+                ("AMOUNT_BASE_UNITS", "LE", task.per_transfer, "BASE_UNITS"),
+                ("DEADLINE", "LE", task.deadline, "UNIX_SECONDS"),
+                ("TASK_ID", "EQ", task.task_id, "ID"),
+                ("TASK_REVISION", "EQ", task.revision, "REVISION"),
+            )
+        ]
+        intent = intent.model_copy(
+            update={
+                "operation": "TRANSFER",
+                "unresolved": [],
+                "constraints": constraints,
+                "authorization_ref": content_hash(task.model_dump(mode="json")),
+            }
+        )
+        self.event(
+            id_, "AUTHENTICATED_TRANSFER_SCOPE", int(self.session(id_)["created_at"]), intent
+        )
 
     def for_workflow(self, workflow_id):
         with self.store.connection() as conn:
@@ -184,6 +321,26 @@ class TaskState:
                 "INSERT INTO shield_messages VALUES(?,?,?,?,?,?)",
                 (id_, message.message_id, expected_revision + 1, "USER", operation, pack(body)),
             )
+            if operation != "CANCEL":
+                from treasury_backend.modules.alignment.hybrid import extract_constraints
+
+                # Resolve canonical IDs after exact task-text deduplication.
+                canonical = []
+                for instruction in instructions:
+                    row = conn.execute(
+                        "SELECT body FROM shield_tasks WHERE session_id=? AND text=?",
+                        (id_, instruction.text),
+                    ).fetchone()
+                    canonical.append(
+                        instruction.model_copy(
+                            update={"instruction_id": json.loads(row[0])["instruction_id"]}
+                        )
+                    )
+                envelope = extract_constraints(message.content, canonical, expected_revision + 1)
+                conn.execute(
+                    "INSERT INTO shield_events(session_id,kind,created_at,body) VALUES(?,?,?,?)",
+                    (id_, "AUTHENTICATED_INTENT", now, pack(envelope)),
+                )
             conn.execute(
                 "INSERT INTO shield_context(session_id,body) VALUES(?,?)",
                 (
