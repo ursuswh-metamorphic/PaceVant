@@ -160,6 +160,7 @@ class HybridTemporalAssessment(Wire):
 
 class ExplainableTemporalAssessment(Wire):
     assessment: HybridTemporalAssessment
+    recorded_facts: dict = Field(default_factory=dict)
     decision_summary: str
     semantic_deviation: str
     temporal_violations: list[Violation]

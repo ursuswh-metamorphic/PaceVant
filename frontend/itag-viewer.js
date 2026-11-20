@@ -5,7 +5,8 @@ const details = document.querySelector("#details");
 
 async function read(path) {
   const response = await fetch(path, {
-    headers: {Authorization: "Bearer " + form.elements.token.value},
+    headers: {Authorization: "Bearer " + document.querySelector("#token").value},
+    redirect: "error",
   });
   if (!response.ok) throw new Error("Request failed (HTTP " + response.status + ")");
   return response.json();
@@ -23,7 +24,8 @@ form.addEventListener("submit", async event => {
     const edges = data.graph.edges;
     status.textContent = data.explanation.decision_summary;
     details.textContent = JSON.stringify({
-      semantic: data.explanation.assessment.semantic,
+      recorded_pre_sign_facts: data.explanation.recorded_facts,
+      model_inference: data.explanation.assessment.semantic,
       temporal: data.explanation.temporal_violations,
       recovery: data.explanation.recovery,
       decision: data.decision,

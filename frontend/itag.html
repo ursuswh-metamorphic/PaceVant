@@ -10,9 +10,9 @@
 <body>
   <main>
     <h1>Intent graph</h1>
-    <form>
+    <form method="post">
       <label>Assessment hash <input name="assessment" required pattern="0x[0-9a-f]{64}"></label>
-      <label>Operator token <input name="token" type="password" required autocomplete="off"></label>
+      <label>Operator token <input id="token" type="password" required autocomplete="off"></label>
       <button>Load assessment</button>
     </form>
     <p id="status" role="status"></p>
