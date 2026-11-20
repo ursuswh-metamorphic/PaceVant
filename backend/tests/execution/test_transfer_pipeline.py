@@ -253,7 +253,11 @@ def test_cumulative_budget(transfer_app):
     task = authorize(client, chain, recipient, budget=50, one_shot=False)
     provider.mutations = {"amount_base_units": "30000000"}
     request = dict(
-        task_id=task["task_id"], revision=1, request_id="first-30", goal="Pay Alice 30 USDC."
+        task_id=task["task_id"],
+        revision=1,
+        request_id="first-30",
+        amount_base_units="30000000",
+        goal="Pay Alice 30 USDC.",
     )
     first = client.post("/v1/transfers", json=request).raise_for_status().json()
     assert first["status"] == "CONFIRMED", first
@@ -344,6 +348,7 @@ def test_onchain_transfer_guards(transfer_app, mutation):
                 task_id=task["task_id"],
                 revision=1,
                 request_id="guard-base",
+                amount_base_units="20000000",
                 goal="Pay Alice 20 USDC.",
             ),
         )
@@ -381,3 +386,26 @@ def test_onchain_transfer_guards(transfer_app, mutation):
         )
     assert not chain.vault.functions.usedNonce(a["nonce"]).call()
     assert chain.usdc.functions.balanceOf(recipient).call() == balance
+
+
+def test_request_amount_cannot_be_expanded_within_task_budget(transfer_app):
+    client, chain, _, recipient, provider, _ = transfer_app
+    task = authorize(client, chain, recipient, budget=50, one_shot=False)
+    provider.mutations = {"amount_base_units": "30000000"}
+    result = (
+        client.post(
+            "/v1/transfers",
+            json=dict(
+                task_id=task["task_id"],
+                revision=1,
+                request_id="amount-manipulation",
+                amount_base_units="20000000",
+                goal="Pay Alice 20 USDC.",
+            ),
+        )
+        .raise_for_status()
+        .json()
+    )
+    assert result["status"] == "REJECTED"
+    assert "TRANSFER_REQUEST_AMOUNT_MISMATCH" in result["temporal"]["reason_codes"]
+    assert not result.get("signed") and chain.usdc.functions.balanceOf(recipient).call() == 0

@@ -244,6 +244,8 @@ class TransferService:
                         {
                             "task": task.model_dump(mode="json"),
                             "goal": request.goal,
+                            "authorized_amount_base_units": request.amount_base_units
+                            or (task.total_budget if task.one_shot else None),
                             "intent_id": "payment_" + uuid4().hex,
                             "deadline": deadline,
                             "schema": TransferProposal.model_json_schema(),
@@ -266,6 +268,11 @@ class TransferService:
         spent = sum(int(r["amount"]) for r in history if r["status"] == "CONFIRMED")
         count = sum(r["status"] == "CONFIRMED" for r in history)
         reasons = check_scope(task, proposal, now, spent, count)
+        requested_amount = request.amount_base_units
+        if requested_amount is None and task.one_shot:
+            requested_amount = task.total_budget
+        if requested_amount is None or proposal.amount_base_units != requested_amount:
+            reasons.append("TRANSFER_REQUEST_AMOUNT_MISMATCH")
         rule = token = None
         try:
             rule, token = self.rule(chain, proposal.token, proposal.recipient, now)

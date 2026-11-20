@@ -72,6 +72,7 @@ class TransferRequest(Wire):
     revision: int = Field(ge=1)
     request_id: str = Field(min_length=1, max_length=128)
     goal: str = Field(min_length=1, max_length=1200)
+    amount_base_units: UInt | None = None
 
 
 def transfer_message(chain_id, vault, approval):
