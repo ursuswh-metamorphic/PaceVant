@@ -1,0 +1,39 @@
+{
+ "python": {
+  "passed": 531,
+  "failure": 0,
+  "error": 0,
+  "skipped": 5
+ },
+ "skips": [
+  {
+   "name": "test_real_fuji_lfj_token_observation_without_wallet_or_keys",
+   "reason": "opt-in public Fuji reads"
+  },
+  {
+   "name": "test_circle_chainlink_pipeline_confirms_on_isolated_fuji_fork",
+   "reason": "Opt-in public Fuji reads; all writes on Anvil"
+  },
+  {
+   "name": "test_v2_simulator_executes_verified_lfj_route_on_fuji_fork",
+   "reason": "Opt-in public Fuji reads"
+  },
+  {
+   "name": "test_real_model_local_transfer",
+   "reason": "Opt-in real model API; writes remain LOCAL Anvil"
+  },
+  {
+   "name": "test_measured_matched_ablation",
+   "reason": "opt-in quantitative local ablation"
+  }
+ ],
+ "curation_and_task_shield_focused_passed": 70,
+ "final_integrity_tests_passed": 8,
+ "notes": "Counts overlap. Final integrity rerun followed audit metadata additions; frozen benchmark inputs and labels were unchanged. A focused metric rerun verifies undefined F1 is null for empty/no-positive groups.",
+ "solidity_passed": 60,
+ "ruff": "PASS",
+ "secret_scan": "PASS",
+ "eip712_v1_v2": "PASS",
+ "frontend_syntax_files": 12,
+ "standalone_itag_viewer_syntax": "PASS"
+}

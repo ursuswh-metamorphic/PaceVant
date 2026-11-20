@@ -1,0 +1,1185 @@
+{
+ "profiles": {
+  "compound_samples_20251112_085506.json": {
+   "rows": 7000,
+   "unique_ids": 7000,
+   "duplicate_ids": 0,
+   "unique_source_transaction_hashes": 1630,
+   "failure_node_shapes": {
+    "NoneType": 1710,
+    "dict": 5290
+   }
+  },
+  "cow_samples_20251110_171339.json": {
+   "rows": 7000,
+   "unique_ids": 7000,
+   "duplicate_ids": 0,
+   "unique_source_transaction_hashes": 1006,
+   "failure_node_shapes": {
+    "NoneType": 1710,
+    "dict": 5290
+   }
+  },
+  "eg_uniswap_samples.json": {
+   "rows": 6000,
+   "unique_ids": 6000,
+   "duplicate_ids": 0,
+   "unique_source_transaction_hashes": 1461,
+   "failure_node_shapes": {
+    "NoneType": 1461,
+    "str": 3572,
+    "list": 967
+   }
+  }
+ },
+ "source_PASS_token_mismatch_flags": [
+  {
+   "source_id": "uniswap_20251102_154231_99b35e79_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_154350_65b56879_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_154739_e6868f06_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_154821_46dca7b8_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_154846_0a64bfc6_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_154911_1d9a1fa0_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_154949_4ab207db_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155025_aed8d070_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155227_5d349ee9_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155303_6d36de05_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155326_f37920a8_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155333_9f1ab651_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155418_e9814977_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155518_d4feca71_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155652_67560e36_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155707_a592efc1_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155713_1793e7e0_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155745_13314a1b_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155820_8fce4bff_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155828_c09f74ef_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155837_6be48b63_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155917_700c971e_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_155935_55eb88fd_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160001_95caef47_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160019_f204a1fa_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160057_dc7c1a03_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160251_5d4157e9_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160321_845e9c1b_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160351_ca99a41b_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160356_3d08516f_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160626_bffe03eb_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160716_628b4953_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160729_547bd1be_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160734_49b159be_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160802_88eb4c44_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160825_30d0fe67_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_160956_655a5524_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_161029_64c6db38_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_161239_81c91c72_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_161448_c5146229_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_161750_d3095ed8_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_161835_5fd97921_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_161934_7c68a3a2_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_161945_ddcebd43_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162004_31bed8e0_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162037_f9418bbe_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162054_5c808b28_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162102_d52d516d_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162136_02853aad_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162237_65459fc3_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162351_251b8304_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162409_15f61f94_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162456_3bfc43ae_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162630_d78ac732_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162634_6d6d72d6_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162654_a3af0c43_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162751_0c3bcb2e_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162835_4f59bb4f_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_162938_f4f1a8f5_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163005_5b55946d_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163141_098dd5a3_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163237_2f339950_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163310_87f6feff_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163354_0e1ba12c_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163416_ed2b9762_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163502_8fddb90c_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163635_e8baf39d_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163638_e9cc9b2b_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163737_579e8f40_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163835_b451a433_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163845_f7a8734f_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_163918_429487a1_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164218_58bc729a_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164226_a863f962_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164239_cc27b4ff_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164243_89b00594_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164311_d18f1a5a_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164433_8a6c2393_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164501_6c4d8331_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164520_bead8abc_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164538_b42bb2a2_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_164833_7abb8528_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165006_8593a5c5_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165239_4c822360_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165252_a3f8a7e7_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165334_c1907219_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165349_05fce333_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165502_56a7e5b7_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165519_875f6717_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165533_0b2e46fb_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165558_6feb0d57_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165645_929d17db_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165651_328179cd_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165718_66432340_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165729_e4cbd4cb_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165759_9674ae5c_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165811_f3cc431f_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165821_c8f86995_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165902_f397502b_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_165927_ca4837ff_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170041_5bf2fb27_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170101_18c57e7b_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170127_319fcdbb_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170141_0f816c06_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170327_7cc152d1_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170359_050007bd_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170444_83fa7145_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170613_a303725a_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170634_056f80f4_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170738_5819930e_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_170934_c8ca3e51_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171006_319dd5e2_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171028_234ae4dd_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171045_9b32726d_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171115_c42ff134_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171235_d7714aed_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171319_10953035_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171424_9c7b6de1_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171440_b8bc666e_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171454_f43dcd76_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171500_b268a296_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171518_c1bb9d97_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171540_967bfdf0_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171641_549e1a21_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171718_ff1e05a5_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171736_f041fd8e_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171912_5280d8f3_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_171949_d823d4a0_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172008_840de0c6_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172039_b847f9eb_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172107_2d384108_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172156_df7aa6b5_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172204_cc5a13d6_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172408_d6bcadaf_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172414_55f29a28_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172436_863a2bdd_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172441_7f3b613e_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172549_41125971_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172917_335d3ff7_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172940_a1881db3_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_172945_0097ce7a_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_173011_0e8857d6_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_173118_bef40ff9_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_173126_de937481_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_173416_10370f9f_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_173436_c8d4ba17_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_173440_c4a57027_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_173859_bff950bb_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174002_683563ca_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174042_a8916ade_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174058_a8ee2a25_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174124_d56a9020_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174128_b704792a_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174212_11fb87dc_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174227_82b25ce2_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174335_03f91fc2_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174406_cd6613ee_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174426_9cb5cde4_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174511_e55662b5_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174523_58a2beef_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174528_2573b439_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174711_2d21d9dc_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174746_281d686d_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174754_2fa3957f_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_174809_24f6f7d8_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175052_64a18910_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175121_0aadd9f3_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175403_a58c0d6d_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175517_3ab6d249_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175551_c97c8f72_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175557_2471e465_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175640_e3daf56f_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175644_78b5eab9_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175647_3fdede35_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175802_cb1470c6_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175836_0b57733c_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_175941_4c471efb_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180056_cd242091_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180226_fb091df9_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180252_d875adba_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180330_3ab2c839_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180356_f5c54d5d_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180537_22ed8ad7_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180545_c7b51134_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180551_3169355c_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180624_328a6f5a_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180758_fb2aff0a_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180814_13f60f06_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_180848_aa6503df_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_181102_1d3db3b6_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  },
+  {
+   "source_id": "uniswap_20251102_181108_da5b149f_aligned",
+   "source_label": "PASS",
+   "issue": "Explicit intent token identities differ from proposed declared token identities",
+   "review": "AUTOMATIC_FLAG_NOT_INDEPENDENT_HUMAN"
+  }
+ ],
+ "flag_count": 191,
+ "filter": "Only intents fully parsed by the conservative curation grammar; this is not an exhaustive count of every source label anomaly."
+}

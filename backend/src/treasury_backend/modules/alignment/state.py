@@ -62,6 +62,16 @@ class TaskState:
             )
         return self.session(id_)
 
+    def create_evaluation(self, id_, protocol_schema, now):
+        """Create an isolated offline session. This grants no wallet mandate or signing scope."""
+        schema={**protocol_schema, "authority":"OFFLINE_BENCHMARK_INPUT_ONLY"}
+        with self.store.connection(write=True) as conn:
+            conn.execute("INSERT INTO shield_sessions VALUES(?,?,?,?,0,?)",
+                         (id_,None,"OFFLINE_BENCHMARK",content_hash(schema),now))
+            conn.execute("INSERT INTO shield_events(session_id,kind,created_at,body) VALUES(?,?,?,?)",
+                         (id_,"MANDATE_PROTOCOL_SCHEMA",now,pack(schema)))
+        return self.session(id_)
+
     def protocol_schema(self, id_):
         with self.store.connection() as conn:
             row = conn.execute(
