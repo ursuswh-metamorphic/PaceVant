@@ -1,0 +1,6 @@
+
+> ai-treasury-security@1.1.0 test:integration
+> node backend/tests/integration/eip712-golden.mjs && node backend/tests/integration/eip712-v2-golden.mjs
+
+PASS Python ↔ TypeScript EIP-712 digest, signer, calldata hash and canonical manifest hash
+PASS V2 Python ↔ viem Phi ABI, EIP-712 digest, signer and version isolation

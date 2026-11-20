@@ -44,6 +44,8 @@ def main():
     for key in "ABCD":
         m=matrices[key]["full"]
         lines.append(f"| {key} | {m['tp']} | {m['tn']} | {m['fp']} | {m['fn']} | {m['abstained_accept']} | {m['abstained_reject']} | {percent(m['coverage'])} | {m['fp']+m['abstained_accept']}/68 = {percent((m['fp']+m['abstained_accept'])/68)} |")
+    m = matrices["D"]["full"]
+    lines += ["", f"Final D uncertain/unavailable rate: {m['abstained_accept']+m['abstained_reject']}/300 = {percent((m['abstained_accept']+m['abstained_reject'])/300)}. Raw report status counts are preserved in ABLATIONS.json, separate from the evaluation runner's generic UNAVAILABLE prediction mapping."]
     lines += ["", "| Experiment | p50 / p95 ms per case | Recorded calls | New calls | Reported tokens (historical for A) |",
               "|---|---:|---:|---:|---:|"]
     for key in "ABCD":

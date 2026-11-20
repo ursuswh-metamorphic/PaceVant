@@ -1,0 +1,102 @@
+{
+  "full_isolated_python": {
+    "tests": 573,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "passed": 568,
+    "skip_reasons": [
+      {
+        "case": "test_real_fuji_lfj_token_observation_without_wallet_or_keys",
+        "reason": "opt-in public Fuji reads"
+      },
+      {
+        "case": "test_circle_chainlink_pipeline_confirms_on_isolated_fuji_fork",
+        "reason": "Opt-in public Fuji reads; all writes on Anvil"
+      },
+      {
+        "case": "test_v2_simulator_executes_verified_lfj_route_on_fuji_fork",
+        "reason": "Opt-in public Fuji reads"
+      },
+      {
+        "case": "test_real_model_local_transfer",
+        "reason": "Opt-in real model API; writes remain LOCAL Anvil"
+      },
+      {
+        "case": "test_measured_matched_ablation",
+        "reason": "opt-in quantitative local ablation"
+      }
+    ]
+  },
+  "focused_after_final_guards": {
+    "tests": 131,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 131,
+    "skip_reasons": []
+  },
+  "artifact_and_frozen_integrity": {
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 12,
+    "skip_reasons": []
+  },
+  "local_swap_and_transfer": {
+    "tests": 24,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 23,
+    "skip_reasons": [
+      {
+        "case": "test_real_model_local_transfer",
+        "reason": "Opt-in real model API; writes remain LOCAL Anvil"
+      }
+    ]
+  },
+  "solidity": {
+    "passed": 60,
+    "failed": 0,
+    "skipped": 0,
+    "version": "1.7.1"
+  },
+  "real_model_local_transfer": {
+    "passed": 1,
+    "scope": "LOCAL Anvil only"
+  },
+  "ruff": "PASS",
+  "secret_scan": "PASS",
+  "frontend_syntax": {
+    "passed_files": 12
+  },
+  "eip712_v1_v2": "PASS",
+  "source_commit": "e656e65",
+  "notes": [
+    "Counts overlap; do not sum them.",
+    "The full isolated run preceded the final negation/read-only-binding guards and final artifact tests. Focused 131 tests, LOCAL 23 tests, real-model LOCAL transfer and artifact tests were rerun on the final code.",
+    "The first isolated harness run failed on missing .env.example/native fallback and an outdated fixture schema; final harness and fixture reruns pass.",
+    "No public-chain writes. Five public/real-model/quantitative tests remain opt-in in the isolated suite. Real-model transfer was run separately with LOCAL writes."
+  ],
+  "commands": {
+    "python-isolated": "python tools/quality/validate_hybrid_isolated.py --output .tools/hybrid-validation-final",
+    "focused": "python -m pytest backend/tests/architecture backend/tests/control/test_task_shield.py backend/tests/control/test_hybrid_task_alignment.py backend/tests/control/test_itag.py -q --tb=short --junitxml=.tools/hybrid-focused-final.xml",
+    "local": "python -m pytest backend/tests/execution/test_itag_unified.py backend/tests/execution/test_transfer_pipeline.py -q --tb=short --junitxml=.tools/hybrid-local-final.xml",
+    "real-local": "PACEVANT_TRANSFER_LIVE=1 python -m pytest backend/tests/execution/test_transfer_pipeline.py::test_real_model_local_transfer -q --basetemp=.tools/hybrid-real-reviewed",
+    "integrity": "python -m pytest backend/tests/control/test_hybrid_evaluation_evidence.py backend/tests/control/test_curated_benchmark.py -q --junitxml=.tools/hybrid-evidence-final.xml",
+    "ruff": "python -m ruff check backend/src backend/tests tools",
+    "secrets": "python tools/quality/scan_secrets.py (Git safe.directory configured for this checkout)",
+    "wire": "npm run test:integration",
+    "frontend": "node tools/quality/check_frontend.mjs"
+  },
+  "output_files": [
+    "verification/python-isolated.txt",
+    "verification/solidity.txt",
+    "verification/focused.txt",
+    "verification/local.txt",
+    "verification/real-local.txt",
+    "verification/wire.txt"
+  ]
+}

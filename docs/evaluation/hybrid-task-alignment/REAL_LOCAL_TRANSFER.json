@@ -1,0 +1,457 @@
+{
+ "request_id": "real-model-payment",
+ "status": "CONFIRMED",
+ "task": {
+  "task_id": "invoice-123",
+  "revision": 1,
+  "chain_id": 31337,
+  "vault_address": "0x91AEcdc5142d824B26208dAB04d47b5150246d3B",
+  "token": "0x516B66e68f17164e7Bf5fD6ED83c03788a7274b1",
+  "recipient": "0x0EE3424DB30089AB8e24F111977f3CA6E586BDb9",
+  "objective": "Pay Alice for invoice 123 using treasury USDC.",
+  "total_budget": "20000000",
+  "per_transfer": "20000000",
+  "deadline": 1795207158,
+  "one_shot": true
+ },
+ "source": "LOCAL_ANVIL",
+ "broadcast": true,
+ "proposal": {
+  "action": "TRANSFER_ERC20",
+  "intent_id": "payment_143e3f23e17b469fae7edcecadf97819",
+  "task_id": "invoice-123",
+  "revision": 1,
+  "chain_id": 31337,
+  "vault_address": "0x91AEcdc5142d824B26208dAB04d47b5150246d3B",
+  "token": "0x516B66e68f17164e7Bf5fD6ED83c03788a7274b1",
+  "recipient": "0x0EE3424DB30089AB8e24F111977f3CA6E586BDb9",
+  "amount_base_units": "20000000",
+  "deadline": 1795206678,
+  "user_goal_reason": "Pay Alice exactly 20 USDC for invoice 123."
+ },
+ "temporal": {
+  "spent": "0",
+  "remaining": "20000000",
+  "verdict": "PASS",
+  "reason_codes": []
+ },
+ "shield": {
+  "provider_trace": [
+   {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "endpoint": "https://api.deepseek.com",
+    "status": "SUCCESS",
+    "latency_ms": 1405
+   }
+  ],
+  "check_id": "shield_1eaecf19d308497cbefb4ccff2f1f93f",
+  "session_id": "transfer_e061f7cae189437e9e5fc957fa8f3801",
+  "revision": 1,
+  "source": "ASSISTANT",
+  "kind": "TOOL_CALL",
+  "candidate_hash": "0xbdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+  "config_hash": "0x6d755888dc10f414f3707a0a445a46e9cd416d64057341c9f112c9cc63b69c85",
+  "status": "ALIGNED",
+  "algorithm": "hybrid-v1",
+  "binding": {
+   "task_id": "instruction_c1cd869807a14e11ac658fc4a6556cc6",
+   "source_message_id": "user_transfer_e061f7cae189437e9e5fc957fa8f3801",
+   "revision": 1,
+   "action_ref": "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+   "verdict": "VALID",
+   "evidence_refs": [
+    "user_transfer_e061f7cae189437e9e5fc957fa8f3801",
+    "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6"
+   ],
+   "explanation": "Unique active authenticated message scope; all its constraints retained.",
+   "authorization_ref": "0xdca00edbbc4ddf5d0864ce3a3f74479d36475c33a2d5e24397ffb5402aa45df6"
+  },
+  "constraints": [
+   {
+    "constraint_id": "invoice-123:1:OPERATION",
+    "constraint_type": "OPERATION",
+    "boundary": "USER_INTENT",
+    "expected": "EQ TRANSFER",
+    "observed": "TRANSFER",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "OPERATION: PASS; source span: Operator-authenticated TransferTask invoice-123 revision 1: OPERATION"
+   },
+   {
+    "constraint_id": "invoice-123:1:TOKEN_IN",
+    "constraint_type": "TOKEN_IN",
+    "boundary": "USER_INTENT",
+    "expected": "EQ 0x516B66e68f17164e7Bf5fD6ED83c03788a7274b1 ADDRESS",
+    "observed": "0x516b66e68f17164e7bf5fd6ed83c03788a7274b1",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "TOKEN_IN: PASS; source span: Operator-authenticated TransferTask invoice-123 revision 1: TOKEN_IN"
+   },
+   {
+    "constraint_id": "invoice-123:1:RECIPIENT",
+    "constraint_type": "RECIPIENT",
+    "boundary": "USER_INTENT",
+    "expected": "EQ 0x0EE3424DB30089AB8e24F111977f3CA6E586BDb9 ADDRESS",
+    "observed": "0x0ee3424db30089ab8e24f111977f3ca6e586bdb9",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "RECIPIENT: PASS; source span: Operator-authenticated TransferTask invoice-123 revision 1: RECIPIENT"
+   },
+   {
+    "constraint_id": "invoice-123:1:CHAIN",
+    "constraint_type": "CHAIN",
+    "boundary": "USER_INTENT",
+    "expected": "EQ 31337 CHAIN_ID",
+    "observed": "31337",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "CHAIN: PASS; source span: Operator-authenticated TransferTask invoice-123 revision 1: CHAIN"
+   },
+   {
+    "constraint_id": "invoice-123:1:AMOUNT_BASE_UNITS",
+    "constraint_type": "AMOUNT_BASE_UNITS",
+    "boundary": "USER_INTENT",
+    "expected": "LE 20000000 BASE_UNITS",
+    "observed": "20000000",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "AMOUNT_BASE_UNITS: PASS; source span: Operator-authenticated TransferTask invoice-123 revision 1: AMOUNT_BASE_UNITS"
+   },
+   {
+    "constraint_id": "invoice-123:1:DEADLINE",
+    "constraint_type": "DEADLINE",
+    "boundary": "USER_INTENT",
+    "expected": "LE 1795207158 UNIX_SECONDS",
+    "observed": "1795206678",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "DEADLINE: PASS; source span: Operator-authenticated TransferTask invoice-123 revision 1: DEADLINE"
+   },
+   {
+    "constraint_id": "invoice-123:1:TASK_ID",
+    "constraint_type": "TASK_ID",
+    "boundary": "USER_INTENT",
+    "expected": "EQ invoice-123 ID",
+    "observed": "invoice-123",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "TASK_ID: PASS; source span: Operator-authenticated TransferTask invoice-123 revision 1: TASK_ID"
+   },
+   {
+    "constraint_id": "invoice-123:1:TASK_REVISION",
+    "constraint_type": "TASK_REVISION",
+    "boundary": "USER_INTENT",
+    "expected": "EQ 1 REVISION",
+    "observed": "1",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "TASK_REVISION: PASS; source span: Operator-authenticated TransferTask invoice-123 revision 1: TASK_REVISION"
+   },
+   {
+    "constraint_id": "technical",
+    "constraint_type": "ABI",
+    "boundary": "TECHNICAL",
+    "expected": "EQ VALID",
+    "observed": "1795206678",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "ABI: PASS; source span: Canonical transaction fields"
+   },
+   {
+    "constraint_id": "metadata",
+    "constraint_type": "SCOPE",
+    "boundary": "METADATA",
+    "expected": "EQ VALID",
+    "observed": "31337",
+    "status": "PASS",
+    "violation_code": "CONSTRAINT_SATISFIED",
+    "evidence_refs": [
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "explanation": "SCOPE: PASS; source span: Canonical transaction fields"
+   }
+  ],
+  "semantic_findings": [
+   {
+    "task_id": "instruction_c1cd869807a14e11ac658fc4a6556cc6",
+    "action_ref": "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6",
+    "finding_type": "OBJECTIVE_ALIGNMENT",
+    "verdict": "ALIGNED",
+    "evidence_refs": [
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801",
+     "action_bdc06a82591a569f8927b9eebba983e7532cde58a5d092e3c013f867394181c6"
+    ],
+    "explanation": "The authenticated objective is to pay Alice for invoice 123 using treasury USDC. The proposed action is a treasury-vault ERC20 transfer whose recipient is Alice, task_id is invoice-123, token is USDC, and amount is 20 USDC, with all deterministic constraints passing. The candidate's user_goal_reason ('Pay Alice exactly 20 USDC for invoice 123') is consistent with, not a substitution for, the authenticated objective."
+   }
+  ],
+  "action_input_hash": "0x70958fea7f293235080225b9dc551e0625c8faf786bcb720febc98bb8172ac9e",
+  "results": [],
+  "feedback": null,
+  "llm_calls": 1,
+  "latency_ms": 1405,
+  "token_usage": {
+   "prompt_tokens": 3241,
+   "completion_tokens": 248,
+   "total_tokens": 3489
+  },
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION",
+  "source_message_id": "candidate_transfer_e061f7cae189437e9e5fc957fa8f3801",
+  "tool_call_id": null,
+  "tool_name": "transfer_erc20",
+  "prompt_version": "task-shield-hybrid-v1"
+ },
+ "graph": {
+  "schema_version": "1.0",
+  "nodes": [
+   {
+    "node_id": "instruction_c1cd869807a14e11ac658fc4a6556cc6",
+    "kind": "AUTHENTICATED_USER_INTENT",
+    "trust": "MODEL_JUDGMENT",
+    "evidence_refs": [
+     "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+    ],
+    "data": {
+     "extracted_at": 1795206560,
+     "instruction_id": "instruction_c1cd869807a14e11ac658fc4a6556cc6",
+     "parent_task_id": null,
+     "source": "USER",
+     "source_message_id": "user_transfer_e061f7cae189437e9e5fc957fa8f3801",
+     "text": "Pay Alice for invoice 123 using treasury USDC.",
+     "tool_call_id": null,
+     "tool_name": null
+    }
+   },
+   {
+    "node_id": "invoice-123:1",
+    "kind": "AUTHENTICATED_USER_INTENT",
+    "trust": "AUTHENTICATED",
+    "evidence_refs": [
+     "0xdca00edbbc4ddf5d0864ce3a3f74479d36475c33a2d5e24397ffb5402aa45df6"
+    ],
+    "data": {
+     "authorization_source": "OPERATOR_API",
+     "status": "AUTHENTICATED",
+     "revision": 1,
+     "terms": {
+      "objective": "Pay Alice for invoice 123 using treasury USDC.",
+      "total_budget": "20000000",
+      "recipient": "0x0EE3424DB30089AB8e24F111977f3CA6E586BDb9",
+      "token": "0x516B66e68f17164e7Bf5fD6ED83c03788a7274b1"
+     }
+    }
+   },
+   {
+    "node_id": "payment_143e3f23e17b469fae7edcecadf97819",
+    "kind": "AGENT_ACTION",
+    "trust": "UNVERIFIED",
+    "evidence_refs": [
+     "payment_143e3f23e17b469fae7edcecadf97819"
+    ],
+    "data": {
+     "proposal": {
+      "action": "TRANSFER_ERC20",
+      "intent_id": "payment_143e3f23e17b469fae7edcecadf97819",
+      "task_id": "invoice-123",
+      "revision": 1,
+      "chain_id": 31337,
+      "vault_address": "0x91AEcdc5142d824B26208dAB04d47b5150246d3B",
+      "token": "0x516B66e68f17164e7Bf5fD6ED83c03788a7274b1",
+      "recipient": "0x0EE3424DB30089AB8e24F111977f3CA6E586BDb9",
+      "amount_base_units": "20000000",
+      "deadline": 1795206678,
+      "user_goal_reason": "Pay Alice exactly 20 USDC for invoice 123."
+     }
+    }
+   }
+  ],
+  "edges": [
+   {
+    "edge_id": "0xca6c2a2c925ec93ad67e94e3af9f9c0958c03f9f2ac9b40d16c60dca84477d5e",
+    "source": "invoice-123:1",
+    "target": "payment_143e3f23e17b469fae7edcecadf97819",
+    "kind": "DEPENDS_ON",
+    "provenance": "SYSTEM_RECORD",
+    "evidence_refs": [
+     "invoice-123:1"
+    ]
+   }
+  ]
+ },
+ "semantic": {
+  "verdict": "ALIGNED",
+  "finding": {
+   "candidate_action_id": "payment_143e3f23e17b469fae7edcecadf97819",
+   "referenced_task_ids": [
+    "instruction_c1cd869807a14e11ac658fc4a6556cc6"
+   ],
+   "referenced_graph_node_ids": [
+    "instruction_c1cd869807a14e11ac658fc4a6556cc6",
+    "invoice-123:1",
+    "payment_143e3f23e17b469fae7edcecadf97819"
+   ],
+   "semantic_verdict": "ALIGNED",
+   "contribution_assessments": [
+    {
+     "task_id": "instruction_c1cd869807a14e11ac658fc4a6556cc6",
+     "relationship": "DIRECT",
+     "explanation": "The candidate proposes paying Alice for invoice 123 from treasury USDC, matching the objective's recipient, invoice, and funding source."
+    }
+   ],
+   "detected_goal_drift": false,
+   "claimed_instruction_source": "ASSISTANT",
+   "reasoning_summary": "The candidate proposes paying Alice for invoice 123 from treasury USDC, matching the objective's recipient, invoice, and funding source.",
+   "supporting_evidence_refs": [
+    "0xdca00edbbc4ddf5d0864ce3a3f74479d36475c33a2d5e24397ffb5402aa45df6",
+    "payment_143e3f23e17b469fae7edcecadf97819",
+    "user_transfer_e061f7cae189437e9e5fc957fa8f3801"
+   ],
+   "uncertainty_reasons": []
+  },
+  "reason_codes": [],
+  "provider_metadata": {
+   "model": "deepseek-flash",
+   "provider": "deepseek",
+   "config_hash": "0x6d755888dc10f414f3707a0a445a46e9cd416d64057341c9f112c9cc63b69c85",
+   "prompt_version": "itag-catalog-v3.3",
+   "scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION",
+   "catalog_hash": "0x587069b7eecce464c0677c40be0e324cfbd3b7ab7753c7d844d3d89a23dc20a0",
+   "schema_version": "itag-judgment-1",
+   "input_chars": 6953,
+   "prevalidation_verdict": "ALIGNED",
+   "semantic_anchors": [
+    {
+     "task": "instruction_c1cd869807a14e11ac658fc4a6556cc6",
+     "objective_quote": "Pay Alice for invoice 123 using treasury USDC.",
+     "candidate_quote": "Pay Alice exactly 20 USDC for invoice 123."
+    }
+   ],
+   "response_protocol": "CATALOG",
+   "verified_factual_claims": [],
+   "provider_trace": [
+    {
+     "provider": "deepseek",
+     "model": "deepseek-flash",
+     "endpoint": "https://api.deepseek.com",
+     "status": "SUCCESS",
+     "latency_ms": 1000
+    }
+   ]
+  },
+  "latency_ms": 1000,
+  "token_usage": {
+   "prompt_tokens": 2143,
+   "completion_tokens": 191,
+   "total_tokens": 2334
+  }
+ },
+ "simulation": {
+  "source": "ISOLATED_ANVIL_FORK",
+  "block": 17,
+  "block_hash": "0x19d28c0b5f2092ce54642af9efe238da7f8acb30943b18dec9ece5ccbd0ab2a1",
+  "vault_before": "7700000000",
+  "recipient_before": "0",
+  "vault_after": "7680000000",
+  "recipient_after": "20000000",
+  "gas_used": "288971",
+  "attestor_override": "SIMULATION_ONLY",
+  "vault_bytecode_hash": "0xbde6d77a2c984cfc57a8e4d0b768ff59f41b8112cead3ff79d2b525f2ce4b809",
+  "token_bytecode_hash": "0x2b74f5bf71dad3f0ff672fee11b0a181a4c0db97a391724494414fc743269d1f"
+ },
+ "proof": {
+  "status": "VERIFIED",
+  "solver": "unsat",
+  "query": "(declare-fun vault () Int)\n(declare-fun recipient () Int)\n(declare-fun amount () Int)\n(declare-fun vault_after () Int)\n(declare-fun recipient_after () Int)\n(assert (= vault 7700000000))\n(assert (= recipient 0))\n(assert (= amount 20000000))\n(assert (= vault_after 7680000000))\n(assert (= recipient_after 20000000))\n(assert (not (and (> amount 0)\n          (>= vault amount)\n          (= vault_after (- vault amount))\n          (= recipient_after (+ recipient amount))\n          (< recipient_after\n             115792089237316195423570985008687907853269984665640564039457584007913129639936)\n          (>= vault_after 0))))\n",
+  "query_hash": "0x6b0dbe2c4d12cb2219f97ac8f7503a4c201fcefa24ed1c219c4cd91030f0b450",
+  "scope": "Exact simulated ERC20 vault/recipient deltas, not arbitrary token behavior",
+  "encoder_hash": "0xc399e02ddf5fece1347100344efc1f56d34267ab8e0a45222205067c53ddb50b"
+ },
+ "risk": {
+  "result": "PASS",
+  "outflow_usd_e8": "2000000000",
+  "valuation_source": "OWNER_LOCAL_REFERENCE",
+  "per_transfer": "50000000",
+  "daily": "100000000"
+ },
+ "sde": {
+  "verdict": "APPROVE",
+  "reason_codes": [],
+  "action": "TRANSFER_ERC20",
+  "intent_id": "payment_143e3f23e17b469fae7edcecadf97819"
+ },
+ "approval": {
+  "intentHash": "0x70958fea7f293235080225b9dc551e0625c8faf786bcb720febc98bb8172ac9e",
+  "taskHash": "0x79bcad3bf3b886ce9a7624bd92095071bd37119b338b2fce24506763df5dc472",
+  "policyHash": "0xa68b4a1e32601f96aac77ac89e6322fad881fdb8c87a3231f0cdd56798651e70",
+  "evidenceRoot": "0xc0b4a461bf085eae605003d663a63069664d143b84c0fa4b5bc6e87408e730d7",
+  "proofContextHash": "0xeb7eac6c23214614c5ab766c58b50b9f79f8925e41b11bcefa5bc621c07abebd",
+  "sessionId": "0xa7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7",
+  "transferPolicyVersion": "1",
+  "taskBudget": "20000000",
+  "riskDebitUsdE8": "2000000000",
+  "nonce": "118464758639359978632437822309821653869",
+  "deadline": "1795206678",
+  "token": "0x516B66e68f17164e7Bf5fD6ED83c03788a7274b1",
+  "recipient": "0x0EE3424DB30089AB8e24F111977f3CA6E586BDb9",
+  "amount": "20000000"
+ },
+ "tx_hash": "0xc9aa3822f6fc43dd05a320784218a7712a014669801ffb6cc11f0ce487c64996",
+ "signed": true,
+ "relayer": "0x78921Fc9bF08e7a24ADf672E1d92D65b2dbE448b",
+ "calldata_hash": "0x2767fbb2b1cd981758a68f5db2ea3b2b8062060123d23fd4a4704710a6e2f077",
+ "receipt": {
+  "tx_hash": "0xc9aa3822f6fc43dd05a320784218a7712a014669801ffb6cc11f0ce487c64996",
+  "block_hash": "0x20a32815254e392aa710dfd9e9abf8ced81e8189c8d2b6d96afa78c220ad3848",
+  "block_number": 18,
+  "status": 1,
+  "gas_used": "288971",
+  "gas_cost_wei": "320993810881874"
+ },
+ "portfolio": {
+  "block_number": 18,
+  "vault_balance": "7680000000",
+  "recipient_balance": "20000000",
+  "transferred_base_units": "20000000",
+  "token": "0x516B66e68f17164e7Bf5fD6ED83c03788a7274b1",
+  "recipient": "0x0EE3424DB30089AB8e24F111977f3CA6E586BDb9"
+ }
+}
