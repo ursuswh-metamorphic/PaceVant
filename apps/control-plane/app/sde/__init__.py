@@ -3,6 +3,7 @@ from uuid import uuid4
 from app.domain import EconomicRiskAssessment, SecurityDecision
 from app.models import Alignment, ChainContext, Mandate
 from app.portfolio import MAX_BLOCK_DRIFT, policy_issues
+from app.temporal.models import HybridTemporalAssessment
 from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 TTL = 30
@@ -80,6 +81,7 @@ def decide(
     evidence: SimulationEvidence | None = None,
     risk: EconomicRiskAssessment | None = None,
     provenance_issues: list[str] | None = None,
+    temporal: HybridTemporalAssessment | None = None,
 ) -> SecurityDecision:
     reasons = list(alignment.reason_codes)
     if context is None:
@@ -122,6 +124,11 @@ def decide(
         verdict = "APPROVE"
     else:
         reasons.append("SIMULATION_INCOMPLETE")
+    if temporal and temporal.verdict != "PASS":
+        # Keep existing hard failures while applying the independent temporal veto.
+        severity = {"APPROVE": 0, "REPLAN": 1, "ESCALATE": 2, "REJECT": 3}
+        verdict = max(verdict, temporal.verdict, key=severity.__getitem__)
+        reasons.extend(temporal.reason_codes)
     return SecurityDecision(
         decision_id=f"decision_{uuid4().hex}",
         intent_id=proposal.intent_id,

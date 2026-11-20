@@ -21,8 +21,10 @@ class ShieldRuntime:
         self.shield, self.session_id = shield, session_id
         self.last_feedback = None
         self.reports = []
+        self.attempt_checks = []
 
     def _require(self, report):
+        self.attempt_checks.append(report.check_id)
         if report.status != "ALIGNED":
             self.last_feedback = report.feedback
             raise ShieldBlocked(report)
@@ -82,6 +84,7 @@ class ShieldRuntime:
                 "call": tool,
                 "tool_call_id": call_id,
                 "output": safe,
+                "check_id": report.check_id,
                 "trust": "UNTRUSTED_TOOL",
                 "feedback": report.feedback.model_dump(mode="json") if report.feedback else None,
             },
@@ -98,6 +101,7 @@ class ShieldRuntime:
                 int(self.shield.clock()),
                 report.feedback.model_dump(mode="json"),
             )
+        self.attempt_checks.append(report.check_id)
         return report
 
     def invoke(self, name, arguments, execute, related_content=""):

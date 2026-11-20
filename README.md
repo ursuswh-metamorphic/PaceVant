@@ -73,6 +73,8 @@ Task Shield bổ sung extraction và ContributesTo bằng LLM, user task set the
 
 Portfolio schema 2.0 bổ sung nguồn dữ liệu theo block/token, lịch sử SQLite bất biến theo Vault và worker đối chiếu receipt có thể phục hồi sau restart mà không cần khóa ký. Xem [hướng dẫn snapshot, monitor và migration](docs/PORTFOLIO_OUTCOME_MONITORING.md), [audit trước triển khai](docs/PORTFOLIO_OUTCOME_AUDIT.md) và [báo cáo kiểm thử](docs/PORTFOLIO_OUTCOME_REPORT.md). PDR và chốt định giá LFJ faucet USDC giữ nguyên.
 
+ITAG mở rộng Task Shield bằng intent có phiên bản, ngân sách theo nhiệm vụ, thứ tự dựa trên receipt xác minh và graph giải thích trước ký. Mở `/itag` để tra cứu graph theo mã assessment. Xem [kiến trúc](docs/ITAG_ARCHITECTURE.md), [API giải thích](docs/ITAG_EXPLAINABILITY.md) và [kết quả đánh giá](docs/ITAG_EVALUATION.md).
+
 The Fuji Observatory reads AVAX, Circle test USDC and WAVAX at a pinned block, Chainlink AVAX/USD and USDC/USD, Witnet and Pyth observations, plus optional PolicyVault state and execution receipts. It exports source and block evidence; prices remain outside SDE/PDR authorization.
 
 ```powershell

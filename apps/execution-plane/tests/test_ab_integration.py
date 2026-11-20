@@ -60,8 +60,9 @@ def process_ready(command, url, env, output, *, cwd):
         (200, 0, ["APPROVE"], True,False),
         (200, 0, ["APPROVE"], "revert",False),
         (200, 0, ["APPROVE"], False,True),
+        (100, 0, ["APPROVE"], False, "itag"),
     ],
-    ids=["normal", "exposure-replan", "stale-oracle", "pending-reservation", "protected-revert", "shield-http-protocol-fixture"],
+    ids=["normal", "exposure-replan", "stale-oracle", "pending-reservation", "protected-revert", "shield-http-protocol-fixture", "itag-history"],
 )
 def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verdicts, hold_receipt,shielded):
     _, chain, keys, _ = plane
@@ -171,6 +172,21 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
             "goal": f"Buy WAVAX with {amount} USDC",
             "mandate_id": mandate["mandate_id"],
         }
+        if shielded == "itag":
+            base_units = str(amount * 10**6)
+            intent = a.post(
+                "/v1/itag/intents",
+                json={
+                    "kind": "ONE_SHOT_SWAP",
+                    "mandate_id": mandate["mandate_id"],
+                    "deadline": int(time.time()) + 120,
+                    "total_budget": base_units,
+                    "steps": [{"step_id": "swap", "min_amount": base_units, "max_amount": base_units}],
+                },
+            ).raise_for_status().json()
+            request["temporal_intent"] = {
+                "spec_id": intent["spec_id"], "revision": 1, "step_id": "swap"
+            }
         if hold_receipt:
             rpc(chain.w3, "evm_setAutomine", [False])
         try:
@@ -233,6 +249,17 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
 
         assert workflow["status"] == ("REVERTED" if hold_receipt == "revert" else "CONFIRMED"), workflow
         reconciliation = workflow["reconciliation"]
+        if shielded == "itag":
+            history = a.get(f'/v1/itag/intents/{intent["spec_id"]}/history').raise_for_status().json()
+            assert history["assessments"][0]["verdict"] == "PASS"
+            assert history["ledger"][0]["state"] == "CONFIRMED"
+            before_repeat = chain.balances()
+            repeated = a.post("/v1/workflows/start", json=request).raise_for_status().json()
+            assert repeated["status"] == "REJECTED", repeated
+            timeline = a.get("/v1/workflows/" + repeated["workflow_id"]).raise_for_status().json()["timeline"]
+            assert "ITAG_STEP_ALREADY_COMPLETE" in timeline[-1]["decision"]["reason_codes"]
+            assert not any(e["stage"] == "ATTESTED" for e in timeline)
+            assert chain.balances() == before_repeat
         if shielded:
             assert any(e.get("alignment",{}).get("shield_model_version")=="task-shield-acl2025-v1" for e in events)
             with sqlite3.connect(tmp_path/"control.sqlite3") as db:
@@ -268,7 +295,18 @@ def test_start_workflow_through_a_and_b(plane, tmp_path, amount, price_age, verd
         receipt = events[-1]["receipt"]
         onchain = chain.w3.eth.get_transaction_receipt(receipt["tx_hash"])
         assert onchain.status == 1 and onchain.to == chain.vault.address
-        assert receipt["actual_token_in_delta_base_units"] == "-200000000"
-        assert receipt["actual_token_out_delta_base_units"] == "10000000000000000000"
+        expected_amount = 100 if shielded == "itag" else 200
+        assert receipt["actual_token_in_delta_base_units"] == str(-expected_amount * 10**6)
+        assert receipt["actual_token_out_delta_base_units"] == str(expected_amount * 5 * 10**16)
         assert int(events[-1]["execution_fee"]["gas_cost_wei"]) > 0
-        assert int(chain.snapshot()["daily_spent_usdc_base_units"]) - before_spend == 200_000_000
+        assert int(chain.snapshot()["daily_spent_usdc_base_units"]) - before_spend == expected_amount * 10**6
+        if shielded == "itag":
+            # Same chain state and user request as the rejected repeat, using the
+            # pre-ITAG workflow path with real guards and Task Shield still active.
+            baseline_request = dict(request)
+            baseline_request.pop("temporal_intent")
+            baseline = a.post("/v1/workflows/start", json=baseline_request).raise_for_status().json()
+            baseline_workflow = a.get("/v1/workflows/" + baseline["workflow_id"]).raise_for_status().json()
+            assert baseline_workflow["status"] == "CONFIRMED", baseline_workflow
+            assert any(e["stage"] == "ATTESTED" for e in baseline_workflow["timeline"])
+            assert int(chain.snapshot()["daily_spent_usdc_base_units"]) - before_spend == 2 * expected_amount * 10**6

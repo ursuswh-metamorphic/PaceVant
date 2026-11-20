@@ -19,6 +19,7 @@ from app.models import Alignment, Goal, WorkflowRequest
 from app.monitoring.api import install_history_routes
 from app.orchestration.service import ControlPlane, utc_now
 from app.settings import DASHBOARD, Settings
+from app.temporal.api import install_itag_routes
 from treasury_contracts.models import Hash, SignedPDR, SimulationEvidence, TransactionProposal, Wire
 
 
@@ -149,7 +150,9 @@ def create_app(settings=None, clock=utc_now):
         return {"status": "ok", "mode": settings.mode}
 
     @app.post("/v1/workflows/start", dependencies=[Depends(operator), Depends(json_post)])
-    def workflow_start(payload: WorkflowRequest, service: Service):
+    def workflow_start(payload: WorkflowRequest, service: Service, request: Request):
+        if payload.temporal_intent:
+            shield_operator(request)
         return service.run(payload)
 
     @app.post(
@@ -170,6 +173,7 @@ def create_app(settings=None, clock=utc_now):
         )
 
     install_shield_routes(app, [Depends(shield_operator)])
+    install_itag_routes(app, shield_operator)
 
     @app.post(
         "/v1/risk/evaluate", dependencies=[Depends(operator)], response_model=EconomicRiskAssessment

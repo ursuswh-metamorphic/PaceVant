@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from secrets import randbelow
-from time import time
+from time import monotonic, time
 from uuid import uuid4
 
 import httpx
@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 from app import alignment, economic_risk, experience, planner, portfolio, sde
 from app.alignment.engine import TaskShield
+from app.alignment.provider import inference_window
 from app.alignment.runtime import ShieldBlocked, ShieldRuntime
 from app.alignment.types import TaskUpdate
 from app.attestor import Attestor
@@ -24,6 +25,9 @@ from app.orchestration.fuji import FujiVerifier
 from app.orchestration.mock import MockExecutionClient
 from app.settings import FIXTURES, Settings
 from app.storage import Store
+from app.temporal import storage as temporal_storage
+from app.temporal.models import HybridTemporalAssessment
+from app.temporal.service import TemporalService
 from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 STAGES = {
@@ -57,6 +61,7 @@ class ControlPlane:
         self.clock = clock
         self.store = Store(settings.db)
         self.shield = TaskShield(self.store, settings.shield, clock=clock)
+        self.temporal = TemporalService(self.store, self.shield, settings.mode, clock)
         self.shield_runtimes = {}
         if settings.mode == "MOCK":
             key_bytes = (1 + randbelow(SECPK1_N - 1)).to_bytes(32, "big")
@@ -134,7 +139,11 @@ class ControlPlane:
         gate = (
             (
                 lambda ref, read: self._tool(
-                    workflow_id, "read_simulation_artifact", {"reference": ref}, read
+                    workflow_id,
+                    "read_simulation_artifact",
+                    {"reference": ref},
+                    read,
+                    deadline=built.deadline,
                 )
             )
             if workflow_id in self.shield_runtimes
@@ -185,9 +194,21 @@ class ControlPlane:
             mandate, self.attestor.address, self.fixture(scenario), self.clock
         )
 
-    def _tool(self, workflow_id, name, arguments, execute):
+    def _tool(self, workflow_id, name, arguments, execute, *, deadline=None):
         runtime = self.shield_runtimes.get(workflow_id)
-        return runtime.invoke(name, arguments, execute) if runtime else execute()
+        if deadline is None:
+            return runtime.invoke(name, arguments, execute) if runtime else execute()
+
+        def within_window():
+            if self.clock() >= deadline:
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
+
+        def checked_execute():
+            within_window()
+            return execute()
+
+        within_window()
+        return runtime.invoke(name, arguments, checked_execute) if runtime else execute()
 
     def check_alignment(self, mandate, proposal, goal, tool_output=""):
         if not self.shield.active:
@@ -368,7 +389,27 @@ class ControlPlane:
         }
 
     def run(self, payload):
+        workflow_started = monotonic()
         mandate = self.mandate(payload.mandate_id)
+        selection = payload.temporal_intent
+        if self.settings.require_itag and selection is None:
+            raise ControlError("ITAG_STRUCTURED_INTENT_REQUIRED", 422)
+        intent_deadline = None
+        if selection:
+            if not self.shield.active:
+                raise ControlError("ITAG_ACTIVE_TASK_SHIELD_REQUIRED", 409)
+            with self.store.connection() as conn:
+                spec = temporal_storage.current(conn, selection.spec_id)
+            if (
+                spec.status != "AUTHENTICATED"
+                or spec.revision != selection.revision
+                or spec.terms.mandate_id != mandate.mandate_id
+                or spec.mode != self.settings.mode
+                or not any(s.step_id == selection.step_id for s in spec.terms.steps)
+                or self.clock() >= spec.terms.deadline
+            ):
+                raise ControlError("ITAG_INTENT_NOT_ACTIVE_FOR_WORKFLOW", 409)
+            intent_deadline = spec.terms.deadline
         if self.settings.mode != "MOCK" and payload.scenario is not None:
             raise ControlError("MOCK_SCENARIO_FORBIDDEN", 422)
         workflow_id = f"workflow_{uuid4().hex}"
@@ -383,7 +424,9 @@ class ControlPlane:
                 "scenario": scenario,
                 "mandate_id": mandate.mandate_id,
                 "planner_version": planner.VERSION,
+                **({"temporal_intent": selection.model_dump()} if selection else {}),
             },
+            temporal_intent=selection,
         )
         try:
             if self.shield.active:
@@ -397,7 +440,9 @@ class ControlPlane:
                     authenticated=True,
                 )
                 self.shield_runtimes[workflow_id] = ShieldRuntime(self.shield, session_id)
-            self._run_attempts(workflow_id, mandate, client, payload.goal)
+            self._run_attempts(
+                workflow_id, mandate, client, payload.goal, intent_deadline, workflow_started
+            )
         except ControlError as error:
             self.store.event(workflow_id, "ESCALATED", self.clock(), reason_codes=[error.code])
         finally:
@@ -407,17 +452,19 @@ class ControlPlane:
                 self.shield_runtimes.pop(workflow_id, None)
         return {"workflow_id": workflow_id, "status": status}
 
-    def _run_attempts(self, workflow_id, mandate, client, goal):
+    def _run_attempts(self, workflow_id, mandate, client, goal, intent_deadline, workflow_started):
         amount = planner.requested_amount(goal) or 0
         fixture = client.fixture if isinstance(client, MockExecutionClient) else {}
         for index in range(mandate.max_replans + 1):
-            now = self.clock()
             context = (
                 self._tool(workflow_id, "read_chain_context", {}, client.context)
                 if isinstance(client, RestExecutionClient)
                 else None
             )
+            now = self.clock()
             deadline = self._deadline(mandate, now, context)
+            if intent_deadline:
+                deadline = min(deadline, intent_deadline)
             proposed = planner.propose(
                 mandate,
                 amount,
@@ -427,18 +474,26 @@ class ControlPlane:
             self.store.event(
                 workflow_id, "PROPOSED", now, attempt=index + 1, proposal=proposed.model_dump()
             )
-            proposed, aligned = self._shield_plan(
-                workflow_id, mandate, client, goal, proposed, amount, deadline, fixture
+            decision = self._assess_plan(
+                workflow_id,
+                mandate,
+                client,
+                goal,
+                proposed,
+                amount,
+                fixture,
+                context,
+                workflow_started,
             )
-            self.store.event(
-                workflow_id, aligned.verdict, self.clock(), alignment=aligned.model_dump()
-            )
-            decision = self._evaluate(workflow_id, mandate, client, proposed, aligned, context)
             runtime = self.shield_runtimes.get(workflow_id)
             if runtime:
                 for shield_retry in range(self.settings.shield.max_replans):
                     feedback = runtime.last_feedback
-                    if feedback is None or feedback.code == "TASK_SHIELD_UNAVAILABLE":
+                    if (
+                        feedback is None
+                        or feedback.code == "TASK_SHIELD_UNAVAILABLE"
+                        or self.clock() >= decision.expires_at
+                    ):
                         break
                     self.shield.state.event(
                         runtime.session_id,
@@ -451,15 +506,21 @@ class ControlPlane:
                         },
                     )
                     # The original candidate and rejected tool output are never reused as executable instructions.
-                    proposed = planner.revise(
-                        mandate, amount, self._deadline(mandate, self.clock(), context), feedback
-                    )
+                    retry_deadline = self._deadline(mandate, self.clock(), context)
+                    if intent_deadline:
+                        retry_deadline = min(retry_deadline, intent_deadline)
+                    proposed = planner.revise(mandate, amount, retry_deadline, feedback)
                     runtime.last_feedback = None
-                    proposed, aligned = self._shield_plan(
-                        workflow_id, mandate, client, goal, proposed, amount, proposed.deadline, {}
-                    )
-                    decision = self._evaluate(
-                        workflow_id, mandate, client, proposed, aligned, context
+                    decision = self._assess_plan(
+                        workflow_id,
+                        mandate,
+                        client,
+                        goal,
+                        proposed,
+                        amount,
+                        {},
+                        context,
+                        workflow_started,
                     )
                 if runtime.last_feedback:
                     self.shield.state.event(
@@ -491,11 +552,39 @@ class ControlPlane:
                 return
             amount = replacement
 
-    def _evaluate(self, workflow_id, mandate, client, proposal, aligned, context=None):
+    def _assess_plan(
+        self,
+        workflow_id,
+        mandate,
+        client,
+        goal,
+        proposed,
+        amount,
+        fixture,
+        context,
+        workflow_started,
+    ):
+        with inference_window(proposed.deadline - self.clock()):
+            proposed, aligned = self._shield_plan(
+                workflow_id, mandate, client, goal, proposed, amount, proposed.deadline, fixture
+            )
+            self.store.event(
+                workflow_id, aligned.verdict, self.clock(), alignment=aligned.model_dump()
+            )
+            return self._evaluate(
+                workflow_id, mandate, client, proposed, aligned, context, workflow_started
+            )
+
+    def _evaluate(
+        self, workflow_id, mandate, client, proposal, aligned, context=None, workflow_started=None
+    ):
+        evaluation_started = monotonic()
         built = sim = evaluation = balances = snapshot = observation = None
         issues = []
         try:
-            context = context or self._tool(workflow_id, "read_chain_context", {}, client.context)
+            context = context or self._tool(
+                workflow_id, "read_chain_context", {}, client.context, deadline=proposal.deadline
+            )
             issues = portfolio.policy_issues(mandate, context, self.clock())
             if aligned.verdict == "ALIGNED" and not issues:
                 if int(proposal.amount_in_base_units) > int(mandate.max_usdc_per_swap_base_units):
@@ -503,7 +592,11 @@ class ControlPlane:
                     issues.append("TRADE_SIZE_LIMIT")
                     raise ControlError("TRADE_SIZE_LIMIT")
                 built = self._tool(
-                    workflow_id, "build_swap", proposal.model_dump(), lambda: client.build(proposal)
+                    workflow_id,
+                    "build_swap",
+                    proposal.model_dump(),
+                    lambda: client.build(proposal),
+                    deadline=proposal.deadline,
                 )
                 verify_build(mandate, proposal, built)
                 self.store.event(workflow_id, "BUILT", self.clock(), build=built.model_dump())
@@ -512,13 +605,17 @@ class ControlPlane:
                     "simulate_swap",
                     {"build": built.model_dump()},
                     lambda: client.simulate(built),
+                    deadline=proposal.deadline,
                 )
-                balances = self._tool(workflow_id, "read_portfolio", {}, client.balances)
+                balances = self._tool(
+                    workflow_id, "read_portfolio", {}, client.balances, deadline=proposal.deadline
+                )
                 context = self._tool(
                     workflow_id,
                     "read_chain_context",
                     {"build_id": built.build_id, "fork_block": sim.fork_block},
                     lambda: client.context(built=built, fork_block=sim.fork_block),
+                    deadline=proposal.deadline,
                 )
                 issues = self.verify_evidence(client, built, sim, context, workflow_id)
                 observation = self._tool(
@@ -534,6 +631,7 @@ class ControlPlane:
                         built=built,
                         phase="PRE",
                     ),
+                    deadline=proposal.deadline,
                 )
                 self.store.event(
                     workflow_id,
@@ -561,6 +659,17 @@ class ControlPlane:
                 except ControlError as balance_error:
                     issues.append(balance_error.code)
 
+        temporal, temporal_hash = self.temporal.evaluate(
+            workflow_id,
+            mandate,
+            proposal,
+            built,
+            sim,
+            observation,
+            aligned,
+            self.shield_runtimes.get(workflow_id),
+        )
+        sde_started = monotonic()
         decision = sde.decide(
             mandate,
             proposal,
@@ -571,7 +680,25 @@ class ControlPlane:
             evidence=sim,
             risk=evaluation.risk if evaluation else None,
             provenance_issues=issues,
+            temporal=temporal,
         )
+        if temporal:
+            self.store.event(
+                workflow_id,
+                "ITAG_ASSESSED",
+                self.clock(),
+                assessment_hash=temporal_hash,
+                verdict=temporal.verdict,
+                reason_codes=temporal.reason_codes,
+                timing_ms={
+                    **temporal.timing_ms,
+                    "evaluation_through_sde": int((monotonic() - evaluation_started) * 1000),
+                    "workflow_through_sde": int(
+                        (monotonic() - (workflow_started or evaluation_started)) * 1000
+                    ),
+                    "sde": int((monotonic() - sde_started) * 1000),
+                },
+            )
         suggested = evaluation.suggested_amount if evaluation else 0
         if decision.verdict == "REPLAN" and not evaluation and "TRADE_SIZE_LIMIT" in issues:
             suggested = min(
@@ -587,6 +714,12 @@ class ControlPlane:
                         - int(balances.daily_spent_usdc_base_units),
                     ),
                 )
+        if temporal and temporal.suggested_amount is not None:
+            suggested = (
+                min(suggested, int(temporal.suggested_amount))
+                if suggested
+                else int(temporal.suggested_amount)
+            )
         evidence = (
             {
                 "risk": evaluation.risk.model_dump(),
@@ -611,6 +744,7 @@ class ControlPlane:
                 "suggested_amount": suggested,
                 "chain_context": context.model_dump() if context else None,
                 "pre_snapshot_id": observation.snapshot_id if observation else None,
+                "itag_assessment_hash": temporal_hash,
                 "task_shield_proof": self.shield_runtimes[workflow_id].proof(proposal)
                 if workflow_id in self.shield_runtimes
                 else None,
@@ -632,6 +766,8 @@ class ControlPlane:
     def _approved(self, id_) -> ApprovedAttempt:
         workflow_id, bundle = self.store.decision(decision_id=id_)
         decision = SecurityDecision.model_validate(bundle["decision"])
+        if self.settings.require_itag and not bundle.get("itag_assessment_hash"):
+            raise ControlError("ITAG_APPROVAL_PROOF_REQUIRED", 403)
         if decision.verdict != "APPROVE" or decision.decision_id != id_:
             raise ControlError("DECISION_NOT_APPROVED", 403)
         if bundle["mode"] != self.settings.mode:
@@ -681,6 +817,11 @@ class ControlPlane:
     def _verify_approval(self, approved: ApprovedAttempt):
         mandate, built, sim = approved.mandate, approved.built, approved.evidence
         _, bundle = self.store.decision(decision_id=approved.decision.decision_id)
+        temporal = None
+        if bundle.get("itag_assessment_hash"):
+            with self.store.connection() as conn:
+                _, body, _ = temporal_storage.load(conn, bundle["itag_assessment_hash"])
+            temporal = HybridTemporalAssessment.model_validate(body)
         proof = bundle.get("task_shield_proof")
         if self.shield.active or proof:
             if not proof or not proof.get("check_ids") or proof.get("unresolved_feedback"):
@@ -785,6 +926,7 @@ class ControlPlane:
             evidence=sim,
             risk=risk,
             provenance_issues=issues,
+            temporal=temporal,
         )
         if recomputed.verdict != "APPROVE" or now >= approved.decision.expires_at:
             raise ControlError(next(iter(recomputed.reason_codes), "STALE_REQUIRES_REEVALUATION"))
@@ -809,7 +951,8 @@ class ControlPlane:
         id_ = decision.decision_id
         try:
             approved = self._approved(id_)
-            client = self._verify_approval(approved)
+            if self.clock() >= decision.expires_at:
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
         except ControlError as error:
             self.store.transition(
                 workflow_id, id_, "ATTESTED", "EXPIRED", self.clock(), reason_codes=[error.code]
@@ -827,11 +970,12 @@ class ControlPlane:
                     raise ControlError("TASK_SHIELD_SESSION_NOT_FOUND")
                 runtime = ShieldRuntime(self.shield, session["id"])
             try:
-                execute_call = runtime.before(
-                    "execute_approved_swap",
-                    {"build": built.model_dump(), "decision_id": id_},
-                    approved.proposal.user_goal_reason,
-                )
+                with inference_window(decision.expires_at - self.clock()):
+                    execute_call = runtime.before(
+                        "execute_approved_swap",
+                        {"build": built.model_dump(), "decision_id": id_},
+                        approved.proposal.user_goal_reason,
+                    )
                 # A concurrent user cancellation invalidates the saved approval even if the model said yes.
                 _, saved = self.store.decision(decision_id=id_)
                 proof = saved["task_shield_proof"]
@@ -841,9 +985,22 @@ class ControlPlane:
                     workflow_id, id_, "ATTESTED", "EXPIRED", self.clock(), reason_codes=[error.code]
                 )
                 return
-        if not self.store.transition(workflow_id, id_, "ATTESTED", "SUBMITTING", self.clock()):
+        try:
+            # A final tool check can spend part of the signing window. Re-read
+            # deterministic evidence after it finishes, immediately before submission.
+            if self.clock() >= decision.expires_at:
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
+            client = self._verify_approval(approved)
+            started = self.store.transition(
+                workflow_id, id_, "ATTESTED", "SUBMITTING", self.clock()
+            )
+        except ControlError as error:
+            self.store.transition(
+                workflow_id, id_, "ATTESTED", "EXPIRED", self.clock(), reason_codes=[error.code]
+            )
+            return
+        if not started:
             raise ControlError("SUBMISSION_ALREADY_STARTED")
-        self.store.track_execution(workflow_id, id_, self.settings.mode, built, self.clock())
         if self.clock() >= decision.expires_at:
             self.store.transition(
                 workflow_id,
@@ -854,6 +1011,7 @@ class ControlPlane:
                 reason_codes=["STALE_REQUIRES_REEVALUATION"],
             )
             return
+        self.store.track_execution(workflow_id, id_, self.settings.mode, built, self.clock())
         try:
             submission = client.execute(built, pdr)
         except ControlError as error:

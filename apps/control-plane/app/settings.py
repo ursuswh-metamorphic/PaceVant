@@ -29,6 +29,7 @@ class Settings:
     chain_rpc_url: str | None = None
     relayer_address: str | None = None
     shield: ShieldConfig = ShieldConfig()
+    require_itag: bool = False
 
     @classmethod
     def from_env(cls):
@@ -100,4 +101,5 @@ class Settings:
             chain_rpc_url=env["CHAIN_RPC_URL"],
             relayer_address=env["RELAYER_ADDRESS"],
             shield=ShieldConfig.from_env(mode),
+            require_itag=os.environ.get("PACEVANT_REQUIRE_ITAG") == "1",
         )
