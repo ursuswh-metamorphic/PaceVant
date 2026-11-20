@@ -34,8 +34,14 @@ def main():
         actual = str(solver.check()).upper()
         results.append({"hash": hash_, "expected": status, "actual": actual, "passed": actual == status})
     source_hash = keccak(Path(encoder.__file__).read_bytes() + Path(v2.__file__).read_bytes())
+    queries_passed = all(r["passed"] for r in results)
     result = {
-        "status": "PASS" if all(r["passed"] for r in results) else "FAIL",
+        "status": "FAIL" if not queries_passed else (
+            "PASS" if source_hash == proof.source_hash else "CURRENT_ENCODER_MISMATCH"
+        ),
+        "query_replay_passed": queries_passed,
+        "current_encoder_hash": source_hash,
+        "archived_encoder_hash": proof.source_hash,
         "query_results": results, "proof_context_hash": proof.context_hash,
         "encoder_hash_matches_current_sources": source_hash == proof.source_hash,
         "network_calls": False, "env_or_wallet_keys_loaded": False,

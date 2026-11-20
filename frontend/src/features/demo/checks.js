@@ -9,6 +9,15 @@ export async function runCheck(kind) {
   byId("live-check-summary").textContent = "Đang kiểm tra thực tế, không gửi giao dịch…";
   result.textContent = "Đang lấy kết quả thực tế; không broadcast giao dịch…";
   let report;
+  if (["repeat-exact", "lh012", "lh022"].includes(kind)) {
+    const response = await fetch("/assets/itag-security-cases.json", {credentials:"omit", redirect:"error"});
+    if (!response.ok) throw new Error("FIXTURE_UNAVAILABLE");
+    const record = (await response.json())[kind];
+    if (!record) throw new Error("FIXTURE_CASE_MISSING");
+    byId("live-check-summary").textContent = "Bản ghi mô phỏng · " + kind + " · SDE " + record.sde;
+    result.textContent = JSON.stringify(record, null, 2);
+    return;
+  }
   if (kind === "limit") {
     const goal = "Buy WAVAX with " + units(BigInt(state.activeMandate.max_usdc_per_swap_base_units) + 1n, 6) + " USDC";
     try {
@@ -41,7 +50,7 @@ export async function runCheck(kind) {
   result.textContent = JSON.stringify(report, null, 2);
   byId("live-check-summary").textContent = kind === "limit" ? "Đã từ chối yêu cầu vượt hạn mức: TRADE_SIZE_LIMIT. Không tạo giao dịch, không trừ gas."
     : kind === "session" ? "Đọc trực tiếp block " + report.block_number + ": " + (report.reason_codes.length ? report.reason_codes.join(", ") : "Policy/session và gas credit chưa có lỗi trong phạm vi kiểm tra. Vẫn phải kiểm toàn bộ gate khi swap.")
-    : kind === "injection" ? "AI " + report.report.model + " trả " + report.report.status + ". " + (report.all_passed ? "Đã phát hiện lệnh đổi recipient từ tool. " : "Chưa xác nhận chặn được challenge này. ") + "Không gửi swap."
+    : kind === "injection" ? "AI " + report.report.model + " trả " + report.report.status + ". " + (report.all_passed ? "Đã phát hiện chỉ dẫn trái mục tiêu từ tool. " : "Chưa xác nhận chặn được challenge này. ") + "Không gửi swap."
     : kind === "auth" ? "Kiểm quyền Demo User: " + report.checks.map(c => c.path + " → " + c.status).join(" · ") + ". Không gửi giao dịch."
     : report.checks.map(c => c.expected_error + ": " + c.status).join(" · ") + ". eth_call trên Fuji, không trừ gas.";
 }
