@@ -2,15 +2,31 @@
 
 Target: Ubuntu 22.04 x86_64, 2 vCPU/4 GB RAM/50 GB SSD. Runtime: Python 3.12/uv + FastAPI/Uvicorn + native Anvil/Z3 + SQLite, Nginx static frontend/reverse proxy, systemd. React được build bởi Vite, không có Node server/SSR. Node chỉ cần lúc build release.
 
-Code/config đã chuẩn bị; chưa có SSH/domain của VPS đích, nên không tuyên bố deploy public VPS. Linux QA hiện có là **Ubuntu 24.04 WSL**, không phải Ubuntu 22.04 VPS. Xem `docs/audit/judge-deployment-report.json` cho phạm vi được kiểm thật.
+Đã triển khai trên **Ubuntu 22.04, 2 vCPU/4 GB** tại **https://pacevant.live**, Nginx/systemd native. HTTPS và simulated certificate renewal đã pass. Xem `docs/audit/vps-live-acceptance.json` cho kiểm tra thật; báo cáo WSL cũ giữ nguyên phạm vi lịch sử. Live transactions vẫn phụ thuộc oracle/model/gates; public MVP chưa được kích hoạt.
+
+## Vận hành nhanh trên VPS hiện tại
+
+Code Git nằm ở `/opt/pacevant-source`; release ở `/opt/pacevant/releases/<sha>`, bản active là `/opt/pacevant/current`. Không đặt project trong `/root`. State nằm ở `/var/lib/pacevant/judge`. Bản `.env` đầy đủ được user cho phép copy nằm tại `/etc/pacevant/private/source.env`, root-only 0600; service chỉ dùng model-only `/etc/pacevant/judge.env` 0640. Không đưa secrets vào Git hoặc frontend.
+
+```bash
+# Lấy develop mới nhất, build, restart, healthcheck; giữ state và TLS
+sudo pacevant-update
+
+sudo systemctl status pacevant-judge nginx --no-pager
+sudo journalctl -u pacevant-judge -n 60 --no-pager
+sudo bash /opt/pacevant/current/scripts/vps/restart.sh
+sudo bash /opt/pacevant/current/scripts/vps/rollback.sh <existing-release-sha>
+```
+
+`pacevant-update` từ chối checkout dirty hoặc branch khác `develop`; pull fast-forward, không force/reset. `/etc/pacevant/deploy.env` chứa URL public cho healthcheck sau khi Certbot redirect HTTP. Đã sửa checksum replay Windows/Linux và healthcheck chờ startup tối đa khoảng 30 giây. Cập nhật cùng SHA đang active chỉ kiểm health, không rebuild. Model env thay đổi cần restart service. Deploy có thể ngắt job đang chạy; chọn lúc `/readyz` có `busy=false`.
 
 ## 1. Cài native tools
 
 SSH bằng operator account có sudo, clone repository:
 
 ```bash
-git clone --branch develop https://github.com/ursuswh-metamorphic/PaceVant.git
-cd PaceVant
+sudo git clone --branch develop https://github.com/ursuswh-metamorphic/PaceVant.git /opt/pacevant-source
+cd /opt/pacevant-source
 sudo bash scripts/vps/install.sh
 ```
 
@@ -92,6 +108,6 @@ Graceful shutdown dừng owned worker/process group. Nếu crash/reboot ở gi�
 * Backup state khi service dừng hoặc dùng SQLite online backup cho consistent snapshot. Rollback chỉ release, không rollback/xóa database hoặc on-chain state.
 * Không giữ Owner key trên VPS để auto-renew/fund. Public contract migration là công việc riêng, vẫn yêu cầu Owner review/sign; website fork không đòi public migration.
 
-## 7. Cần bạn cung cấp để nghiệm thu VPS
+## 7. Phạm vi nghiệm thu
 
-SSH endpoint/account/quyền sudo, domain/DNS và private model-only environment. Không cần dán private keys vào chat. Khi chưa có access, phần đã giao là **VPS deployment prepared**, chưa phải deployment accepted. Cần smoke trên Ubuntu 22.04 thực tế, HTTPS, resource cap, service restart/reboot (khi được cho phép), persistent quota/history và một live fork job dưới tải đo được.
+SSH/domain/config đã được cung cấp và triển khai thực tế. HTTPS, service restart, health/config, browser và recordings được kiểm riêng với live transaction outcomes. Payment acceptance trên VPS gặp stale oracle; swap có economic risk PASS nhưng ITAG trả `ITAG_SEMANTIC_UNCERTAIN`, chưa ký. Không nới policy để ép success. Chưa có multi-day soak/reboot test và chưa có live transaction CONFIRMED trên VPS. Website/replay hoạt động không đồng nghĩa dependency của mọi giao dịch luôn sẵn sàng.

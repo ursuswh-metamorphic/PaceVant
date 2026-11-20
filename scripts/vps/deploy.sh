@@ -31,10 +31,22 @@ sudo chown "$(id -u):$(id -g)" "$release"
 git -C "$repo" archive "$sha" | tar -x -C "$release"
 cd "$release"
 uv sync --locked --no-dev --python 3.12
-npm ci --prefix frontend --no-audit --no-fund
-npm run --prefix frontend build
-uv run --locked --no-dev python tools/contracts/bootstrap.py
-uv run --locked --no-dev python tools/contracts/foundry.py forge build
+previous_sha=$(basename "$previous")
+if [[ -f $previous/frontend/dist/index.html ]] && git -C "$repo" diff --quiet "$previous_sha" "$sha" -- frontend; then
+  mkdir -p frontend/dist
+  cp -a "$previous/frontend/dist/." frontend/dist/
+  echo 'Frontend source unchanged; reused previous static build.'
+else
+  npm ci --prefix frontend --no-audit --no-fund
+  npm run --prefix frontend build
+fi
+if [[ -f $previous/out/PolicyVaultMVP.sol/PolicyVaultMVP.json ]] && git -C "$repo" diff --quiet "$previous_sha" "$sha" -- contracts foundry.toml tools/contracts scripts/vps/install.sh packages/contracts-api/treasury_contracts/toolchain.py; then
+  cp -a "$previous/out" out
+  echo 'Contracts and toolchain unchanged; reused previous compiled artifacts.'
+else
+  uv run --locked --no-dev python tools/contracts/bootstrap.py
+  uv run --locked --no-dev python tools/contracts/foundry.py forge build
+fi
 # Offline simulations use the compiler already installed during this build.
 sudo install -d -o pacevant -g pacevant -m 0700 /var/lib/pacevant/.svm
 if [[ -d ${HOME}/.svm ]]; then sudo cp -a "${HOME}/.svm/." /var/lib/pacevant/.svm/; fi

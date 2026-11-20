@@ -1,5 +1,7 @@
 # PaceVant — Hiện trạng MVP hai nghiệp vụ và khả năng chạy Avalanche Fuji
 
+> **VPS đã triển khai:** https://pacevant.live, Ubuntu 22.04/2 vCPU/4 GB, native Nginx/systemd, TLS và renewal dry-run pass. Code ở `/opt/pacevant-source`, releases ở `/opt/pacevant/releases`, state `/var/lib/pacevant/judge`; private config ở `/etc/pacevant`, không để project trong `/root`. Cập nhật bằng `sudo pacevant-update`, chỉ nhánh develop. Đã sửa replay checksum CRLF/LF và startup healthcheck race. Live VPS payment gặp oracle không đủ mới; swap risk PASS nhưng ITAG semantic uncertain, chưa ký. Xem [VPS guide](../VPS_DEPLOYMENT.md) và [acceptance](audit/vps-live-acceptance.json). Các đoạn ghi “chưa có SSH/domain” bên dưới là checkpoint trước deployment; multi-day soak/reboot và public MVP migration vẫn chưa làm.
+
 > **Cập nhật giao diện và deployment mới nhất:** React/TypeScript/Vite + Tailwind + Radix/shadcn + Motion/Lucide/TanStack Query thay entrypoint judge cũ. Website có đúng ba tab, anonymous fixed-preset Judge API, isolated Fuji forks, durable quota/idempotency và verified replay có nhãn. Native Ubuntu/systemd/Nginx là đường triển khai hiện hành, không Docker. Xem [implementation summary](../IMPLEMENTATION_SUMMARY.md), [judge guide](../JUDGE_DEMO_GUIDE.md), [VPS deployment](../VPS_DEPLOYMENT.md). Nội dung operator/vanilla/container ở các checkpoint bên dưới giữ tham chiếu lịch sử; public MVP migration vẫn chưa được thực hiện.
 
 ### Lớp mới không thay core security

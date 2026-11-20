@@ -1,0 +1,68 @@
+{
+  "url": "https://pacevant.live",
+  "public_chain_broadcast": false,
+  "jobs": [
+    {
+      "job_id": "judge_369093ca5f3241a1b5f8ebd2a2a604e1",
+      "scenario": "payment",
+      "status": "UNAVAILABLE",
+      "reason_code": "FRESH_CHAINLINK_SIGNING_WINDOW_UNAVAILABLE",
+      "source_block": 61394189,
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "stages": [],
+      "recovery": [],
+      "outcome": null
+    },
+    {
+      "job_id": "judge_22c9cbeec58c432b99c1539a66ccc74e",
+      "scenario": "swap",
+      "status": "REJECTED",
+      "reason_code": "SECURITY_GATE_FAILED",
+      "source_block": 61394204,
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "REJECTION_OR_RECOVERY"
+      ],
+      "recovery": [
+        {
+          "code": "SECURITY_GATE_FAILED",
+          "signed": false,
+          "error_type": "ControlError"
+        }
+      ],
+      "outcome": null
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "service": "judge",
+    "public_chain_spending": false
+  },
+  "configured": true,
+  "admin_status": 404,
+  "all_three_replay_checksums": "PASS",
+  "https_certificate_valid": true,
+  "https_browser_and_replay": "PASS",
+  "live_swap_blocker": "ITAG_SEMANTIC_UNCERTAIN; economic risk PASS; no signature",
+  "status": "DEPLOYED_HTTPS_PASS_LIVE_DEPENDENCIES_BLOCKED",
+  "initial_verified_runtime_commit": "bab7f2caeac9e72e076b75eca2dcf652f95ff635",
+  "target_os": "Ubuntu 22.04.1 LTS",
+  "vcpus": 2,
+  "ram_mb": 3923,
+  "systemd_nginx_active": true,
+  "certbot_renewal_dry_run": "PASS",
+  "update_same_sha_no_rebuild": "PASS",
+  "state_persisted_across_release_restart": true,
+  "code_directory": "/opt/pacevant-source",
+  "release_directory": "/opt/pacevant/releases",
+  "full_env_backup": "/etc/pacevant/private/source.env (0600; not loaded by judge service)",
+  "service_env": "/etc/pacevant/judge.env (0640; model-only)"
+}

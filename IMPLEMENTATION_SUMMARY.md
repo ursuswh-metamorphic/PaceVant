@@ -32,8 +32,8 @@ Judge API mới đã có real-provider payment CONFIRMED trên Fuji fork, bao g�
 
 Kiểm tra: full Python regression **608 passed / 10 skipped** tại checkpoint; focused cuối **14 passed**; frontend **10 passed**, TypeScript/Vite build và Chromium checks passed; Foundry **109 passed**, vectors V1/V2/MVP passed. Các focused counts có overlap, không cộng dồn. Bundle chính khoảng 169 KB gzip, Vite có cảnh báo chunk trên 500 KB minified; build không lỗi. Linux/Nginx và giới hạn nghiệm thu được ghi trong `docs/audit/judge-deployment-report.json`.
 
-Linux QA dùng **Ubuntu 24.04 WSL**: Python 3.12/uv lock, non-root systemd service, Nginx static/proxy/admin block. Chưa SSH Ubuntu 22.04 VPS, chưa HTTPS domain thật, multi-day soak/reboot/tài nguyên VPS chưa nghiệm thu. Không cam kết mọi transaction luôn success khi dependency hoặc policy không cho phép.
+Đã triển khai native trên **Ubuntu 22.04 VPS, 2 vCPU/4 GB**, tại **https://pacevant.live**. Code/release nằm dưới `/opt`, private config dưới `/etc/pacevant`, SQLite dưới `/var/lib/pacevant`; không Docker/Node production server. HTTPS và simulated renewal pass. Đã sửa replay hash do CRLF/LF, startup healthcheck race và thêm lệnh `sudo pacevant-update` lấy nhánh develop. Acceptance live VPS: payment thiếu fresh oracle; swap economic risk PASS nhưng ITAG semantic uncertain, chưa ký. Multi-day soak/reboot chưa kiểm; không cam kết mọi transaction luôn success. Xem `docs/audit/vps-live-acceptance.json`.
 
 ## Hướng dẫn
 
-[Judge guide](JUDGE_DEMO_GUIDE.md), [Native VPS deployment](VPS_DEPLOYMENT.md), [current system review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md). Production còn cần SSH access, domain/DNS và model-only private env do user cung cấp riêng. Public MVP contract activation là Owner migration/signature riêng, không được bypass bởi frontend/demo mode.
+[Judge guide](JUDGE_DEMO_GUIDE.md), [Native VPS deployment](VPS_DEPLOYMENT.md), [current system review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md). SSH/domain/model env đã được cấu hình trên VPS. Public MVP contract activation vẫn là Owner migration/signature riêng, không được bypass bởi frontend/demo mode.
