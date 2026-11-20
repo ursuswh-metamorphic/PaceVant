@@ -2,6 +2,7 @@ fixtures/eip712_golden/manifest.canonical.json -text
 scripts/vps/*.sh text eol=lf
 deploy/native/* text eol=lf
 fixtures/judge/*.json text eol=lf
+fixtures/evaluation/economic-risk-v1/* text eol=lf
 *.smt2 text eol=lf
 packages/contracts-api/treasury_contracts/proof.py text eol=lf
 packages/contracts-api/treasury_contracts/v2.py text eol=lf

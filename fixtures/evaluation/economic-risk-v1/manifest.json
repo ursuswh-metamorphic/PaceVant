@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "seed": 20261121,
+  "rows": 800,
+  "families": [
+    "ordinary_swap",
+    "ordinary_payment",
+    "loss_boundary",
+    "compiled_floor",
+    "session_risk",
+    "global_risk",
+    "swap_spend",
+    "payment_caps",
+    "receipt_shortfall",
+    "exposure",
+    "stale_evidence",
+    "allowance",
+    "unverified_effects",
+    "disabled_asset_debit",
+    "invalid_price_band",
+    "mixed_market"
+  ],
+  "development": 160,
+  "test": 640,
+  "sha256": "5de9619736020275b4575625bf9d0ea7bd3ab36b381f03d9f78413968befb60c",
+  "positive_class": "REJECT",
+  "labeling": "Independent Fraction arithmetic, four price vertices, published economic obligations; no production/Z3 imports",
+  "independence_limit": "Same project specification and author; synthetic corpus, not external peer annotation or field accuracy"
+}

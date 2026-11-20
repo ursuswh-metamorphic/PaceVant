@@ -1,0 +1,83 @@
+{
+  "dataset_sha256": "5de9619736020275b4575625bf9d0ea7bd3ab36b381f03d9f78413968befb60c",
+  "same_corpus_repeats": 3,
+  "identical_decisions": true,
+  "limitation": "Determinism across three processes, not population/market stability",
+  "runs": [
+    {
+      "run": 1,
+      "test": {
+        "n": 640,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "macro_f1": 1.0,
+        "confusion_matrix": {
+          "true_reject": 288,
+          "true_approve": 352,
+          "false_rejection": 0,
+          "false_approval": 0,
+          "errors": 0
+        },
+        "false_approval_rate": 0.0,
+        "false_rejection_rate": 0.0,
+        "latency_ms": {
+          "median": 6.309,
+          "p95": 8.738
+        }
+      },
+      "decision_sha256": "1167cba39c7eba53e42f3e4e4670b5ba10e587efba5029cd5beafcf3638479de"
+    },
+    {
+      "run": 2,
+      "test": {
+        "n": 640,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "macro_f1": 1.0,
+        "confusion_matrix": {
+          "true_reject": 288,
+          "true_approve": 352,
+          "false_rejection": 0,
+          "false_approval": 0,
+          "errors": 0
+        },
+        "false_approval_rate": 0.0,
+        "false_rejection_rate": 0.0,
+        "latency_ms": {
+          "median": 6.1665,
+          "p95": 9.134
+        }
+      },
+      "decision_sha256": "1167cba39c7eba53e42f3e4e4670b5ba10e587efba5029cd5beafcf3638479de"
+    },
+    {
+      "run": 3,
+      "test": {
+        "n": 640,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "macro_f1": 1.0,
+        "confusion_matrix": {
+          "true_reject": 288,
+          "true_approve": 352,
+          "false_rejection": 0,
+          "false_approval": 0,
+          "errors": 0
+        },
+        "false_approval_rate": 0.0,
+        "false_rejection_rate": 0.0,
+        "latency_ms": {
+          "median": 6.409,
+          "p95": 8.814
+        }
+      },
+      "decision_sha256": "1167cba39c7eba53e42f3e4e4670b5ba10e587efba5029cd5beafcf3638479de"
+    }
+  ]
+}

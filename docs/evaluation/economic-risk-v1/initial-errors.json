@@ -1,0 +1,101 @@
+[
+  {
+    "id": "econ-stale_evidence-001",
+    "family": "stale_evidence",
+    "split": "development",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.193
+  },
+  {
+    "id": "econ-stale_evidence-003",
+    "family": "stale_evidence",
+    "split": "development",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.172
+  },
+  {
+    "id": "econ-stale_evidence-004",
+    "family": "stale_evidence",
+    "split": "development",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.171
+  },
+  {
+    "id": "econ-stale_evidence-006",
+    "family": "stale_evidence",
+    "split": "development",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.176
+  },
+  {
+    "id": "econ-stale_evidence-009",
+    "family": "stale_evidence",
+    "split": "development",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.168
+  },
+  {
+    "id": "econ-stale_evidence-018",
+    "family": "stale_evidence",
+    "split": "test",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.198
+  },
+  {
+    "id": "econ-stale_evidence-020",
+    "family": "stale_evidence",
+    "split": "test",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.168
+  },
+  {
+    "id": "econ-stale_evidence-021",
+    "family": "stale_evidence",
+    "split": "test",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.181
+  },
+  {
+    "id": "econ-stale_evidence-028",
+    "family": "stale_evidence",
+    "split": "test",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.177
+  },
+  {
+    "id": "econ-stale_evidence-032",
+    "family": "stale_evidence",
+    "split": "test",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.162
+  },
+  {
+    "id": "econ-stale_evidence-043",
+    "family": "stale_evidence",
+    "split": "test",
+    "gold": "APPROVE",
+    "prediction": "REJECT",
+    "reason": "ORACLE_WINDOW_UNAVAILABLE",
+    "latency_ms": 0.163
+  }
+]

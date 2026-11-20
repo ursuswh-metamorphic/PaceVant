@@ -1,0 +1,469 @@
+{
+  "dataset_sha256": "5de9619736020275b4575625bf9d0ea7bd3ab36b381f03d9f78413968befb60c",
+  "source_commit": "e5aa179ed29df1c874090121020c107b54b9945f",
+  "scope": "Synthetic offline economic admissibility: actual assess_operation + prove_operation; no RPC, simulation, signing or receipt acceptance",
+  "positive_class": "REJECT",
+  "overall": {
+    "n": 800,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "macro_f1": 1.0,
+    "confusion_matrix": {
+      "true_reject": 356,
+      "true_approve": 444,
+      "false_rejection": 0,
+      "false_approval": 0,
+      "errors": 0
+    },
+    "false_approval_rate": 0.0,
+    "false_rejection_rate": 0.0,
+    "latency_ms": {
+      "median": 6.4815000000000005,
+      "p95": 8.879
+    }
+  },
+  "development": {
+    "n": 160,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "macro_f1": 1.0,
+    "confusion_matrix": {
+      "true_reject": 68,
+      "true_approve": 92,
+      "false_rejection": 0,
+      "false_approval": 0,
+      "errors": 0
+    },
+    "false_approval_rate": 0.0,
+    "false_rejection_rate": 0.0,
+    "latency_ms": {
+      "median": 6.758,
+      "p95": 8.977
+    }
+  },
+  "test": {
+    "n": 640,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "macro_f1": 1.0,
+    "confusion_matrix": {
+      "true_reject": 288,
+      "true_approve": 352,
+      "false_rejection": 0,
+      "false_approval": 0,
+      "errors": 0
+    },
+    "false_approval_rate": 0.0,
+    "false_rejection_rate": 0.0,
+    "latency_ms": {
+      "median": 6.409,
+      "p95": 8.814
+    }
+  },
+  "per_family": {
+    "ordinary_swap": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "macro_f1": null,
+      "confusion_matrix": {
+        "true_reject": 0,
+        "true_approve": 40,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": null,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 7.895,
+        "p95": 8.915
+      }
+    },
+    "ordinary_payment": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "macro_f1": null,
+      "confusion_matrix": {
+        "true_reject": 0,
+        "true_approve": 40,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": null,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 6.098000000000001,
+        "p95": 7.06
+      }
+    },
+    "loss_boundary": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 19,
+        "true_approve": 21,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 7.2965,
+        "p95": 9.634
+      }
+    },
+    "compiled_floor": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 22,
+        "true_approve": 18,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 7.3235,
+        "p95": 9.241
+      }
+    },
+    "session_risk": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 12,
+        "true_approve": 28,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 7.7585,
+        "p95": 8.41
+      }
+    },
+    "global_risk": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 20,
+        "true_approve": 20,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 6.083,
+        "p95": 8.185
+      }
+    },
+    "swap_spend": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 11,
+        "true_approve": 29,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 7.603999999999999,
+        "p95": 8.548
+      }
+    },
+    "payment_caps": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 12,
+        "true_approve": 28,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 5.8735,
+        "p95": 6.721
+      }
+    },
+    "receipt_shortfall": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 16,
+        "true_approve": 24,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 5.7490000000000006,
+        "p95": 6.442
+      }
+    },
+    "exposure": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 19,
+        "true_approve": 21,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 7.4935,
+        "p95": 8.257
+      }
+    },
+    "stale_evidence": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 27,
+        "true_approve": 13,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 0.2395,
+        "p95": 8.339
+      }
+    },
+    "allowance": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 29,
+        "true_approve": 11,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 0.23349999999999999,
+        "p95": 8.197
+      }
+    },
+    "unverified_effects": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 27,
+        "true_approve": 13,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 0.319,
+        "p95": 8.185
+      }
+    },
+    "disabled_asset_debit": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 26,
+        "true_approve": 14,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 0.237,
+        "p95": 8.305
+      }
+    },
+    "invalid_price_band": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 26,
+        "true_approve": 14,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 0.5894999999999999,
+        "p95": 7.923
+      }
+    },
+    "mixed_market": {
+      "n": 40,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "macro_f1": 1.0,
+      "confusion_matrix": {
+        "true_reject": 22,
+        "true_approve": 18,
+        "false_rejection": 0,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 4.3265,
+        "p95": 9.202
+      }
+    }
+  },
+  "source_sha256": {
+    "backend/src/treasury_backend/modules/risk/operations.py": "8c65595a8ecec23848953bba092fb6575272969d6ddb15580b3e7af613e7ddc9",
+    "packages/contracts-api/treasury_contracts/proof_v3.py": "44ef666e6c91ec6e78e69317516ceda638c48e2dd01280cff3156e9b465b7adf",
+    "tools/evaluation/economic_oracle.py": "04b8496ab34c79e206a59b631da51001860d8ba59c5c226364c0e92edbdf46d7",
+    "tools/evaluation/build_economic_dataset.py": "527b760404c0cbbbcae24c2a1334d6c24b84b355cdab9cdded2623c19e667624",
+    "tools/evaluation/evaluate_economic_dataset.py": "3df19137efa3d92cb95cb64640b79a37146a85f6c1219b16381b09b1c183633f"
+  },
+  "limitations": [
+    "Synthetic specification conformance, not real-world predictive accuracy",
+    "Same author/team; no independent human annotation",
+    "Only USDC-input swap and USDC payment; no reverse swap or other protocols",
+    "Assumes trusted measured effects and bounded price intervals; does not evaluate oracle integrity",
+    "No tuning or claim about held-out real-world data"
+  ],
+  "baselines": {
+    "always_approve": {
+      "n": 640,
+      "accuracy": 0.55,
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "macro_f1": 0.3548387096774194,
+      "confusion_matrix": {
+        "true_reject": 0,
+        "true_approve": 352,
+        "false_rejection": 0,
+        "false_approval": 288,
+        "errors": 0
+      },
+      "false_approval_rate": 1.0,
+      "false_rejection_rate": 0.0,
+      "latency_ms": {
+        "median": 6.409,
+        "p95": 8.814
+      }
+    },
+    "always_reject": {
+      "n": 640,
+      "accuracy": 0.45,
+      "precision": 0.45,
+      "recall": 1.0,
+      "f1": 0.6206896551724138,
+      "macro_f1": 0.3103448275862069,
+      "confusion_matrix": {
+        "true_reject": 288,
+        "true_approve": 0,
+        "false_rejection": 352,
+        "false_approval": 0,
+        "errors": 0
+      },
+      "false_approval_rate": 0.0,
+      "false_rejection_rate": 1.0,
+      "latency_ms": {
+        "median": 6.409,
+        "p95": 8.814
+      }
+    }
+  },
+  "test_accuracy_wilson95": [
+    0.9940333150265532,
+    1.0000000000000002
+  ]
+}
