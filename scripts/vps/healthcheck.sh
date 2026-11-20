@@ -2,7 +2,7 @@
 set -euo pipefail
 if [[ -r /etc/pacevant/deploy.env ]]; then source /etc/pacevant/deploy.env; fi
 base=${1:-http://127.0.0.1:8000}
-curl --fail --silent --show-error --max-time 10 "$base/healthz" >/dev/null
+curl --fail --silent --show-error --max-time 3 --retry 15 --retry-connrefused --retry-delay 1 --retry-max-time 30 "$base/healthz" >/dev/null
 curl --fail --silent --show-error --max-time 10 "$base/judge/config" >/dev/null
 curl --fail --silent --show-error --max-time 10 "${PACEVANT_FRONTEND_URL:-http://127.0.0.1}/" | grep -q 'PaceVant'
 status=$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 15 "$base/readyz")
