@@ -18,6 +18,7 @@ LOOPBACK = {"127.0.0.1", "::1", "localhost"}
 
 @dataclass(frozen=True, repr=False)
 class Settings:
+    require_itag: bool = False
     planning: PlanningSettings = field(default_factory=PlanningSettings)
     shield: ShieldConfig = field(default_factory=ShieldConfig)
     mode: Mode = "MOCK"
@@ -140,6 +141,7 @@ class Settings:
         ):
             raise RuntimeError("PACEVANT_FUJI_VERIFICATION_RPC must use HTTPS or loopback HTTP")
         return cls(
+            require_itag=os.environ.get("PACEVANT_REQUIRE_ITAG", "0") == "1",
             planning=PlanningSettings.from_values(os.environ),
             shield=ShieldConfig.from_env(mode),
             cors_origins=origins,

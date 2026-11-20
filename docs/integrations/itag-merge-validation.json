@@ -1,0 +1,43 @@
+{
+  "upstream": "70bf6c7",
+  "checkpoint": "9c05936",
+  "backup_branch": "backup/pre-itag-9c05936",
+  "integration": "selective port into modular Python backend with merge ancestry",
+  "pytest": {
+    "passed": 393,
+    "skipped": 4,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 219.565,
+    "command": "python -m pytest -q --tb=short --junitxml=.control-data-v2/itag-tests.xml"
+  },
+  "additional_v2_anvil_integration": {
+    "passed": 1,
+    "scope": "Oversized V2 simulation artifact fails closed with OUTPUT_BUDGET_EXCEEDED, no attestation or swap, balances unchanged",
+    "successful_itag_v2_execution_demonstrated": false
+  },
+  "checks": {
+    "ruff": "PASS",
+    "frontend_existing_js_syntax_files": 9,
+    "itag_viewer_js_syntax": "PASS",
+    "secret_scan": "PASS",
+    "git_diff_check": "PASS",
+    "env_names_match": true,
+    "env_variable_count": 94
+  },
+  "configuration": {
+    "PACEVANT_REQUIRE_ITAG": "0",
+    "task_shield": "disabled",
+    "new_api_keys_required": false
+  },
+  "limits": [
+    "Live LLM evaluation was not performed in this merge; scripted results are not detection-accuracy evidence.",
+    "The real V2 pipeline hits the existing Task Shield 16000-character artifact budget when ITAG/Shield is enabled; representation/budget and live latency need further work before live activation.",
+    "Per-intent budgets are enforced by signers sharing SQLite, not by new Solidity logic.",
+    "Intent token direction follows upstream mandate terms; reverse ITAG support is not claimed."
+  ],
+  "solidity_and_v2_proof_engine_changed": false,
+  "public_broadcasts": 0,
+  "backend_restarted": false,
+  "push_performed": false
+}

@@ -19,6 +19,7 @@ from treasury_backend.core.models import Alignment, Goal, WorkflowRequest
 from treasury_backend.modules.alignment.api import install_shield_routes
 from treasury_backend.modules.monitoring.api import install_history_routes
 from treasury_backend.modules.oracle.fuji.fuji_service import FujiService
+from treasury_backend.modules.temporal.api import install_itag_routes
 from treasury_backend.modules.workflows.service import ControlPlane, utc_now
 from treasury_contracts.http_limits import RequestSizeLimit
 from treasury_contracts.models import Hash, SignedPDR, SimulationEvidence, TransactionProposal, Wire
@@ -93,7 +94,7 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
         app.add_middleware(
             CORSMiddleware,
             allow_origins=list(settings.cors_origins),
-            allow_methods=["GET", "POST"],
+            allow_methods=["GET", "POST", "PUT"],
             allow_headers=["Authorization", "Content-Type", "X-Request-Id"],
             allow_credentials=False,
         )
@@ -153,6 +154,7 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
         auth(request, settings.internal_token)
 
     install_shield_routes(app, [Depends(observer_operator)])
+    install_itag_routes(app, observer_operator, serve_frontend=settings.serve_frontend)
 
     def json_post(request: Request):
         if request.headers.get("Content-Type", "").split(";")[0].lower() != "application/json":
@@ -163,7 +165,9 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
         return {"status": "ok", "mode": settings.mode}
 
     @app.post("/v1/workflows/start", dependencies=[Depends(operator), Depends(json_post)])
-    def workflow_start(payload: WorkflowRequest, service: Service):
+    def workflow_start(payload: WorkflowRequest, service: Service, request: Request):
+        if payload.temporal_intent:
+            observer_operator(request)
         return service.run(payload)
 
     @app.post(

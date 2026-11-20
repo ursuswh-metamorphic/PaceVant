@@ -204,6 +204,10 @@ class TaskShield:
             provider=self.config.provider,
             model=self.config.model,
             evaluation_scope=self.provider.evaluation_scope,
+            source_message_id=message.message_id,
+            tool_call_id=message.tool_call_id,
+            tool_name=message.tool_name,
+            prompt_version=prompts.VERSION,
             results=[],
         )
         try:

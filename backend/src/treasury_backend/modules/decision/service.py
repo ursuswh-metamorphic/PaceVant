@@ -3,6 +3,7 @@ from uuid import uuid4
 from treasury_backend.core.domain import EconomicRiskAssessment, SecurityDecision
 from treasury_backend.core.models import Alignment, ChainContext, Mandate
 from treasury_backend.modules.portfolio import policy_issues
+from treasury_backend.modules.temporal.models import HybridTemporalAssessment
 from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 TTL = 30
@@ -81,6 +82,7 @@ def decide(
     risk: EconomicRiskAssessment | None = None,
     provenance_issues: list[str] | None = None,
     proof=None,
+    temporal: HybridTemporalAssessment | None = None,
 ) -> SecurityDecision:
     reasons = list(alignment.reason_codes)
     needs_proof = mandate.proof_policy is not None or (
@@ -157,6 +159,11 @@ def decide(
         verdict = "APPROVE"
     else:
         reasons.append("SIMULATION_INCOMPLETE")
+    if temporal and temporal.verdict != "PASS":
+        # Keep existing hard failures while applying the independent temporal veto.
+        severity = {"APPROVE": 0, "REPLAN": 1, "ESCALATE": 2, "REJECT": 3}
+        verdict = max(verdict, temporal.verdict, key=severity.__getitem__)
+        reasons.extend(temporal.reason_codes)
     return SecurityDecision(
         proof_context_hash=proof.context_hash if proof and proof.status == "VERIFIED" else None,
         source="SDE_V2" if mandate.proof_policy else "SDE_V1",

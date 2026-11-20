@@ -1,3 +1,5 @@
+from time import monotonic
+
 from treasury_backend.core.errors import ControlError
 from treasury_backend.modules import alignment as alignment
 from treasury_backend.modules import decision as sde
@@ -6,6 +8,7 @@ from treasury_backend.modules import planning as planner
 from treasury_backend.modules import portfolio as portfolio
 from treasury_backend.modules import proof as proof_service
 from treasury_backend.modules import risk as economic_risk
+from treasury_backend.modules.alignment.provider import inference_window
 from treasury_backend.modules.workflows.client import VerifiedExecutionClient
 from treasury_backend.modules.workflows.evidence import verify_build
 from treasury_backend.modules.workflows.mock import MockExecutionClient
@@ -19,7 +22,7 @@ STAGES = {
 
 
 class EvaluationPipeline:
-    def _run_attempts(self, workflow_id, mandate, client, goal):
+    def _run_attempts(self, workflow_id, mandate, client, goal, intent_deadline=None, workflow_started=None):
         # Resolve the remote plan before opening the 30-second approval window.
         plan = self.planner.parse(goal)
         if self.settings.planning.provider in {"rotate", "gemini", "xingchi"}:
@@ -32,13 +35,15 @@ class EvaluationPipeline:
         amount = plan.amount
         fixture = client.fixture if isinstance(client, MockExecutionClient) else {}
         for index in range(mandate.max_replans + 1):
-            now = self.clock()
             context = (
                 self._tool(workflow_id, "read_chain_context", {}, client.context)
                 if isinstance(client, VerifiedExecutionClient)
                 else None
             )
+            now = self.clock()
             deadline = self._deadline(mandate, now, context)
+            if intent_deadline:
+                deadline = min(deadline, intent_deadline)
             proposed = planner.propose(
                 mandate,
                 amount,
@@ -49,18 +54,26 @@ class EvaluationPipeline:
             self.store.event(
                 workflow_id, "PROPOSED", now, attempt=index + 1, proposal=proposed.model_dump()
             )
-            proposed, aligned = self._shield_plan(
-                workflow_id, mandate, client, goal, proposed, amount, deadline, fixture
+            decision = self._assess_plan(
+                workflow_id,
+                mandate,
+                client,
+                goal,
+                proposed,
+                amount,
+                fixture,
+                context,
+                workflow_started,
             )
-            self.store.event(
-                workflow_id, aligned.verdict, self.clock(), alignment=aligned.model_dump()
-            )
-            decision = self._evaluate(workflow_id, mandate, client, proposed, aligned, context)
             runtime = self.shield_runtimes.get(workflow_id)
             if runtime:
                 for shield_retry in range(self.settings.shield.max_replans):
                     feedback = runtime.last_feedback
-                    if feedback is None or feedback.code == "TASK_SHIELD_UNAVAILABLE":
+                    if (
+                        feedback is None
+                        or feedback.code == "TASK_SHIELD_UNAVAILABLE"
+                        or self.clock() >= decision.expires_at
+                    ):
                         break
                     self.shield.state.event(
                         runtime.session_id,
@@ -73,16 +86,21 @@ class EvaluationPipeline:
                         },
                     )
                     # The original candidate and rejected tool output are never reused as executable instructions.
-                    proposed = planner.revise(
-                        mandate, amount, self._deadline(mandate, self.clock(), context), feedback,
-                        reverse=proposed.token_in == mandate.token_out,
-                    )
+                    retry_deadline = self._deadline(mandate, self.clock(), context)
+                    if intent_deadline:
+                        retry_deadline = min(retry_deadline, intent_deadline)
+                    proposed = planner.revise(mandate, amount, retry_deadline, feedback, reverse=proposed.token_in == mandate.token_out)
                     runtime.last_feedback = None
-                    proposed, aligned = self._shield_plan(
-                        workflow_id, mandate, client, goal, proposed, amount, proposed.deadline, {}
-                    )
-                    decision = self._evaluate(
-                        workflow_id, mandate, client, proposed, aligned, context
+                    decision = self._assess_plan(
+                        workflow_id,
+                        mandate,
+                        client,
+                        goal,
+                        proposed,
+                        amount,
+                        {},
+                        context,
+                        workflow_started,
                     )
                 if runtime.last_feedback:
                     self.shield.state.event(
@@ -114,12 +132,17 @@ class EvaluationPipeline:
                 return
             amount = replacement
 
-    def _evaluate(self, workflow_id, mandate, client, proposal, aligned, context=None):
+    def _evaluate(
+        self, workflow_id, mandate, client, proposal, aligned, context=None, workflow_started=None
+    ):
+        evaluation_started = monotonic()
         built = sim = evaluation = balances = snapshot = observation = None
         proof = None
         issues = []
         try:
-            context = context or self._tool(workflow_id, "read_chain_context", {}, client.context)
+            context = context or self._tool(
+                workflow_id, "read_chain_context", {}, client.context, deadline=proposal.deadline
+            )
             issues = portfolio.policy_issues(mandate, context, self.clock())
             if aligned.verdict == "ALIGNED" and not issues:
                 self.require_priced_assets(mandate)
@@ -134,7 +157,11 @@ class EvaluationPipeline:
                     issues.append("TRADE_SIZE_LIMIT")
                     raise ControlError("TRADE_SIZE_LIMIT")
                 built = self._tool(
-                    workflow_id, "build_swap", proposal.model_dump(), lambda: client.build(proposal)
+                    workflow_id,
+                    "build_swap",
+                    proposal.model_dump(),
+                    lambda: client.build(proposal),
+                    deadline=proposal.deadline,
                 )
                 verify_build(mandate, proposal, built)
                 self.store.event(workflow_id, "BUILT", self.clock(), build=built.model_dump())
@@ -143,13 +170,17 @@ class EvaluationPipeline:
                     "simulate_swap",
                     {"build": built.model_dump()},
                     lambda: client.simulate(built),
+                    deadline=proposal.deadline,
                 )
-                balances = self._tool(workflow_id, "read_portfolio", {}, client.balances)
+                balances = self._tool(
+                    workflow_id, "read_portfolio", {}, client.balances, deadline=proposal.deadline
+                )
                 context = self._tool(
                     workflow_id,
                     "read_chain_context",
                     {"build_id": built.build_id, "fork_block": sim.fork_block},
                     lambda: client.context(built=built, fork_block=sim.fork_block),
+                    deadline=proposal.deadline,
                 )
                 issues = self.verify_evidence(client, built, sim, context, workflow_id)
                 observation = self._tool(
@@ -165,6 +196,7 @@ class EvaluationPipeline:
                         built=built,
                         phase="PRE",
                     ),
+                    deadline=proposal.deadline,
                 )
                 self.store.event(
                     workflow_id,
@@ -203,6 +235,17 @@ class EvaluationPipeline:
                 except ControlError as balance_error:
                     issues.append(balance_error.code)
 
+        temporal, temporal_hash = self.temporal.evaluate(
+            workflow_id,
+            mandate,
+            proposal,
+            built,
+            sim,
+            observation,
+            aligned,
+            self.shield_runtimes.get(workflow_id),
+        )
+        sde_started = monotonic()
         decision = sde.decide(
             mandate,
             proposal,
@@ -214,7 +257,25 @@ class EvaluationPipeline:
             risk=evaluation.risk if evaluation else None,
             provenance_issues=issues,
             proof=proof,
+            temporal=temporal,
         )
+        if temporal:
+            self.store.event(
+                workflow_id,
+                "ITAG_ASSESSED",
+                self.clock(),
+                assessment_hash=temporal_hash,
+                verdict=temporal.verdict,
+                reason_codes=temporal.reason_codes,
+                timing_ms={
+                    **temporal.timing_ms,
+                    "evaluation_through_sde": int((monotonic() - evaluation_started) * 1000),
+                    "workflow_through_sde": int(
+                        (monotonic() - (workflow_started or evaluation_started)) * 1000
+                    ),
+                    "sde": int((monotonic() - sde_started) * 1000),
+                },
+            )
         suggested = evaluation.suggested_amount if evaluation else 0
         if decision.verdict == "REPLAN" and not evaluation and "TRADE_SIZE_LIMIT" in issues:
             reverse = proposal.token_in.lower() == mandate.token_out
@@ -236,6 +297,12 @@ class EvaluationPipeline:
                         - int(balances.daily_spent_usdc_base_units),
                     ),
                 )
+        if temporal and temporal.suggested_amount is not None:
+            suggested = (
+                min(suggested, int(temporal.suggested_amount))
+                if suggested
+                else int(temporal.suggested_amount)
+            )
         evidence = (
             {
                 "risk": evaluation.risk.model_dump(),
@@ -261,6 +328,7 @@ class EvaluationPipeline:
                 **({"proof": proof.model_dump(mode="json")} if proof else {}),
                 "chain_context": context.model_dump() if context else None,
                 "pre_snapshot_id": observation.snapshot_id if observation else None,
+                "itag_assessment_hash": temporal_hash,
                 "task_shield_proof": self.shield_runtimes[workflow_id].proof(proposal)
                 if workflow_id in self.shield_runtimes
                 else None,
@@ -278,3 +346,26 @@ class EvaluationPipeline:
                 build_id=built.build_id if built else None,
             )
         return decision
+
+    def _assess_plan(
+        self,
+        workflow_id,
+        mandate,
+        client,
+        goal,
+        proposed,
+        amount,
+        fixture,
+        context,
+        workflow_started,
+    ):
+        with inference_window(proposed.deadline - self.clock()):
+            proposed, aligned = self._shield_plan(
+                workflow_id, mandate, client, goal, proposed, amount, proposed.deadline, fixture
+            )
+            self.store.event(
+                workflow_id, aligned.verdict, self.clock(), alignment=aligned.model_dump()
+            )
+            return self._evaluate(
+                workflow_id, mandate, client, proposed, aligned, context, workflow_started
+            )

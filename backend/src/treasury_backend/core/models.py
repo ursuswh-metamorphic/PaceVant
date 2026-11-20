@@ -11,10 +11,18 @@ Goal = Annotated[str, StringConstraints(min_length=1, max_length=500)]
 Scenario = Literal["normal_swap", "exposure_limit", "stale_price", "injection"]
 
 
+class IntentSelection(Wire):
+    spec_id: Id
+    revision: int = Field(ge=1)
+    step_id: Id
+
+
+
 class WorkflowRequest(Wire):
     goal: Goal
     mandate_id: Id
     scenario: Scenario | None = None
+    temporal_intent: IntentSelection | None = None
 
 
 class Mandate(Wire):

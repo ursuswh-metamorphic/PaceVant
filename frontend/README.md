@@ -1,5 +1,7 @@
 # Frontend
 
+The optional ITAG evidence viewer is served at `/itag` by the unified backend; its static files are `itag.html`, `itag-viewer.js`, and `itag-viewer.css`. It loads authenticated assessment/node APIs with an operator token kept in tab memory. It is hidden when `PACEVANT_SERVE_FRONTEND=false`. It inspects existing assessments; it does not create intents or authorize transactions. See [ITAG integration](../docs/integrations/ITAG_MAIN_SYNC.md).
+
 Static HTML/CSS and browser ES modules. No Node.js server, bundler or wallet extension is required to use the dashboard. Node is optional for developer syntax/vector checks only.
 
 | Folder | Owns |

@@ -74,6 +74,10 @@ class CheckReport(Wire):
     provider: str
     model: str
     evaluation_scope: str
+    source_message_id: Id | None = None
+    tool_call_id: Id | None = None
+    tool_name: Id | None = None
+    prompt_version: str | None = None
 
 
 class TaskUpdate(Wire):

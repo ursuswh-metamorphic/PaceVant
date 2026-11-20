@@ -73,7 +73,7 @@ def a_environment(p, *, source_root=None):
             for name, value in p.values.items()
             if name.startswith(("GROQ_", "GEMINI_", "XINGCHI_"))
             or name.startswith("PACEVANT_SHIELD_")
-            or name in {"PACEVANT_PLANNER_PROVIDER", "PACEVANT_AI_ROTATION_ORDER"}
+            or name in {"PACEVANT_PLANNER_PROVIDER", "PACEVANT_AI_ROTATION_ORDER", "PACEVANT_REQUIRE_ITAG"}
         }
     )
     return safe_environment(values)

@@ -7,7 +7,10 @@ from treasury_backend.modules import decision as sde
 from treasury_backend.modules import portfolio as portfolio
 from treasury_backend.modules import proof as proof_service
 from treasury_backend.modules import risk as economic_risk
+from treasury_backend.modules.alignment.provider import inference_window
 from treasury_backend.modules.alignment.runtime import ShieldRuntime
+from treasury_backend.modules.temporal import storage as temporal_storage
+from treasury_backend.modules.temporal.models import HybridTemporalAssessment
 from treasury_backend.modules.workflows.evidence import verify_build
 from treasury_backend.modules.workflows.mock import MockExecutionClient
 from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
@@ -20,6 +23,8 @@ class AuthorizationPipeline:
     def _approved(self, id_) -> ApprovedAttempt:
         workflow_id, bundle = self.store.decision(decision_id=id_)
         decision = SecurityDecision.model_validate(bundle["decision"])
+        if self.settings.require_itag and not bundle.get("itag_assessment_hash"):
+            raise ControlError("ITAG_APPROVAL_PROOF_REQUIRED", 403)
         if decision.verdict != "APPROVE" or decision.decision_id != id_:
             raise ControlError("DECISION_NOT_APPROVED", 403)
         if bundle["mode"] != self.settings.mode:
@@ -80,6 +85,11 @@ class AuthorizationPipeline:
     def _verify_approval(self, approved: ApprovedAttempt):
         mandate, built, sim = approved.mandate, approved.built, approved.evidence
         _, bundle = self.store.decision(decision_id=approved.decision.decision_id)
+        temporal = None
+        if bundle.get("itag_assessment_hash"):
+            with self.store.connection() as conn:
+                _, body, _ = temporal_storage.load(conn, bundle["itag_assessment_hash"])
+            temporal = HybridTemporalAssessment.model_validate(body)
         proof = bundle.get("task_shield_proof")
         if self.shield.active or proof:
             if not proof or not proof.get("check_ids") or proof.get("unresolved_feedback"):
@@ -223,6 +233,7 @@ class AuthorizationPipeline:
             risk=risk,
             provenance_issues=issues,
             proof=proof,
+            temporal=temporal,
         )
         if recomputed.verdict != "APPROVE" or now >= approved.decision.expires_at:
             raise ControlError(next(iter(recomputed.reason_codes), "STALE_REQUIRES_REEVALUATION"))
@@ -253,7 +264,8 @@ class AuthorizationPipeline:
         id_ = decision.decision_id
         try:
             approved = self._approved(id_)
-            client, _ = self._verify_approval(approved)
+            if self.clock() >= decision.expires_at:
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
         except ControlError as error:
             self.store.transition(
                 workflow_id, id_, "ATTESTED", "EXPIRED", self.clock(), reason_codes=[error.code]
@@ -271,11 +283,12 @@ class AuthorizationPipeline:
                     raise ControlError("TASK_SHIELD_SESSION_NOT_FOUND")
                 runtime = ShieldRuntime(self.shield, session["id"])
             try:
-                execute_call = runtime.before(
-                    "execute_approved_swap",
-                    {"build": built.model_dump(), "decision_id": id_},
-                    approved.proposal.user_goal_reason,
-                )
+                with inference_window(decision.expires_at - self.clock()):
+                    execute_call = runtime.before(
+                        "execute_approved_swap",
+                        {"build": built.model_dump(), "decision_id": id_},
+                        approved.proposal.user_goal_reason,
+                    )
                 # A concurrent user cancellation invalidates the saved approval even if the model said yes.
                 _, saved = self.store.decision(decision_id=id_)
                 proof = saved["task_shield_proof"]
@@ -285,9 +298,22 @@ class AuthorizationPipeline:
                     workflow_id, id_, "ATTESTED", "EXPIRED", self.clock(), reason_codes=[error.code]
                 )
                 return
-        if not self.store.transition(workflow_id, id_, "ATTESTED", "SUBMITTING", self.clock()):
+        try:
+            # A final tool check can spend part of the signing window. Re-read
+            # deterministic evidence after it finishes, immediately before submission.
+            if self.clock() >= decision.expires_at:
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
+            client, _ = self._verify_approval(approved)
+            started = self.store.transition(
+                workflow_id, id_, "ATTESTED", "SUBMITTING", self.clock()
+            )
+        except ControlError as error:
+            self.store.transition(
+                workflow_id, id_, "ATTESTED", "EXPIRED", self.clock(), reason_codes=[error.code]
+            )
+            return
+        if not started:
             raise ControlError("SUBMISSION_ALREADY_STARTED")
-        self.store.track_execution(workflow_id, id_, self.settings.mode, built, self.clock())
         if self.clock() >= decision.expires_at:
             self.store.transition(
                 workflow_id,
@@ -298,6 +324,7 @@ class AuthorizationPipeline:
                 reason_codes=["STALE_REQUIRES_REEVALUATION"],
             )
             return
+        self.store.track_execution(workflow_id, id_, self.settings.mode, built, self.clock())
         try:
             submission = client.execute(built, pdr)
         except ControlError as error:

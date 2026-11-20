@@ -1,6 +1,6 @@
 import json
 from secrets import randbelow
-from time import time
+from time import monotonic, time
 from uuid import uuid4
 
 import httpx
@@ -22,6 +22,8 @@ from treasury_backend.modules.oracle import build_provider
 from treasury_backend.modules.oracle.fuji.fuji_data import LFJ_TEST_USDC
 from treasury_backend.modules.persistence import Store
 from treasury_backend.modules.signing import Attestor
+from treasury_backend.modules.temporal import storage as temporal_storage
+from treasury_backend.modules.temporal.service import TemporalService
 from treasury_backend.modules.workflows.client import ExecutionClient, RestExecutionClient
 from treasury_backend.modules.workflows.evidence import evidence_issues, json_object
 from treasury_backend.modules.workflows.fuji import FujiVerifier
@@ -44,6 +46,7 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
         self.store = Store(settings.db)
         self.planner = planner.GoalPlanner(settings.planning, settings.db.parent)
         self.shield = TaskShield(self.store, settings.shield, clock=clock)
+        self.temporal = TemporalService(self.store, self.shield, settings.mode, clock)
         self.shield_runtimes = {}
         if settings.mode == "MOCK":
             key_bytes = (1 + randbelow(SECPK1_N - 1)).to_bytes(32, "big")
@@ -80,7 +83,11 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
         gate = (
             (
                 lambda ref, read: self._tool(
-                    workflow_id, "read_simulation_artifact", {"reference": ref}, read
+                    workflow_id,
+                    "read_simulation_artifact",
+                    {"reference": ref},
+                    read,
+                    deadline=built.deadline,
                 )
             )
             if workflow_id in self.shield_runtimes
@@ -227,7 +234,27 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
         }
 
     def run(self, payload):
+        workflow_started = monotonic()
         mandate = self.mandate(payload.mandate_id)
+        selection = payload.temporal_intent
+        if self.settings.require_itag and selection is None:
+            raise ControlError("ITAG_STRUCTURED_INTENT_REQUIRED", 422)
+        intent_deadline = None
+        if selection:
+            if not self.shield.active:
+                raise ControlError("ITAG_ACTIVE_TASK_SHIELD_REQUIRED", 409)
+            with self.store.connection() as conn:
+                spec = temporal_storage.current(conn, selection.spec_id)
+            if (
+                spec.status != "AUTHENTICATED"
+                or spec.revision != selection.revision
+                or spec.terms.mandate_id != mandate.mandate_id
+                or spec.mode != self.settings.mode
+                or not any(s.step_id == selection.step_id for s in spec.terms.steps)
+                or self.clock() >= spec.terms.deadline
+            ):
+                raise ControlError("ITAG_INTENT_NOT_ACTIVE_FOR_WORKFLOW", 409)
+            intent_deadline = spec.terms.deadline
         if self.settings.mode != "MOCK" and payload.scenario is not None:
             raise ControlError("MOCK_SCENARIO_FORBIDDEN", 422)
         workflow_id = f"workflow_{uuid4().hex}"
@@ -242,7 +269,9 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
                 "scenario": scenario,
                 "mandate_id": mandate.mandate_id,
                 **self.planner.metadata,
+                **({"temporal_intent": selection.model_dump()} if selection else {}),
             },
+            temporal_intent=selection,
         )
         try:
             if self.shield.active:
@@ -256,7 +285,9 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
                     authenticated=True,
                 )
                 self.shield_runtimes[workflow_id] = ShieldRuntime(self.shield, session_id)
-            self._run_attempts(workflow_id, mandate, client, payload.goal)
+            self._run_attempts(
+                workflow_id, mandate, client, payload.goal, intent_deadline, workflow_started
+            )
         except ControlError as error:
             trace = getattr(self.planner.provider, "last_attempts", [])
             self.store.event(workflow_id, "ESCALATED", self.clock(), reason_codes=[error.code],
@@ -310,9 +341,21 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
             )
         return observation
 
-    def _tool(self, workflow_id, name, arguments, execute):
+    def _tool(self, workflow_id, name, arguments, execute, *, deadline=None):
         runtime = self.shield_runtimes.get(workflow_id)
-        return runtime.invoke(name, arguments, execute) if runtime else execute()
+        if deadline is None:
+            return runtime.invoke(name, arguments, execute) if runtime else execute()
+
+        def within_window():
+            if self.clock() >= deadline:
+                raise ControlError("STALE_REQUIRES_REEVALUATION")
+
+        def checked_execute():
+            within_window()
+            return execute()
+
+        within_window()
+        return runtime.invoke(name, arguments, checked_execute) if runtime else execute()
 
     def check_alignment(self, mandate, proposal, goal, tool_output=""):
         if not self.shield.active:

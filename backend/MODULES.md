@@ -8,6 +8,7 @@ This is a modular monolith served by one FastAPI/Uvicorn process. Folders are di
 | Alignment / Task Shield | `modules/alignment` | deterministic constraints; `TaskShield` / `ShieldRuntime`, objective revisions and tool interception |
 | Portfolio | `modules/portfolio` | `PortfolioReader.collect`, `decision_snapshot` -> observed / authorization snapshots |
 | Outcome reconciliation | `modules/monitoring` | `OutcomeMonitor`, read-only worker and authenticated history APIs |
+| Intent budgets / temporal evidence | `modules/temporal` | `TemporalService`, authenticated IntentSpec, graph/verifier/semantic fusion and atomic approval revalidation |
 | Pricing | `modules/oracle` | `PriceProvider.read` -> `OraclePrice` |
 | Economic risk | `modules/risk` | `evaluate` -> risk assessment |
 | Proof mapping | `modules/proof` | `prove` -> shared proof evidence |

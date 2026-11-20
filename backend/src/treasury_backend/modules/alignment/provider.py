@@ -4,6 +4,8 @@ import json
 import os
 import re
 import time
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from decimal import Decimal
 from urllib.parse import urlsplit
@@ -11,6 +13,20 @@ from urllib.parse import urlsplit
 import httpx
 
 from treasury_backend.core.errors import ControlError
+
+_inference_deadline = ContextVar("pacevant_inference_deadline", default=None)
+
+
+@contextmanager
+def inference_window(seconds):
+    end = time.monotonic() + seconds
+    previous = _inference_deadline.get()
+    token = _inference_deadline.set(end if previous is None else min(previous, end))
+    try:
+        yield
+    finally:
+        _inference_deadline.reset(token)
+
 
 SECRET_FIELD = re.compile(
     r"private.?key|attestor.?key|signature|authorization|api.?key|password|mnemonic|secret|raw.?tx|signed.?pdr",
@@ -195,6 +211,12 @@ class ChatProvider:
         if self.config.temperature is not None:
             payload["temperature"] = self.config.temperature
         started = time.monotonic()
+        timeout = self.config.timeout
+        deadline = _inference_deadline.get()
+        if deadline is not None:
+            timeout = min(timeout, deadline - started)
+            if timeout <= 0:
+                raise ControlError("TASK_SHIELD_INFERENCE_WINDOW_EXPIRED", 409)
         try:
             with self.http.stream(
                 "POST",
@@ -204,16 +226,13 @@ class ChatProvider:
                     "Authorization": "Bearer " + self.config.api_key,
                     "User-Agent": self.config.user_agent,
                 },
-                timeout=self.config.timeout,
+                timeout=timeout,
                 follow_redirects=False,
             ) as response:
                 response.raise_for_status()
                 data = bytearray()
                 for chunk in response.iter_bytes():
-                    if (
-                        len(data) + len(chunk) > 262144
-                        or time.monotonic() - started > self.config.timeout
-                    ):
+                    if len(data) + len(chunk) > 262144 or time.monotonic() - started >= timeout:
                         raise ControlError("TASK_SHIELD_PROVIDER_LIMIT", 503)
                     data.extend(chunk)
                 raw = json.loads(data)

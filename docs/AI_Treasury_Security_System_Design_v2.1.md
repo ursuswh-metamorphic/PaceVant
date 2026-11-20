@@ -1,5 +1,7 @@
 # PaceVant — Thiết kế hệ thống V2.1 hiện tại
 
+**ITAG từ main@70bf6c7:** đã tích hợp intent budget/ordered tasks, temporal graph, semantic assessment, atomic revalidation và viewer `/itag`. [Thiết kế tích hợp và giới hạn hiện tại](integrations/ITAG_MAIN_SYNC.md). ITAG là opt-in; thử nghiệm V2 Anvil có Shield tái hiện artifact quá giới hạn, nên chưa nghiệm thu live V2 có ITAG. Luồng V2 hiện tại không chọn ITAG vẫn giữ nguyên kiểm tra an toàn.
+
 **Đồng bộ main:** đã đưa Task Shield, portfolio observation/history và read-only outcome reconciliation từ `main@08c35df` vào backend module. Bộ đối soát được bổ sung hỗ trợ PDR V2/Phi/ProofCommitted và đường Fuji Circle USDC hiện có; worker nằm trong cùng FastAPI. [Thiết kế luồng bổ sung, API, cấu hình và kiểm chứng](integrations/MAIN_SYNC_2026_11_20.md). `.env` hiện tắt LLM Task Shield để giữ luồng demo đã kiểm chứng; cần đánh giá latency/artifact trước khi bật `paper`/`wallet_hardened`. Không đồng nhất các kết quả scripted tests của shield với độ chính xác AI hoặc với một giao dịch Fuji mới được shield bảo vệ.
 
 **Cập nhật AI provider:** planner hỗ trợ failover `Gemini/Gemma 4 → Groq → Xingchi gpt-6.1-sol`, với quota/cache/cooldown riêng và trace provider thực dùng trong event `PLANNED`. [Cấu hình và kiểm chứng live](integrations/AI_PROVIDER_ROTATION.md). Không có fallback fixture/rules khi provider lỗi; sai amount/direction vẫn từ chối và mọi gate risk/proof/signing giữ nguyên. Các mô tả Groq-only bên dưới là provider ban đầu; entrypoint `GoalPlanner` hiện chọn theo cấu hình này.
