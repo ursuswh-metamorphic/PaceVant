@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 620" role="img" aria-label="PaceVant: kiểm chứng ý định trước khi AI Agent được phép thực thi giao dịch">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#080F1C"/><stop offset="1" stop-color="#0F2030"/></linearGradient>
+  <radialGradient id="halo"><stop offset="0" stop-color="#65E8BD" stop-opacity=".24"/><stop offset="1" stop-color="#65E8BD" stop-opacity="0"/></radialGradient>
+  <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7BCCEF"/><stop offset="1" stop-color="#65E8BD"/></linearGradient>
+  <pattern id="grid" width="43" height="43" patternUnits="userSpaceOnUse"><path d="M43 0H0V43" fill="none" stroke="#2D4958" stroke-width=".75" opacity=".28"/></pattern>
+</defs>
+<rect width="1600" height="620" rx="28" fill="url(#bg)"/>
+<rect width="1600" height="620" rx="28" fill="url(#grid)" opacity=".66"/>
+<circle cx="1200" cy="265" r="460" fill="url(#halo)"/>
+<path d="M0 540Q350 470 720 565T1600 520" fill="none" stroke="#65E8BD" stroke-opacity=".08" stroke-width="3"/>
+<g transform="translate(88,78)">
+ <path d="M23 0L47 9V30C47 47 36 57 23 64C10 57 0 47 0 30V9Z" fill="#65E8BD" fill-opacity=".16" stroke="#65E8BD" stroke-width="2.4"/>
+ <path d="M13 31l7 7 15 -18" fill="none" stroke="#65E8BD" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+ <text x="66" y="46" font-family="Arial,Helvetica,sans-serif" font-size="50" font-weight="800" letter-spacing="-2.5" fill="#F6FBFF">PaceVant</text>
+ <rect x="292" y="15" width="168" height="31" rx="15" fill="#133936" stroke="#65E8BD" stroke-opacity=".4"/>
+ <text x="376" y="35" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="12" letter-spacing="1.2" font-weight="700" fill="#65E8BD">AI × WEB3 SECURITY</text>
+</g>
+<text x="92" y="226" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700" letter-spacing="3.6" fill="#65E8BD">VERIFY BEFORE EXECUTE</text>
+<text x="88" y="298" font-family="Arial,Helvetica,sans-serif" font-size="53" font-weight="800" letter-spacing="-2.0" fill="#F6FBFF">AI có thể lập kế hoạch.</text>
+<text x="88" y="366" font-family="Arial,Helvetica,sans-serif" font-size="53" font-weight="800" letter-spacing="-2.0" fill="#F6FBFF">Quyền sử dụng tài sản</text>
+<text x="88" y="434" font-family="Arial,Helvetica,sans-serif" font-size="53" font-weight="800" letter-spacing="-2.0" fill="#65E8BD">phải được xác minh.</text>
+<text x="92" y="489" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#A8BCC9">Intent-aware security for autonomous treasury agents</text>
+<rect x="88" y="521" width="176" height="41" rx="20" fill="#133936" stroke="#65E8BD" stroke-opacity=".42"/>
+<text x="176" y="547" text-anchor="middle" font-size="15" font-weight="700" font-family="Arial,Helvetica,sans-serif" fill="#65E8BD">Hybrid TaskShield</text>
+<rect x="275" y="521" width="129" height="41" rx="20" fill="#122937" stroke="#2D4958"/>
+<text x="340" y="547" text-anchor="middle" font-size="15" font-weight="700" font-family="Arial,Helvetica,sans-serif" fill="#A8BCC9">Hybrid ITAG</text>
+<rect x="415" y="521" width="159" height="41" rx="20" fill="#122937" stroke="#2D4958"/>
+<text x="495" y="547" text-anchor="middle" font-size="15" font-weight="700" font-family="Arial,Helvetica,sans-serif" fill="#A8BCC9">On-chain policy</text>
+<g opacity=".9">
+ <path d="M1107 70l196 0" stroke="#2D4958" stroke-width="2" stroke-dasharray="4 9"/>
+ <path d="M1118 530l200 0" stroke="#2D4958" stroke-width="2" stroke-dasharray="4 9"/>
+ <path d="M1230 90V522" stroke="#2D4958" stroke-width="2" stroke-dasharray="3 13" opacity=".5"/>
+ <circle cx="1230" cy="310" r="224" fill="none" stroke="#65E8BD" stroke-opacity=".18" stroke-width="2"/>
+ <circle cx="1230" cy="310" r="176" fill="none" stroke="#7BCCEF" stroke-opacity=".14" stroke-width="1.5" stroke-dasharray="3 13"/>
+</g>
+<path d="M1260 156l65 25v60c0 62-34 103-65 118-32-15-65-56-65-118v-60z" fill="#65E8BD" fill-opacity=".11" stroke="url(#stroke)" stroke-width="3"/>
+<path d="M1227 254l24 23 41-53" fill="none" stroke="#65E8BD" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="926" y="65" width="392" height="90" rx="18" fill="#122937" stroke="#2D4958" stroke-width="1.6"/><circle cx="956" cy="95" r="10" fill="#65E8BD" fill-opacity=".18" stroke="#65E8BD" stroke-width="1.5"/><path d="M952 95 l3 3 5 -6" fill="none" stroke="#65E8BD" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><text x="976" y="100" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700" fill="#F6FBFF">AUTHENTICATED INTENT</text><text x="956" y="127" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#A8BCC9">Nguồn quyền hạn đã xác thực</text>
+<rect x="1005" y="376" width="430" height="90" rx="18" fill="#122937" stroke="#2D4958" stroke-width="1.6"/><circle cx="1035" cy="406" r="10" fill="#7BCCEF" fill-opacity=".18" stroke="#7BCCEF" stroke-width="1.5"/><path d="M1031 406 l3 3 5 -6" fill="none" stroke="#7BCCEF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><text x="1055" y="411" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700" fill="#F6FBFF">VERIFIED DECISION</text><text x="1035" y="438" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#A8BCC9">Constraints  •  Temporal graph  •  Proof</text>
+<path d="M1140 155C1130 168 1143 179 1154 191" stroke="#65E8BD" stroke-width="2.2" fill="none" stroke-dasharray="5 7"/>
+<path d="M1311 354v20" stroke="#65E8BD" stroke-width="2.2" fill="none"/>
+<path d="M1305 366l6 8 6-8" stroke="#65E8BD" stroke-width="2.2" fill="none"/>
+<rect x="1135" y="493" width="295" height="44" rx="16" fill="#133936" stroke="#65E8BD" stroke-opacity=".5"/>
+<text x="1282" y="521" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing=".5" fill="#65E8BD">SIGNED PDR → POLICYVAULT</text>
+</svg>

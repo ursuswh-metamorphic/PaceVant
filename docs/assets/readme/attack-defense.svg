@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 490" role="img" aria-label="Minh họa bài kiểm thử ITAG trên Anvil: ngân sách 20 USDC, hai giao dịch 10 USDC, giao dịch thứ ba bị chặn trước signing">
+<defs><linearGradient id="back" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#0B1726"/><stop offset="1" stop-color="#142432"/></linearGradient></defs>
+<rect width="1600" height="490" rx="24" fill="url(#back)"/>
+<text x="58" y="58" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700" letter-spacing="2.5" fill="#70E2C2">ATTACK → DETECTION → ENFORCEMENT</text>
+<text x="58" y="98" font-family="Arial,Helvetica,sans-serif" font-size="29" font-weight="700" fill="#F1F7FB">Một giao dịch đúng chưa có nghĩa toàn bộ chuỗi được phép</text>
+<g font-family="Arial,Helvetica,sans-serif">
+ <rect x="57" y="145" width="334" height="219" rx="18" fill="#172D3A" stroke="#34505D" stroke-width="1.6"/>
+ <rect x="81" y="166" width="112" height="28" rx="14" fill="#234841"/><text x="137" y="185" text-anchor="middle" font-size="13" font-weight="700" fill="#86EEC5">MANDATE</text>
+ <text x="82" y="247" font-size="48" font-weight="800" fill="#FCFFFF">20 USDC</text>
+ <text x="82" y="283" font-size="18" font-weight="700" fill="#E2ECF2">Tổng ngân sách tác vụ</text>
+ <text x="82" y="315" font-size="15" fill="#9DB2C3">Được cấp quyền có giới hạn</text>
+
+ <rect x="437" y="145" width="334" height="219" rx="18" fill="#172D3A" stroke="#34505D" stroke-width="1.6"/>
+ <rect x="461" y="166" width="118" height="28" rx="14" fill="#234841"/><text x="520" y="185" text-anchor="middle" font-size="13" font-weight="700" fill="#86EEC5">CONFIRMED</text>
+ <text x="461" y="246" font-size="46" font-weight="800" fill="#FCFFFF">10 + 10</text>
+ <text x="461" y="283" font-size="18" font-weight="700" fill="#E2ECF2">Hai swap hợp lệ</text>
+ <text x="461" y="315" font-size="15" fill="#9DB2C3">LOCAL receipts đã đối soát</text>
+
+ <rect x="817" y="145" width="334" height="219" rx="18" fill="#172D3A" stroke="#B48B57" stroke-width="1.6"/>
+ <rect x="841" y="166" width="119" height="28" rx="14" fill="#4A3A2C"/><text x="901" y="185" text-anchor="middle" font-size="13" font-weight="700" fill="#F1CA87">PROPOSED</text>
+ <text x="841" y="246" font-size="48" font-weight="800" fill="#FCFFFF">+ 10 USDC</text>
+ <text x="841" y="283" font-size="18" font-weight="700" fill="#E2ECF2">Yêu cầu giao dịch thứ ba</text>
+ <text x="841" y="315" font-size="15" fill="#BFA88C">Có thể hợp lệ nếu chỉ xét riêng</text>
+
+ <rect x="1197" y="145" width="346" height="219" rx="18" fill="#252B39" stroke="#CE727A" stroke-width="2"/>
+ <rect x="1221" y="166" width="112" height="28" rx="14" fill="#58323B"/><text x="1277" y="185" text-anchor="middle" font-size="13" font-weight="700" fill="#FFADB4">ITAG VETO</text>
+ <path d="M1238 224l18 18m0-18l-18 18" stroke="#FF9EA7" stroke-linecap="round" stroke-width="6"/>
+ <text x="1271" y="246" font-size="37" font-weight="800" fill="#FFE9E9">BLOCKED</text>
+ <text x="1222" y="283" font-size="18" font-weight="700" fill="#F0E1E7">Budget 30 &gt; 20 USDC</text>
+ <text x="1222" y="315" font-size="15" fill="#F0BEC2">Không ký · relayer nonce giữ nguyên</text>
+</g>
+<g stroke="#75E5BF" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round">
+ <path d="M398 254h31m-10-8l10 8-10 8"/>
+ <path d="M778 254h31m-10-8l10 8-10 8"/>
+ <path d="M1158 254h31m-10-8l10 8-10 8" stroke="#E6AC79"/>
+</g>
+<line x1="57" y1="403" x2="1543" y2="403" stroke="#2C4756"/>
+<text x="58" y="436" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#C7DBE4">Bằng chứng: LOCAL Anvil budget-isolation test (actual receipts + matched counterfactual decisions).</text>
+<text x="58" y="461" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#8BA4B2">Sơ đồ diễn giải kết quả kiểm thử đã ghi nhận; không phải ảnh một cuộc tấn công live trên Fuji.</text>
+</svg>
