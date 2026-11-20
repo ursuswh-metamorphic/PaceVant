@@ -203,6 +203,9 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     manifest = {
         "dataset_sha256": hashlib.sha256(args.dataset.read_bytes()).hexdigest(),
+        "dataset_lf_sha256": hashlib.sha256(
+            args.dataset.read_bytes().replace(b"\r\n", b"\n")
+        ).hexdigest(),
         "config": cfg.public(),
         "base": "7210efd455407f2905f31dd44b1ed54270947802",
         "mode": "PRODUCTION_TASK_SHIELD_PAPER_OFFLINE",
@@ -211,9 +214,24 @@ def main():
         "maximum_tokens": args.max_tokens,
     }
     path = args.output / "run.json"
-    if path.exists() and json.loads(path.read_text()) != manifest:
-        p.error("Run input or configuration changed; use a new directory")
-    path.write_text(json.dumps(manifest, indent=1) + "\n")
+    if path.exists():
+        previous = json.loads(path.read_text())
+        stable_keys = (
+            "config",
+            "base",
+            "mode",
+            "native_transactions",
+            "maximum_requests",
+            "maximum_tokens",
+        )
+        if (
+            any(previous[k] != manifest[k] for k in stable_keys)
+            or previous.get("dataset_lf_sha256", previous["dataset_sha256"])
+            != manifest["dataset_lf_sha256"]
+        ):
+            p.error("Run input or configuration changed; use a new directory")
+    else:
+        path.write_text(json.dumps(manifest, indent=1) + "\n")
     journal = args.output / "predictions.jsonl"
     completed = (
         {json.loads(s)["benchmark_id"] for s in journal.read_text().splitlines()}

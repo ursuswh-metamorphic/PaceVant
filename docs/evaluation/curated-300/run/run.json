@@ -1,0 +1,29 @@
+{
+ "dataset_sha256": "8f385eb63962935c4ddbd3907b0062689ea59e6287e3da6982e3ef62f73336ea",
+ "config": {
+  "fallbacks": [],
+  "reasoning_effort": null,
+  "max_output_chars": 65536,
+  "mode": "paper",
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "api_style": "chat_completions",
+  "user_agent": "PaceVant-TaskShield/1.0",
+  "temperature": null,
+  "timeout": 20.0,
+  "retries": 0,
+  "context_chars": 32000,
+  "epsilon": "0",
+  "max_replans": 0,
+  "max_instructions": 16,
+  "max_tasks": 32,
+  "max_calls": 2
+ },
+ "base": "7210efd455407f2905f31dd44b1ed54270947802",
+ "mode": "PRODUCTION_TASK_SHIELD_PAPER_OFFLINE",
+ "native_transactions": 0,
+ "maximum_requests": 650,
+ "maximum_tokens": 2000000,
+ "dataset_lf_sha256": "6963edd5c915467f743dfe17447ad67072dcae5ec4572288d8b2e6f26c7df04a",
+ "byte_format_note": "Original inference read CRLF line delimiters. Published corpus uses LF with identical 300 parsed objects. dataset_sha256 preserves the observed input-byte hash; dataset_lf_sha256 binds portable content."
+}
