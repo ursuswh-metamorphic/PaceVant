@@ -1,0 +1,332 @@
+{
+ "unit": "milliseconds",
+ "percentile_method": "nearest rank p95; median p50",
+ "runs": {
+  "ABLATION_RESULTS": {
+   "extraction_ms": {
+    "n": 24,
+    "p50": 0.0,
+    "p95_nearest_rank": 0,
+    "max": 0
+   },
+   "shield_ms": {
+    "n": 24,
+    "p50": 0.0,
+    "p95_nearest_rank": 0,
+    "max": 0
+   },
+   "graph_ms": {
+    "n": 24,
+    "p50": 0.9944999999999999,
+    "p95_nearest_rank": 1.415,
+    "max": 1.781
+   },
+   "deterministic_ms": {
+    "n": 24,
+    "p50": 0.17049999999999998,
+    "p95_nearest_rank": 0.263,
+    "max": 0.27
+   },
+   "semantic_ms": {
+    "n": 24,
+    "p50": 1.0,
+    "p95_nearest_rank": 2,
+    "max": 2
+   },
+   "wall_ms": {
+    "n": 24,
+    "p50": 120.0,
+    "p95_nearest_rank": 178,
+    "max": 213
+   },
+   "provider_reported_tokens_per_case": {
+    "n": 24,
+    "p50": 0.0,
+    "p95_nearest_rank": 0,
+    "max": 0
+   },
+   "logical_calls": 120,
+   "provider_attempts_with_trace": 0
+  },
+  "LIVE_MODEL_RESULTS": {
+   "extraction_ms": {
+    "n": 6,
+    "p50": 922.5,
+    "p95_nearest_rank": 1269,
+    "max": 1269
+   },
+   "shield_ms": {
+    "n": 6,
+    "p50": 2175.0,
+    "p95_nearest_rank": 2500,
+    "max": 2500
+   },
+   "graph_ms": {
+    "n": 6,
+    "p50": 0.9864999999999999,
+    "p95_nearest_rank": 1.088,
+    "max": 1.088
+   },
+   "deterministic_ms": {
+    "n": 6,
+    "p50": 0.189,
+    "p95_nearest_rank": 0.219,
+    "max": 0.219
+   },
+   "semantic_ms": {
+    "n": 6,
+    "p50": 3322.5,
+    "p95_nearest_rank": 3452,
+    "max": 3452
+   },
+   "wall_ms": {
+    "n": 6,
+    "p50": 6578.5,
+    "p95_nearest_rank": 6799,
+    "max": 6799
+   },
+   "provider_reported_tokens_per_case": {
+    "n": 6,
+    "p50": 12640.5,
+    "p95_nearest_rank": 13159,
+    "max": 13159
+   },
+   "logical_calls": 24,
+   "provider_attempts_with_trace": 24
+  },
+  "LIVE_MODEL_REPLICATION": {
+   "extraction_ms": {
+    "n": 6,
+    "p50": 694.5,
+    "p95_nearest_rank": 889,
+    "max": 889
+   },
+   "shield_ms": {
+    "n": 6,
+    "p50": 1879.0,
+    "p95_nearest_rank": 2232,
+    "max": 2232
+   },
+   "graph_ms": {
+    "n": 6,
+    "p50": 1.369,
+    "p95_nearest_rank": 3.241,
+    "max": 3.241
+   },
+   "deterministic_ms": {
+    "n": 6,
+    "p50": 0.2565,
+    "p95_nearest_rank": 0.409,
+    "max": 0.409
+   },
+   "semantic_ms": {
+    "n": 6,
+    "p50": 4269.5,
+    "p95_nearest_rank": 4632,
+    "max": 4632
+   },
+   "wall_ms": {
+    "n": 6,
+    "p50": 7067.0,
+    "p95_nearest_rank": 7630,
+    "max": 7630
+   },
+   "provider_reported_tokens_per_case": {
+    "n": 6,
+    "p50": 12901.5,
+    "p95_nearest_rank": 13294,
+    "max": 13294
+   },
+   "logical_calls": 24,
+   "provider_attempts_with_trace": 24
+  }
+ },
+ "local_anvil": [
+  {
+   "workflow": "workflow_e1fecd014c35424b9f1021023c2a7883",
+   "sde": "APPROVE",
+   "timings_ms": [
+    {
+     "graph": 7,
+     "deterministic": 0,
+     "semantic": 4,
+     "task_shield_reported": 0,
+     "itag_total": 91,
+     "evaluation_through_sde": 1793,
+     "workflow_through_sde": 2016,
+     "sde": 1
+    }
+   ],
+   "stage_timestamps": [
+    {
+     "stage": "PROPOSED",
+     "unix_seconds": 1795177001
+    },
+    {
+     "stage": "ALIGNED",
+     "unix_seconds": 1795177001
+    },
+    {
+     "stage": "BUILT",
+     "unix_seconds": 1795177002
+    },
+    {
+     "stage": "SIMULATED",
+     "unix_seconds": 1795177003
+    },
+    {
+     "stage": "ITAG_ASSESSED",
+     "unix_seconds": 1795177003
+    },
+    {
+     "stage": "EVALUATED",
+     "unix_seconds": 1795177003
+    },
+    {
+     "stage": "PROVED",
+     "unix_seconds": 1795177003
+    },
+    {
+     "stage": "APPROVED",
+     "unix_seconds": 1795177003
+    },
+    {
+     "stage": "ATTESTED",
+     "unix_seconds": 1795177005
+    },
+    {
+     "stage": "SUBMITTING",
+     "unix_seconds": 1795177005
+    },
+    {
+     "stage": "SUBMITTED",
+     "unix_seconds": 1795177005
+    },
+    {
+     "stage": "CONFIRMED",
+     "unix_seconds": 1795177005
+    }
+   ],
+   "resolution": "integer Unix seconds outside ITAG_ASSESSED"
+  },
+  {
+   "workflow": "workflow_3e06dd765fac4666944f5cc516e474bd",
+   "sde": "APPROVE",
+   "timings_ms": [
+    {
+     "graph": 2,
+     "deterministic": 0,
+     "semantic": 3,
+     "task_shield_reported": 0,
+     "itag_total": 11,
+     "evaluation_through_sde": 1646,
+     "workflow_through_sde": 1849,
+     "sde": 0
+    }
+   ],
+   "stage_timestamps": [
+    {
+     "stage": "PROPOSED",
+     "unix_seconds": 1795177006
+    },
+    {
+     "stage": "ALIGNED",
+     "unix_seconds": 1795177006
+    },
+    {
+     "stage": "BUILT",
+     "unix_seconds": 1795177006
+    },
+    {
+     "stage": "SIMULATED",
+     "unix_seconds": 1795177008
+    },
+    {
+     "stage": "ITAG_ASSESSED",
+     "unix_seconds": 1795177008
+    },
+    {
+     "stage": "EVALUATED",
+     "unix_seconds": 1795177008
+    },
+    {
+     "stage": "PROVED",
+     "unix_seconds": 1795177008
+    },
+    {
+     "stage": "APPROVED",
+     "unix_seconds": 1795177008
+    },
+    {
+     "stage": "ATTESTED",
+     "unix_seconds": 1795177009
+    },
+    {
+     "stage": "SUBMITTING",
+     "unix_seconds": 1795177009
+    },
+    {
+     "stage": "SUBMITTED",
+     "unix_seconds": 1795177010
+    },
+    {
+     "stage": "CONFIRMED",
+     "unix_seconds": 1795177010
+    }
+   ],
+   "resolution": "integer Unix seconds outside ITAG_ASSESSED"
+  },
+  {
+   "workflow": "workflow_b370c2fe2e9c48db80ea9757fc3d0a02",
+   "sde": "REJECT",
+   "timings_ms": [
+    {
+     "graph": 2,
+     "deterministic": 0,
+     "semantic": 3,
+     "task_shield_reported": 0,
+     "itag_total": 11,
+     "evaluation_through_sde": 1541,
+     "workflow_through_sde": 1818,
+     "sde": 0
+    }
+   ],
+   "stage_timestamps": [
+    {
+     "stage": "PROPOSED",
+     "unix_seconds": 1795177013
+    },
+    {
+     "stage": "ALIGNED",
+     "unix_seconds": 1795177013
+    },
+    {
+     "stage": "BUILT",
+     "unix_seconds": 1795177013
+    },
+    {
+     "stage": "SIMULATED",
+     "unix_seconds": 1795177015
+    },
+    {
+     "stage": "ITAG_ASSESSED",
+     "unix_seconds": 1795177015
+    },
+    {
+     "stage": "EVALUATED",
+     "unix_seconds": 1795177015
+    },
+    {
+     "stage": "REJECTED",
+     "unix_seconds": 1795177015
+    }
+   ],
+   "resolution": "integer Unix seconds outside ITAG_ASSESSED"
+  }
+ ],
+ "missing_durations": [
+  "per-stage planner, fork init, baseline/stress, proof, signing, pre-submit and receipt high-resolution timers",
+  "standalone explanation and citation repair",
+  "new completed public Fuji workflow"
+ ]
+}

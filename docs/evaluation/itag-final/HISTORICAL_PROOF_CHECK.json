@@ -1,0 +1,42 @@
+{
+  "status": "CURRENT_ENCODER_MISMATCH",
+  "query_replay_passed": true,
+  "current_encoder_hash": "0x714d642b917da8f4669a8cb7950e83ad0b3c99271dd00ffe64a183123b9ba92a",
+  "archived_encoder_hash": "0x5cdc2805d0ba5cfa31d5d0be05cdbb81fd012e03cdf4767bac7d2cfa66f2623b",
+  "query_results": [
+    {
+      "hash": "0x84d2c03b518cf7524c802cf607fc1b1488ee005ce3a87bbae6b25ea3487730f1",
+      "expected": "SAT",
+      "actual": "SAT",
+      "passed": true
+    },
+    {
+      "hash": "0x868195ec321b544ff4fb7052b8843c46c44848296b7a656af066ad554e784e6c",
+      "expected": "UNSAT",
+      "actual": "UNSAT",
+      "passed": true
+    },
+    {
+      "hash": "0xab3707e724b548f2d6731743f08f407fb829fe1a6eb587dc734f47a0f5091f23",
+      "expected": "SAT",
+      "actual": "SAT",
+      "passed": true
+    },
+    {
+      "hash": "0xce5046b4772f0345216f6735db8590c4f956cd0f50d069aeafb67dfda8ae4243",
+      "expected": "UNSAT",
+      "actual": "UNSAT",
+      "passed": true
+    },
+    {
+      "hash": "0x993747571b727174af745a673e024287f2087517efb4dea9685c444419918174",
+      "expected": "UNSAT",
+      "actual": "UNSAT",
+      "passed": true
+    }
+  ],
+  "proof_context_hash": "0x45c9e1d9620ea55831efa790f92f3f3390316e53ca034ecf8c147b63ebeba972",
+  "encoder_hash_matches_current_sources": false,
+  "network_calls": false,
+  "env_or_wallet_keys_loaded": false
+}

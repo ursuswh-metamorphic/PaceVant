@@ -1,0 +1,89 @@
+{
+ "scope": "Separate cProfile local pytest run with two confirmed and one rejected candidate; cumulative function times overlap, fork_node includes generator resumption, not pure startup. Not a wall time distribution.",
+ "functions": [
+  {
+   "module": "execution/simulation/runner.py",
+   "function": "fork_node",
+   "calls": 10,
+   "cumulative_ms": 556.9,
+   "self_ms": 0.36
+  },
+  {
+   "module": "execution/simulation/runner.py",
+   "function": "preflight_v2",
+   "calls": 2,
+   "cumulative_ms": 1608.24,
+   "self_ms": 0.71
+  },
+  {
+   "module": "execution/simulation/runner.py",
+   "function": "simulate",
+   "calls": 3,
+   "cumulative_ms": 3471.56,
+   "self_ms": 1.8
+  },
+  {
+   "module": "planning/service.py",
+   "function": "propose",
+   "calls": 3,
+   "cumulative_ms": 0.39,
+   "self_ms": 0.06
+  },
+  {
+   "module": "portfolio/observations.py",
+   "function": "collect",
+   "calls": 9,
+   "cumulative_ms": 2114.13,
+   "self_ms": 0.28
+  },
+  {
+   "module": "decision/service.py",
+   "function": "decide",
+   "calls": 7,
+   "cumulative_ms": 14.53,
+   "self_ms": 0.27
+  },
+  {
+   "module": "monitoring/service.py",
+   "function": "process",
+   "calls": 3,
+   "cumulative_ms": 1590.55,
+   "self_ms": 0.56
+  },
+  {
+   "module": "workflows/authorization.py",
+   "function": "attest",
+   "calls": 2,
+   "cumulative_ms": 3456.43,
+   "self_ms": 0.04
+  },
+  {
+   "module": "proof/service.py",
+   "function": "prove",
+   "calls": 6,
+   "cumulative_ms": 87.9,
+   "self_ms": 0.15
+  },
+  {
+   "module": "workflows/authorization.py",
+   "function": "_verify_approval",
+   "calls": 4,
+   "cumulative_ms": 5192.52,
+   "self_ms": 0.75
+  },
+  {
+   "module": "workflows/authorization.py",
+   "function": "_submit",
+   "calls": 2,
+   "cumulative_ms": 3852.84,
+   "self_ms": 0.53
+  },
+  {
+   "module": "workflows/authorization.py",
+   "function": "_verify_for_attestor",
+   "calls": 2,
+   "cumulative_ms": 3390.15,
+   "self_ms": 0.27
+  }
+ ]
+}
