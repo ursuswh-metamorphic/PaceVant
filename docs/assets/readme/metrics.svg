@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 390" role="img" aria-label="Các số liệu PaceVant kèm phạm vi kiểm thử: 95,67% TaskShield, 8 trên 12 long-horizon, confirmed Fuji testnet">
+<defs><linearGradient id="back" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#0B1522"/><stop offset="1" stop-color="#162735"/></linearGradient><linearGradient id="line"><stop stop-color="#5CE1BC"/><stop offset="1" stop-color="#7FCDE7"/></linearGradient></defs>
+<rect width="1600" height="390" rx="24" fill="url(#back)"/>
+<text x="62" y="63" font-family="Arial,Helvetica,sans-serif" letter-spacing="3" font-weight="700" font-size="19" fill="#76E8C4">EVIDENCE, NOT JUST CLAIMS</text>
+<text x="62" y="103" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#E8F2F8">Kết quả có thể kiểm chứng</text>
+<g font-family="Arial,Helvetica,sans-serif">
+<rect x="60" y="132" width="480" height="196" rx="19" fill="#172A38" stroke="#2C4A57" stroke-width="1.5"/>
+<rect x="83" y="154" width="5" height="47" rx="2" fill="#62E3B9"/>
+<text x="107" y="210" font-size="55" font-weight="800" fill="#FFFFFF">95,67%</text>
+<text x="85" y="249" font-size="21" font-weight="700" fill="#CEE0E8">TaskShield accuracy</text>
+<text x="85" y="279" font-size="15" fill="#A2B8C5">300 adapted SWAP cases · regression</text>
+<text x="85" y="303" font-size="14" fill="#7C9EAC">Constraints-only cũng đạt 95,67%</text>
+<rect x="560" y="132" width="480" height="196" rx="19" fill="#172A38" stroke="#2C4A57" stroke-width="1.5"/>
+<rect x="583" y="154" width="5" height="47" rx="2" fill="#9C9BFA"/>
+<text x="608" y="210" font-size="55" font-weight="800" fill="#FFFFFF">8 / 12</text>
+<text x="585" y="249" font-size="21" font-weight="700" fill="#CEE0E8">ITAG interventions</text>
+<text x="585" y="279" font-size="15" fill="#A2B8C5">Scripted adverse trajectories</text>
+<text x="585" y="303" font-size="14" fill="#7C9EAC">12 / 12 benign được chấp nhận</text>
+<rect x="1060" y="132" width="480" height="196" rx="19" fill="#172A38" stroke="#2C4A57" stroke-width="1.5"/>
+<rect x="1083" y="154" width="5" height="47" rx="2" fill="#81CEE9"/>
+<path d="M1110 174l13 12 24-26" fill="none" stroke="#70E6C3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1166" y="210" font-size="46" font-weight="800" fill="#FFFFFF">FUJI</text>
+<text x="1085" y="249" font-size="21" font-weight="700" fill="#CEE0E8">Confirmed on-chain swap</text>
+<text x="1085" y="279" font-size="15" fill="#A2B8C5">Verified receipt · gas reconciliation</text>
+<text x="1085" y="303" font-size="14" fill="#7C9EAC">Checkpoint trước Hybrid PR #10</text>
+</g>
+<text x="62" y="365" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#839DAB">Tham chiếu báo cáo và giới hạn của từng phép đo ở phần Đánh giá bên dưới.</text>
+</svg>
