@@ -66,6 +66,19 @@ def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, ou
     class DataFixtureProvider(ReplayProvider):
         def complete(self, messages):
             data = json.loads(messages[1]["content"])
+            if bounded and "evidence_catalog" in data:
+                catalog = data["evidence_catalog"]
+                scope = next(e for e in catalog["entries"] if e["scope_role"] == "ACTIVE_OPERATOR_INTENT")
+                return Completion(json.dumps({
+                    "candidate_alias": catalog["candidate_alias"], "semantic_verdict": "ALIGNED",
+                    "goal_drift_detected": False, "uncertainty": [],
+                    "task_relationships": [{
+                        "task_alias": t, "relationship": "DIRECT",
+                        "supporting_aliases": [scope["alias"], catalog["candidate_alias"]],
+                        "objective_field": "terms.objective", "candidate_field": "proposal.user_goal_reason",
+                        "explanation": "Scripted authorized continuation for Anvil integration."
+                    } for t in catalog["task_aliases"]]
+                }))
             if "subject" in data and data["message"]["role"] == "TOOL":
                 # Scripted extraction: real chain artifacts in this fixture contain data, no commands.
                 return Completion("[]")
@@ -98,6 +111,7 @@ def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, ou
                 "/v1/itag/intents",
                 json=dict(
                     kind="BOUNDED_SWAP" if bounded else "ONE_SHOT_SWAP",
+                    objective="Acquire WAVAX for treasury reserves." if bounded else None,
                     mandate_id=mandate["mandate_id"],
                     deadline=int(time.time()) + 120,
                     total_budget=str(2 * int(step_amount)) if bounded else step_amount,

@@ -54,6 +54,8 @@ def explain(assessment, graph):
             if n.kind == "TRANSACTION_OUTCOME"
         ],
         "stage": "PRE_SIGN", "first_semantic_divergence_step": None,
+        "semantic_anchors": semantic.provider_metadata.get("semantic_anchors", []),
+        "semantic_text_status": "MODEL_INFERENCE",
     }
     return ExplainableTemporalAssessment(
         assessment=assessment,
