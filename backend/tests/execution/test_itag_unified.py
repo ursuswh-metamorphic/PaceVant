@@ -110,7 +110,9 @@ def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, ou
         if demo:
             unauth = client.get("/v1/demo/account")
             assert unauth.status_code == 401  # Operator credential is NOT a demo credential.
-            headers = {"Authorization": "Bearer " + demo_config.access_token, "Idempotency-Key": "demo-request-1"}
+            selected = client.post("/v1/demo/select", json={"account_id":"demo"}).raise_for_status().json()
+            assert selected["access_token"] != demo_config.access_token
+            headers = {"Authorization": "Bearer " + selected["access_token"], "Idempotency-Key": "demo-request-1"}
             denied = client.post("/v1/workflows/start", headers=headers, json=request)
             assert denied.status_code == 401
             first = client.post("/v1/demo/workflows", json={"goal": request["goal"]}, headers=headers).raise_for_status().json()

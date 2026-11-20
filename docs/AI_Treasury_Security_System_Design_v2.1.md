@@ -1012,7 +1012,7 @@ Luồng mới giữ nguyên modular monolith và các lớp bảo mật ở mụ
 
 ```mermaid
 flowchart LR
-  U[Demo User: chọn account và mã demo] --> D[Scoped demo API]
+  U[Demo User: chọn account, không nhập mã] --> D[Auto-issued demo session + scoped API]
   D --> I[Exact one-shot ITAG intent]
   I --> W[Full existing security pipeline]
   W --> S[Approved signed build]
@@ -1026,6 +1026,7 @@ flowchart LR
 
 | Ranh giới | Input | Output / invariant |
 | --- | --- | --- |
+| Chọn tài khoản | Public POST select, account_id=demo | Tự cấp HMAC-signed demo-only session 24 giờ; không trả server secret, không tạo giao dịch, không reset credit |
 | Demo API | Scoped Bearer, exact goal, Idempotency-Key | Durable request/workflow ID, authenticated intent và full pipeline; không có quyền operator/internal/execution |
 | Build binding | Workflow ID từ trusted API adapter + immutable build | Chỉ build thuộc accepted demo request được tính phí vào tài khoản demo |
 | Gas reserve | Signed gas limit × gas price, available credit và relayer pending balance | Commit cùng raw send journal; thiếu ngân sách/fee cap thì không broadcast |

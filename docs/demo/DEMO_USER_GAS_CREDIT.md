@@ -4,7 +4,7 @@ Phiên bản sau checkpoint `3fba479`, ngày 20/11/2026. Đây là bổ sung cho
 
 ## 1. Người dùng sử dụng gì?
 
-Ban giám khảo chọn **PaceVant - Demo User**, nhập mã truy cập demo do người trình diễn cung cấp, rồi nhập goal swap. Chỉ có một tài khoản dùng chung. Đây là shared demo access, chưa phải hệ thống đăng nhập/ownership theo ví hoặc multi-user production.
+Ban giám khảo chỉ chọn **PaceVant - Demo User** rồi bấm chạy với goal mẫu đã điền sẵn, hoặc chỉnh goal nếu muốn. Không nhập mã/token, không Connect Wallet. Website gọi `POST /v1/demo/select` để tự nhận quyền chỉ dành cho demo, giữ trong bộ nhớ tab. Chỉ có một tài khoản dùng chung; khi bật demo, người truy cập website đều có thể chọn tài khoản và cùng chia sẻ hạn mức đã cấp. Đây chưa phải hệ thống đăng nhập/ownership theo ví hoặc multi-user production.
 
 Địa chỉ từ private `.env`: `0xf23bE4A69B162DdC0F7D5456172212d294b233c7`. Đã đối chiếu key/address nhưng không công bố key. Private key Demo User **không dùng** để đăng nhập, ký swap, trả gas hoặc được forward vào runtime/frontend.
 
@@ -32,7 +32,9 @@ sequenceDiagram
   participant DB as Existing execution SQLite + gas ledger
   participant F as Public Fuji Vault / LFJ
   participant M as Existing outcome monitor
-  U->>UI: Chọn Demo User + mã truy cập demo
+  U->>UI: Chọn Demo User, không nhập mã
+  UI->>D: POST select, account_id=demo
+  D-->>UI: Tự cấp scoped session, không trả server secret
   UI->>D: GET account / treasury (demo Bearer)
   D-->>UI: Wallet AVAX riêng, gas credit, history
   U->>UI: Goal swap chính xác
@@ -61,7 +63,7 @@ Chữ ký treasurer vẫn do attestor tạo sau approval đã lưu. Demo credent
 | Thành phần | Input | Output / hành vi |
 | --- | --- | --- |
 | `config/demo.py` | Enabled, public wallet address, scoped token, initial credit/fee cap | Validated DemoSettings; token không có trong repr; flag/budget sai fail startup |
-| `api/demo.py` | Scoped Bearer + goal + Idempotency-Key | Authenticated exact ITAG intent, stable workflow ID, existing workflow result; không nhận arbitrary calldata/signature |
+| `api/demo.py` / `demo_auth.py` | Public account selection, sau đó session Bearer + goal + Idempotency-Key | Tự cấp HMAC-signed demo session 24 giờ; authenticated exact ITAG intent, stable workflow ID và full pipeline; không nhận arbitrary calldata/signature |
 | `modules/gas_credit` | Request/build binding; signed tx max cost; verified reconciliation report | Durable reservation, actual debit, reorg reversal/hold và account/history DTO |
 | `LocalExecutionSDK` / `ExecutionService.build` | Trusted workflow identity + build result | Bind billing vào build của request demo; không đổi wire/signature schema |
 | `Relayer` hook | Build đã bind, actual estimateGas/gasPrice, relayer pending balance | Reserve + send journal trong cùng DB transaction; không gửi nếu thiếu tiền |
@@ -100,13 +102,14 @@ Sau deep reorg, nếu các giao dịch sau đã dùng phần headroom giải ph�
 | Method / path | Auth | Input / output |
 | --- | --- | --- |
 | `GET /v1/demo/config` | Public | Enabled và một public account; không có token/private key/budget history |
+| `POST /v1/demo/select` | Public khi demo enabled | `{ "account_id": "demo" }` → demo-only session tự động; không tạo intent, workflow, hold hay giao dịch |
 | `GET /v1/demo/account` | Demo Bearer | Wallet address, nullable actual AVAX balance/status, allocated/spent/reserved/available wei, txs/ledger/request history |
 | `GET /v1/demo/treasury` | Demo Bearer | Existing treasury view của đúng mandate/vault; không đổi quyền owner |
 | `POST /v1/demo/workflows` | Demo Bearer + `Idempotency-Key` | `{ "goal": "Buy WAVAX with 0.000001 USDC" }` → existing workflow result |
 | `GET /v1/demo/requests/{key}` | Demo Bearer | Stable workflow cho request ID đã tiếp nhận; đọc lại không khởi chạy |
 | `GET /v1/demo/workflows/{workflow_id}` | Demo Bearer | Workflow do demo sở hữu; workflow khác trả not found |
 
-Bearer demo khác operator/internal/execution credentials. CORS cho explicit origins có cho phép Idempotency-Key. Mã lưu trong bộ nhớ tab; sessionStorage chỉ lưu random request ID. UI chặn submit tiếp khi tab còn yêu cầu chưa rõ kết quả. Chỉ khi GET xác nhận `DEMO_REQUEST_NOT_FOUND` mới có thể bỏ ID chưa được tiếp nhận. Một tài khoản dùng chung nên mọi giám khảo cùng chia sẻ ngân sách/lịch sử; không dùng cho multi-user thật.
+Bearer demo được cấp tự động, có HMAC signature, scope cố định `demo` và expiry 24 giờ; không dùng được như operator/internal/execution credential. Hết hạn hoặc reload có thể chọn lại account, không phải nhập gì và không reset credit. `PACEVANT_DEMO_ACCESS_TOKEN` nay chỉ là server signing secret, không gửi cho giám khảo/browser và không chấp nhận nó như Bearer trực tiếp. CORS chỉ cho explicit origins; sessionStorage chỉ lưu random request ID, credential chỉ ở tab memory. UI chặn submit tiếp khi còn request chưa rõ kết quả. Chỉ khi GET xác nhận `DEMO_REQUEST_NOT_FOUND` mới có thể bỏ ID chưa được tiếp nhận. Mọi người chọn demo cùng chia sẻ ngân sách/lịch sử; không dùng cho multi-user thật.
 
 ## 7. Env và lưu trữ
 
@@ -115,7 +118,7 @@ Bearer demo khác operator/internal/execution credentials. CORS cho explicit ori
 | Biến | Cấu hình local hiện đặt / ý nghĩa |
 | --- | --- |
 | `PACEVANT_DEMO_ENABLED` | `1` trong private env, `0` trong template; opt-in |
-| `PACEVANT_DEMO_ACCESS_TOKEN` | Đã sinh mã ngẫu nhiên riêng trong private env; template trống; người trình diễn lấy và đưa cho giám khảo |
+| `PACEVANT_DEMO_ACCESS_TOKEN` | Server-only secret ký session tự cấp; giữ giá trị hiện có trong `.env`, template trống. Không đưa cho giám khảo và không điền lên website |
 | `PACEVANT_DEMO_INITIAL_CREDIT_WEI` | `1000000000000000` = **0,001 AVAX** allowance lúc khởi tạo ledger lần đầu |
 | `PACEVANT_DEMO_MAX_TX_FEE_WEI` | `100000000000000` = **0,0001 AVAX** maximum reserve cho một giao dịch |
 | `TREASURY_DEMO_USER_ADDRESS` | Public demo identity nêu ở mục 1 |
@@ -138,13 +141,15 @@ Không thể cam kết 0,05 AVAX chạy được bao nhiêu lượt vì gas pric
    uv run --locked treasury serve --network fuji
    ```
 
-2. Mở `http://127.0.0.1:8000`, chọn **Demo User**, nhập giá trị `PACEVANT_DEMO_ACCESS_TOKEN` lấy riêng từ `.env`. Không đưa operator token hoặc private key cho giám khảo.
+2. Mở `http://127.0.0.1:8000`, bấm **Chọn Demo User**. Không nhập token/mã/private key. Goal mẫu đã có sẵn. Chọn tài khoản không tự gửi swap.
 3. Kiểm tra hai dòng độc lập **AVAX thực trong ví** và **gas credit khả dụng/giữ chỗ/đã trừ**. Tài khoản chưa có receipt sẽ ghi chưa có phí xác minh, không tạo phí mẫu.
 4. Khi thực sự muốn gửi giao dịch demo, nhập `Buy WAVAX with 0.000001 USDC` rồi chạy một lần. Theo dõi timeline cũ đầy đủ, tx hash/explorer và phí thực tế. Trong đợt triển khai này agent **không bấm gửi Fuji**.
 5. Nếu pending/timeout, dùng **Kiểm tra yêu cầu đã gửi**; đây là GET-only. Không bấm/gửi goal mới để xử lý giao dịch chưa rõ.
 6. Nếu hết session, stale feed hoặc thiếu USDC/exposure headroom, giải quyết đúng điều kiện đó. Gas credit không nới policy. Trạng thái cuối của audit trước tính năng này cho biết vault cần thêm Circle test USDC; xem [báo cáo có số dư và hướng dẫn nạp](../audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md). Không coi thông tin cũ là số dư được refresh trong đợt này.
 
 ## 9. Phạm vi kiểm chứng
+
+Bổ sung thao tác chọn account không nhập mã có [report kiểm chứng riêng](../audit/demo-account-selection-validation.json): offline session/auth/API/ledger/architecture tests và syntax frontend. Không chạy swap hoặc tạo giao dịch trong đợt thay đổi thao tác chọn tài khoản; cần restart backend đang chạy bản cũ và reload website để nạp code mới.
 
 Tests sổ cái dùng các verifier facts dựng rõ trong fixture để kiểm concurrency, reservation rollback, receipt scope, pending/revert/reorg/dedup/restart. Test integration chạy **Anvil thật trên chain 31337** với contracts V2, Shield replies scripted có nhãn test và cùng pipeline ITAG/proof/sign/execute/monitor. Các API adapters được kiểm auth, same-key replay và no-broadcast khi thiếu credit hoặc fee cap quá thấp. Kiểm syntax frontend riêng.
 

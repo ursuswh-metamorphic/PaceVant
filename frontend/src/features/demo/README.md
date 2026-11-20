@@ -1,6 +1,6 @@
 # Demo User UI
 
-One predefined identity is selected from `/v1/demo/config`; a separate demo access code authenticates `/v1/demo/*` only. No wallet extension or private key is required. The access token stays in tab memory, not local/session storage, URL, static config or bundled source. Only a random idempotency/request ID is saved in sessionStorage so a lost response/reload can resume through a GET.
+One predefined identity is shown by `/v1/demo/config`. Clicking Select calls public `POST /v1/demo/select` to obtain a signed demo-only session automatically; visitors enter no code, token, wallet key or connection details. Session credentials stay in tab memory, not local/session storage, URL, static config or bundled source. The server signing secret never leaves the backend. Only a random idempotency/request ID is saved in sessionStorage so a lost response/reload can resume through a GET. Selection itself never creates a workflow or transaction. All visitors who select the demo share its finite credit/history.
 
 The API supplies gas credit allocation, available/reserved/spent amounts, actual gas receipt fields, immutable debit/reversal history, transactions and request history. Render with DOM textContent and BigInt wei arithmetic. The demo wallet AVAX balance is a separate on-chain read; unavailable remains unknown, never zero. Credit is explicitly labeled as a sponsor-funded demo allowance, not a verified cash deposit.
 

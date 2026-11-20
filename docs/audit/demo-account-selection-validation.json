@@ -1,0 +1,40 @@
+{
+  "schema_version": "demo-account-selection-validation-v1",
+  "base_commit": "e5668bd",
+  "behavior": "Select the predefined demo account without entering any code or token; automatically issue a demo-only HMAC session",
+  "session_seconds": 86400,
+  "server_signing_secret_exposed": false,
+  "selection_creates_workflow_or_transaction": false,
+  "selection_refills_gas_credit": false,
+  "tests": [
+    {
+      "scope": "Offline demo API/session, gas ledger and architecture tests",
+      "passed": 30,
+      "seconds": 3.23
+    },
+    {
+      "scope": "Frontend JavaScript syntax",
+      "files_checked": 11,
+      "status": "PASS"
+    },
+    {
+      "scope": "Ruff / diff whitespace / configured-secret scan",
+      "status": "PASS"
+    }
+  ],
+  "covered": [
+    "Selection needs only account_id=demo",
+    "Unknown account cannot be selected",
+    "Disabled demo cannot issue a session",
+    "Unsigned, tampered, expired or wrong-secret sessions are refused",
+    "Server env secret is not returned and is no longer accepted as a direct demo Bearer",
+    "Demo session cannot authenticate operator/internal endpoints",
+    "Account selection has zero workflows, transactions or gas debits"
+  ],
+  "public_fuji_transactions_sent": false,
+  "swap_pipeline_executed_for_this_change": false,
+  "browser_visual_verification": "NOT_RUN",
+  "backend_restart_required_for_running_old_process": true,
+  "billing_regression_report": "demo-user-gas-credit-validation.json",
+  "deployment_note": "Public demo mode deliberately allows visitors to share one finite sponsor allowance; all treasury security and gas checks remain required"
+}

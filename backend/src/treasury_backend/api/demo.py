@@ -1,7 +1,6 @@
 """Restricted single-account adapter; delegates to the unchanged security pipeline."""
 
-import secrets
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import Depends, Header, Request
 from pydantic import StringConstraints
@@ -14,6 +13,8 @@ from treasury_backend.modules.planning import requested_amount, reverse_goal
 from treasury_backend.modules.temporal.models import IntentTerms, Step
 from treasury_contracts.models import Wire
 
+from .demo_auth import issue_demo_session, valid_demo_session
+
 RequestKey = Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9_-]{8,100}$")]
 
 
@@ -21,15 +22,25 @@ class DemoGoal(Wire):
     goal: Goal
 
 
+class DemoSelection(Wire):
+    account_id: Literal["demo"]
+
+
 def install_demo_routes(app, config):
     def auth(request: Request):
         if not config.enabled:
             raise ControlError("DEMO_DISABLED", 404)
         supplied = request.headers.get("Authorization", "")
-        if not secrets.compare_digest(
-            supplied.encode(), ("Bearer " + config.access_token).encode()
-        ):
+        if not supplied.startswith("Bearer ") or not valid_demo_session(supplied[7:], config.access_token):
             raise ControlError("DEMO_ACCESS_REQUIRED", 401)
+
+    @app.post("/v1/demo/select")
+    def select_account(payload: DemoSelection):
+        if not config.enabled:
+            raise ControlError("DEMO_DISABLED", 404)
+        token, expires_at = issue_demo_session(config.access_token)
+        return {"account_id": payload.account_id, "access_token": token, "expires_at": expires_at,
+                "scope": "demo", "token_type": "Bearer"}
 
     @app.get("/v1/demo/config")
     def public_config():

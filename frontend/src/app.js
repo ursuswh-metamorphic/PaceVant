@@ -43,10 +43,13 @@ api("/v1/demo/config").then(config => {
 }).catch(() => {});
 byId("demo-select-form").addEventListener("submit", async event => {
   event.preventDefault();
-  state.demoToken = byId("demo-access-code").value;
-  byId("demo-access-code").value = "";
-  state.demoMode = true;
   try {
+    const session = await api("/v1/demo/select", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({account_id:byId("demo-account-select").value}),
+    });
+    state.demoToken = session.access_token;
+    state.demoMode = true;
     await api("/v1/demo/account");
     await connectTreasury();
     await updateDemo();

@@ -21,7 +21,7 @@ class DemoSettings:
             return
         TypeAdapter(Address).validate_python(self.address)
         if len(self.access_token) < 32:
-            raise ValueError("Configure a separate demo access token of at least 32 characters")
+            raise ValueError("Configure a separate demo session signing secret of at least 32 characters")
         if not 0 < self.max_transaction_fee_wei <= self.initial_credit_wei <= 5 * 10**16:
             raise ValueError("Invalid demo gas budget: max fee <= credit <= 0.05 AVAX")
 
