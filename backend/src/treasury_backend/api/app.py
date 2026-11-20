@@ -57,6 +57,11 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
     async def lifespan(application):
         if runtime is not None:
             runtime.start()
+            if settings.mode == "FUJI" and (
+                runtime.chain.deployment.get("adapter_version") != "lfj-v1-fuji-v1"
+                or runtime.chain.deployment.get("pdr_version") != "2"
+            ):
+                raise RuntimeError("FUJI serving requires the live LFJ V2 deployment; use LOCAL for mock contracts")
         async with control_lifespan(application):
             if demo.enabled:
                 chain = runtime.chain

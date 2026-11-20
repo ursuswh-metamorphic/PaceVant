@@ -38,6 +38,7 @@ export async function refreshDemo(onOpen) {
   byId("demo-credit").textContent = "Gas credit khả dụng: " + avax(account.available_wei) +
     " · Đang giữ chỗ: " + avax(account.reserved_wei) + " · Đã trừ: " + avax(account.spent_wei);
   const paid = account.transactions.find(tx => tx.state === "SETTLED");
+  state.demoConfirmedWorkflow = account.transactions.find(tx => tx.state === "SETTLED" && tx.receipt_status === "SUCCESS")?.workflow_id;
   byId("demo-last-fee").textContent = paid ? "Phí gần nhất: " + avax(paid.actual_cost_wei) +
     " = " + paid.gas_used + " gas × " + paid.effective_gas_price_wei + " wei/gas · " + paid.receipt_status : "Chưa có phí giao dịch đã xác minh. Pending không tính là phí 0.";
   const transactions = byId("demo-transactions"); transactions.replaceChildren();
@@ -64,5 +65,6 @@ export async function refreshDemo(onOpen) {
   }
   // After reload the identifier is safe to retain; resumption is GET-only.
   byId("demo-resume").hidden = !pendingRequest();
-  if (pendingRequest() || BigInt(account.available_wei) <= 0n) byId("run").disabled = true;
+  state.demoAvailableWei = account.available_wei;
+  if (byId("live-case").value === "swap" && (pendingRequest() || BigInt(account.available_wei) <= 0n)) byId("run").disabled = true;
 }

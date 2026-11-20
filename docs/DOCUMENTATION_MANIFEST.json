@@ -241,9 +241,9 @@
     },
     {
       "path": "deploy/runtime.env.example",
-      "status": "HISTORICAL_TEMPLATE",
-      "purpose": "Incomplete older hosting env; reconcile against canonical effective profile",
-      "replacement": "deploy/README.md"
+      "status": "CURRENT_TEMPLATE",
+      "purpose": "Owner-free Fuji template aligned with current demo flags; hosting still unverified",
+      "replacement": null
     },
     {
       "path": "deployments/README.md",
@@ -580,15 +580,15 @@
       "path": "docs/current-api-catalog.json",
       "status": "CURRENT_API_CATALOG",
       "purpose": "Sanitized static source/config inventory; not current chain/provider readiness",
-      "sha256": "196b022da5d32a15dab28e9023623afd934d0d98996b1217c2d8fd507634ec07",
-      "sha256_lf_checkout": "3f022d843b8aca36fe9b7fae8ec8788b82ee0e33c397315ab5cb39209a3e9e7e"
+      "sha256": "999668e1b82ebb0a98076d83ec5970333fd2c1ea3de90982e502f822695aefbe",
+      "sha256_lf_checkout": "08c3ddbf0586e072f9ea9b00ab24d22e43be85f0c16ca40620803774449f0269"
     },
     {
       "path": "docs/current-system-inventory.json",
       "status": "CURRENT_INVENTORY",
       "purpose": "Sanitized static source/config inventory; not current chain/provider readiness",
-      "sha256": "733de869fd832fe684e51d72b904aae341f9c15797402e1f04eaf53795f0385a",
-      "sha256_lf_checkout": "3ad59f8c48f602b77e93a77e42cd9949816f247bdb87a4fb1f8be47546c313dd"
+      "sha256": "2c393e4ce16530bbea896c5b062ec3e81df624dd74a2054cc784029fee00c2fc",
+      "sha256_lf_checkout": "8d5c00786ae09856dd78e0bc9f0fc908f04e9c832346244a24063e3e9568d62e"
     },
     {
       "path": "docs/CURRENT_SYSTEM_FLOW.md",
@@ -1188,6 +1188,73 @@
       "status": "COMPONENT_REFERENCE",
       "purpose": "Current documentation/reference; read local scope and canonical design",
       "replacement": null
+    },
+    {
+      "path": "docs/audit/web-demo-fuji-chain-evidence.json",
+      "status": "EVIDENCE_ARTIFACT",
+      "purpose": "Live web Fuji evidence/query; no future readiness claim",
+      "evidence_scope": "Demo User Fuji workflow_00370cd7f0c3479aacf9c9faced7940f",
+      "sha256": "a63ee1469aa6cf092c32489cdd3eb07bbf84498ef5befa680ae454e1a839ee8d",
+      "sha256_lf_checkout": "db080a0f8a97011ac02730348d2cd12f81323343db4559a73640e337523583dd"
+    },
+    {
+      "path": "docs/audit/web-demo-live-validation.json",
+      "status": "EVIDENCE_ARTIFACT",
+      "purpose": "Live web Fuji evidence/query; no future readiness claim",
+      "evidence_scope": "Demo User Fuji workflow_00370cd7f0c3479aacf9c9faced7940f",
+      "sha256": "7a9994417716c1337f106fab6eb859863b8b49b3e7226355648013abf70b9003",
+      "sha256_lf_checkout": "1a447bbc75eede5f7c2c673d9f9f53ee226aefc7c7918f2b38e8744cc054f29e"
+    },
+    {
+      "path": "docs/audit/WEB_DEMO_LIVE_REVIEW.md",
+      "status": "CURRENT_REVIEW_REPORT",
+      "purpose": "Current live web implementation/evidence/runbook; read scoped limits"
+    },
+    {
+      "path": "docs/demo/LIVE_WEB_DEMO.md",
+      "status": "CURRENT_RUNBOOK",
+      "purpose": "Current live web implementation/evidence/runbook; read scoped limits"
+    },
+    {
+      "path": "docs/audit/web-demo-live-proof/84d2c03b518cf7524c802cf607fc1b1488ee005ce3a87bbae6b25ea3487730f1.smt2",
+      "status": "EVIDENCE_ARTIFACT",
+      "purpose": "Live web Fuji evidence/query; no future readiness claim",
+      "evidence_scope": "Demo User Fuji workflow_00370cd7f0c3479aacf9c9faced7940f",
+      "sha256": "252df65803c9166cc85a41a5d78f7b8cf7c6a05ec65fa1eb674c56c51e0c2c37"
+    },
+    {
+      "path": "docs/audit/web-demo-live-proof/868195ec321b544ff4fb7052b8843c46c44848296b7a656af066ad554e784e6c.smt2",
+      "status": "EVIDENCE_ARTIFACT",
+      "purpose": "Live web Fuji evidence/query; no future readiness claim",
+      "evidence_scope": "Demo User Fuji workflow_00370cd7f0c3479aacf9c9faced7940f",
+      "sha256": "b56c69f73018d5de8a1b5f3066091d6918867d6134884fbf5e339379fb246d0e"
+    },
+    {
+      "path": "docs/audit/web-demo-live-proof/993747571b727174af745a673e024287f2087517efb4dea9685c444419918174.smt2",
+      "status": "EVIDENCE_ARTIFACT",
+      "purpose": "Live web Fuji evidence/query; no future readiness claim",
+      "evidence_scope": "Demo User Fuji workflow_00370cd7f0c3479aacf9c9faced7940f",
+      "sha256": "7e93bb3a6d29947ac304b87614031939d8a3246fb5f5aa39a8884e697e9a9daf"
+    },
+    {
+      "path": "docs/audit/web-demo-live-proof/ab3707e724b548f2d6731743f08f407fb829fe1a6eb587dc734f47a0f5091f23.smt2",
+      "status": "EVIDENCE_ARTIFACT",
+      "purpose": "Live web Fuji evidence/query; no future readiness claim",
+      "evidence_scope": "Demo User Fuji workflow_00370cd7f0c3479aacf9c9faced7940f",
+      "sha256": "aea75d4dd3f1c77f64fbdaddbc3fa5f837fa73bb3156a87d94efa8b7c0092956"
+    },
+    {
+      "path": "docs/audit/web-demo-live-proof/ce5046b4772f0345216f6735db8590c4f956cd0f50d069aeafb67dfda8ae4243.smt2",
+      "status": "EVIDENCE_ARTIFACT",
+      "purpose": "Live web Fuji evidence/query; no future readiness claim",
+      "evidence_scope": "Demo User Fuji workflow_00370cd7f0c3479aacf9c9faced7940f",
+      "sha256": "62322d6bfdb87bfe1207ccea3abd54a3fa64844f75f02c3318ab39b016279789"
+    },
+    {
+      "path": "docs/audit/web-demo-live-proof/README.md",
+      "status": "CURRENT_EVIDENCE_REFERENCE",
+      "purpose": "Current live web implementation/evidence/runbook; read scoped limits"
     }
-  ]
+  ],
+  "runtime_revision": "Live web feature changes based on 713f867; source fingerprints updated"
 }

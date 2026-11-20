@@ -154,6 +154,18 @@ def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, ou
                 assert account2["spent_wei"] == account["spent_wei"]
                 assert len([e for e in account2["ledger"] if e["kind"] == "GAS_DEBIT"]) == 1
                 assert "private_key" not in json.dumps(account2).lower()
+                checked = client.get("/v1/demo/workflows/" + first["workflow_id"] + "/security-checks", headers=headers).raise_for_status().json()
+                assert checked["all_passed"] and checked["broadcast"] is False
+                assert all(c["status"] == "PASS" for c in checked["checks"])
+                assert chain.w3.eth.get_transaction_count(chain.deployment["relayer"]) == nonce
+                # RPC failure is inconclusive, never a successful negative security check.
+                with monkeypatch.context() as failed_rpc:
+                    def unavailable(*args, **kwargs):
+                        raise RuntimeError("test-only RPC outage")
+                    failed_rpc.setattr(chain.w3.eth, "call", unavailable)
+                    inconclusive = client.get("/v1/demo/workflows/" + first["workflow_id"] + "/security-checks", headers=headers).raise_for_status().json()
+                    assert not inconclusive["all_passed"]
+                    assert all(c["status"] == "INCONCLUSIVE" for c in inconclusive["checks"])
                 request["temporal_intent"] = wf["temporal_intent"]
                 # A second demo request with no available credit MUST NOT broadcast.
                 with ledger.db() as db:

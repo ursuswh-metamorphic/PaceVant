@@ -96,10 +96,10 @@
     "workflows"
   ],
   "source_files": {
-    "backend/src/treasury_backend/api/app.py": "396f05d425b1df7f96f371da44f2ef4d9f1d163e347241f8c94b2d28f5fb2161",
-    "backend/src/treasury_backend/api/demo.py": "6d2ce073ced80a7fc0bfa7ff2d6f373b73939f91174f4e905dba4624415d2c6c",
+    "backend/src/treasury_backend/api/app.py": "343c4c906609eacb7f3511b3e6e5185c747ccbd86f4405559fb95f335dfe422c",
+    "backend/src/treasury_backend/api/demo.py": "6e6b7980c963a5e71704cffaf4dc4d7b95be67ede12e7b7a4786678e10febecc",
     "backend/src/treasury_backend/api/demo_auth.py": "31c24be9f99d753716a3eaefb36505947fbbe74b186754372619403219fbcc1e",
-    "backend/src/treasury_backend/modules/workflows/service.py": "3b062b9850223e839f5684a1cf109e3e52f694dabc1d8816b039b0bd89011ff8",
+    "backend/src/treasury_backend/modules/workflows/service.py": "af3c8bd93427cc829e0dad2c1458a73432f86ba8b3a34345d1001ae25a55c227",
     "backend/src/treasury_backend/modules/workflows/evaluation.py": "064105c63c49be4fa14f72b34cb8c0aec771e3e6f2b4eac30626b0cd22499aaa",
     "backend/src/treasury_backend/modules/workflows/authorization.py": "4f314b88fcb198ac34cdf42fbdd99da5186ef4806628427ea3ae6593aa35e96d",
     "backend/src/treasury_backend/modules/monitoring/service.py": "909d0a734e8f51a7a6098c2f8032dff9016bd56f2d7a05a1eaeab61a62d23d72",
@@ -111,19 +111,19 @@
     "packages/contracts-api/treasury_contracts/proof.py": "2fb62005a61e733ebd6accabb6eb1caffbecdb13c08d68bf8db432d84884ccd1",
     "packages/contracts-api/treasury_contracts/v2.py": "9398e0c3ad21bee0cb0c843fa028731f7020f83326999b12e58e881bda458877",
     "packages/contracts-api/treasury_contracts/oracle.py": "3b180f812ee33c5db22935496c2ccaec9cd1548c36ab1888e18105375018b54a",
-    "packages/contracts-api/treasury_contracts/outcomes.py": "cf48f14088922c350ea252417098ccad586b86a066ce343493baa0a753f27012",
+    "packages/contracts-api/treasury_contracts/outcomes.py": "83e928d5493c18883af4a92999b96f0d89103252eeef9192c358b177d2547b78",
     "contracts/src/PolicyVault.sol": "f275437158dbaaa9af3bcc71130529448db2f74c5076c4b31fe46fddfd5f2768",
     "contracts/src/adapters/LFJSwapAdapter.sol": "bd8158f317ae64bf4ad4c4cb2c2d9618a9dc0c319476439f6c2b9b7653f9a296",
-    "frontend/src/app.js": "088a2a8ccec0e857a98be57c2b00e53e0659831ada057c932d4004b17d6d040a",
+    "frontend/src/app.js": "161fa1312e5c1c2b1851cdf9e21073ebbddd53add89d61c25db54604045c0071",
     "backend/src/treasury_backend/operations/environments.py": "ba5320b5843d7dfbff6bd4b5eb317d03a36d509d0c9da63f2665fa6c0aef6ba6",
     "Dockerfile": "3910dc2e909bd85726de7adcd9253d9ea950fded86c2c681ed3ce6845b3245f3"
   },
   "readiness": "Code and historical evidence do not prove current live readiness; check session/funding/oracle/RPC/model/runtime separately",
   "source_files_lf_sha256": {
-    "backend/src/treasury_backend/api/app.py": "396f05d425b1df7f96f371da44f2ef4d9f1d163e347241f8c94b2d28f5fb2161",
-    "backend/src/treasury_backend/api/demo.py": "6d2ce073ced80a7fc0bfa7ff2d6f373b73939f91174f4e905dba4624415d2c6c",
+    "backend/src/treasury_backend/api/app.py": "343c4c906609eacb7f3511b3e6e5185c747ccbd86f4405559fb95f335dfe422c",
+    "backend/src/treasury_backend/api/demo.py": "6e6b7980c963a5e71704cffaf4dc4d7b95be67ede12e7b7a4786678e10febecc",
     "backend/src/treasury_backend/api/demo_auth.py": "31c24be9f99d753716a3eaefb36505947fbbe74b186754372619403219fbcc1e",
-    "backend/src/treasury_backend/modules/workflows/service.py": "51af13fa8ab7445b7b9e840dbb03cfad77e6e40592a5af2e56e1802c47dd4985",
+    "backend/src/treasury_backend/modules/workflows/service.py": "af993728661354805c2c09fab846c0c9f6b4bec366e8be4ae26b48a5a8f7c7e6",
     "backend/src/treasury_backend/modules/workflows/evaluation.py": "b66066eff5945f92cd398baf0e77213b193ea6217d2dc01bd61c217f16c4f0af",
     "backend/src/treasury_backend/modules/workflows/authorization.py": "56acfb1925a2a8c2fedbe940ae849f0f73180a3e4074ce6ac76f8ef9dd1a13a7",
     "backend/src/treasury_backend/modules/monitoring/service.py": "98cfa796c835ff2e30146984d2b455472e2a26d26174c54c4274e314637d8ecf",
@@ -135,12 +135,14 @@
     "packages/contracts-api/treasury_contracts/proof.py": "2fb62005a61e733ebd6accabb6eb1caffbecdb13c08d68bf8db432d84884ccd1",
     "packages/contracts-api/treasury_contracts/v2.py": "3929b81e5deaf9207a0e04866da1b6c2f83edb916d01c1227cfcbe89751da4e5",
     "packages/contracts-api/treasury_contracts/oracle.py": "51fa210c9c3e7ce49f20d879e66af6b7615a1a487712164d64d1d7380d67cc92",
-    "packages/contracts-api/treasury_contracts/outcomes.py": "cf48f14088922c350ea252417098ccad586b86a066ce343493baa0a753f27012",
+    "packages/contracts-api/treasury_contracts/outcomes.py": "83e928d5493c18883af4a92999b96f0d89103252eeef9192c358b177d2547b78",
     "contracts/src/PolicyVault.sol": "f275437158dbaaa9af3bcc71130529448db2f74c5076c4b31fe46fddfd5f2768",
     "contracts/src/adapters/LFJSwapAdapter.sol": "bd8158f317ae64bf4ad4c4cb2c2d9618a9dc0c319476439f6c2b9b7653f9a296",
-    "frontend/src/app.js": "a5a2fd9310615ffe7668c4a8c68342fb76d391c2f4c9c367e6d81901bef33cf5",
+    "frontend/src/app.js": "37e4860c0415b8f41e98092e2ee1dbbeeee99d1d556bccc56ebbfbb45ec76208",
     "backend/src/treasury_backend/operations/environments.py": "71a2da47e7b9e677df173b37d4c6d0f23e1a1791f244206a5f1e90ff0c37cd55",
     "Dockerfile": "3910dc2e909bd85726de7adcd9253d9ea950fded86c2c681ed3ce6845b3245f3"
   },
-  "fingerprint_note": "source_files is exact reviewed checkout bytes; source_files_lf_sha256 also permits Git LF/CRLF checkout conversion for static documentation validation, not attestation source commitments"
+  "fingerprint_note": "source_files is exact reviewed checkout bytes; source_files_lf_sha256 also permits Git LF/CRLF checkout conversion for static documentation validation, not attestation source commitments",
+  "runtime_revision": "live-web feature changes based on 713f867; see feature commit",
+  "latest_live_evidence": "docs/audit/web-demo-live-validation.json"
 }

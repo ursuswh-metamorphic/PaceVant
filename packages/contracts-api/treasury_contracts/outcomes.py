@@ -84,6 +84,12 @@ def verify_outcome(
             )
         header = w3.eth.get_block(receipt.blockNumber)
         head = w3.eth.get_block("latest")
+        if receipt.blockNumber > head.number or tx.blockNumber is None or tx.blockHash is None:
+            # Load-balanced RPC backends may expose a mined receipt before their
+            # latest head/transaction view catches up. This is uncertainty, not
+            # evidence of a reorg; keep reservations and do not charge unverified gas.
+            return ExecutionReconciliation(**{**out, "verification_status": "PENDING",
+                "receipt_status": "PENDING", "reason_codes": ["RPC_INCLUSION_NOT_CONVERGED"]})
         if (
             Web3.to_hex(receipt.transactionHash) != tx_hash
             or Web3.to_hex(tx.hash) != tx_hash
@@ -91,7 +97,6 @@ def verify_outcome(
             or tx.blockHash != header.hash
             or tx.blockNumber != receipt.blockNumber
             or header.number != receipt.blockNumber
-            or receipt.blockNumber > head.number
         ):
             return ExecutionReconciliation(
                 **{

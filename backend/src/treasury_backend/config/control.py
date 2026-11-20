@@ -59,7 +59,7 @@ class Settings:
         serve_frontend = os.environ.get("PACEVANT_SERVE_FRONTEND", "true").lower()
         if serve_frontend not in {"true", "false"}:
             raise RuntimeError("PACEVANT_SERVE_FRONTEND must be true or false")
-        mode = os.environ.get("PACEVANT_MODE", "MOCK")
+        mode = os.environ.get("PACEVANT_MODE", "FUJI")
         if mode not in ("MOCK", "LOCAL", "FUJI"):
             raise RuntimeError("PACEVANT_MODE must be MOCK, LOCAL or FUJI")
         env = {

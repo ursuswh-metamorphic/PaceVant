@@ -1,5 +1,7 @@
 # PaceVant — Hồ sơ hiện trạng, thiết kế và phản biện hệ thống
 
+> **Cập nhật sau baseline bên dưới:** Demo User đã swap Fuji thật và trừ đúng gas tại transaction `0x315a9bff8ba111487d295903ebd0f6389b1baefd40ea9526fc33bc014a9656ba`. [Live review](audit/WEB_DEMO_LIVE_REVIEW.md) và [web runbook](demo/LIVE_WEB_DEMO.md) thay thế các giới hạn cũ về chưa có Fuji billing/browser evidence. Fuji nay là mặc định; mock/LOCAL chọn riêng; web có kiểm thử tấn công có kiểm soát. Các phần assumptions/production limitations còn áp dụng. Chi tiết implementation mới phải đọc cùng live review.
+
 > **DOC STATUS: CURRENT_REVIEW_PACK** — bản Markdown tự chứa để gửi cho AI/reviewer.
 > Ngày tổng hợp: **20/11/2026**. Runtime source baseline: **`3f9f9af91310040bd43eb3895d145a0fc46d776c`**. Commit chuẩn hóa design trước báo cáo: `4aa7a30`.
 > Phạm vi: implementation/configuration đã kiểm kê và bằng chứng đã lưu trong repository. Không chạy model, kiểm lại chain state, gửi transaction, gia hạn session hoặc kiểm browser trong lần tạo file này. Không chứa private key/API key/service token.

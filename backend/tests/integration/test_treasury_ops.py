@@ -133,6 +133,8 @@ def test_complete_local_operator_command(tmp_path, monkeypatch):
                 str(ROOT / "scripts/treasury.py"),
                 "local",
                 "--once",
+                "--goal",
+                "Buy WAVAX with 200 USDC",
                 "--env-file",
                 str(env),
             ],

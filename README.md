@@ -1,5 +1,7 @@
 # PaceVant
 
+**Live web update:** `uv run --locked treasury serve` mặc định Fuji; `treasury mock` và `treasury local` là chế độ test riêng. Demo User đã có swap Fuji và actual gas debit; web tách sử dụng bình thường/kiểm thử bảo mật. Xem [runbook mới](docs/demo/LIVE_WEB_DEMO.md) và [bằng chứng](docs/audit/WEB_DEMO_LIVE_REVIEW.md); các giới hạn chưa có Fuji billing trong baseline bên dưới đã được thay thế.
+
 > **DOC STATUS: CURRENT_INDEX** — hiện trạng source baseline `3f9f9af`, rà soát 20/11/2026. Không có giao dịch hoặc live readiness check mới trong lần chuẩn hóa docs.
 
 PaceVant là treasury security system: AI đề xuất swap, hệ thống kiểm quyền và intent, mô phỏng fork, đánh giá rủi ro, chứng minh bounded postcondition bằng Z3, ký approval và thực thi qua Solidity PolicyVault trên Avalanche Fuji. Backend là **một Python/FastAPI modular monolith**, frontend là HTML/CSS/browser JavaScript. Native Anvil phục vụ mô phỏng; Node.js chỉ là tooling phát triển tùy chọn.

@@ -19,7 +19,12 @@ def test_env_template_matches_initializer_schema(tmp_path):
     path = tmp_path / "fresh.env"
     ops.init_env(path)
     assert set(dotenv_values(path, interpolate=False)) == set(template)
-    assert dotenv_values(path)["PACEVANT_PLANNER_PROVIDER"] == "rules"
+    assert dotenv_values(path)["PACEVANT_PLANNER_PROVIDER"] == "rotate"
+    assert dotenv_values(path)["PACEVANT_MODE"] == "FUJI"
+    assert ops.Profile.load(ROOT, path, "local").values["PACEVANT_PLANNER_PROVIDER"] == "rules"
+    local = ops.Profile.load(ROOT, path, "local")
+    assert len(local.values["B_API_KEY"]) >= 24
+    assert "DEEPSEEK_API_KEY" not in local.values
 
 
 def test_groq_key_is_required_only_when_selected():

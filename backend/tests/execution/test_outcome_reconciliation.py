@@ -14,7 +14,7 @@ from treasury_contracts.token_facts import TRANSFER
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("mutation", ["none", "pending", "outage", "chain", "tx_hash", "block_hash", "recipient", "calldata", "missing_event", "malformed_event", "token_delta", "nonce", "policy", "allowance"])
+@pytest.mark.parametrize("mutation", ["none", "pending", "lagging_head", "lagging_transaction", "outage", "chain", "tx_hash", "block_hash", "recipient", "calldata", "missing_event", "malformed_event", "token_delta", "nonce", "policy", "allowance"])
 def test_canonical_verifier_rejects_contradictions(plane, mutation):
     client, chain, keys, _ = plane
     b, e = build_and_simulate(client, chain)
@@ -33,6 +33,8 @@ def test_canonical_verifier_rejects_contradictions(plane, mutation):
         if mutation == "chain" and method == "eth_chainId":
             raw["result"] = "0x1"
         if method == "eth_getTransactionByHash" and value:
+            if mutation == "lagging_transaction":
+                value["blockHash"] = value["blockNumber"] = None
             if mutation == "recipient":
                 value["to"] = "0x" + "77" * 20
             if mutation == "calldata":
@@ -57,6 +59,8 @@ def test_canonical_verifier_rejects_contradictions(plane, mutation):
                 for log in value["logs"]:
                     if log["topics"][0] == TRANSFER and log["address"].lower() == b["token_out"].lower():
                         log["data"] = "0x" + (1).to_bytes(32, "big").hex()
+        if mutation == "lagging_head" and method == "eth_getBlockByNumber" and payload["params"][0] == "latest" and value:
+            value["number"] = hex(int(value["number"], 16) - 1)
         if method == "eth_call":
             selector = payload["params"][0]["data"][:10]
             if mutation == "nonce" and selector == Web3.to_hex(Web3.keccak(text="usedNonce(uint256)")[:4]):
@@ -78,8 +82,9 @@ def test_canonical_verifier_rejects_contradictions(plane, mutation):
         assert remote["verification_status"] == "VERIFIED"
         found = client.get(f"/v1/submissions/by-build/{b['build_id']}").raise_for_status().json()
         assert found["tx_hash"] == tx
-    elif mutation == "pending":
+    elif mutation in {"pending", "lagging_head", "lagging_transaction"}:
         assert report.verification_status == "PENDING"
+        assert not report.gas_verified
     elif mutation in {"chain", "outage"}:
         assert report.verification_status == "UNAVAILABLE"
     else:

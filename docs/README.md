@@ -1,5 +1,7 @@
 # Chỉ mục tài liệu PaceVant
 
+Luồng web mới nhất: [Live web runbook](demo/LIVE_WEB_DEMO.md), [kết quả Fuji và gas billing](audit/WEB_DEMO_LIVE_REVIEW.md). Fuji là mặc định; chọn MOCK/LOCAL rõ ràng khi kiểm offline. Các mô tả baseline cũ chưa có Fuji billing được thay thế bởi evidence này.
+
 > **DOC STATUS: CURRENT_INDEX** — chuẩn hóa 20/11/2026, runtime source baseline `3f9f9af`. Đây là điểm vào để tránh trộn tài liệu cũ với hiện trạng.
 
 ## Bộ tài liệu hiện hành

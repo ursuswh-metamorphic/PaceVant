@@ -1,4 +1,4 @@
-"""Run from the repository root with uv; all command defaults are local-only."""
+"""Fuji is the serving default; mock/local execution must be selected explicitly."""
 
 import argparse
 import json
@@ -43,9 +43,11 @@ def main():
             "lfj-preflight",
             "fuji-demo",
             "fuji-evidence",
+            "mock",
+            "fund-demo",
         ],
     )
-    parser.add_argument("--network", choices=["local", "fuji"], default="local")
+    parser.add_argument("--network", choices=["local", "fuji"], default=None)
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env")
     parser.add_argument("--live", action="store_true", help="Read-only RPC/funding checks")
     parser.add_argument(
@@ -58,12 +60,26 @@ def main():
         action="store_true",
         help="Run one complete workflow and stop the owned local services",
     )
-    parser.add_argument("--goal", default="Buy WAVAX with 200 USDC")
-    parser.add_argument("--adapter", choices=["mock", "lfj"], default="mock")
+    parser.add_argument("--goal", default="Buy WAVAX with 0.000001 USDC")
+    parser.add_argument("--adapter", choices=["mock", "lfj"], default=None)
     parser.add_argument("--output", type=Path, help="Optional LFJ preflight report path")
     parser.add_argument("--setup", action="store_true", help="Deploy/fund the small real Fuji demo using the configured owner")
     parser.add_argument("--workflow-id", help="Workflow to verify/export with fuji-evidence")
     args = parser.parse_args()
+    if args.command in {"deploy", "renew-session", "renew-policy"} and args.network is None:
+        parser.error("Owner writes require an explicit --network local|fuji")
+    args.network = args.network or ("local" if args.command == "local" else "fuji")
+    args.adapter = args.adapter or ("lfj" if args.network == "fuji" else "mock")
+    if args.command == "mock":
+        import uvicorn
+
+        from treasury_backend.api.app import create_app
+        from treasury_backend.config.control import Settings
+        from treasury_backend.config.demo import DemoSettings
+
+        # Explicit fixture app: never inherit live credentials, demo billing or chain clients.
+        uvicorn.run(create_app(Settings(), demo_settings=DemoSettings()), host="127.0.0.1", port=8000)
+        return 0
     if args.command == "serve-container":
         from .container import main as container_main
 
@@ -86,7 +102,13 @@ def main():
             p = Profile.load(ROOT, args.env_file, args.network)
             if args.command == "doctor":
                 result = doctor(p, live=args.live)
+            elif args.command == "fund-demo":
+                from .demo_funding import fund_demo
+
+                result = fund_demo(p)
             elif args.command == "deploy":
+                if args.network == "fuji" and args.adapter != "lfj":
+                    raise OpsError("Mock adapters are restricted to the explicit LOCAL test mode")
                 if args.adapter == "lfj" and args.network != "fuji":
                     raise OpsError("LFJ deployment requires --network fuji")
                 compile_contracts()

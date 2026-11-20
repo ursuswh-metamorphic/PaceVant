@@ -132,3 +132,10 @@ footer.shell { color: var(--muted); display: flex; justify-content: space-betwee
  #demo-account-select { display: block; width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #cbdcd3; border-radius: 6px; font: inherit; }
  #demo-budget ul { padding-left: 20px; font-size: 13px; line-height: 1.7; }
  #demo-budget h3 { margin-top: 18px; }
+ #live-case, #demo-activity, #shield-challenge { display:block; width:100%; padding:10px; margin:10px 0; border:1px solid #cbdcd3; border-radius:6px; font:inherit; background:white; }
+ #live-case-label, #demo-activity-label, #challenge-label { display:block; margin-bottom:14px; font-size:14px; font-weight:600; }
+ #live-case-label[hidden], #demo-activity-label[hidden], #challenge-label[hidden], #demo-supported[hidden], #live-check-panel[hidden] { display:none; }
+ #live-case-help, #demo-supported { margin-top:14px; font-size:13px; line-height:1.65; color:#52645b; }
+ #live-check-panel { margin-top:18px; border-top:1px solid #dce6df; padding-top:16px; }
+ #live-check-summary { font-size:14px; line-height:1.65; }
+ #live-check-result { max-height:440px; overflow:auto; font-size:11px; }

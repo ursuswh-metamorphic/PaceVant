@@ -1,0 +1,577 @@
+{
+  "schema_version": "fuji-live-evidence-v1",
+  "workflow_id": "workflow_00370cd7f0c3479aacf9c9faced7940f",
+  "status": "CONFIRMED",
+  "chain_id": 43113,
+  "public_chain": true,
+  "planner": {
+    "planner_version": "provider-failover-bounded-v1",
+    "planner_provider": "rotate",
+    "planner_model": null,
+    "runtime": {
+      "planner_provider": "deepseek",
+      "planner_model": "deepseek-flash",
+      "provider_attempts": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "status": "VALIDATED"
+        }
+      ]
+    }
+  },
+  "wallets": {
+    "owner": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+    "attestor": "0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989",
+    "relayer": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C"
+  },
+  "contracts": {
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "router": "0x497d967d003717FA49ce16ac6FFf73a399aFe5D4",
+    "token_in": "0x5425890298aed601595a70AB815c96711a31Bc65",
+    "token_out": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+  },
+  "transaction": {
+    "hash": "0x315a9bff8ba111487d295903ebd0f6389b1baefd40ea9526fc33bc014a9656ba",
+    "block": 61375517,
+    "block_hash": "0x20ee7412216e59c11ed2a0bae399a044517464c67106b5ff73382fdb428d7b0b",
+    "gas_used": "356389",
+    "explorer": "https://testnet.snowtrace.io/tx/0x315a9bff8ba111487d295903ebd0f6389b1baefd40ea9526fc33bc014a9656ba"
+  },
+  "token_deltas_base_units": [
+    "-1",
+    "13266640314006"
+  ],
+  "checks": {
+    "chain_43113": true,
+    "successful_receipt": true,
+    "relayer_is_configured_wallet": true,
+    "recipient_is_vault": true,
+    "calldata_is_exact_signed_call": true,
+    "signer_is_attestor": true,
+    "nonce_consumed": true,
+    "exact_input_delta": true,
+    "output_at_least_minimum": true,
+    "vault_allowance_cleared": true,
+    "adapter_allowance_cleared": true,
+    "session_debit_matches_proof": true,
+    "global_debit_matches_proof": true,
+    "three_unsat_obligations": true
+  },
+  "negative_eth_calls": [
+    {
+      "case": "replay",
+      "block_number": 61375517,
+      "expected_error": "NonceReplay()",
+      "selector": "0x6aa319b1",
+      "passed": true,
+      "broadcast": false
+    },
+    {
+      "case": "tampered_router_calldata",
+      "block_number": 61375516,
+      "expected_error": "HashMismatch()",
+      "selector": "0x3f4d6053",
+      "passed": true,
+      "broadcast": false
+    },
+    {
+      "case": "unauthorized_signer",
+      "block_number": 61375516,
+      "expected_error": "BadSignature()",
+      "selector": "0x5cd5d233",
+      "passed": true,
+      "broadcast": false
+    }
+  ],
+  "all_checks_passed": true,
+  "proof": {
+    "status": "VERIFIED",
+    "reason": "PROOF_VERIFIED",
+    "check_mode": "UNSAT",
+    "compile_mode": "UNSAT",
+    "risk_bound": "UNSAT",
+    "assumptions_satisfiable": true,
+    "compiled_region_satisfiable": true,
+    "phi": {
+      "balance_bounds": [
+        {
+          "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "min_delta": "-1"
+        },
+        {
+          "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "min_delta": "13213573752749"
+        }
+      ],
+      "allowance_caps": [
+        {
+          "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "max_remaining": "0"
+        },
+        {
+          "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "max_remaining": "0"
+        }
+      ]
+    },
+    "risk_debit_usd_e8": "0",
+    "query_hashes": [
+      "0x84d2c03b518cf7524c802cf607fc1b1488ee005ce3a87bbae6b25ea3487730f1",
+      "0x868195ec321b544ff4fb7052b8843c46c44848296b7a656af066ad554e784e6c",
+      "0xab3707e724b548f2d6731743f08f407fb829fe1a6eb587dc734f47a0f5091f23",
+      "0xce5046b4772f0345216f6735db8590c4f956cd0f50d069aeafb67dfda8ae4243",
+      "0x993747571b727174af745a673e024287f2087517efb4dea9685c444419918174"
+    ],
+    "encoder_version": "pgs-treasury-2.1.0",
+    "solver_version": "4.15.4",
+    "source_hash": "0x5cdc2805d0ba5cfa31d5d0be05cdbb81fd012e03cdf4767bac7d2cfa66f2623b",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "policy_config_hash": "0x87f37da6d302d867e133fd83bbe68daa640ce7e4d55e03010935880cd43ac24e",
+    "registry_hash": "0x30a36da3cece29c71519f120726a10668285d1964ec51d81cd347895bf3a9a20",
+    "oracle_hash": "0x60370223a5c8fc1889baec86e2d7ea83577b01c62a6dfe7a3b51d4a51ce5eacf",
+    "exact_call_hash": "0x85c11c53c05eecc297604145f6f8d96ed965d07d52381216a385f1cd93abfb02",
+    "evidence_root": "0x1e0b43e6a06f8c879daa168b455d378840c98e39a99a50b09c49e35aa558fcf0",
+    "session_context_hash": "0x36f84f9d671dea5cf57763bd94b98b317bfe6a9b1329d5456980de6a1ab0daa4",
+    "fallback_tau_zero": false,
+    "witness": null
+  },
+  "oracle_snapshot": {
+    "snapshot_id": "snapshot_5a95e3cb85e83a79b11fe417ea337b94a06b0b0a785dd38337c8e5edc98c4072",
+    "chain_id": 43113,
+    "vault_address": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+    "block_number": 61375425,
+    "usdc_base_units": "1379",
+    "wavax_base_units": "52870741369512",
+    "price_usdc_usd_e8": "99981087",
+    "price_wavax_usd_e8": "691216262",
+    "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+    "price_timestamp": 1795121325,
+    "history_version": 4,
+    "oracle_observed_at": 1795172023,
+    "oracle_block_number": 61375401,
+    "oracle_block_hash": "0x1676d6c8b078f22cb01d764b44483491e5d3de00f7b386cd5104209c1e4a78d3",
+    "oracle_feeds": [
+      {
+        "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+        "description": "USDC/USD",
+        "decimals": 8,
+        "answer_raw": "99981087",
+        "round_id": "18446744073709552589",
+        "answered_in_round": "18446744073709552589",
+        "started_at": 1795121325,
+        "updated_at": 1795121325,
+        "max_age_seconds": 86400,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      },
+      {
+        "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+        "description": "AVAX/USD",
+        "decimals": 8,
+        "answer_raw": "691216262",
+        "round_id": "55340232221128821039",
+        "answered_in_round": "55340232221128821039",
+        "started_at": 1795171946,
+        "updated_at": 1795171946,
+        "max_age_seconds": 600,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      }
+    ],
+    "schema_version": "2.0",
+    "observation_snapshot_id": "observed_b42d1047f667908677e1aec5d8462aa0c0ff039ed70d864269a6355897e76f40",
+    "observation_hash": "0xb42d1047f667908677e1aec5d8462aa0c0ff039ed70d864269a6355897e76f40",
+    "content_hash": "0x5a95e3cb85e83a79b11fe417ea337b94a06b0b0a785dd38337c8e5edc98c4072",
+    "eligible_for_authorization": true,
+    "verification_scope": "FUJI_CHAINLINK_POLICY_REFERENCE",
+    "block_hash": "0x71ce0fe92db928338724a3c4f759c66f7372d72c41137aa29500fda57bd3dde0",
+    "block_timestamp": 1795172073,
+    "observed_at": 1795172099,
+    "source_rpc_id": "https://avalanche-fuji-c-chain-rpc.publicnode.com#path-c5d2460186f7233c",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "policy_version": 7,
+    "asset_identities": [
+      "43113:native",
+      "43113:erc20:0x5425890298aed601595a70ab815c96711a31bc65",
+      "43113:erc20:0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+    ],
+    "build_id": "build_a16697cf2a7a98e4d94defa735df2a975dfb797a9beb90a0e5c4761b36ed0a09"
+  },
+  "simulation": {
+    "effects_v2": {
+      "chain_id": 43113,
+      "vault": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+      "intent_hash": "0xca31f7dd7e6b6c0328169bdf6bde9c0503871ba2e0d046e8a6941495af09487b",
+      "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+      "calldata_hash": "0x24d366d8ce38877616d84bbfed2a1e7505d00826304f199c1779e8b0106a936a",
+      "block_number": 61375401,
+      "block_hash": "0x1676d6c8b078f22cb01d764b44483491e5d3de00f7b386cd5104209c1e4a78d3",
+      "timestamp": 1795172023,
+      "registry_hash": "0x30a36da3cece29c71519f120726a10668285d1964ec51d81cd347895bf3a9a20",
+      "balances": [
+        {
+          "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "before": "1379",
+          "after": "1378"
+        },
+        {
+          "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "before": "52870741369512",
+          "after": "66137381683518"
+        }
+      ],
+      "allowances": [
+        {
+          "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "spender": "0x497d967d003717fa49ce16ac6fff73a399afe5d4",
+          "before": "0",
+          "after": "0"
+        }
+      ],
+      "unexpected_transfer": false,
+      "unauthorized_approval": false,
+      "simulator_version": "guarded-v2.1",
+      "adapter_version": "lfj-v1-fuji-v1"
+    },
+    "schema_version": "1.1",
+    "intent_id": "intent_d6421a7a72eb4652a7dabaf77765651f",
+    "build_id": "build_a16697cf2a7a98e4d94defa735df2a975dfb797a9beb90a0e5c4761b36ed0a09",
+    "chain_id": 43113,
+    "vault_address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "calldata_hash": "0x24d366d8ce38877616d84bbfed2a1e7505d00826304f199c1779e8b0106a936a",
+    "nonce": "1021",
+    "deadline": 1795172310,
+    "fork_block": 61375401,
+    "bytecode_hash": "0x893bef38ed64d6d4d347d5b4911a73ba497ecaab88a0d00726903538eb2685f0",
+    "simulation_mode": "LOCAL_TEST_ATTESTOR",
+    "baseline": {
+      "execution_status": "SUCCESS",
+      "token_in_delta_base_units": "-1",
+      "token_out_delta_base_units": "13266640314006",
+      "unexpected_transfer": false,
+      "unauthorized_approval": false,
+      "gas_used": "288289"
+    },
+    "stress_tests": [
+      {
+        "scenario_id": "reserve_shift_mild",
+        "status": "SUCCESS_SAFE",
+        "scenario_hash": "0xdc9ac54e618cbd0de511ae95d3893f795bab820bff0df7fcd4d44993c8ba526e",
+        "output_base_units": "13240279717262",
+        "revert_reason": null
+      },
+      {
+        "scenario_id": "reserve_shift_adverse",
+        "status": "PROTECTED_REVERT",
+        "scenario_hash": "0x9b8682ea8ee377fbde8ae36ada4bfed295fb132b2fdb474dbd22673b88c9e19b",
+        "output_base_units": "0",
+        "revert_reason": "MIN_OUTPUT_NOT_MET"
+      }
+    ],
+    "verification_status": "COMPLETE",
+    "parser_version": "extractor-v1",
+    "source": "FORK_SIM",
+    "artifact_refs": [
+      "/v1/artifacts/7837e5d0cc854c8d76ee73b545db6ea6bdd9c2b485b21b6dc2cd2e074d8b2e83",
+      "/v1/artifacts/e3b5663f85292a964070bca4f7669dfe99c3bb886e62cac8c2770d3bf72c5bf7",
+      "/v1/artifacts/6fe969d463fd4071037e0de6ab2db88b60fd1d887f8a57199f5aa8376e623e71"
+    ],
+    "evidence_manifest_ref": "/v1/artifacts/dbd4090d617d6758e3d12681d2606eaeddca0fb86b6f8b8455ba442bf3ba4288",
+    "evidence_root": "0xdbd4090d617d6758e3d12681d2606eaeddca0fb86b6f8b8455ba442bf3ba4288"
+  },
+  "limitations": [
+    "Testnet reference USD valuations; no redemption or real-dollar claim.",
+    "Stress uses hypothetical external actor funding and attestor overrides ONLY on isolated Anvil forks.",
+    "Bounded SMT model plus concrete EVM tests; not a complete security audit."
+  ],
+  "task_shield": {
+    "model_version": "task-shield-wallet-pipeline-v1",
+    "all_aligned": true,
+    "checks": [
+      {
+        "check_id": "shield_9583b162348f449c9aca412a9187e8dd",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": null,
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 2,
+        "latency_ms": 2015,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 890,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          },
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 1125,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_b149504dd3f44ec38589acd36980308f",
+        "status": "ALIGNED",
+        "kind": "TOOL_CALL",
+        "tool_name": "build_swap",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 1641,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 1641,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_dd571ef8db454506b7f4ec60a4486152",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 859,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 859,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_05565a89889a40f7a38f2f2689d3268e",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 532,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 532,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_bca1b6a50099412ba9d6a1c7c1abf090",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 515,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 515,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_8f11d35e9755412e816a5cd90d043260",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "verified_execution_evidence",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 656,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 656,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_54a3a82babb54ea18f3e67422a6fa6eb",
+        "status": "ALIGNED",
+        "kind": "TOOL_CALL",
+        "tool_name": "execute_approved_swap",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 1468,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 1468,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      },
+      {
+        "check_id": "shield_ddd8e227c6ad419e939725181e04fa80",
+        "status": "ALIGNED",
+        "kind": "CONTENT",
+        "tool_name": "execute_approved_swap",
+        "model": "deepseek-flash",
+        "provider": "deepseek",
+        "llm_calls": 1,
+        "latency_ms": 469,
+        "provider_trace": [
+          {
+            "endpoint": "https://api.deepseek.com",
+            "latency_ms": 469,
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "status": "SUCCESS"
+          }
+        ],
+        "prompt_version": "task-shield-acl2025-v1.3",
+        "evaluation_scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION"
+      }
+    ]
+  },
+  "itag": {
+    "assessment_hash": "0x531aa48008e60f73baa95cf1c359b9d8c152085348caf4829dc489484fecc3fe",
+    "assessment": {
+      "semantic": {
+        "verdict": "ALIGNED",
+        "finding": {
+          "candidate_action_id": "intent_d6421a7a72eb4652a7dabaf77765651f",
+          "referenced_task_ids": [
+            "instruction_1babea2b92cb40938143b87d63928b2e"
+          ],
+          "referenced_graph_node_ids": [
+            "intent_d6421a7a72eb4652a7dabaf77765651f",
+            "itag_a953d26370e147119b1de2027320f69e:1",
+            "instruction_1babea2b92cb40938143b87d63928b2e",
+            "user-message:user_a696cfcc93b84c76ad4be6f2aefd16db",
+            "shield_b149504dd3f44ec38589acd36980308f",
+            "shield_9583b162348f449c9aca412a9187e8dd"
+          ],
+          "semantic_verdict": "ALIGNED",
+          "contribution_assessments": [
+            {
+              "task_id": "instruction_1babea2b92cb40938143b87d63928b2e",
+              "relationship": "DIRECT",
+              "explanation": "Candidate build_swap proposes exact-input swap with token_in USDC (0x5425...bc65), token_out WAVAX (0xd00a...a48c), amount_in_base_units 1 (=0.000001 USDC at 6 decimals), chain 43113, vault/recipient matching the authenticated spec vault 0xd8ec...e1d. Matches objective 'Buy WAVAX with 0.000001 USDC' and the itag spec step swap (min/max 1)."
+            }
+          ],
+          "detected_goal_drift": false,
+          "claimed_instruction_source": "USER",
+          "reasoning_summary": "Authenticated IntentSpec itag_a953d26370e147119b1de2027320f69e:1 (authorized by mandate) sets objective 'Buy WAVAX with 0.000001 USDC' on chain 43113, vault 0xd8ec86820709505c3779a4fe5d828e8ade663e1d, token_in USDC, token_out WAVAX, router 0x497d..., one step 'swap' with min=max=1. The candidate build_swap arguments match chain, vault, router, token_in, token_out, recipient, and amount (1 base unit = 0.000001 USDC) with slippage 100 bps equal to spec max. No extra recipients, tokens, or amounts beyond scope; no prohibited divergence. Simulation binding exists for the same build. Tool observation previews and shield scores are treated as untrusted/opinion, but the candidate alone matches the spec terms.",
+          "supporting_evidence_refs": [
+            "itag_a953d26370e147119b1de2027320f69e:1",
+            "instruction_1babea2b92cb40938143b87d63928b2e",
+            "intent_d6421a7a72eb4652a7dabaf77765651f",
+            "user_a696cfcc93b84c76ad4be6f2aefd16db",
+            "0x14a4d1a78df4c3e062961e508bdf4903df684ada2bb566b03254d3322ad9ae8d",
+            "shield_b149504dd3f44ec38589acd36980308f",
+            "shield_9583b162348f449c9aca412a9187e8dd",
+            "0xa7d497fafec0758bb8df2ac028345a1d68f5e1aaed6f379badd19910846f7d8d"
+          ],
+          "uncertainty_reasons": []
+        },
+        "reason_codes": [],
+        "provider_metadata": {
+          "model": "deepseek-flash",
+          "provider": "deepseek",
+          "config_hash": "0x59fbf4061741536768bf6c5fb7281f2c600020e31960655a254c9f59f880570f",
+          "prompt_version": "itag-trajectory-v2.2",
+          "scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION",
+          "provider_trace": [
+            {
+              "provider": "deepseek",
+              "model": "deepseek-flash",
+              "endpoint": "https://api.deepseek.com",
+              "status": "SUCCESS",
+              "latency_ms": 3766
+            }
+          ]
+        },
+        "latency_ms": 3780,
+        "token_usage": {
+          "prompt_tokens": 9722,
+          "completion_tokens": 809,
+          "total_tokens": 10531
+        }
+      },
+      "deterministic": {
+        "verdict": "PASS",
+        "violations": [],
+        "spent": "0",
+        "reserved": "0",
+        "remaining": "1"
+      },
+      "graph_hash": "0x5baad44fa1ad1e460cd255894e2608c7cb8ff6fdc952db72cf27e89190053365",
+      "intent_hash": "0x10b0288bf5a6aeb00a807bba587adce572b9246711a33ff91d2226f842856fef",
+      "history_hash": "0x518674ab2b227e5f11e9084f615d57663cde47bce1ba168b4c19c7ee22a73d70",
+      "task_revision": 1,
+      "history_version": 4,
+      "candidate_action_id": "intent_d6421a7a72eb4652a7dabaf77765651f",
+      "candidate_hash": "0x6b38b2bd40cbbf0bc63a52f7f204cb00d0110704596312529977274f51287307",
+      "build_hash": "0x44c0380bd817f33c08786d634d645f2ea748250f623316a84d85490192bc646b",
+      "build_id": "build_a16697cf2a7a98e4d94defa735df2a975dfb797a9beb90a0e5c4761b36ed0a09",
+      "evidence_refs": [
+        "intent_d6421a7a72eb4652a7dabaf77765651f",
+        "itag_a953d26370e147119b1de2027320f69e:1"
+      ],
+      "verdict": "PASS",
+      "reason_codes": [],
+      "violating_node_ids": [],
+      "violating_edge_ids": [],
+      "suggested_amount": null,
+      "timing_ms": {
+        "graph": 0,
+        "deterministic": 0,
+        "semantic": 3780,
+        "task_shield_reported": 6218,
+        "itag_total": 3812
+      }
+    }
+  }
+}

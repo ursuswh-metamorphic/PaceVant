@@ -80,6 +80,17 @@ class Profile:
     @classmethod
     def load(cls, root, env_file, network):
         v = read_env(env_file)
+        if network == "local":
+            # Explicit isolated test mode: never inherit Fuji feeds/model keys/billing behavior.
+            v = v | {"TREASURY_ORACLE_MODE": "demo", "TREASURY_ORACLE_SOURCE_ID": "TRUSTED_TEST_ORACLE",
+                     "PACEVANT_PLANNER_PROVIDER": "rules", "PACEVANT_REQUIRE_ITAG": "0",
+                     "PACEVANT_SHIELD_MODE": "disabled", "PACEVANT_DEMO_ENABLED": "0"}
+            for key in list(v):
+                if ((key.endswith("API_KEY") and key != "B_API_KEY") or key in {"PACEVANT_DEMO_ACCESS_TOKEN",
+                        "TREASURY_DEMO_USER_PRIVATE_KEY", "B_FUJI_OWNER_PRIVATE_KEY",
+                        "B_FUJI_RELAYER_PRIVATE_KEY", "DEPLOYER_PRIVATE_KEY", "AGENT_PRIVATE_KEY",
+                        "PACEVANT_ATTESTOR_KEY"}):
+                    v.pop(key)
         n = network.upper()
         rpc = v.get(f"TREASURY_{n}_RPC_URL") or (
             v.get("B_FUJI_RPC_URL") or PUBLIC_RPC if network == "fuji" else "http://127.0.0.1:8545"

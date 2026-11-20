@@ -4,6 +4,11 @@ import {units,symbol} from "../../shared/format.js";
 import {showPortfolio,showRiskBudget} from "../treasury/index.js";
 
 function detailRows(event) {
+  if (event.stage === "WAITING_FOR_ORACLE") return {
+    "Trạng thái": "Chờ round Chainlink thật còn đủ thời gian hợp lệ; chưa mở approval, chưa gửi giao dịch",
+    "Freshness còn lại (giây)": event.remaining_feed_freshness_seconds,
+    "Cần tối thiểu (giây)": event.required_freshness_seconds,
+  };
   if (event.assessment_hash) return {
     "ITAG assessment": event.assessment_hash, "Temporal verdict": event.verdict,
     "Reason codes": event.reason_codes?.join(", "),

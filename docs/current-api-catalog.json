@@ -14,7 +14,7 @@
     "/assets",
     "/src (when serve_frontend)"
   ],
-  "route_count": 57,
+  "route_count": 60,
   "routes": [
     {
       "method": "GET",
@@ -298,86 +298,90 @@
       "path": "/v1/demo/account",
       "auth_fuji": "demo_bearer",
       "handler": "account",
-      "input_annotations": {},
-      "response_model": null,
       "source": "backend/src/treasury_backend/api/demo.py",
-      "line": 87,
-      "condition": "demo_enabled for use (config remains public)"
+      "line": 91,
+      "condition": "demo enabled"
     },
     {
       "method": "GET",
       "path": "/v1/demo/config",
       "auth_fuji": "public",
       "handler": "public_config",
-      "input_annotations": {},
-      "response_model": null,
       "source": "backend/src/treasury_backend/api/demo.py",
-      "line": 46,
-      "condition": "demo_enabled for use (config remains public)"
+      "line": 50,
+      "condition": "demo enabled"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/demo/readiness",
+      "auth_fuji": "demo_bearer",
+      "handler": "readiness",
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 134,
+      "condition": "demo enabled"
     },
     {
       "method": "GET",
       "path": "/v1/demo/requests/{key}",
       "auth_fuji": "demo_bearer",
       "handler": "resume",
-      "input_annotations": {
-        "key": "RequestKey"
-      },
-      "response_model": null,
       "source": "backend/src/treasury_backend/api/demo.py",
-      "line": 134,
-      "condition": "demo_enabled for use (config remains public)"
+      "line": 207,
+      "condition": "demo enabled"
     },
     {
       "method": "POST",
       "path": "/v1/demo/select",
       "auth_fuji": "public",
       "handler": "select_account",
-      "input_annotations": {
-        "payload": "DemoSelection"
-      },
-      "response_model": null,
       "source": "backend/src/treasury_backend/api/demo.py",
-      "line": 38,
-      "condition": "demo_enabled for use (config remains public)"
+      "line": 42,
+      "condition": "demo enabled"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/demo/shield-check",
+      "auth_fuji": "demo_bearer",
+      "handler": "shield_check",
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 156,
+      "condition": "demo enabled"
     },
     {
       "method": "GET",
       "path": "/v1/demo/treasury",
       "auth_fuji": "demo_bearer",
       "handler": "treasury",
-      "input_annotations": {},
-      "response_model": null,
       "source": "backend/src/treasury_backend/api/demo.py",
-      "line": 126,
-      "condition": "demo_enabled for use (config remains public)"
+      "line": 130,
+      "condition": "demo enabled"
     },
     {
       "method": "POST",
       "path": "/v1/demo/workflows",
       "auth_fuji": "demo_bearer",
       "handler": "start",
-      "input_annotations": {
-        "payload": "DemoGoal",
-        "idempotency_key": "Annotated[RequestKey, Header()]"
-      },
-      "response_model": null,
       "source": "backend/src/treasury_backend/api/demo.py",
-      "line": 145,
-      "condition": "demo_enabled for use (config remains public)"
+      "line": 218,
+      "condition": "demo enabled"
     },
     {
       "method": "GET",
       "path": "/v1/demo/workflows/{workflow}",
       "auth_fuji": "demo_bearer",
       "handler": "workflow",
-      "input_annotations": {
-        "workflow": "Id"
-      },
-      "response_model": null,
       "source": "backend/src/treasury_backend/api/demo.py",
-      "line": 130,
-      "condition": "demo_enabled for use (config remains public)"
+      "line": 203,
+      "condition": "demo enabled"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/demo/workflows/{workflow}/security-checks",
+      "auth_fuji": "demo_bearer",
+      "handler": "security_checks",
+      "source": "backend/src/treasury_backend/api/demo.py",
+      "line": 183,
+      "condition": "demo enabled"
     },
     {
       "method": "GET",
@@ -750,23 +754,24 @@
     }
   ],
   "source_files_sha256": {
-    "backend/src/treasury_backend/api/app.py": "396f05d425b1df7f96f371da44f2ef4d9f1d163e347241f8c94b2d28f5fb2161",
-    "backend/src/treasury_backend/api/control/__init__.py": "157c54869861767b931ee53a8d0f675354e0ed87ae43efaefe7eafc1d10e4eeb",
-    "backend/src/treasury_backend/api/demo.py": "6d2ce073ced80a7fc0bfa7ff2d6f373b73939f91174f4e905dba4624415d2c6c",
-    "backend/src/treasury_backend/api/execution.py": "f2925abb19f674db32d303d8ade99fe78fa6fd83abd75ded1dff0eb245e1df52",
-    "backend/src/treasury_backend/api/fuji.py": "83cb097a471c64587a24df6f5065c63a1286b5c274330264fac892af1a5371be",
     "backend/src/treasury_backend/modules/alignment/api.py": "62974cb2e1f15cb8cc6e5d08810c669e592bb94af1c866ca5322cf97e9fe22d5",
-    "backend/src/treasury_backend/modules/monitoring/api.py": "dbb6239c5d3f2b6a8b99275d614141c7309fa47a25f9fdc938a8190197e8fbe1",
-    "backend/src/treasury_backend/modules/temporal/api.py": "893723a6bfe3c46e722ec7cd8db7a76b607d346c71012fd70f2d480cab59e1ae"
+    "backend/src/treasury_backend/api/control/__init__.py": "157c54869861767b931ee53a8d0f675354e0ed87ae43efaefe7eafc1d10e4eeb",
+    "backend/src/treasury_backend/api/fuji.py": "83cb097a471c64587a24df6f5065c63a1286b5c274330264fac892af1a5371be",
+    "backend/src/treasury_backend/api/execution.py": "f2925abb19f674db32d303d8ade99fe78fa6fd83abd75ded1dff0eb245e1df52",
+    "backend/src/treasury_backend/api/demo.py": "6e6b7980c963a5e71704cffaf4dc4d7b95be67ede12e7b7a4786678e10febecc",
+    "backend/src/treasury_backend/api/app.py": "343c4c906609eacb7f3511b3e6e5185c747ccbd86f4405559fb95f335dfe422c",
+    "backend/src/treasury_backend/modules/temporal/api.py": "893723a6bfe3c46e722ec7cd8db7a76b607d346c71012fd70f2d480cab59e1ae",
+    "backend/src/treasury_backend/modules/monitoring/api.py": "dbb6239c5d3f2b6a8b99275d614141c7309fa47a25f9fdc938a8190197e8fbe1"
   },
   "source_files_lf_sha256": {
-    "backend/src/treasury_backend/api/app.py": "396f05d425b1df7f96f371da44f2ef4d9f1d163e347241f8c94b2d28f5fb2161",
-    "backend/src/treasury_backend/api/control/__init__.py": "e960e3caeac4b2e9a1fda3c12c1e4e8a1eda7cd38c4b5d6088d7afdac5e46552",
-    "backend/src/treasury_backend/api/demo.py": "6d2ce073ced80a7fc0bfa7ff2d6f373b73939f91174f4e905dba4624415d2c6c",
-    "backend/src/treasury_backend/api/execution.py": "f2925abb19f674db32d303d8ade99fe78fa6fd83abd75ded1dff0eb245e1df52",
-    "backend/src/treasury_backend/api/fuji.py": "83cb097a471c64587a24df6f5065c63a1286b5c274330264fac892af1a5371be",
     "backend/src/treasury_backend/modules/alignment/api.py": "62974cb2e1f15cb8cc6e5d08810c669e592bb94af1c866ca5322cf97e9fe22d5",
-    "backend/src/treasury_backend/modules/monitoring/api.py": "dbb6239c5d3f2b6a8b99275d614141c7309fa47a25f9fdc938a8190197e8fbe1",
-    "backend/src/treasury_backend/modules/temporal/api.py": "893723a6bfe3c46e722ec7cd8db7a76b607d346c71012fd70f2d480cab59e1ae"
-  }
+    "backend/src/treasury_backend/api/control/__init__.py": "e960e3caeac4b2e9a1fda3c12c1e4e8a1eda7cd38c4b5d6088d7afdac5e46552",
+    "backend/src/treasury_backend/api/fuji.py": "83cb097a471c64587a24df6f5065c63a1286b5c274330264fac892af1a5371be",
+    "backend/src/treasury_backend/api/execution.py": "f2925abb19f674db32d303d8ade99fe78fa6fd83abd75ded1dff0eb245e1df52",
+    "backend/src/treasury_backend/api/demo.py": "6e6b7980c963a5e71704cffaf4dc4d7b95be67ede12e7b7a4786678e10febecc",
+    "backend/src/treasury_backend/api/app.py": "343c4c906609eacb7f3511b3e6e5185c747ccbd86f4405559fb95f335dfe422c",
+    "backend/src/treasury_backend/modules/temporal/api.py": "893723a6bfe3c46e722ec7cd8db7a76b607d346c71012fd70f2d480cab59e1ae",
+    "backend/src/treasury_backend/modules/monitoring/api.py": "dbb6239c5d3f2b6a8b99275d614141c7309fa47a25f9fdc938a8190197e8fbe1"
+  },
+  "runtime_revision": "live-web feature changes based on 713f867; see feature commit"
 }

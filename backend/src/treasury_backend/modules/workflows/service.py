@@ -290,6 +290,21 @@ class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
             temporal_intent=selection,
         )
         try:
+            from treasury_contracts.oracle import SOURCE_HASH
+
+            if (self.settings.mode == "FUJI" and mandate.proof_policy
+                    and mandate.proof_policy.oracle_source_hash == SOURCE_HASH):
+                from treasury_backend.modules.oracle.window import wait_for_round_window
+
+                def waiting(remaining):
+                    if intent_deadline and self.clock() >= intent_deadline:
+                        raise ControlError("ITAG_INTENT_NOT_ACTIVE_FOR_WORKFLOW", 409)
+                    self.store.event(workflow_id, "WAITING_FOR_ORACLE", self.clock(),
+                                     remaining_feed_freshness_seconds=remaining,
+                                     required_freshness_seconds=300)
+
+                wait_for_round_window(lambda: self.price(client), required_seconds=300,
+                                      on_wait=waiting)
             if self.shield.active:
                 session_id = "session_" + uuid4().hex
                 self.shield.state.create(session_id, mandate, self.clock(), workflow_id)

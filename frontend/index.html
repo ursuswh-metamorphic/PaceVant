@@ -71,15 +71,38 @@
     <section class="panel proof-summary" aria-label="Proof and risk budgets" id="proof-summary" hidden>
       <div class="panel-heading"><h2>Proof-gated treasury V2.1</h2></div>
       <p id="proof-policy"></p><p id="proof-budgets"></p>
-      <p>WAVAX exposure: PRE-SIGN ONLY. Oracle test có kiểm soát. Chưa audit.</p>
+      <p>Trần WAVAX được kiểm trước ký. Giá USD tham chiếu theo oracle của mạng đang chọn. Chưa audit độc lập.</p>
     </section>
 
     <div class="workspace">
       <aside class="panel scenario-panel" aria-labelledby="scenario-title">
         <div class="panel-heading"><h2 id="scenario-title">Kịch bản</h2></div>
         <form id="run-form">
+          <label id="demo-activity-label" for="demo-activity" hidden>Bạn muốn trình diễn phần nào?
+            <select id="demo-activity">
+              <option value="normal">Sử dụng bình thường · AI swap</option>
+              <option value="security">Kiểm thử bảo mật · tình huống tấn công</option>
+            </select>
+          </label>
+          <label id="live-case-label" for="live-case" hidden>Kịch bản demo thực tế
+            <select id="live-case">
+              <option value="swap">Swap nhỏ trên testnet · có trả gas</option>
+              <option value="limit">Vượt hạn mức · từ chối trước gửi</option>
+              <option value="session">Kiểm policy / session / gas credit · chỉ đọc</option>
+              <option value="contract">Replay / calldata / chữ ký · eth_call, không trả gas</option>
+              <option value="injection">Prompt injection · kiểm bằng AI thật, không gửi swap</option>
+              <option value="auth">Demo User không có quyền quản trị · kiểm API thật</option>
+            </select>
+          </label>
+          <label id="challenge-label" for="shield-challenge" hidden>Kiểu tấn công qua tool
+            <select id="shield-challenge">
+              <option value="recipient_redirect">Đổi recipient sang ví hacker</option>
+              <option value="policy_override">Yêu cầu bỏ risk / proof / budget</option>
+              <option value="forged_user">Giả mạo lệnh mới từ người dùng</option>
+            </select>
+          </label>
           <label id="live-goal-label" for="live-goal" hidden>Yêu cầu AI swap (USDC / WAVAX)
-            <input id="live-goal" value="Buy WAVAX with 200 USDC" maxlength="500">
+            <input id="live-goal" value="Buy WAVAX with 0.000001 USDC" maxlength="500">
           </label>
           <fieldset id="scenarios">
             <legend class="sr-only">Chọn kịch bản</legend>
@@ -94,6 +117,15 @@
           </fieldset>
           <button type="submit" id="run" disabled>Chạy kiểm tra <span aria-hidden="true">→</span></button>
         </form>
+        <p id="live-case-help" hidden></p>
+        <p id="demo-supported" hidden>Hiện hỗ trợ USDC → WAVAX qua LFJ, nhận token về PolicyVault. Chưa hỗ trợ chuyển tiền tới ví bất kỳ, swap chiều ngược hoặc ERC-4337. Các bài kiểm tấn công là probe có kiểm soát, không bật tấn công lên swap thật.</p>
+        <section id="live-check-panel" hidden>
+          <h3>Kết quả kiểm tra</h3>
+          <p id="live-check-summary" role="status"></p>
+          <details><summary>Xem dữ liệu và bằng chứng</summary>
+            <pre id="live-check-result" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+          </details>
+        </section>
         <p class="error" id="error" role="alert" hidden></p>
       </aside>
 
@@ -116,6 +148,6 @@
       </section>
     </div>
   </main>
-  <footer class="shell"><span>PaceVant</span><span>Shared Integration Contract v1.1 · EIP-712</span></footer>
+  <footer class="shell"><span>PaceVant</span><span>Security pipeline V2.1 · PolicyVault V2 · EIP-712</span></footer>
 </body>
 </html>

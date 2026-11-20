@@ -1,0 +1,11 @@
+(declare-fun price_0_usdE8 () Real)
+(declare-fun price_1_usdE8 () Real)
+(assert (>= price_0_usdE8 98981277.0))
+(assert (<= price_0_usdE8 100980897.0))
+(assert (> price_0_usdE8 0.0))
+(assert (>= price_1_usdE8 684304100.0))
+(assert (<= price_1_usdE8 698128424.0))
+(assert (> price_1_usdE8 0.0))
+(assert true)
+
+(check-sat)

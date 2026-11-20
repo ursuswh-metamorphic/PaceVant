@@ -1,10 +1,14 @@
 """In-process SDK adapter. No sockets, loopback HTTP or second FastAPI app."""
 
 import logging
+import time
 
 import httpx
 from fastapi.encoders import jsonable_encoder
 from pydantic import ValidationError
+from requests.exceptions import ConnectionError as RPCConnectionError
+from requests.exceptions import Timeout as RPCTimeout
+from web3.exceptions import Web3RPCError
 
 from treasury_backend.modules.execution.errors import PlaneError
 from treasury_backend.modules.gas_credit import CreditError
@@ -28,7 +32,16 @@ class LocalExecutionSDK(ExecutionClient):
     def _request(self, method, path, **options):
         request = httpx.Request(method, "http://execution.internal" + path)
         try:
-            result, raw = self._dispatch(method, path, options)
+            for attempt in range(2):
+                try:
+                    result, raw = self._dispatch(method, path, options)
+                    break
+                except (Web3RPCError, RPCConnectionError, RPCTimeout):
+                    # Only idempotent reads: never retry execute/build/simulation here.
+                    # Every downstream freshness/hash/policy check still runs on the result.
+                    if method != "GET" or attempt:
+                        raise
+                    time.sleep(0.2)
             response = (
                 httpx.Response(200, content=result, request=request)
                 if raw

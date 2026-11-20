@@ -1,5 +1,7 @@
 # PaceVant — System Design V2.1 hiện tại
 
+> **Cập nhật live web 20/11/2026:** Fuji là mặc định; MOCK/LOCAL phải chọn riêng. Demo User đã có swap Fuji và actual gas debit, được ghi tại [live review](audit/WEB_DEMO_LIVE_REVIEW.md). Web có chế độ bình thường và kiểm thử bảo mật; xem [runbook mới](demo/LIVE_WEB_DEMO.md). Các nhận xét bên dưới về “chưa có Fuji billing/browser evidence” và “hosting template cũ” là trạng thái trước bổ sung này, đã được thay thế bởi live review/runbook; hosting thực tế vẫn chưa được nghiệm thu.
+
 > **DOC STATUS: CURRENT_SYSTEM_DESIGN — nguồn mô tả hiện trạng chính thức của repository.**
 > Source baseline: `3f9f9af91310040bd43eb3895d145a0fc46d776c`, ngày đối chiếu **20/11/2026**. Bao gồm modular backend, unified FastAPI, Chainlink/LFJ, Task Shield, ITAG, gas credit và thao tác chọn Demo User không nhập mã.
 > Phạm vi kiểm tra tài liệu: source/config cục bộ và evidence đã lưu. Không gửi giao dịch, gọi model, renew policy/session hoặc xác nhận lại số dư/round giá trên chain trong đợt biên soạn này.

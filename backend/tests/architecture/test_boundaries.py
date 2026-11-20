@@ -51,7 +51,8 @@ def test_primary_npm_entrypoints_use_the_unified_backend():
         "local": "uv run --locked treasury local",
         "dev:local": "uv run --locked treasury local",
         "dev:fuji": "uv run --locked treasury serve --network fuji",
-        "demo": "uv run --locked treasury demo --network local",
+        "demo": "uv run --locked treasury demo --network fuji",
+        "dev:mock": "uv run --locked treasury mock",
         "deploy:local": "uv run --locked treasury deploy --network local",
         "deploy:fuji": "uv run --locked treasury deploy --network fuji",
     }
