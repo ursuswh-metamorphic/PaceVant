@@ -1,12 +1,58 @@
-# PaceVant — Bảo vệ ví và treasury trước các hành động sai ý định của AI Agent
 
-**AI Agent có thể đề xuất giao dịch. Nhưng AI không nên có quyền tự quyết định giao dịch nào được phép dùng tiền.**
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/hero-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/hero-light.svg">
+    <img src="docs/assets/readme/hero-dark.svg" alt="PaceVant — AI có thể lập kế hoạch, quyền sử dụng tài sản phải được xác minh" width="100%">
+  </picture>
+</div>
 
-PaceVant là nguyên mẫu **AI Treasury Security** trên EVM, xây dựng cơ chế xác minh có bằng chứng giữa **ý định người dùng → kế hoạch của AI → giao dịch được đề xuất → giao dịch được thực thi**. Hệ thống kết hợp **Hybrid Task Alignment Shield**, **Intent-Aware Temporal Action Graph (ITAG)**, mô phỏng EVM, đánh giá rủi ro kinh tế, chứng minh ràng buộc hữu hạn bằng Z3, **Signed Policy Decision Record (PDR)** và **Solidity PolicyVault**.
+<p align="center">
+  <a href="#xem-cách-pacevant-chặn-giao-dịch">Xem attack/defense</a> ·
+  <a href="#ba-đóng-góp-kỹ-thuật-chính">Điểm khác biệt</a> ·
+  <a href="#đánh-giá-và-ablation">Benchmark</a> ·
+  <a href="#kiến-trúc-end-to-end">Architecture</a> ·
+  <a href="#chạy-thử-và-tái-hiện">Quickstart</a> ·
+  <a href="docs/research/RESEARCH_INDEX.md">Research Library</a>
+</p>
 
-> **Trạng thái:** nguyên mẫu nghiên cứu / hackathon với giao dịch thật trên **Avalanche Fuji testnet**, chưa phải ví production, hệ thống custody đa người dùng hay sản phẩm đã được kiểm toán độc lập. Các kết quả bên dưới gắn với những checkpoint kiểm thử khác nhau; không được hiểu là đã tái kiểm chứng toàn bộ trên HEAD.
+<p align="center"><strong>Giữ AI ở vai trò lập kế hoạch; xác minh quyền hạn, ý định và rủi ro trước khi cho phép giao dịch.</strong></p>
 
-**Đi thẳng đến:** [Demo & bằng chứng](#-demo-và-bằng-chứng-thực-thi) · [Kiến trúc](#-kiến-trúc-end-to-end) · [Điểm mới](#-ba-đóng-góp-kỹ-thuật-chính) · [Kết quả nghiên cứu](#-đánh-giá-và-ablation) · [Công nghệ](#-công-nghệ-sử-dụng) · [Chạy thử](#-chạy-thử-và-tái-hiện) · [Thư viện nghiên cứu](docs/research/RESEARCH_INDEX.md)
+PaceVant là nguyên mẫu **AI Treasury Security** chạy trên EVM, kết nối ba ý tưởng: **Hybrid TaskShield** xác minh một hành động có đúng yêu cầu, **Hybrid ITAG** kiểm tra cả chuỗi giao dịch, và **evidence-bound enforcement** đưa quyết định bảo mật xuống smart contract. Thay vì chỉ hỏi giao dịch *có hợp lệ về kỹ thuật không*, PaceVant kiểm thêm giao dịch *có được người dùng cho phép không, có vi phạm quyền tích lũy không và có đủ bằng chứng để ký không*.
+
+> **Trạng thái kiểm chứng:** nguyên mẫu nghiên cứu / hackathon, đã có swap **Avalanche Fuji testnet** và LOCAL Anvil security tests; **chưa kiểm toán độc lập, chưa hỗ trợ custody production hoặc arbitrary DeFi**, và chưa có public Fuji E2E riêng cho bản Hybrid TaskShield mới nhất. Các chỉ số được gắn với đúng benchmark/checkpoint, không suy ra khả năng bảo vệ tuyệt đối.
+
+<p align="center">
+  <a href="https://testnet.snowtrace.io/tx/0x315a9bff8ba111487d295903ebd0f6389b1baefd40ea9526fc33bc014a9656ba"><strong>◉ Giao dịch Fuji đã xác nhận</strong></a>
+  &nbsp;·&nbsp;
+  <a href="docs/audit/WEB_DEMO_LIVE_REVIEW.md"><strong>Live evidence</strong></a>
+  &nbsp;·&nbsp;
+  <a href="docs/demo/LIVE_WEB_DEMO.md"><strong>Hướng dẫn demo</strong></a>
+</p>
+
+## Xem cách PaceVant chặn giao dịch
+
+Kịch bản trên **LOCAL Anvil**: người dùng cấp ngân sách **20 USDC**; hai swap **10 USDC** được thực thi và đối soát. Khi Agent đề xuất giao dịch thứ ba **10 USDC**, ITAG nhận ra ngân sách tích lũy đã hết, **từ chối trước khi ký**, và nonce của relayer không đổi. Đây là một bài kiểm thử end-to-end có receipt thật trong môi trường local, **không phải một public Fuji attack**.
+
+<p align="center">
+  <a href="docs/evaluation/itag-final/ANVIL_BUDGET_ISOLATION.json">
+    <img src="docs/assets/readme/attack-defense.svg" alt="LOCAL Anvil: ngân sách 20 USDC, hai swap 10 USDC hợp lệ, giao dịch thứ ba bị ITAG chặn" width="100%">
+  </a>
+</p>
+
+[Đọc counterfactual / receipt evidence](docs/evaluation/itag-final/FINAL_VALIDATION.md) · [Xem source temporal verifier](backend/src/treasury_backend/modules/temporal/README.md)
+
+### Kết quả nổi bật
+
+<p align="center">
+  <a href="docs/evaluation/HYBRID_TASK_ALIGNMENT_RESULTS.md">
+    <img src="docs/assets/readme/metrics.svg" alt="TaskShield 95,67% trên 300 mẫu regression; ITAG 8/12 adverse scripted; Fuji confirmed swap tại checkpoint trước PR #10" width="100%">
+  </a>
+</p>
+
+**Đọc số liệu đúng phạm vi:** 95,67% là accuracy trên **300 adapted Uniswap V2 swap cases**, không phải wallet security E2E; constraints-only cũng đạt 95,67% trên tập đó. Kết quả **8/12** đến từ scripted long-horizon trajectories. Bằng chứng **Fuji** là transaction đã xác nhận thuộc checkpoint trước PR Hybrid TaskShield mới. [Đối chiếu TaskShield](docs/evaluation/HYBRID_TASK_ALIGNMENT_RESULTS.md) · [ITAG](docs/evaluation/itag-final/FINAL_VALIDATION.md) · [Fuji](docs/audit/WEB_DEMO_LIVE_REVIEW.md).
+
+---
 
 ## 🎯 Vấn đề chúng tôi giải quyết
 
@@ -23,6 +69,11 @@ Kiểm tra chữ ký, allowlist và hạn mức mỗi giao dịch là cần thi�
 | Bỏ qua quyết định off-chain | Gửi calldata bị sửa, replay hoặc vượt session | Signed PDR, revalidation, PolicyVault |
 
 ## ✨ Ba đóng góp kỹ thuật chính
+
+<p align="center">
+  <img src="docs/assets/readme/innovations.svg" alt="Ba lớp đổi mới: Hybrid TaskShield, Hybrid ITAG và Proof-bound PolicyVault" width="100%">
+</p>
+
 
 ### 1. Hybrid Task Alignment Shield — xác minh hành động có đúng yêu cầu không?
 
@@ -75,6 +126,15 @@ PaceVant xây exact calldata, mô phỏng chính giao dịch qua **Anvil fork**,
 
 ## 🧭 Kiến trúc end-to-end
 
+<p align="center">
+  <img src="docs/assets/readme/architecture.svg" alt="PaceVant security architecture từ intent đến policy enforcement và monitor" width="100%">
+</p>
+
+**Sơ đồ tóm tắt** trên thể hiện các gate quan trọng; code có các luồng kiểm song song, revalidation và call-binding chi tiết được mô tả trong [System Design V2.1](docs/AI_Treasury_Security_System_Design_v2.1.md) và [Module Map](backend/MODULES.md).
+
+<details>
+<summary><strong>Xem Mermaid end-to-end chi tiết (có thể chỉnh sửa và tái hiện)</strong></summary>
+
 ~~~mermaid
 flowchart TD
     U["Người dùng: intent đã xác thực + Treasury Mandate"] --> P["AI Treasury Planner"]
@@ -96,6 +156,8 @@ flowchart TD
     O --> H["History + experience / future task budget"]
     H -.-> G
 ~~~
+
+</details>
 
 **Hai ranh giới không được đánh đồng:** (1) control plane (AI/risk/proof/SDE) xác minh để *cấp quyền*; (2) PolicyVault kiểm những điều kiện Solidity có thể enforce khi giao dịch *thực thi*. Kết quả simulation tại pinned block không bảo đảm điều kiện chain trong tương lai; vì vậy có revalidation, final preflight và postconditions.
 
