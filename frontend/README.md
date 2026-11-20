@@ -1,45 +1,28 @@
-# Frontend
+# PaceVant frontend
 
-> **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
+The current public judge interface lives in `src/app`: React + TypeScript + Vite, Tailwind CSS, locally owned shadcn-style Radix components, Motion for React, Lucide and TanStack Query. It has three tabs: Live Demo, Security & Policies, History.
 
-The optional ITAG evidence viewer is served at `/itag` by the unified backend; its static files are `itag.html`, `itag-viewer.js`, and `itag-viewer.css`. It loads authenticated assessment/node APIs with an operator token kept in tab memory. It is hidden when `PACEVANT_SERVE_FRONTEND=false`. It inspects existing assessments; it does not create intents or authorize transactions. See [ITAG integration](../docs/integrations/ITAG_MAIN_SYNC.md).
-
-Static HTML/CSS and browser ES modules. No Node.js server, bundler or wallet extension is required to use the dashboard. Node is optional for developer syntax/vector checks only.
-
-| Folder | Owns |
-| --- | --- |
-| `src/app.js` | Startup, connect/run forms and workflow polling |
-| [src/api](src/api/README.md) | Authenticated backend requests and error mapping |
-| [src/shared](src/shared/README.md) | DOM, formatting and tab-local state |
-| [src/features/treasury](src/features/treasury/README.md) | Mandate, portfolio and risk budget display |
-| [src/features/workflows](src/features/workflows/README.md) | Attempt/timeline/decision/proof/receipt display |
-| `assets/` | Styles and public `config.js` |
-
-## Local development
-
-`uv run --locked treasury local` serves this directory at http://127.0.0.1:8000 through the unified Python API. `uv run --locked python -m treasury_backend.api.serve` runs MOCK without chain access. Do not open index.html through file:// because ES module loading requires HTTP.
-
-Judges choose **PaceVant - Demo User** without entering a token or connecting a wallet. The browser obtains a demo-scoped expiring session automatically and keeps it in tab memory. See [demo runbook](../docs/demo/DEMO_USER_GAS_CREDIT.md). The separate operator view still accepts an operator token in memory. No owner/attestor/relayer/Demo User keys belong in frontend code or public hosting variables.
-
-## Independent deployment
-
-`frontend/Dockerfile` copies only this folder into Nginx and proxies `/healthz`, `/v1/`, `/v2/` to `$BACKEND_URL`, default `http://backend:10000`. Serve frontend and API at one browser origin with [compose](../compose.yaml); no CORS configuration is necessary.
-
-For a static host without an API proxy, publish this directory and set the public value in `assets/config.js`:
-
-```js
-window.TREASURY_CONFIG = {apiBaseUrl: "https://your-backend.example"};
+```bash
+npm ci --prefix frontend
+npm run --prefix frontend dev
+npm run --prefix frontend test
+npm run --prefix frontend build
 ```
 
-Set `PACEVANT_CORS_ORIGINS=https://your-frontend.example` on the backend. Origins are comma-separated exact HTTP(S) origins, with no path or wildcard. Use HTTPS for public hosts and `PACEVANT_SERVE_FRONTEND=false` on an independent backend. config.js contains only the public API URL and has no-store caching in the provided Nginx config.
+Development proxies `/judge` to the local backend at port 18040. Start it separately with `uv run --locked python -m treasury_backend.operations.judge_serve --port 18040`, using a model-only environment as described in the deployment guide. It does not load the private root `.env`. Without model configuration, verified recordings remain available. Local HTTP testing requires `PACEVANT_JUDGE_SECURE_COOKIE=0`; production HTTPS keeps secure cookies enabled.
 
-## Extend and verify
+Production output is **`dist`**, served through native Nginx. Node is build tooling only. See [judge guide](../JUDGE_DEMO_GUIDE.md) and [VPS deployment](../VPS_DEPLOYMENT.md).
 
-Add a new capability under `src/features/<name>/` with a narrow exported renderer/loader and its README. Reuse `api/client.js`; avoid direct fetch calls or secrets in a feature. Render untrusted display values with textContent; do not insert server-provided HTML.
+| Path | Responsibility |
+|---|---|
+| `src/app/App.tsx` | Three tabs, fixed scenarios, exact request recovery and backend polling |
+| `src/app/lib/api.ts`, `types.ts` | Same-origin API client and response contracts |
+| `src/app/lib/recovery.ts` | Persist request identity before POST; recover by key |
+| `src/app/lib/pipeline.ts` | Gate states derived from backend evidence |
+| `src/app/components` | Pipeline, results, accessible evidence drawer and policy sections |
+| `src/app/components/ui` | Locally maintained Radix/shadcn-style primitives |
+| `src/app/styles.css` | Light fintech design, responsive layouts and reduced motion |
 
-```sh
-node tools/quality/check_frontend.mjs
-uv run --locked python -m pytest backend/tests/integration/test_frontend_boundary.py -q
-```
+Real runs execute on isolated Fuji forks with temporary roles. Replays are explicitly labeled and hash checked. Missing, rejected or uncertain evidence cannot become a confirmed receipt; fork hashes never link to a public explorer. Model/RPC/oracle failures remain visible. The judge interface receives no operator token or wallet signing key.
 
-Browser checks should exercise MOCK scenarios and a local chain workflow. CORS and static asset tests do not alone prove browser rendering. See [deploy guide](../deploy/README.md).
+`legacy-index.html`, `treasury-mvp.html`, `treasury-v3.html`, the older `src/features`, `src/api/client.js`, ITAG viewer and legacy Docker files remain compatibility/research sources. They are not the public judge entrypoint. The authenticated operator API remains a separate backend surface, outside the native public judge Nginx proxy. Old Demo User/HMAC and four-area interface descriptions are superseded.

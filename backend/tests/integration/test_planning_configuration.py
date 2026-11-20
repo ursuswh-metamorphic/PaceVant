@@ -73,7 +73,8 @@ def test_profile_only_gives_provider_secret_to_control_or_unified(tmp_path, monk
     unified = ops.backend_environment(p)
     assert "TREASURY_DEMO_USER_PRIVATE_KEY" not in unified
     assert "must-not-reach-runtime" not in unified.values()
-    assert unified["PACEVANT_DEMO_ACCESS_TOKEN"] == p.values["PACEVANT_DEMO_ACCESS_TOKEN"]
+    assert "PACEVANT_DEMO_ACCESS_TOKEN" not in unified
+    assert unified["PACEVANT_DEMO_ENABLED"] == "0"
     assert "PACEVANT_DEMO_ACCESS_TOKEN" not in ops.b_environment(p)
     p.values["TREASURY_RELAYER_ADDRESS"] = owner.address
     with pytest.raises(ops.OpsError, match="TREASURY_RELAYER_ADDRESS"):

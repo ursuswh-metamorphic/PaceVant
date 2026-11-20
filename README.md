@@ -1,5 +1,17 @@
 # PaceVant
 
+> **Latest frontend / judge demo:** React + TypeScript + Vite, Tailwind, Radix/shadcn components, Motion, Lucide and TanStack Query. Three tabs, anonymous fixed-scenario **isolated Fuji fork** runs, recorded-evidence fallback and durable recovery. Start with [Judge guide](JUDGE_DEMO_GUIDE.md), [native Ubuntu deployment](VPS_DEPLOYMENT.md) and [implementation summary](IMPLEMENTATION_SUMMARY.md). Production is static Nginx + one Python/systemd service; **no Docker or Node server required**. Earlier container/operator-demo instructions below are separate historical paths.
+
+```bash
+npm ci --prefix frontend
+npm run web:build
+uv sync --locked
+# Supply model-only environment explicitly; no automatic root .env load.
+uv run --locked python -m treasury_backend.operations.judge_serve --port 8000
+```
+
+> **Current MVP (21 November 2026):** single tenant, three system EOAs, exactly `SWAP_EXACT_IN` and `USDC_PAYMENT`. Read the [complete current review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md), [test report](MVP_TEST_REPORT.md), [operator runbook](MVP_DEMO_RUNBOOK.md), and [VPS runbook](MVP_VPS_RUNBOOK.md). Demo User billing is retired; its funds were consolidated on explicit request. Real-model Fuji-state fork workflows passed. Web now preserves uncertain requests, exposes readiness, and includes HTTPS/VPS recovery configuration. Public MVP activation still requires Owner migration; actual image/VPS hosting is not yet verified. Earlier live-demo notes below are historical checkpoints.
+
 **Live web update:** `uv run --locked treasury serve` mặc định Fuji; `treasury mock` và `treasury local` là chế độ test riêng. Demo User đã có swap Fuji và actual gas debit; web tách sử dụng bình thường/kiểm thử bảo mật. Xem [runbook mới](docs/demo/LIVE_WEB_DEMO.md) và [bằng chứng](docs/audit/WEB_DEMO_LIVE_REVIEW.md); các giới hạn chưa có Fuji billing trong baseline bên dưới đã được thay thế.
 
 > **DOC STATUS: CURRENT_INDEX** — hiện trạng source baseline `3f9f9af`, rà soát 20/11/2026. Không có giao dịch hoặc live readiness check mới trong lần chuẩn hóa docs.

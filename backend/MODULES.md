@@ -1,5 +1,7 @@
 # Module map and collaboration rules
 
+Current MVP extension: `planning/treasury.py`, `temporal/operations.py`, `risk/operations.py`, shared SDK proof, existing SDE/attestor, `workflows/treasury.py`, `execution/mvp.py`, additive `persistence/v3.py`, and `gas_credit/system.py`. The latter is system expense accounting without customer credits. `workflows/autonomy.py` also runs the read-only outcome observer with autonomy off. See [MVP architecture](../MVP_FINAL_ARCHITECTURE.md).
+
 > **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
 
 This is a modular monolith served by one FastAPI/Uvicorn process. Folders are divided by responsibility rather than person A/B. The API composition injects an in-process execution adapter into workflow; module boundaries remain explicit without an internal HTTP hop. See [single-app architecture](../docs/architecture/UNIFIED_BACKEND.md).

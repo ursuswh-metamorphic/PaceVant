@@ -10,7 +10,9 @@ def safe_environment(extra):
     env = {
         k: v
         for k, v in os.environ.items()
-        if not k.startswith(("B_", "PACEVANT_", "TREASURY_", "FUJI_", "GROQ_", "GEMINI_", "XINGCHI_", "DEEPSEEK_"))
+        if not k.startswith(
+            ("B_", "PACEVANT_", "TREASURY_", "FUJI_", "GROQ_", "GEMINI_", "XINGCHI_", "DEEPSEEK_")
+        )
         and k not in {"DEPLOYER_PRIVATE_KEY", "AGENT_PRIVATE_KEY", "AGENT_ADDRESS"}
     }
     return env | {k: str(v) for k, v in extra.items()}
@@ -74,7 +76,8 @@ def a_environment(p, *, source_root=None):
             for name, value in p.values.items()
             if name.startswith(("GROQ_", "GEMINI_", "XINGCHI_", "DEEPSEEK_"))
             or name.startswith("PACEVANT_SHIELD_")
-            or name in {"PACEVANT_PLANNER_PROVIDER", "PACEVANT_AI_ROTATION_ORDER", "PACEVANT_REQUIRE_ITAG"}
+            or name
+            in {"PACEVANT_PLANNER_PROVIDER", "PACEVANT_AI_ROTATION_ORDER", "PACEVANT_REQUIRE_ITAG"}
         }
     )
     return safe_environment(values)
@@ -86,9 +89,15 @@ def backend_environment(p):
     # b_environment strips provider secrets; retain only the explicit planner profile.
     values.pop("PACEVANT_B_URL", None)
     values.pop("PACEVANT_B_TOKEN", None)
-    # Public identity and a scoped demo credential only; never the demo wallet key.
-    for name in ("PACEVANT_DEMO_ENABLED", "PACEVANT_DEMO_ACCESS_TOKEN", "TREASURY_DEMO_USER_ADDRESS",
-                 "PACEVANT_DEMO_INITIAL_CREDIT_WEI", "PACEVANT_DEMO_MAX_TX_FEE_WEI"):
+    values["PACEVANT_DEMO_ENABLED"] = "0"
+    for name in (
+        "PACEVANT_MVP_MANIFEST_FILE",
+        "PACEVANT_MVP_LIVE_ENABLED",
+        "B_MAX_GAS_PER_TX",
+        "B_MAX_GAS_PRICE_WEI",
+        "B_MAX_TX_FEE_WEI",
+        "B_MAX_DAILY_GAS_EXPENSE_WEI",
+    ):
         if name in p.values:
             values[name] = p.values[name]
     return values

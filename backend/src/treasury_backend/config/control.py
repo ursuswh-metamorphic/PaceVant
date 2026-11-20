@@ -18,6 +18,9 @@ LOOPBACK = {"127.0.0.1", "::1", "localhost"}
 
 @dataclass(frozen=True, repr=False)
 class Settings:
+    mvp_manifest_file: Path | None = None
+    mvp_live_enabled: bool = False
+    v3_manifest_file: Path | None = None
     require_itag: bool = False
     planning: PlanningSettings = field(default_factory=PlanningSettings)
     shield: ShieldConfig = field(default_factory=ShieldConfig)
@@ -145,10 +148,15 @@ class Settings:
         require_itag = os.environ.get("PACEVANT_REQUIRE_ITAG", "0")
         if require_itag not in {"0", "1"}:
             raise RuntimeError("PACEVANT_REQUIRE_ITAG must be 0 or 1")
+        if os.environ.get("PACEVANT_MVP_LIVE_ENABLED","0") not in {"0","1"}:
+            raise RuntimeError("PACEVANT_MVP_LIVE_ENABLED must be 0 or 1")
         shield = ShieldConfig.from_env(mode)
         if mode != "MOCK" and shield.mode == "legacy_fixture":
             raise RuntimeError("legacy_fixture Task Shield is restricted to MOCK mode")
         return cls(
+            mvp_manifest_file=Path(os.environ["PACEVANT_MVP_MANIFEST_FILE"]) if os.environ.get("PACEVANT_MVP_MANIFEST_FILE") else None,
+            mvp_live_enabled=os.environ.get("PACEVANT_MVP_LIVE_ENABLED","0")=="1",
+            v3_manifest_file=Path(os.environ["PACEVANT_V3_MANIFEST_FILE"]) if os.environ.get("PACEVANT_V3_MANIFEST_FILE") else None,
             require_itag=require_itag == "1",
             planning=PlanningSettings.from_values(os.environ),
             shield=shield,

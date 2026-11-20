@@ -1,0 +1,153 @@
+{
+  "environment": "ANVIL_FORK",
+  "public_writes": false,
+  "source_block": 61388824,
+  "source_block_hash": "0xfb95ed06d90f34dce7250de77d142bd9717e7e7248770d64bbe5b59a9a302a1b",
+  "semantic_scope": "REAL_CONFIGURED_PROVIDER",
+  "test_role_keys": "THREE_EPHEMERAL_KEYS_NOT_PERSISTED",
+  "results": [
+    {
+      "operation": "USDC_PAYMENT",
+      "status": "CONFIRMED",
+      "reason": null,
+      "stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ],
+      "outcome": {
+        "tx_hash": "0x2cfe861d65652246f71dc2607b1476d7df17cd28cc79c81587618b45ed0c8134",
+        "block_number": 61388836,
+        "block_hash": "0xd5d73f5e74d1734b0e037eab9d757a948bec930ff1a4cb600c1f8b7331002f8b",
+        "gas_used": "356172",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "356172",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "356172002849376",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-1000000",
+          "0",
+          "0",
+          "0"
+        ],
+        "payee_received": "1000000"
+      },
+      "proof_status": "VERIFIED",
+      "risk_debit_usd_e8": "0",
+      "exact_signed_preflight": true,
+      "preflight_overrides": []
+    },
+    {
+      "operation": "SWAP_EXACT_IN",
+      "status": "CONFIRMED",
+      "reason": null,
+      "stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ],
+      "outcome": {
+        "tx_hash": "0x1414ffe2a736183a372d5c0cdcc5a1df62b40666e2fafd333003d61fee2a95c6",
+        "block_number": 61388837,
+        "block_hash": "0x0860067533cff9198f7500088524580b70eb38bbf800cff85bd2e8be99224174",
+        "gas_used": "418694",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "418694",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "418694003349552",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-1",
+          "13266545691051",
+          "0",
+          "0"
+        ],
+        "payee_received": "0"
+      },
+      "proof_status": "VERIFIED",
+      "risk_debit_usd_e8": "0",
+      "exact_signed_preflight": true,
+      "preflight_overrides": []
+    }
+  ],
+  "setup": {
+    "new_deployments_and_configuration": [
+      {
+        "gas_used": "4784681",
+        "actual_fee_wei": "4784681043062129"
+      },
+      {
+        "gas_used": "1180689",
+        "actual_fee_wei": "1180689010626201"
+      },
+      {
+        "gas_used": "79380",
+        "actual_fee_wei": "79380000635040"
+      },
+      {
+        "gas_used": "308091",
+        "actual_fee_wei": "308091002464728"
+      },
+      {
+        "gas_used": "41152",
+        "actual_fee_wei": "41152000329216"
+      },
+      {
+        "gas_used": "246271",
+        "actual_fee_wei": "246271001970168"
+      },
+      {
+        "gas_used": "107736",
+        "actual_fee_wei": "107736000861888"
+      },
+      {
+        "gas_used": "176343",
+        "actual_fee_wei": "176343001410744"
+      },
+      {
+        "gas_used": "152817",
+        "actual_fee_wei": "152817001222536"
+      },
+      {
+        "gas_used": "160992",
+        "actual_fee_wei": "160992001287936"
+      }
+    ],
+    "total_new_owner_setup_fee_wei": "7238152063870586",
+    "funding": "5 copied Circle USDC from impersonated existing Owner, only on isolated fork",
+    "gas_balances": "Ephemeral roles received copied public role AVAX balances on fork only",
+    "prices": "Real unmodified Chainlink rounds; no price or token storage overrides"
+  },
+  "status": "PASS"
+}

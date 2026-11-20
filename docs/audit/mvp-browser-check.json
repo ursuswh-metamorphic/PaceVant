@@ -1,0 +1,18 @@
+{
+  "environment": "LOCAL_TEST",
+  "status": "PASS",
+  "public_writes": false,
+  "checks": [
+    "public chain status",
+    "two operation choices",
+    "operator login without private keys",
+    "USDC receipt workflow",
+    "timeline and no fake Fuji link",
+    "proof/fee evidence",
+    "isolated attack case",
+    "mobile width"
+  ],
+  "semantic_scope": "SCRIPTED_RESPONSES_NOT_LLM_EVALUATION",
+  "browser": "headless Chromium",
+  "in_app_browser_blocker": "Importing module node:process is not allowed in node_repl"
+}

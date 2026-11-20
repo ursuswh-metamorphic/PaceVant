@@ -1,0 +1,21 @@
+{
+  "owner_reviewed": false,
+  "max_per_swap_usdc": "1000000",
+  "max_wavax_per_swap": "10000000000000000",
+  "max_usdc_daily_outflow": "10000000",
+  "max_swap_usd_e8": "100000000",
+  "daily_swap_usd_e8": "500000000",
+  "max_payment_usdc": "100000",
+  "daily_payment_usdc": "1000000",
+  "recipient_session_usdc": "5000000",
+  "recipient_daily_usdc": "1000000",
+  "session_swap_usd_e8": "300000000",
+  "session_payment_usdc": "5000000",
+  "session_duration_seconds": 604800,
+  "policy_duration_seconds": 604800,
+  "max_actions": 500,
+  "rebalance_cooldown_seconds": 60,
+  "max_wavax_exposure_bps": 2500,
+  "max_daily_execution_cost_usd_e8": "100000000",
+  "fund_from_owner_usdc": "5000000"
+}

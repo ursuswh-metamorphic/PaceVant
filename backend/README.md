@@ -1,5 +1,9 @@
 # Python backend
 
+New public adapter: `api/judge.py` + bounded `modules/workflows/judge.py`, native entrypoint `operations/judge_serve.py`. It uses fixed anonymous fork presets and the existing PACE/PGS workflow with temporary fork-only roles, not public signer keys. Authenticated `/mvp` remains separate. See [native deployment](../VPS_DEPLOYMENT.md).
+
+Current scope: [two-operation single-tenant MVP](../MVP_FINAL_ARCHITECTURE.md). Canonical composition exposes `/mvp/...`, serves the MVP dashboard, retires environment-based Demo User activation, and uses system-paid Relayer expense accounting. The optional new execution port requires an Owner-signed manifest; existing Fuji deployment files remain unchanged. See the [MVP runbook](../MVP_DEMO_RUNBOOK.md). Earlier component/checkpoint descriptions below retain compatibility context.
+
 > **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
 
 Current full-system reference: [V2.1 system design](../docs/AI_Treasury_Security_System_Design_v2.1.md), [reviewer guide](../docs/REVIEWER_GUIDE.md), [one-click Demo User runbook](../docs/demo/DEMO_USER_GAS_CREDIT.md). Earlier integration/audit reports retain checkpoint scope and do not certify current readiness.

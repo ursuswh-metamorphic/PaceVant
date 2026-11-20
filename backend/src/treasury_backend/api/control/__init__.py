@@ -75,12 +75,12 @@ def error_response(request, code, status, retryable=False):
     )
 
 
-def create_app(settings=None, clock=utc_now, client_factory=None):
+def create_app(settings=None, clock=utc_now, client_factory=None, shield_provider=None):
     settings = settings or Settings.from_env()
 
     @asynccontextmanager
     async def lifespan(app):
-        app.state.control = ControlPlane(settings, clock, client_factory=client_factory)
+        app.state.control = ControlPlane(settings, clock, client_factory=client_factory,shield_provider=shield_provider)
         app.state.fuji = FujiService()
         try:
             yield
@@ -161,7 +161,7 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
             raise ControlError("INVALID_REQUEST", 400)
 
     @app.get("/healthz")
-    def health():
+    async def health():
         return {"status": "ok", "mode": settings.mode}
 
     @app.post("/v1/workflows/start", dependencies=[Depends(operator), Depends(json_post)])
@@ -245,7 +245,10 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
         }
 
     if settings.serve_frontend:
-        app.mount("/assets", StaticFiles(directory=DASHBOARD / "assets"), name="assets")
+        assets = StaticFiles(directory=DASHBOARD / "assets")
+        if (DASHBOARD / "dist/assets").is_dir():
+            assets.all_directories.insert(0, str(DASHBOARD / "dist/assets"))
+        app.mount("/assets", assets, name="assets")
         app.mount("/src", StaticFiles(directory=DASHBOARD / "src"), name="frontend-source")
 
     @app.get("/", include_in_schema=False)
@@ -253,7 +256,7 @@ def create_app(settings=None, clock=utc_now, client_factory=None):
         if not settings.serve_frontend:
             return {"service": "treasury-control", "health": "/healthz"}
         return FileResponse(
-            DASHBOARD / "index.html",
+            DASHBOARD / "dist/index.html" if (DASHBOARD / "dist/index.html").is_file() else DASHBOARD / "treasury-mvp.html",
             headers={
                 "Content-Security-Policy": (
                     "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'"

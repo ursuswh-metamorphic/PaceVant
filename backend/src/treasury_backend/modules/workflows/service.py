@@ -39,13 +39,13 @@ def utc_now() -> int:
 
 
 class ControlPlane(EvaluationPipeline, AuthorizationPipeline, WorkflowMonitor):
-    def __init__(self, settings: Settings, clock=utc_now, client_factory=None):
+    def __init__(self, settings: Settings, clock=utc_now, client_factory=None, shield_provider=None):
         self.settings = settings
         self.client_factory = client_factory
         self.clock = clock
         self.store = Store(settings.db)
         self.planner = planner.GoalPlanner(settings.planning, settings.db.parent)
-        self.shield = TaskShield(self.store, settings.shield, clock=clock)
+        self.shield = TaskShield(self.store, settings.shield, provider=shield_provider, clock=clock)
         self.temporal = TemporalService(self.store, self.shield, settings.mode, clock)
         self.shield_runtimes = {}
         if settings.mode == "MOCK":

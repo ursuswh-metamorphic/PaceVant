@@ -1,0 +1,220 @@
+{
+  "workflow_id": "treasury_995a6d7f025240efb425f47b24eafeb4",
+  "intent": {
+    "operation": "TOKEN_SWAP",
+    "chain_id": 43113,
+    "treasury": "0xd25323fdff00b075979000f6342eb845b283a7c1",
+    "session_id": "0xca0b9955c8bad69b6ff0142e6503a361cda9139647d95c0d69c39a57b7060a40",
+    "token_in": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+    "token_out": "0x5425890298aed601595a70ab815c96711a31bc65",
+    "recipient": "0xd25323fdff00b075979000f6342eb845b283a7c1",
+    "amount": "50000000000000",
+    "min_output": "0",
+    "slippage_bps": 40,
+    "deadline": 1795203093,
+    "objective": "Evaluate this exact WAVAX to USDC swap under the unchanged Owner economic policy",
+    "rebalance": false
+  },
+  "status": "REJECTED",
+  "created_at": 1795202953,
+  "reason_code": "LFJ_UNSUPPORTED_ROUTE",
+  "timeline": [
+    {
+      "stage": "OWNER_AUTHORITY",
+      "created_at": 1795202954,
+      "evidence": {
+        "mvp": true,
+        "chain_id": 43113,
+        "treasury": "0xd25323fdff00b075979000f6342eb845b283a7c1",
+        "usdc": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "wavax": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "shares": "0x0000000000000000000000000000000000000000",
+        "adapter": "0x6d8e2874af66687c286b2c32acff884357aa4809",
+        "owner": "0xe917c14a634dbffc30b3d1bcbb22522d007f3dd6",
+        "attestor": "0x7c754b7fde6bb525038950347688f9587d91298d",
+        "relayer": "0xb04ebe774a32a0b5e8fccb65334aae5d5956d52c",
+        "policy_hash": "0x159e502cf66cc9dea760db993546cd0f5cd5080b8b0ed85fecffd57e951f1a2d",
+        "policy_version": 6,
+        "paused": false,
+        "policy_active": true,
+        "session_active": true,
+        "session_starts_at": 1795202925,
+        "session_id": "0xca0b9955c8bad69b6ff0142e6503a361cda9139647d95c0d69c39a57b7060a40",
+        "session_expires_at": 1795807725,
+        "policy_expires_at": 1795807725,
+        "block_number": 61392978,
+        "block_hash": "0x4497e93d02c8aae5eed7530f04d8a3ee18254a6939349ae02f2beaa658a6fef7",
+        "timestamp": 1795202925,
+        "server_time": 1795202953,
+        "environment": "ANVIL_FORK",
+        "balances": [
+          "5000000",
+          "50000000000000",
+          "0",
+          "0"
+        ],
+        "authority": {
+          "operation_mask": 3,
+          "spend_limit_usd_e8": 300000000,
+          "spend_used_usd_e8": 0,
+          "max_actions": 500,
+          "actions": 0,
+          "cooldown": 0,
+          "last_rebalance": 0
+        },
+        "proof_policy": {
+          "max_wavax_per_swap": "10000000000000000",
+          "max_relative_loss_bps": 300,
+          "fixed_loss_usd_e8": 0,
+          "oracle_band_bps": 100,
+          "tolerance_bps": 40,
+          "max_oracle_age": 300,
+          "max_session_risk_usd_e8": 1000000000,
+          "global_daily_risk_usd_e8": 2000000000,
+          "oracle_source_hash": "0x49f4d3f0460b604b751ed50083ccc7d297570ca2c3a8ac1cc1a028e463ec3fdc",
+          "owner_approved": true
+        },
+        "share_unit": "1",
+        "share_rate": "1000000",
+        "share_rate_low": "1000000",
+        "share_rate_high": "1000000",
+        "oracle": {
+          "chain_id": 43113,
+          "vault_address": "0xd25323fdff00b075979000f6342eb845b283a7c1",
+          "price_usdc_usd_e8": "99981087",
+          "price_wavax_usd_e8": "641760609",
+          "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+          "price_timestamp": 1795121325,
+          "oracle_observed_at": 1795202925,
+          "oracle_block_number": 61392978,
+          "oracle_block_hash": "0x4497e93d02c8aae5eed7530f04d8a3ee18254a6939349ae02f2beaa658a6fef7",
+          "oracle_feeds": [
+            {
+              "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+              "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+              "description": "USDC/USD",
+              "decimals": 8,
+              "answer_raw": "99981087",
+              "round_id": "18446744073709552589",
+              "answered_in_round": "18446744073709552589",
+              "started_at": 1795121325,
+              "updated_at": 1795121325,
+              "max_age_seconds": 86400,
+              "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+            },
+            {
+              "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+              "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+              "description": "AVAX/USD",
+              "decimals": 8,
+              "answer_raw": "641760609",
+              "round_id": "55340232221128821092",
+              "answered_in_round": "55340232221128821092",
+              "started_at": 1795202793,
+              "updated_at": 1795202793,
+              "max_age_seconds": 600,
+              "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+            }
+          ]
+        },
+        "oracle_valid_until": 1795203093,
+        "nominal_prices": [
+          "99981087",
+          "641760609"
+        ],
+        "price_intervals": [
+          [
+            "98981276",
+            "100980898"
+          ],
+          [
+            "635343002",
+            "648178216"
+          ],
+          [
+            "98981276",
+            "100980898"
+          ],
+          [
+            "635343002",
+            "648178216"
+          ]
+        ],
+        "max_slippage_bps": 100,
+        "max_ttl": 300,
+        "max_operation_usd_e8": "100000000",
+        "max_wavax_exposure_bps": 2500,
+        "spend_remaining": "300000000",
+        "daily_spend_remaining": "500000000",
+        "swap_spend_remaining": "300000000",
+        "payment_spend_remaining_usdc": "5000000",
+        "daily_swap_remaining": "500000000",
+        "daily_payment_remaining_usdc": "1000000",
+        "max_payment_usdc": "100000",
+        "risk_remaining": "1000000000",
+        "global_risk_remaining": "2000000000",
+        "recipient_allowlist": [
+          {
+            "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+            "recipient": "0xe917c14a634dbffc30b3d1bcbb22522d007f3dd6",
+            "per_payment": "100000",
+            "per_day": "1000000",
+            "per_session": "5000000",
+            "session_spent": "0",
+            "daily_spent": "0"
+          }
+        ],
+        "adapter_allowed": true,
+        "token_allowlist": {
+          "0x5425890298aed601595a70ab815c96711a31bc65": true,
+          "0xd00ae08403b9bbb9124bb305c09058e32c39a48c": true
+        },
+        "relayer_avax_wei": "31999999692398823",
+        "manifest_hash": "0x3c51ba594d6fc690e18ec0194c924bc7ffcef333f74c9d11b2e8cbbbad68e0c4",
+        "gas_spent_or_reserved_wei": "0",
+        "max_tx_fee_wei": "1000000000000000",
+        "max_gas_price_wei": "5000000000",
+        "max_daily_execution_cost_usd_e8": "100000000"
+      }
+    },
+    {
+      "stage": "AGENT_PROPOSAL",
+      "created_at": 1795202959,
+      "evidence": {
+        "typed_intent": {
+          "operation": "TOKEN_SWAP",
+          "chain_id": 43113,
+          "treasury": "0xd25323fdff00b075979000f6342eb845b283a7c1",
+          "session_id": "0xca0b9955c8bad69b6ff0142e6503a361cda9139647d95c0d69c39a57b7060a40",
+          "token_in": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "token_out": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "recipient": "0xd25323fdff00b075979000f6342eb845b283a7c1",
+          "amount": "50000000000000",
+          "min_output": "0",
+          "slippage_bps": 40,
+          "deadline": 1795203093,
+          "objective": "Evaluate this exact WAVAX to USDC swap under the unchanged Owner economic policy",
+          "rebalance": false
+        },
+        "explanation": "Executes the exact WAVAX-to-USDC swap specified in the authenticated terms, returning output to the treasury. This bounded evaluation swap advances the objective of assessing the exact swap under the unchanged Owner economic policy; it does not alter any policy, target, calldata, or budget.",
+        "candidate_plan": {
+          "operation": "TOKEN_SWAP",
+          "token_in": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "token_out": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "recipient": "0xd25323fdff00b075979000f6342eb845b283a7c1",
+          "amount": "50000000000000",
+          "explanation": "Executes the exact WAVAX-to-USDC swap specified in the authenticated terms, returning output to the treasury. This bounded evaluation swap advances the objective of assessing the exact swap under the unchanged Owner economic policy; it does not alter any policy, target, calldata, or budget."
+        },
+        "authority": "OWNER_SESSION_ONLY"
+      }
+    },
+    {
+      "stage": "REJECTION_OR_RECOVERY",
+      "created_at": 1795202960,
+      "evidence": {
+        "code": "LFJ_UNSUPPORTED_ROUTE",
+        "signed": false
+      }
+    }
+  ]
+}

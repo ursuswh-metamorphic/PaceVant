@@ -1,0 +1,12 @@
+{
+  "scope": "Full Python regression at judge implementation checkpoint; later focused tests recorded separately",
+  "counts": {
+    "tests": 618,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 10,
+    "passed": 608
+  },
+  "duration_seconds": 810.464,
+  "public_transactions_sent": false
+}

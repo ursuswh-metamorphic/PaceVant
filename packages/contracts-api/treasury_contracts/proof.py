@@ -39,6 +39,18 @@ def ceil_nonnegative(value):
     return (value.numerator + value.denominator - 1) // value.denominator
 
 
+def owner_price_interval(nominal, band_bps):
+    """Canonical USD-e8 endpoints covering the entire real owner interval.
+
+    Round outward: excluding even a fractional USD-e8 endpoint would narrow the
+    universally quantified domain. Both the evidence builder and verifier use
+    this rule; callers cannot choose a more convenient, smaller price interval.
+    """
+    return nominal * (10000 - band_bps) // 10000, (
+        nominal * (10000 + band_bps) + 9999
+    ) // 10000
+
+
 class PGSProofEngine:
     def __init__(self, timeout_ms=1000, query_sink=None, solver_factory=z3.Solver):
         if type(timeout_ms) is not int or not 1 <= timeout_ms <= 5000:
@@ -176,6 +188,13 @@ class PGSProofEngine:
                         "ERROR" if feasible == "UNSAT" else "INCONCLUSIVE", "PHI_REGION_NOT_SAT"
                     )
                 state["compiled_region_satisfiable"] = True
+                # Complete Phi => policy check by monotonic corner reduction:
+                # input delta is fixed exactly; the sole output delta is >= its
+                # lower bound and positive. For positive prices, increasing it
+                # decreases loss and leaves outgoing value fixed. Thus the
+                # lower corner maximizes both loss-relative*outgoing and loss
+                # over EVERY feasible Phi outcome. _validate enforces these
+                # swap-only assumptions. Do not reuse for arbitrary operations.
                 loss, outgoing = expressions(lower)
                 label, witness = query(loss > relative * outgoing + int(policy.fixed_loss_usd_e8))
                 state["compile_mode"] = label
@@ -279,10 +298,8 @@ class PGSProofEngine:
             raise ValueError("untrusted/incomplete price source")
         for p in oracle.prices:
             nominal, low, high = map(int, (p.nominal_usd_e8, p.low_usd_e8, p.high_usd_e8))
-            if low * 10000 < nominal * (
-                10000 - policy.oracle_band_bps
-            ) or high * 10000 > nominal * (10000 + policy.oracle_band_bps):
-                raise ValueError("band outside owner domain")
+            if (low, high) != owner_price_interval(nominal, policy.oracle_band_bps):
+                raise ValueError("noncanonical owner price domain")
         if [v.asset for v in e.balances] != assets or [v.token for v in e.allowances] != assets:
             raise ValueError("incomplete registry/allowance coverage")
         if any(a.spender != b.router.lower() or int(a.after) != 0 for a in e.allowances):

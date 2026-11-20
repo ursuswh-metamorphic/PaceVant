@@ -1,0 +1,158 @@
+{
+  "recorded_at": "2026-11-20T19:41:53.633726+00:00",
+  "status": "PARTIAL_LIVE_ACCEPTANCE",
+  "scope": "New anonymous Judge API with real configured model, actual Circle/LFJ/Chainlink Fuji state and isolated native Anvil; no public writes",
+  "attempts": [
+    {
+      "attempt": "payment.json",
+      "scenario": "payment",
+      "job_id": "judge_1cc75eca08cb4349bcf20918e267b79e",
+      "status": "CONFIRMED",
+      "workflow_status": "CONFIRMED",
+      "reason_code": null,
+      "active_stage": "RELAY",
+      "environment": "ANVIL_FORK",
+      "source_block": 61392284,
+      "public_chain_broadcast": false,
+      "proof_status": "VERIFIED",
+      "exact_signed_preflight": true,
+      "outcome": {
+        "tx_hash": "0x9118791e8e2c1bfe8c6a7017feb289bd4de9a6de6cb540289713a66c97414ff3",
+        "block_number": 61392296,
+        "block_hash": "0xef23fbe8cf80cf2cd5fe4808323cd968c9b941af05ba1bc1720d75a33806fac5",
+        "gas_used": "356124",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "356124",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "356124002848992",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-10000",
+          "0",
+          "0",
+          "0"
+        ],
+        "payee_received": "10000"
+      },
+      "observed_stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ]
+    },
+    {
+      "attempt": "swap.json",
+      "scenario": "swap",
+      "job_id": "judge_d6233c67e6b0471c8e2d1478fa2f03fa",
+      "status": "UNAVAILABLE",
+      "workflow_status": null,
+      "reason_code": "FRESH_CHAINLINK_SIGNING_WINDOW_UNAVAILABLE",
+      "active_stage": null,
+      "environment": "ANVIL_FORK",
+      "source_block": 61392677,
+      "public_chain_broadcast": false,
+      "proof_status": null,
+      "exact_signed_preflight": false,
+      "outcome": null,
+      "observed_stages": []
+    },
+    {
+      "attempt": "guard.json",
+      "scenario": "guard",
+      "job_id": "judge_acf946ce6b6041e38edfcf369025e790",
+      "status": "UNAVAILABLE",
+      "workflow_status": null,
+      "reason_code": "FRESH_CHAINLINK_SIGNING_WINDOW_UNAVAILABLE",
+      "active_stage": null,
+      "environment": "ANVIL_FORK",
+      "source_block": 61392700,
+      "public_chain_broadcast": false,
+      "proof_status": null,
+      "exact_signed_preflight": false,
+      "outcome": null,
+      "observed_stages": []
+    },
+    {
+      "attempt": "swap-final.json",
+      "scenario": "swap",
+      "job_id": "judge_802b59a5bc3b4e1e8c863bd5e9a30a69",
+      "status": "UNKNOWN",
+      "workflow_status": "SIGNED_REQUIRES_RECOVERY",
+      "reason_code": "TREASURY_WORKFLOW_FAILED",
+      "active_stage": "EXACT_SIGNED_PREFLIGHT",
+      "environment": "ANVIL_FORK",
+      "source_block": 61392940,
+      "public_chain_broadcast": false,
+      "proof_status": "VERIFIED",
+      "exact_signed_preflight": true,
+      "outcome": null,
+      "observed_stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "REJECTION_OR_RECOVERY"
+      ]
+    },
+    {
+      "attempt": "guard-final.json",
+      "scenario": "guard",
+      "job_id": "judge_73f753164b5e462eb445ca294f455461",
+      "status": "REJECTED",
+      "workflow_status": "REJECTED",
+      "reason_code": "LFJ_UNSUPPORTED_ROUTE",
+      "active_stage": "BUILD",
+      "environment": "ANVIL_FORK",
+      "source_block": 61392966,
+      "public_chain_broadcast": false,
+      "proof_status": null,
+      "exact_signed_preflight": false,
+      "outcome": null,
+      "observed_stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "REJECTION_OR_RECOVERY"
+      ]
+    }
+  ],
+  "browser_payment": "CONFIRMED; deliberately lost POST response followed by reload; one POST and no duplicate job",
+  "browser_evidence": "judge-browser-live-acceptance.json",
+  "verified_replays": [
+    "payment",
+    "swap",
+    "guard"
+  ],
+  "swap_replay_scope": "Earlier complete real-provider fork checkpoint, not confirmation of the new API swap attempt",
+  "open_issue": {
+    "code": "TREASURY_WORKFLOW_FAILED",
+    "stage": "after exact signed preflight, before RELAY",
+    "status": "UNKNOWN / SIGNED_REQUIRES_RECOVERY",
+    "receipt_verified": false,
+    "cause": "Original exception class was not retained; root cause remains undetermined",
+    "diagnostic_followups": "Two bounded worker attempts could not obtain a fresh Chainlink signing window",
+    "change": "Recovery evidence now records exception class, without raw exception messages or credentials",
+    "behavior": "No automatic resend, resigning, policy relaxation or fabricated confirmation"
+  },
+  "public_transactions_sent": false
+}

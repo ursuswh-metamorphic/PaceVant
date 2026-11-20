@@ -63,15 +63,16 @@ class LFJClient:
             "bytecode_hash": self.code_hash(address, block),
         }
 
-    def quote(self, amount, block):
+    def quote(self, amount, block, *, reverse=False):
         if type(amount) is not int or not 0 < amount < 2**128:
             raise PlaneError("INVALID_QUOTE_AMOUNT", "LFJ quote requires a positive uint128")
+        expected_path=[WAVAX,self.usdc] if reverse else [self.usdc,WAVAX]
         (values,) = call(
             self.w3,
             QUOTER,
             "findBestPathFromAmountIn(address[],uint128)",
             ("address[]", "uint128"),
-            ([self.usdc, WAVAX], amount),
+            (expected_path, amount),
             (QUOTE_TYPE,),
             block,
         )
@@ -87,7 +88,7 @@ class LFJClient:
                 "NO_LIQUIDITY", "LFJ quoter found no executable direct USDC/WAVAX route", 409
             )
         if (
-            [a.lower() for a in route] != [self.usdc.lower(), WAVAX.lower()]
+            [a.lower() for a in route] != [a.lower() for a in expected_path]
             or len(steps) != 1
             or len(versions) != 1
             or len(virtual) != 2
@@ -165,9 +166,9 @@ class LFJClient:
             },
         }
 
-    def verified_quote(self, amount, block, route=None):
+    def verified_quote(self, amount, block, route=None, *, reverse=False):
         route = route or self.v1_route(block)
-        quote = self.quote(amount, block)
+        quote = self.quote(amount, block, reverse=reverse)
         if (
             quote["pairs"][0].lower() != route["pair"].lower()
             or quote["versions"] != [0]
@@ -180,7 +181,8 @@ class LFJClient:
             )
         # Independently recompute the *same DEX* quote from V1 reserves. Not an oracle.
         r0, r1 = map(int, route["reserves"])
-        ri, ro = (r0, r1) if route["token0"].lower() == self.usdc.lower() else (r1, r0)
+        input_token=WAVAX if reverse else self.usdc
+        ri, ro = (r0, r1) if route["token0"].lower() == input_token.lower() else (r1, r0)
         expected = amount * 997 * ro // (ri * 1000 + amount * 997)
         if int(quote["amount_out_base_units"]) != expected:
             raise PlaneError(

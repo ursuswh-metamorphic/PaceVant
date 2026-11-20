@@ -1,0 +1,96 @@
+{
+  "status": "CONFIRMED",
+  "environment": "REAL_FUJI_EXECUTION",
+  "broadcast": true,
+  "chain_id": 43113,
+  "scope": "Retired demo wallet consolidation; not an AI PolicyVault operation",
+  "before": {
+    "block": 61389412,
+    "wallets": {
+      "retired_demo": {
+        "address": "0xf23bE4A69B162DdC0F7D5456172212d294b233c7",
+        "avax_wei": "50000000000000000",
+        "usdc_base_units": "20000000",
+        "wavax_base_units": "0"
+      },
+      "owner": {
+        "address": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+        "avax_wei": "27873064882675760",
+        "usdc_base_units": "20000004",
+        "wavax_base_units": "0"
+      },
+      "relayer": {
+        "address": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C",
+        "avax_wei": "1999999706328263",
+        "usdc_base_units": "20000000",
+        "wavax_base_units": "0"
+      }
+    }
+  },
+  "after": {
+    "block": 61389438,
+    "wallets": {
+      "retired_demo": {
+        "address": "0xf23bE4A69B162DdC0F7D5456172212d294b233c7",
+        "avax_wei": "0",
+        "usdc_base_units": "0",
+        "wavax_base_units": "0"
+      },
+      "owner": {
+        "address": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+        "avax_wei": "47873064882675760",
+        "usdc_base_units": "40000004",
+        "wavax_base_units": "0"
+      },
+      "relayer": {
+        "address": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C",
+        "avax_wei": "31999999692398823",
+        "usdc_base_units": "20000000",
+        "wavax_base_units": "0"
+      }
+    }
+  },
+  "transactions": [
+    {
+      "tx_hash": "0x4869417e5154ee99421889e7c56d79d64542fe48abd12b33b4806c746a9dd49b",
+      "to": "0x5425890298aed601595a70AB815c96711a31Bc65",
+      "nonce": 0,
+      "value_wei": "0",
+      "status": "CONFIRMED",
+      "block": 61389421,
+      "block_hash": "0x707fe99b13a38e5ae2881a2047383a481d04c35c8bd559152684a2ed158218b1",
+      "gas_used": "45059",
+      "actual_fee_wei": "7209440",
+      "confirmations": 5,
+      "token_amount_base_units": "20000000",
+      "step": "usdc_to_owner"
+    },
+    {
+      "tx_hash": "0xaf13537b84faa5d82bcab3de32207af24600740d68c98ce073a3251bf70dcb75",
+      "to": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+      "nonce": 1,
+      "value_wei": "20000000000000000",
+      "status": "CONFIRMED",
+      "block": 61389430,
+      "block_hash": "0xa0a53b835ef71992f11d26465139db6106a7f9b7dbad7d730b43e59254515f37",
+      "gas_used": "21000",
+      "actual_fee_wei": "3360000",
+      "confirmations": 2,
+      "step": "avax_to_owner"
+    },
+    {
+      "tx_hash": "0xf821ee0db5898e6f2d0e9a38b93e1bb126897d0cabf436f6864956b57565a0be",
+      "to": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C",
+      "nonce": 2,
+      "value_wei": "29999999986070560",
+      "status": "CONFIRMED",
+      "block": 61389436,
+      "block_hash": "0xe0f457896f2e20cad6408c448eae9f6a9104208ff04091bab85257f139cd1ba8",
+      "gas_used": "21000",
+      "actual_fee_wei": "3360000",
+      "confirmations": 3,
+      "step": "avax_to_relayer"
+    }
+  ],
+  "all_known_source_assets_zero": true
+}

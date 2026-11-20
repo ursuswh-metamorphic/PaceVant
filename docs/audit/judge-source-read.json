@@ -1,0 +1,27 @@
+{
+  "status": "VERIFIED_READ",
+  "observed_at": "2026-11-20T19:36:49.121119+00:00",
+  "block_number": 61393202,
+  "chain_id": 43113,
+  "balances": {
+    "usdc": "1378",
+    "wavax": "66137381683518"
+  },
+  "policy": {
+    "paused": false,
+    "active": true,
+    "expires_at": 1795757322,
+    "max_relative_loss_bps": 300,
+    "oracle_band_bps": 100
+  },
+  "oracle": {
+    "status": "UNAVAILABLE",
+    "source": "CHAINLINK_FUJI"
+  },
+  "addresses": {
+    "treasury": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+    "owner": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+    "attestor": "0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989",
+    "relayer": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C"
+  }
+}

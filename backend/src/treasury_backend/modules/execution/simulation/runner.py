@@ -55,6 +55,8 @@ def fork_node(settings, block, chain_id):
         "--port",
         str(port),
         "--silent",
+        "--threads",
+        "1",
         "--fork-url",
         settings.fork_rpc_url or settings.rpc_url,
         "--fork-block-number",

@@ -1,5 +1,6 @@
 FROM nginx:stable-alpine
 COPY frontend/index.html /usr/share/nginx/html/index.html
+COPY frontend/treasury-mvp.html /usr/share/nginx/html/treasury-mvp.html
 COPY frontend/fuji-wallet.html /usr/share/nginx/html/fuji-wallet.html
 COPY frontend/assets /usr/share/nginx/html/assets
 COPY frontend/src /usr/share/nginx/html/src

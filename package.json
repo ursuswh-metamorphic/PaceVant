@@ -25,7 +25,10 @@
     "config:fuji": "uv run --locked python -m treasury_backend.operations.execution config --network fuji",
     "test:contracts": "uv run --locked python tools/contracts/foundry.py forge test -vv",
     "test:python": "uv run --locked python -m pytest -q",
-    "test:integration": "node backend/tests/integration/eip712-golden.mjs && node backend/tests/integration/eip712-v2-golden.mjs",
+    "test:integration": "node backend/tests/integration/eip712-golden.mjs && node backend/tests/integration/eip712-v2-golden.mjs && node backend/tests/integration/eip712-mvp-golden.mjs",
+    "demo:mvp:local": "uv run --locked python -m treasury_backend.operations.mvp_demo --protocol-fixture",
+    "demo:mvp:smoke": "uv run --locked python -m treasury_backend.operations.mvp_demo --protocol-fixture --once",
+    "audit:mvp:fuji": "uv run --locked python tools/operations/audit_mvp.py",
     "test:consumer": "npm run compile && uv run --locked python -m pytest backend/tests/execution/test_consumer_contract.py -q",
     "test:ab": "npm run compile && uv run --locked python -m pytest backend/tests/execution/test_ab_integration.py -q",
     "test": "npm run test:contracts && npm run test:python && npm run test:integration",
@@ -59,7 +62,12 @@
     "b:golden": "npm run golden",
     "b:check": "npm run check",
     "b:scan-secrets": "npm run scan:secrets",
-    "check:frontend": "node tools/quality/check_frontend.mjs"
+    "check:frontend": "node tools/quality/check_frontend.mjs",
+    "web:install": "npm ci --prefix frontend",
+    "web:dev": "npm run --prefix frontend dev",
+    "web:build": "npm run --prefix frontend build",
+    "web:test": "npm run --prefix frontend test",
+    "judge:serve": "uv run --locked python -m treasury_backend.operations.judge_serve"
   },
   "devDependencies": {
     "@foundry-rs/anvil": "1.7.1",

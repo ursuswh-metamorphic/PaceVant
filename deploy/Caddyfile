@@ -1,0 +1,10 @@
+{$PACEVANT_HOSTNAME} {
+    encode zstd gzip
+    reverse_proxy frontend:80 {
+        lb_retries 0
+    }
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy same-origin
+    }
+}

@@ -151,3 +151,36 @@ def sign_pdr(built, evidence, keys):
         signature=Web3.to_hex(signature),
         typed_data_hash=digest(d, a),
     ).model_dump()
+
+
+@pytest.fixture
+def v3(local_network, tmp_path):
+    """Disposable V3 deployment; generated keys stay in process memory."""
+    from types import SimpleNamespace
+    from treasury_backend.modules.execution.v3 import V3Execution
+    from treasury_backend.operations.v3_local import deploy_local
+    from treasury_contracts.rpc import evm_web3
+
+    base, _ = local_network
+    w3 = evm_web3(Web3.HTTPProvider(base.rpc_url))
+    snap = rpc(w3, "evm_snapshot", [])
+    mine_current_block(SimpleNamespace(w3=w3))
+    data = deploy_local(w3, base.model_copy(update={"data_dir": tmp_path / "execution"}), tmp_path)
+    data["execution"] = V3Execution(data["settings"], data["manifest"])
+    yield data
+    assert rpc(w3, "evm_revert", [snap])
+
+
+@pytest.fixture
+def mvp(local_network,tmp_path):
+    from types import SimpleNamespace
+    from treasury_backend.modules.execution.mvp import MvpExecution
+    from treasury_backend.operations.mvp_local import deploy_mvp_local
+    from treasury_contracts.rpc import evm_web3
+    base,_=local_network
+    w3=evm_web3(Web3.HTTPProvider(base.rpc_url));snap=rpc(w3,"evm_snapshot",[])
+    mine_current_block(SimpleNamespace(w3=w3))
+    data=deploy_mvp_local(w3,base.model_copy(update={"data_dir":tmp_path/"execution"}),tmp_path)
+    data["execution"]=MvpExecution(data["settings"],data["manifest"])
+    yield data
+    assert rpc(w3,"evm_revert",[snap])

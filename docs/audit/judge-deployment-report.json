@@ -1,0 +1,46 @@
+{
+  "status": "LOCAL_NATIVE_QA_PASS_VPS_ACCEPTANCE_PENDING",
+  "target": "Ubuntu 22.04 LTS, 2 vCPU / 4 GB, native systemd + Nginx; static Vite assets",
+  "actual_qa_host": "Ubuntu 24.04.3 under local WSL; not the target VPS",
+  "verified": {
+    "native_bash_syntax_all_five_scripts": true,
+    "locked_uv_python_3_12_no_dev_install": true,
+    "non_root_systemd_process_health": true,
+    "systemd_transient_resource_limits": "MemoryMax=2800M CPUQuota=180% TasksMax=192",
+    "recorded_payment_api": "VERIFIED_REPLAY / CONFIRMED / public_chain_broadcast=false",
+    "native_nginx_configuration_test": true,
+    "native_nginx_static_and_api_proxy": true,
+    "native_nginx_mvp_admin_404": true,
+    "recovery_and_durable_quota": "Covered by focused controller tests"
+  },
+  "deployment_prepared": {
+    "scripts": [
+      "install",
+      "deploy",
+      "healthcheck",
+      "restart",
+      "rollback"
+    ],
+    "service": "deploy/native/pacevant-judge.service",
+    "nginx": "deploy/native/nginx.conf",
+    "persistent_state": "/var/lib/pacevant/judge",
+    "runtime": "one loopback Python API plus bounded native worker/Anvil processes",
+    "owner_keys_required": false,
+    "docker_required": false,
+    "node_production_server_required": false
+  },
+  "not_verified": [
+    "SSH deployment to Ubuntu 22.04 VPS",
+    "Actual domain/DNS and HTTPS certificate",
+    "Production reboot recovery",
+    "Multi-day soak and measured target-VPS load",
+    "New live API swap confirmation"
+  ],
+  "required_user_inputs": [
+    "SSH endpoint/account/sudo access",
+    "Domain and DNS",
+    "Private model-only environment, supplied securely outside Git"
+  ],
+  "availability_scope": "systemd restarts failures; live execution still requires actual model/RPC/oracle/policy success. Hash-pinned recorded evidence is an explicit fallback, never a fabricated live success.",
+  "public_transactions_sent": false
+}

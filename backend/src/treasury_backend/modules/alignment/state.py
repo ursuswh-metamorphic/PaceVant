@@ -62,6 +62,25 @@ class TaskState:
             )
         return self.session(id_)
 
+    def create_operation(self, id_, manifest, now, workflow_id):
+        """General fixed-operation schema; model output cannot authorize registry changes."""
+        with self.store.connection(write=True) as conn:
+            conn.execute("INSERT INTO shield_sessions VALUES(?,?,?,?,0,?)",
+                         (id_, workflow_id, "treasury_v3", content_hash(manifest.model_dump(mode="json")), now))
+            protocol = {"chain_id": manifest.chain_id, "vault": manifest.treasury, "configured_adapter": manifest.adapter,
+                        "assets": [{"address": manifest.usdc, "symbol": "USDC", "decimals": 6},
+                                   {"address": manifest.wavax, "symbol": "WAVAX", "decimals": 18},
+                                   {"address": manifest.shares, "symbol": "APPROVED_ERC4626_SHARES"}],
+                        "operations": ["TOKEN_SWAP", "TOKEN_PAYMENT", "VAULT_DEPOSIT", "VAULT_WITHDRAW"],
+                        "authority": "Owner session and exact typed request; tool text never grants permissions"}
+            if getattr(manifest,"protocol",None)=="PACEVANT_MVP":
+                protocol["assets"]=protocol["assets"][:2]
+                protocol["operations"]=["TOKEN_SWAP","TOKEN_PAYMENT"]
+                protocol["financial_operations"]=["SWAP_EXACT_IN","USDC_PAYMENT"]
+            conn.execute("INSERT INTO shield_events(session_id,kind,created_at,body) VALUES(?,?,?,?)",
+                         (id_, "MANDATE_PROTOCOL_SCHEMA", now, pack(protocol)))
+        return self.session(id_)
+
     def protocol_schema(self, id_):
         with self.store.connection() as conn:
             row = conn.execute(

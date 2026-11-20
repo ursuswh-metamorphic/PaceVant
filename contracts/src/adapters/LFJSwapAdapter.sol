@@ -21,7 +21,7 @@ contract LFJSwapAdapter is ISwapAdapter, ReentrancyGuard {
     bytes32 public immutable pairCodeHash;
     bytes32 public immutable inputCodeHash;
     bytes32 public immutable outputCodeHash;
-    string public constant adapterVersion = "lfj-v1-fuji-v1";
+    function adapterVersion() public pure virtual returns (string memory) { return "lfj-v1-fuji-v1"; }
     uint8 public constant routeVersion = 0; // Official ILBRouter.Version.V1
     uint256 public constant binStep = 0;
     error WrongChain();
@@ -49,7 +49,7 @@ contract LFJSwapAdapter is ISwapAdapter, ReentrancyGuard {
         inputCodeHash = input.codehash; outputCodeHash = output.codehash;
     }
 
-    function _validate(address input, address output) private view {
+    function _validate(address input, address output) internal view virtual {
         if (block.chainid != 43113) revert WrongChain();
         if (input != usdc || output != wavax) revert UnsupportedPair();
         if (lfjRouter.codehash != routerCodeHash || pair.codehash != pairCodeHash
@@ -62,7 +62,7 @@ contract LFJSwapAdapter is ISwapAdapter, ReentrancyGuard {
         _validate(input, output);
         if (amount == 0 || amount > type(uint128).max) revert NoLiquidity();
         (uint112 r0, uint112 r1,) = ILFJV1Pair(pair).getReserves();
-        (uint256 reserveIn, uint256 reserveOut) = ILFJV1Pair(pair).token0() == usdc ? (r0, r1) : (r1, r0);
+        (uint256 reserveIn, uint256 reserveOut) = ILFJV1Pair(pair).token0() == input ? (r0, r1) : (r1, r0);
         if (reserveIn == 0 || reserveOut == 0) revert NoLiquidity();
         // Official JoeLibrary.getAmountOut: V1 0.3% fee, actual pool reserves.
         uint256 withFee = amount * 997;

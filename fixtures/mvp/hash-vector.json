@@ -1,0 +1,124 @@
+{
+  "label": "TEST_VECTOR_ONLY",
+  "chain_id": 43113,
+  "treasury": "0x3333333333333333333333333333333333333333",
+  "operation": {
+    "kind": 2,
+    "rebalance": false,
+    "policyHash": "0x0101010101010101010101010101010101010101010101010101010101010101",
+    "sessionId": "0x0202020202020202020202020202020202020202020202020202020202020202",
+    "intentHash": "0x0303030303030303030303030303030303030303030303030303030303030303",
+    "evidenceRoot": "0x0404040404040404040404040404040404040404040404040404040404040404",
+    "proofContextHash": "0x0505050505050505050505050505050505050505050505050505050505050505",
+    "constraintsHash": "0xdad6d543bf2bf71451e0c81993809879dbcb22767bc503623c0690eca770a27e",
+    "calldataHash": "0x4be2f0d92ce5f96787ac3acbb7899c9f79ef622d9e915e53403cd9adba93f034",
+    "target": "0x1111111111111111111111111111111111111111",
+    "tokenIn": "0x1111111111111111111111111111111111111111",
+    "tokenOut": "0x1111111111111111111111111111111111111111",
+    "recipient": "0x2222222222222222222222222222222222222222",
+    "amount": "1000000",
+    "minOutput": "1000000",
+    "spendDebitUsdE8": "101000000",
+    "riskDebitUsdE8": "0",
+    "nonce": "7",
+    "deadline": "2000000030"
+  },
+  "fields": [
+    {
+      "name": "kind",
+      "type": "uint8"
+    },
+    {
+      "name": "rebalance",
+      "type": "bool"
+    },
+    {
+      "name": "policyHash",
+      "type": "bytes32"
+    },
+    {
+      "name": "sessionId",
+      "type": "bytes32"
+    },
+    {
+      "name": "intentHash",
+      "type": "bytes32"
+    },
+    {
+      "name": "evidenceRoot",
+      "type": "bytes32"
+    },
+    {
+      "name": "proofContextHash",
+      "type": "bytes32"
+    },
+    {
+      "name": "constraintsHash",
+      "type": "bytes32"
+    },
+    {
+      "name": "calldataHash",
+      "type": "bytes32"
+    },
+    {
+      "name": "target",
+      "type": "address"
+    },
+    {
+      "name": "tokenIn",
+      "type": "address"
+    },
+    {
+      "name": "tokenOut",
+      "type": "address"
+    },
+    {
+      "name": "recipient",
+      "type": "address"
+    },
+    {
+      "name": "amount",
+      "type": "uint256"
+    },
+    {
+      "name": "minOutput",
+      "type": "uint256"
+    },
+    {
+      "name": "spendDebitUsdE8",
+      "type": "uint256"
+    },
+    {
+      "name": "riskDebitUsdE8",
+      "type": "uint256"
+    },
+    {
+      "name": "nonce",
+      "type": "uint256"
+    },
+    {
+      "name": "deadline",
+      "type": "uint256"
+    }
+  ],
+  "phi": {
+    "before_balances": [
+      "10000000",
+      "0",
+      "0",
+      "0"
+    ],
+    "min_deltas": [
+      "-1000000",
+      "0",
+      "0",
+      "0"
+    ],
+    "receipt_credit": "1000000",
+    "max_wavax_balance": "0"
+  },
+  "phi_abi": "0x0000000000000000000000000000000000000000000000000000000000989680000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0bdc000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f42400000000000000000000000000000000000000000000000000000000000000000",
+  "phi_hash": "0xdad6d543bf2bf71451e0c81993809879dbcb22767bc503623c0690eca770a27e",
+  "typed_data_hash": "0xf06c2f7e34f715331844fd4fb8c1506594408b3edbe48a601e0f410ec6f2c334",
+  "call_data": "0xa9059cbb000000000000000000000000222222222222222222222222222222222222222200000000000000000000000000000000000000000000000000000000000f4240"
+}

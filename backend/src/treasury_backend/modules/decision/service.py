@@ -7,6 +7,23 @@ from treasury_backend.modules.temporal.models import HybridTemporalAssessment
 from treasury_contracts.models import BuiltTransaction, SimulationEvidence, TransactionProposal
 
 TTL = 30
+
+
+def decide_operation(intent, built, effects, risk, proof, temporal, now):
+    """V3 SDE is conjunctive: no model score can compensate for a failed security gate."""
+    from treasury_contracts.crypto import content_hash
+    reasons = list(risk["reason_codes"]) + list(temporal["reason_codes"])
+    if (proof.get("status") != "VERIFIED" or proof.get("intent_hash") != intent.hash
+            or proof.get("build_hash") != content_hash(built) or proof.get("evidence_root") != content_hash(effects)):
+        reasons.append("PROOF_INVALID")
+    if risk["result"] != "PASS" or temporal["verdict"] != "PASS":
+        reasons.append("SECURITY_GATE_FAILED")
+    if now >= intent.deadline:
+        reasons.append("EXPIRED_APPROVAL")
+    return {"verdict": "APPROVE" if not reasons else "REJECT", "reason_codes": list(dict.fromkeys(reasons)),
+            "intent_hash": intent.hash, "build_hash": content_hash(built), "evidence_root": content_hash(effects),
+            "proof_hash": proof["proof_hash"], "policy_hash": built["operation"]["policyHash"],
+            "temporal_hash": content_hash(temporal), "risk_hash":content_hash(risk), "expires_at": intent.deadline, "source": "SDE_V3"}
 HARD = {
     "TASK_MISALIGNED",
     "TOKEN_NOT_ALLOWED",

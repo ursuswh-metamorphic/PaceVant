@@ -82,7 +82,7 @@ def test_itag_v2_artifact_budget_and_completion(plane, tmp_path, monkeypatch, ou
     ec = ExecutionSettings(**{**chain.settings.model_dump(), "api_key": "e" * 32})
     demo_config = DemoSettings(enabled=demo, address="0x" + "11" * 20, access_token="d" * 32,
                                initial_credit_wei=10**16, max_transaction_fee_wei=fee_cap)
-    app = create_app(cfg, ec, execution_service=ExecutionService(ec, chain), demo_settings=demo_config)
+    app = create_app(cfg, ec, execution_service=ExecutionService(ec, chain), demo_settings=demo_config,legacy_demo_tests=True)
     with TestClient(app, headers={"Authorization": "Bearer " + cfg.operator_token}) as client:
         spec = (
             client.post(

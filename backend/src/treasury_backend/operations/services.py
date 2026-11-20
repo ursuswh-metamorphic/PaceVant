@@ -1,15 +1,16 @@
+import json
 import os
 import subprocess
 import sys
 import time
 from contextlib import contextmanager
 from decimal import InvalidOperation
+from pathlib import Path
 from threading import Event, Thread
 from urllib.parse import urlsplit
 
 import httpx
 
-from treasury_backend.config.demo import DemoSettings
 from treasury_backend.config.planning import PlanningSettings
 from treasury_backend.modules.alignment.provider import ShieldConfig
 
@@ -22,14 +23,28 @@ from .profiles import owner_config
 
 
 @contextmanager
-def services(p, *, public_host="127.0.0.1"):
-    prepare(p)
+def services(p, *, public_host="127.0.0.1", log_to_stdout=False):
+    mvp_file = p.values.get("PACEVANT_MVP_MANIFEST_FILE")
+    if mvp_file:
+        # The old vault is intentionally paused/revoked after migration. Its
+        # journal stays available, but its session cannot gate MVP startup.
+        from treasury_contracts.mvp import MvpManifest
+
+        manifest = MvpManifest.model_validate_json(Path(mvp_file).read_bytes())
+        manifest.verify_owner()
+        p.credentials()
+        p.control_data.mkdir(parents=True, exist_ok=True)
+    else:
+        prepare(p)
     check_port(p.a_port)
     children = []
     logs = []
     stop = Event()
 
     def heartbeat():
+        if mvp_file:
+            # MVP reads pinned Chainlink rounds through its execution context.
+            return
         if p.network == "fuji" and p.values.get("TREASURY_ORACLE_MODE") == "chainlink":
             # Workflows/dashboard read pinned rounds directly. A competing file
             # heartbeat would consume public RPC capacity during cold fork calls.
@@ -48,8 +63,10 @@ def services(p, *, public_host="127.0.0.1"):
         env["PYTHONPATH"] = os.pathsep.join(
             (str(p.root / "backend/src"), str(p.root / "packages/contracts-api"))
         )
-        log = (p.control_data / "backend.log").open("a", encoding="utf-8")
-        logs.append(log)
+        log = None
+        if not log_to_stdout:
+            log = (p.control_data / "backend.log").open("a", encoding="utf-8")
+            logs.append(log)
         proc = subprocess.Popen(
             [
                 sys.executable,
@@ -146,16 +163,7 @@ def doctor(p, *, live=False):
     except (ValueError, TypeError, InvalidOperation):
         row("shield_configuration", "INVALID", "Check ITAG flag, shield endpoint/model/budgets")
 
-    try:
-        demo = DemoSettings.from_values(p.values)
-        if demo.enabled:
-            credentials = [p.values.get(name) for name in ("B_API_KEY", "PACEVANT_OPERATOR_TOKEN", "PACEVANT_INTERNAL_TOKEN")]
-            valid = (demo.access_token not in credentials and p.values.get("PACEVANT_REQUIRE_ITAG") == "1"
-                     and p.values.get("PACEVANT_SHIELD_MODE") in {"wallet_pipeline", "wallet_hardened"})
-            row("demo_user_configuration", "OK" if valid else "INVALID",
-                "Scoped access; sponsor gas credit is off-chain, not a wallet balance")
-    except (ValueError, TypeError):
-        row("demo_user_configuration", "INVALID", "Check demo identity, access token and gas budgets")
+    row("single_tenant_interface", "OK", "Demo User and customer gas billing are retired; legacy flags are ignored")
 
     for name in ("B_API_KEY", "PACEVANT_OPERATOR_TOKEN", "PACEVANT_INTERNAL_TOKEN"):
         value = p.values.get(name, "")
@@ -170,8 +178,12 @@ def doctor(p, *, live=False):
     )
     wallets = {}
     if p.network == "fuji":
+        try:
+            wallets["owner"] = json.loads(p.deployment.read_text())["owner"]
+            row("owner_public_identity", "OK", "Serving does not require the Owner private key")
+        except (OSError, KeyError, ValueError):
+            row("owner_public_identity", "MISSING", "Supply the public deployment manifest")
         for name, role in (
-            ("B_FUJI_OWNER_PRIVATE_KEY", "owner"),
             ("B_FUJI_RELAYER_PRIVATE_KEY", "relayer"),
             ("PACEVANT_ATTESTOR_KEY", "attestor"),
         ):
@@ -180,13 +192,25 @@ def doctor(p, *, live=False):
                 row(name, "OK")
             except OpsError:
                 row(name, "MISSING_OR_INVALID")
-        for name in POLICY_ENV:
-            row(name, "OK" if p.values.get(name) else "MISSING")
-        try:
-            owner_config(p.values)
-            row("owner_policy_approval", "OK")
-        except OpsError as e:
-            row("owner_policy_approval", "BLOCKED", str(e))
+        if p.values.get("PACEVANT_MVP_MANIFEST_FILE"):
+            try:
+                from treasury_contracts.mvp import MvpManifest
+
+                manifest = MvpManifest.model_validate_json(
+                    Path(p.values["PACEVANT_MVP_MANIFEST_FILE"]).read_bytes()
+                )
+                manifest.verify_owner()
+                row("mvp_owner_manifest", "OK", "Live policy/budgets are verified from the new vault")
+            except (OSError, ValueError):
+                row("mvp_owner_manifest", "INVALID", "Supply the signed two-operation manifest")
+        else:
+            for name in POLICY_ENV:
+                row(name, "OK" if p.values.get(name) else "MISSING")
+            try:
+                owner_config(p.values)
+                row("owner_policy_approval", "OK")
+            except OpsError as e:
+                row("owner_policy_approval", "BLOCKED", str(e))
         try:
             p.credentials()
             row("wallet_roles_and_testnet_ack", "OK")

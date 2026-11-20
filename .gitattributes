@@ -1,1 +1,3 @@
 fixtures/eip712_golden/manifest.canonical.json -text
+scripts/vps/*.sh text eol=lf
+deploy/native/* text eol=lf

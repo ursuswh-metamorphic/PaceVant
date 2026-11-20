@@ -1,0 +1,84 @@
+{
+  "environment": "LOCAL_TEST",
+  "public_chain_broadcast": false,
+  "command": "uv run --locked python -m pytest -q --maxfail=1 --junitxml=data/mvp-final-pytest.xml",
+  "counts": {
+    "tests": 596,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 10,
+    "passed": 586
+  },
+  "duration_seconds": 805.462,
+  "skipped_cases": [
+    {
+      "file": "backend.tests.control.test_portfolio_fuji_read",
+      "test": "test_real_fuji_lfj_token_observation_without_wallet_or_keys",
+      "reason": "opt-in public Fuji reads"
+    },
+    {
+      "file": "backend.tests.execution.test_circle_fuji_fork",
+      "test": "test_circle_chainlink_pipeline_confirms_on_isolated_fuji_fork",
+      "reason": "Opt-in public Fuji reads; all writes on Anvil"
+    },
+    {
+      "file": "backend.tests.execution.test_economic_fuji_fork",
+      "test": "test_real_lfj_post_signing_drift_and_bounded_sandwich",
+      "reason": "Opt-in public read-only Fuji source; transactions restricted to Anvil"
+    },
+    {
+      "file": "backend.tests.execution.test_lfj_v2_fuji_fork",
+      "test": "test_v2_simulator_executes_verified_lfj_route_on_fuji_fork",
+      "reason": "Opt-in public Fuji reads"
+    },
+    {
+      "file": "backend.tests.execution.test_mvp_fuji_fork",
+      "test": "test_mvp_real_forward_lfj_route",
+      "reason": "Opt-in public reads; writes only to isolated Anvil fork"
+    },
+    {
+      "file": "backend.tests.execution.test_mvp_fuji_fork",
+      "test": "test_mvp_real_reverse_lfj_route",
+      "reason": "Opt-in public reads; writes only to isolated Anvil fork"
+    },
+    {
+      "file": "backend.tests.execution.test_mvp_fuji_fork",
+      "test": "test_mvp_real_routes_reject_bad_recipient_and_slippage[False]",
+      "reason": "Opt-in public reads; writes only to isolated Anvil fork"
+    },
+    {
+      "file": "backend.tests.execution.test_mvp_fuji_fork",
+      "test": "test_mvp_real_routes_reject_bad_recipient_and_slippage[True]",
+      "reason": "Opt-in public reads; writes only to isolated Anvil fork"
+    },
+    {
+      "file": "backend.tests.execution.test_mvp_fuji_fork",
+      "test": "test_mvp_real_reverse_economic_divergence_rejected",
+      "reason": "Opt-in public reads; writes only to isolated Anvil fork"
+    },
+    {
+      "file": "backend.tests.execution.test_v2_ablation",
+      "test": "test_measured_matched_ablation",
+      "reason": "opt-in quantitative local ablation"
+    }
+  ],
+  "scope": "Full regression before the final operator-startup cleanup. Subsequent focused results are reported separately.",
+  "final_focused_verification": {
+    "counts": {
+      "tests": 40,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 40
+    },
+    "duration_seconds": 143.722,
+    "suites": [
+      "integration/test_container_config.py",
+      "integration/test_planning_configuration.py",
+      "integration/test_treasury_ops.py",
+      "execution/test_mvp_api.py",
+      "execution/test_mvp_workflows.py"
+    ],
+    "scope": "Includes final startup/credential changes and specific route-gate regression; overlaps the full suite."
+  }
+}

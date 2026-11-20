@@ -1,5 +1,7 @@
 # Chỉ mục tài liệu PaceVant
 
+> **Current two-operation MVP (21 November 2026):** [complete current review](PACEVANT_CURRENT_SYSTEM_REVIEW.md), [source audit](../MVP_CURRENT_STATE_AUDIT.md), [final architecture](../MVP_FINAL_ARCHITECTURE.md), [economic/proof audit](../MVP_ECONOMIC_RISK_AUDIT.md), [test evidence](../MVP_TEST_REPORT.md), and [operator runbook](../MVP_DEMO_RUNBOOK.md). Demo User and gas-billing instructions below describe the previous snapshot. New public MVP deployment/payment remains pending Owner action; real-model full fork succeeded, Demo User funds were consolidated on explicit request, and reverse remains subject to unchanged route/economic gates.
+
 Luồng web mới nhất: [Live web runbook](demo/LIVE_WEB_DEMO.md), [kết quả Fuji và gas billing](audit/WEB_DEMO_LIVE_REVIEW.md). Fuji là mặc định; chọn MOCK/LOCAL rõ ràng khi kiểm offline. Các mô tả baseline cũ chưa có Fuji billing được thay thế bởi evidence này.
 
 Economic risk: [báo cáo kiểm thử và tình trạng vốn/exposure](audit/ECONOMIC_RISK_REVIEW.md), [evidence JSON](audit/economic-risk-validation.json). Không gửi thêm transaction hoặc thay policy trong đợt kiểm thử này.

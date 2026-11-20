@@ -37,6 +37,14 @@ class Relayer:
     def __init__(self, chain, store):
         self.chain, self.store = chain, store
         self.gas_credit = None
+        self._system_gas = None
+
+    @property
+    def system_gas(self):
+        if self._system_gas is None:
+            from treasury_backend.modules.gas_credit.system import SystemGasLedger
+            self._system_gas=SystemGasLedger(self.store.db_path,self.chain.settings)
+        return self._system_gas
 
     def execute(self, request: ExecutionRequest, *, dry_run=False):
         if self.chain.w3.eth.chain_id != self.chain.chain_id:
@@ -207,13 +215,17 @@ class Relayer:
                 "build_id": b.build_id,
                 "gas_estimate": str(gas),
             }
+        from treasury_backend.modules.gas_credit.system import gas_terms
+        system_gas,system_price,system_cost = gas_terms(self.chain.settings,self.chain.w3,account.address,gas)
+        # Schema initialization must precede BEGIN IMMEDIATE on the submission journal.
+        system_ledger=self.system_gas if not billed else None
         tx = fn.build_transaction(
             {
                 "from": account.address,
                 "chainId": b.chain_id,
                 "nonce": self.chain.w3.eth.get_transaction_count(account.address, "pending"),
-                "gas": (gas * 110 + 99) // 100 + 5000 if billed else gas * 12 // 10 + 10000,
-                "gasPrice": self.chain.w3.eth.gas_price,
+                "gas": (gas * 110 + 99) // 100 + 5000 if billed else system_gas,
+                "gasPrice": system_price,
             }
         )
         signed = account.sign_transaction(tx)
@@ -235,6 +247,8 @@ class Relayer:
                     db, b.build_id, tx_hash, tx["gas"] * tx["gasPrice"],
                     self.chain.w3.eth.get_balance(account.address, "pending"),
                 )
+            else:
+                system_ledger.reserve(db,tx_hash,b.chain_id,account.address,c["timestamp"]//86400,system_cost)
             db.execute(
                 "INSERT INTO submissions VALUES(?,?,?,?,?)",
                 (b.build_id, request_hash, tx_hash, raw, canonical(result).decode()),
@@ -247,6 +261,7 @@ class Relayer:
 
     def monitor(self, tx_hash):
         base = self.store.get("execution", tx_hash)
+        self.system_gas.reconcile(self.chain.w3,tx_hash)
         try:
             receipt = self.chain.w3.eth.get_transaction_receipt(tx_hash)
         except TransactionNotFound:

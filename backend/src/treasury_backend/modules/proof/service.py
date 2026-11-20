@@ -2,7 +2,7 @@
 
 from treasury_backend.core.errors import ControlError
 from treasury_backend.modules.oracle import is_supported_source, source_hash
-from treasury_contracts.proof import PGSProofEngine
+from treasury_contracts.proof import PGSProofEngine, owner_price_interval
 from treasury_contracts.v2 import OracleEvidence, Price
 
 
@@ -51,10 +51,8 @@ def prove(mandate, built, simulation, snapshot, context, now, query_sink=None):
             Price(
                 asset=a.address,
                 nominal_usd_e8=str(by_decimals[a.decimals]),
-                low_usd_e8=str(
-                    (by_decimals[a.decimals] * (10000 - p.oracle_band_bps) + 9999) // 10000
-                ),
-                high_usd_e8=str(by_decimals[a.decimals] * (10000 + p.oracle_band_bps) // 10000),
+                low_usd_e8=str(owner_price_interval(by_decimals[a.decimals], p.oracle_band_bps)[0]),
+                high_usd_e8=str(owner_price_interval(by_decimals[a.decimals], p.oracle_band_bps)[1]),
             )
             for a in registry.assets
         ),

@@ -21,6 +21,7 @@ from treasury_backend.modules.execution.models import (
 )
 from treasury_backend.modules.execution.service import ExecutionService
 from treasury_backend.config.execution import Settings
+from treasury_backend.core.errors import ControlError
 from treasury_contracts.v2 import PreflightV2Request
 from treasury_contracts.http_limits import RequestSizeLimit
 
@@ -84,6 +85,10 @@ def create_app(settings=None, chain=None):
     @app.exception_handler(PlaneError)
     async def plane_error(request, exc):
         return error(request, exc.status, exc.code, exc.message, exc.retryable)
+
+    @app.exception_handler(ControlError)
+    async def control_error(request, exc):
+        return error(request, exc.status, exc.code, exc.code.replace("_", " "), exc.retryable)
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):

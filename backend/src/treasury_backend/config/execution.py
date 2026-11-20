@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     freshness_seconds: int = 60
     max_block_drift: int = Field(default=3, ge=1, le=240)
     required_confirmations: int = Field(default=1, ge=1, le=100)
+    max_gas_per_tx: int = Field(default=1500000, gt=21000, le=10000000)
+    max_gas_price_wei: int = Field(default=5000000000, gt=0)
+    max_tx_fee_wei: int = Field(default=1000000000000000, gt=0)
+    max_daily_gas_expense_wei: int = Field(default=5000000000000000, gt=0)
 
     def model_post_init(self, __context):
         # Generic B_* overrides remain supported; normal .env configuration uses

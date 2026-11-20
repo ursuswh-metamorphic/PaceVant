@@ -1,5 +1,7 @@
 # Solidity contracts
 
+Current MVP adds `PolicyVaultMVP` and `LFJSwapAdapterV3`, with exactly swap/payment agent execution, dedicated spending scopes, measured payee receipts and disabled legacy/investment/native-payment paths. Existing immutable Fuji contracts are preserved; use the [Owner migration runbook](../MVP_DEMO_RUNBOOK.md). `PolicyVaultV3` and `DemoERC4626` remain shared/local research infrastructure, not an enabled investment product.
+
 > **DOC STATUS: COMPONENT_REFERENCE** - local interface/contribution reference, not a live readiness certification. The [current system design](../docs/AI_Treasury_Security_System_Design_v2.1.md) owns the complete architecture/status; old reports linked below remain checkpoint-scoped.
 
 `PolicyVault` is the final enforcement boundary for signed swaps. Python authorizes and relays; Solidity executes on Avalanche/EVM after one explicit deployment. Hosting the backend does not deploy the contracts automatically.

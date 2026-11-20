@@ -1,0 +1,943 @@
+{
+  "workflow_id": "treasury_e72267a2d89a4f4d928e0c3b52285939",
+  "intent": {
+    "operation": "TOKEN_SWAP",
+    "chain_id": 43113,
+    "treasury": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+    "session_id": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139",
+    "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+    "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+    "recipient": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+    "amount": "1",
+    "min_output": "0",
+    "slippage_bps": 40,
+    "deadline": 1795196151,
+    "objective": "Swap exactly 0.000001 Circle USDC for WAVAX to the treasury",
+    "rebalance": false
+  },
+  "status": "CONFIRMED",
+  "created_at": 1795196016,
+  "build_id": "v3_b6dd35ff705f58284da7bcb83d926b416bd7e733779ca0e0dac7cfe85c87a19f",
+  "decision": {
+    "verdict": "APPROVE",
+    "reason_codes": [],
+    "intent_hash": "0x053a3ad56078c715932fe9157687f13c8f9fe217dd8ba65e7c66e2f4743613d6",
+    "build_hash": "0x4e229a6b18efb7e5c60a5296d2d42a43402739dca9c48b0c283ba0c1a1b50aed",
+    "evidence_root": "0xa2b668c637d4782395c40f65fa1f2508ec37d50a52bbd4ba15731208c1de034e",
+    "proof_hash": "0x5aeba819902949a52c9253c5c764c262f8df0970fb3d34f5f70a35fd9c593536",
+    "policy_hash": "0x12195a23ac27f40240dd6299ebb81488aed58330fb9ea344046ade2eb801bc52",
+    "temporal_hash": "0x03de5f6d2c35989dab6647538af8e207be29e875d28699e8ad982535f55b16de",
+    "risk_hash": "0x6d96f106c3b5d6a409d31b87d57740bf085a506fe498764412137cf070cdf0a7",
+    "expires_at": 1795196151,
+    "source": "SDE_V3"
+  },
+  "outcome": {
+    "tx_hash": "0x1414ffe2a736183a372d5c0cdcc5a1df62b40666e2fafd333003d61fee2a95c6",
+    "block_number": 61388837,
+    "block_hash": "0x0860067533cff9198f7500088524580b70eb38bbf800cff85bd2e8be99224174",
+    "gas_used": "418694",
+    "confirmations": 1,
+    "environment": "ANVIL_FORK",
+    "public_chain_receipt": false,
+    "system_gas_expense": {
+      "payer": "SYSTEM_RELAYER",
+      "gas_used": "418694",
+      "effective_gas_price_wei": "1000000008",
+      "actual_cost_wei": "418694003349552",
+      "transaction_status": 1,
+      "billing": false
+    },
+    "status": "CONFIRMED",
+    "actual_deltas": [
+      "-1",
+      "13266545691051",
+      "0",
+      "0"
+    ],
+    "payee_received": "0"
+  },
+  "environment": "ANVIL_FORK",
+  "timeline": [
+    {
+      "stage": "OWNER_AUTHORITY",
+      "created_at": 1795196017,
+      "evidence": {
+        "mvp": true,
+        "chain_id": 43113,
+        "treasury": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+        "usdc": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "wavax": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "shares": "0x0000000000000000000000000000000000000000",
+        "adapter": "0xfb5a1cf312fbc31fae36f20381ea778123d44ca3",
+        "owner": "0x52618f690a10393ae3245dcf7728e64d76c2c146",
+        "attestor": "0x76dd89f17dfafa09bab6fd82b9ea09c5f7f66fab",
+        "relayer": "0xf5e9d97722d16c950c0f462a12e22399ece194ef",
+        "policy_hash": "0x12195a23ac27f40240dd6299ebb81488aed58330fb9ea344046ade2eb801bc52",
+        "policy_version": 6,
+        "paused": false,
+        "policy_active": true,
+        "session_active": true,
+        "session_id": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139",
+        "session_expires_at": 1795199571,
+        "policy_expires_at": 1795199571,
+        "block_number": 61388836,
+        "block_hash": "0xd5d73f5e74d1734b0e037eab9d757a948bec930ff1a4cb600c1f8b7331002f8b",
+        "timestamp": 1795195971,
+        "environment": "ANVIL_FORK",
+        "balances": [
+          "4000000",
+          "0",
+          "0",
+          "0"
+        ],
+        "authority": {
+          "operation_mask": 3,
+          "spend_limit_usd_e8": 300000000,
+          "spend_used_usd_e8": 0,
+          "max_actions": 8,
+          "actions": 1,
+          "cooldown": 0,
+          "last_rebalance": 0
+        },
+        "proof_policy": {
+          "max_wavax_per_swap": "10000000000000000",
+          "max_relative_loss_bps": 300,
+          "fixed_loss_usd_e8": 0,
+          "oracle_band_bps": 100,
+          "tolerance_bps": 40,
+          "max_oracle_age": 300,
+          "max_session_risk_usd_e8": 1000000000,
+          "global_daily_risk_usd_e8": 2000000000,
+          "oracle_source_hash": "0x49f4d3f0460b604b751ed50083ccc7d297570ca2c3a8ac1cc1a028e463ec3fdc",
+          "owner_approved": true
+        },
+        "share_unit": "1",
+        "share_rate": "1000000",
+        "share_rate_low": "1000000",
+        "share_rate_high": "1000000",
+        "oracle": {
+          "chain_id": 43113,
+          "vault_address": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+          "price_usdc_usd_e8": "99981087",
+          "price_wavax_usd_e8": "649623548",
+          "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+          "price_timestamp": 1795121325,
+          "oracle_observed_at": 1795195971,
+          "oracle_block_number": 61388836,
+          "oracle_block_hash": "0xd5d73f5e74d1734b0e037eab9d757a948bec930ff1a4cb600c1f8b7331002f8b",
+          "oracle_feeds": [
+            {
+              "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+              "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+              "description": "USDC/USD",
+              "decimals": 8,
+              "answer_raw": "99981087",
+              "round_id": "18446744073709552589",
+              "answered_in_round": "18446744073709552589",
+              "started_at": 1795121325,
+              "updated_at": 1795121325,
+              "max_age_seconds": 86400,
+              "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+            },
+            {
+              "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+              "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+              "description": "AVAX/USD",
+              "decimals": 8,
+              "answer_raw": "649623548",
+              "round_id": "55340232221128821080",
+              "answered_in_round": "55340232221128821080",
+              "started_at": 1795195923,
+              "updated_at": 1795195923,
+              "max_age_seconds": 600,
+              "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+            }
+          ]
+        },
+        "oracle_valid_until": 1795196223,
+        "nominal_prices": [
+          "99981087",
+          "649623548"
+        ],
+        "price_intervals": [
+          [
+            "98981276",
+            "100980898"
+          ],
+          [
+            "643127312",
+            "656119784"
+          ],
+          [
+            "98981276",
+            "100980898"
+          ],
+          [
+            "643127312",
+            "656119784"
+          ]
+        ],
+        "max_slippage_bps": 100,
+        "max_ttl": 300,
+        "max_operation_usd_e8": "100000000",
+        "max_wavax_exposure_bps": 2500,
+        "spend_remaining": "300000000",
+        "daily_spend_remaining": "500000000",
+        "swap_spend_remaining": "300000000",
+        "payment_spend_remaining_usdc": "1000000",
+        "daily_swap_remaining": "500000000",
+        "daily_payment_remaining_usdc": "2000000",
+        "max_payment_usdc": "1000000",
+        "risk_remaining": "1000000000",
+        "global_risk_remaining": "2000000000",
+        "recipient_allowlist": [
+          {
+            "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+            "recipient": "0x52618f690a10393ae3245dcf7728e64d76c2c146",
+            "per_payment": "1000000",
+            "per_day": "3000000",
+            "per_session": "2000000",
+            "session_spent": "1000000"
+          }
+        ],
+        "adapter_allowed": true,
+        "token_allowlist": {
+          "0x5425890298aed601595a70ab815c96711a31bc65": true,
+          "0xd00ae08403b9bbb9124bb305c09058e32c39a48c": true
+        },
+        "relayer_avax_wei": "1643827703478887",
+        "manifest_hash": "0x535fb55a358eb8967cb36a18c9096ee84803dba2045478a934763ef9b0931d24",
+        "gas_spent_or_reserved_wei": "356172002849376",
+        "max_tx_fee_wei": "1000000000000000",
+        "max_gas_price_wei": "5000000000",
+        "max_daily_execution_cost_usd_e8": "100000000"
+      }
+    },
+    {
+      "stage": "AGENT_PROPOSAL",
+      "created_at": 1795196023,
+      "evidence": {
+        "typed_intent": {
+          "operation": "TOKEN_SWAP",
+          "chain_id": 43113,
+          "treasury": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+          "session_id": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139",
+          "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "recipient": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+          "amount": "1",
+          "min_output": "0",
+          "slippage_bps": 40,
+          "deadline": 1795196151,
+          "objective": "Swap exactly 0.000001 Circle USDC for WAVAX to the treasury",
+          "rebalance": false
+        },
+        "explanation": "Executes the authorized swap of exactly 1 base unit (0.000001) of the specified USDC token on chain 43113 into WAVAX, delivering the output to the treasury address. This directly fulfills the stated objective of converting a minimal USDC balance into WAVAX held by the treasury, with no rebalance and within the 40 bps slippage constraint.",
+        "candidate_plan": {
+          "operation": "TOKEN_SWAP",
+          "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "recipient": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+          "amount": "1",
+          "explanation": "Executes the authorized swap of exactly 1 base unit (0.000001) of the specified USDC token on chain 43113 into WAVAX, delivering the output to the treasury address. This directly fulfills the stated objective of converting a minimal USDC balance into WAVAX held by the treasury, with no rebalance and within the 40 bps slippage constraint."
+        },
+        "authority": "OWNER_SESSION_ONLY"
+      }
+    },
+    {
+      "stage": "BUILD",
+      "created_at": 1795196029,
+      "evidence": {
+        "intent": {
+          "operation": "TOKEN_SWAP",
+          "chain_id": 43113,
+          "treasury": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+          "session_id": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139",
+          "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "recipient": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+          "amount": "1",
+          "min_output": "0",
+          "slippage_bps": 40,
+          "deadline": 1795196151,
+          "objective": "Swap exactly 0.000001 Circle USDC for WAVAX to the treasury",
+          "rebalance": false
+        },
+        "operation": {
+          "kind": 1,
+          "rebalance": false,
+          "policyHash": "0x12195a23ac27f40240dd6299ebb81488aed58330fb9ea344046ade2eb801bc52",
+          "sessionId": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139",
+          "intentHash": "0x053a3ad56078c715932fe9157687f13c8f9fe217dd8ba65e7c66e2f4743613d6",
+          "evidenceRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "proofContextHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "constraintsHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "calldataHash": "0x32310161fbfdb1b55c494335e9083fe1ffb898dd3829d6a0ff09b12af687254a",
+          "target": "0xfb5a1cf312fbc31fae36f20381ea778123d44ca3",
+          "tokenIn": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "tokenOut": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "recipient": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+          "amount": "1",
+          "minOutput": "13213479508286",
+          "spendDebitUsdE8": "1",
+          "riskDebitUsdE8": "0",
+          "nonce": "1002",
+          "deadline": "1795196151"
+        },
+        "call": {
+          "target": "0xfb5a1cf312fbc31fae36f20381ea778123d44ca3",
+          "value": "0",
+          "data": "0x651781f30000000000000000000000005425890298aed601595a70ab815c96711a31bc65000000000000000000000000d00ae08403b9bbb9124bb305c09058e32c39a48c000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000c0480c0993e0000000000000000000000000d585e0ccc095a3c0e67c39dedd3447627e53b13"
+        },
+        "min_output": "13213479508286",
+        "quote": "13266545691051",
+        "route": {
+          "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+          "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+          "pair": "0x8436B8c75ed2F015a80b8472526dd1A79BF54E38",
+          "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+          "version": 0,
+          "version_name": "V1",
+          "bin_step": 0,
+          "token_path": [
+            "0x5425890298aed601595a70AB815c96711a31Bc65",
+            "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+          ],
+          "token0": "0x5425890298aed601595a70ab815c96711a31bc65",
+          "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+          "reserves": [
+            "279989",
+            "3725677119596704727"
+          ],
+          "bytecode_hashes": {
+            "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+            "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+            "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+            "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+          },
+          "verified_quoter": {
+            "source": "LFJ_LBQUOTER_V2_2",
+            "router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+            "quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+            "token_path": [
+              "0x5425890298aed601595a70ab815c96711a31bc65",
+              "0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+            ],
+            "pairs": [
+              "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38"
+            ],
+            "bin_steps": [
+              0
+            ],
+            "versions": [
+              0
+            ],
+            "version_names": [
+              "V1"
+            ],
+            "amounts": [
+              "1",
+              "13266545691051"
+            ],
+            "virtual_amounts_without_slippage": [
+              "1",
+              "13266592931286"
+            ],
+            "fees_e18": [
+              "3000000000000000"
+            ],
+            "amount_in_base_units": "1",
+            "amount_out_base_units": "13266545691051",
+            "block_number": 61388836,
+            "block_hash": "0xd5d73f5e74d1734b0e037eab9d757a948bec930ff1a4cb600c1f8b7331002f8b",
+            "independent_usd_oracle": false
+          }
+        },
+        "context_hash": "0x82c3d13c7690096a919f2db34cfbc0f1b4145f2361e2a5b74a8a5ffac5c13268",
+        "build_id": "v3_b6dd35ff705f58284da7bcb83d926b416bd7e733779ca0e0dac7cfe85c87a19f"
+      }
+    },
+    {
+      "stage": "SIMULATION",
+      "created_at": 1795196033,
+      "evidence": {
+        "source": "LOCAL_FORK_EVM",
+        "environment": "ANVIL_FORK",
+        "execution_status": "SUCCESS",
+        "build_hash": "0x4e229a6b18efb7e5c60a5296d2d42a43402739dca9c48b0c283ba0c1a1b50aed",
+        "source_block": 61388836,
+        "source_block_hash": "0xd5d73f5e74d1734b0e037eab9d757a948bec930ff1a4cb600c1f8b7331002f8b",
+        "before": [
+          "4000000",
+          "0",
+          "0",
+          "0"
+        ],
+        "after": [
+          "3999999",
+          "13266545691051",
+          "0",
+          "0"
+        ],
+        "deltas": [
+          "-1",
+          "13266545691051",
+          "0",
+          "0"
+        ],
+        "received": "0",
+        "allowances": [
+          "0",
+          "0"
+        ],
+        "gas_used": 418970,
+        "simulation_overrides": [
+          {
+            "kind": "ATTESTOR_STORAGE_ONLY",
+            "slot": "3",
+            "offset": 0,
+            "previous_storage": "0x00000000000000000000000076dd89f17dfafa09bab6fd82b9ea09c5f7f66fab",
+            "simulation_attestor": "0xe61B99d74C2c7882a2302963542A4D04E15C5Ff7"
+          }
+        ],
+        "exact_signed_preflight": false,
+        "fork_tx_hash": "0x00be44e368eaef3304202148174d5f392c5f234db472772424a34cb74cbcb3c7",
+        "public_chain_receipt": false
+      }
+    },
+    {
+      "stage": "RISK",
+      "created_at": 1795196033,
+      "evidence": {
+        "result": "PASS",
+        "reason_codes": [],
+        "operation": "TOKEN_SWAP",
+        "oracle_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+        "effects_hash": "0xa2b668c637d4782395c40f65fa1f2508ec37d50a52bbd4ba15731208c1de034e",
+        "balance_semantics": "measured on isolated EVM",
+        "gas_economics": {
+          "separate_from_trading_loss": true,
+          "maximum_next_fee_wei": "1000000000000000",
+          "daily_spent_reserved_plus_next_reference_usd_e8": "889812"
+        }
+      }
+    },
+    {
+      "stage": "ITAG",
+      "created_at": 1795196036,
+      "evidence": {
+        "verdict": "PASS",
+        "reason_codes": [],
+        "semantic": {
+          "verdict": "ALIGNED",
+          "finding": {
+            "candidate_action_id": "candidate_053a3ad56078c715",
+            "referenced_task_ids": [
+              "task_053a3ad56078c715"
+            ],
+            "referenced_graph_node_ids": [
+              "task_053a3ad56078c715",
+              "candidate_053a3ad56078c715",
+              "owner_scope",
+              "prior_0"
+            ],
+            "semantic_verdict": "ALIGNED",
+            "contribution_assessments": [
+              {
+                "task_id": "task_053a3ad56078c715",
+                "relationship": "DIRECT",
+                "explanation": "Candidate swap matches the authenticated intent on chain (43113), token_in (0x5425\u2026bc65 USDC), token_out (0xd00a\u2026a48c WAVAX), recipient/treasury (0x0d58\u20263b13), amount (1 base unit = 0.000001 USDC), deadline (1795196151), slippage (40 bps), and non-rebalance. The executed min_output 13213479508286 is below the quote 13266545691051, consistent with the 40 bps slippage tolerance; the intent specified min_output 0, so the candidate is at least as protective and not divergent. Target is the LFJ router with calldata parameters mirroring the intent."
+              }
+            ],
+            "detected_goal_drift": false,
+            "claimed_instruction_source": "USER",
+            "reasoning_summary": "Authenticated intent authorizes swapping exactly 0.000001 USDC for WAVAX to the treasury on chain 43113. The candidate's operation, call data, tokenIn, tokenOut, recipient, amount (1 base unit) and deadline all match. The only divergence is a nonzero minOutput (13213479508286) versus intent min_output 0, which tightens rather than loosens the swap and is bounded by the quoted amount under 40 bps slippage; this is not goal drift. Prior confirmed payment (prior_0, 1 USDC to EOA) is a separate workflow and does not alter this scope. No contradiction between plan and proposed outcome found.",
+            "supporting_evidence_refs": [
+              "task_053a3ad56078c715",
+              "candidate_053a3ad56078c715",
+              "0x12195a23ac27f40240dd6299ebb81488aed58330fb9ea344046ade2eb801bc52",
+              "treasury_19b0ec80c83940af81411ed6f8fd2181"
+            ],
+            "uncertainty_reasons": []
+          },
+          "reason_codes": [],
+          "provider_metadata": {
+            "model": "deepseek-flash",
+            "provider": "deepseek",
+            "config_hash": "0x59fbf4061741536768bf6c5fb7281f2c600020e31960655a254c9f59f880570f",
+            "prompt_version": "itag-trajectory-v2.2",
+            "scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION",
+            "provider_trace": [
+              {
+                "provider": "deepseek",
+                "model": "deepseek-flash",
+                "endpoint": "https://api.deepseek.com",
+                "status": "SUCCESS",
+                "latency_ms": 2890
+              }
+            ]
+          },
+          "latency_ms": 2890,
+          "token_usage": {
+            "prompt_tokens": 3635,
+            "completion_tokens": 532,
+            "total_tokens": 4167
+          }
+        },
+        "graph": {
+          "schema_version": "1.0",
+          "nodes": [
+            {
+              "node_id": "task_053a3ad56078c715",
+              "kind": "AUTHENTICATED_USER_INTENT",
+              "trust": "AUTHENTICATED",
+              "evidence_refs": [
+                "task_053a3ad56078c715"
+              ],
+              "data": {
+                "source": "USER",
+                "authorization_source": "OPERATOR_API",
+                "objective": "Swap exactly 0.000001 Circle USDC for WAVAX to the treasury",
+                "typed_intent": {
+                  "operation": "TOKEN_SWAP",
+                  "chain_id": 43113,
+                  "treasury": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+                  "session_id": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139",
+                  "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "recipient": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+                  "amount": "1",
+                  "min_output": "0",
+                  "slippage_bps": 40,
+                  "deadline": 1795196151,
+                  "objective": "Swap exactly 0.000001 Circle USDC for WAVAX to the treasury",
+                  "rebalance": false
+                },
+                "owner_session": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139"
+              }
+            },
+            {
+              "node_id": "candidate_053a3ad56078c715",
+              "kind": "AGENT_ACTION",
+              "trust": "UNTRUSTED",
+              "evidence_refs": [
+                "candidate_053a3ad56078c715"
+              ],
+              "data": {
+                "intent": {
+                  "operation": "TOKEN_SWAP",
+                  "chain_id": 43113,
+                  "treasury": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+                  "session_id": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139",
+                  "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "recipient": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+                  "amount": "1",
+                  "min_output": "0",
+                  "slippage_bps": 40,
+                  "deadline": 1795196151,
+                  "objective": "Swap exactly 0.000001 Circle USDC for WAVAX to the treasury",
+                  "rebalance": false
+                },
+                "operation": {
+                  "kind": 1,
+                  "rebalance": false,
+                  "policyHash": "0x12195a23ac27f40240dd6299ebb81488aed58330fb9ea344046ade2eb801bc52",
+                  "sessionId": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139",
+                  "intentHash": "0x053a3ad56078c715932fe9157687f13c8f9fe217dd8ba65e7c66e2f4743613d6",
+                  "evidenceRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "proofContextHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "constraintsHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "calldataHash": "0x32310161fbfdb1b55c494335e9083fe1ffb898dd3829d6a0ff09b12af687254a",
+                  "target": "0xfb5a1cf312fbc31fae36f20381ea778123d44ca3",
+                  "tokenIn": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "tokenOut": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "recipient": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+                  "amount": "1",
+                  "minOutput": "13213479508286",
+                  "spendDebitUsdE8": "1",
+                  "riskDebitUsdE8": "0",
+                  "nonce": "1002",
+                  "deadline": "1795196151"
+                },
+                "call": {
+                  "target": "0xfb5a1cf312fbc31fae36f20381ea778123d44ca3",
+                  "value": "0",
+                  "data": "0x651781f30000000000000000000000005425890298aed601595a70ab815c96711a31bc65000000000000000000000000d00ae08403b9bbb9124bb305c09058e32c39a48c000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000c0480c0993e0000000000000000000000000d585e0ccc095a3c0e67c39dedd3447627e53b13"
+                },
+                "min_output": "13213479508286",
+                "quote": "13266545691051",
+                "route": {
+                  "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+                  "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+                  "pair": "0x8436B8c75ed2F015a80b8472526dd1A79BF54E38",
+                  "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+                  "version": 0,
+                  "version_name": "V1",
+                  "bin_step": 0,
+                  "token_path": [
+                    "0x5425890298aed601595a70AB815c96711a31Bc65",
+                    "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+                  ],
+                  "token0": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "reserves": [
+                    "279989",
+                    "3725677119596704727"
+                  ],
+                  "bytecode_hashes": {
+                    "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+                    "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+                    "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+                    "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+                  },
+                  "verified_quoter": {
+                    "source": "LFJ_LBQUOTER_V2_2",
+                    "router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+                    "quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+                    "token_path": [
+                      "0x5425890298aed601595a70ab815c96711a31bc65",
+                      "0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+                    ],
+                    "pairs": [
+                      "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38"
+                    ],
+                    "bin_steps": [
+                      0
+                    ],
+                    "versions": [
+                      0
+                    ],
+                    "version_names": [
+                      "V1"
+                    ],
+                    "amounts": [
+                      "1",
+                      "13266545691051"
+                    ],
+                    "virtual_amounts_without_slippage": [
+                      "1",
+                      "13266592931286"
+                    ],
+                    "fees_e18": [
+                      "3000000000000000"
+                    ],
+                    "amount_in_base_units": "1",
+                    "amount_out_base_units": "13266545691051",
+                    "block_number": 61388836,
+                    "block_hash": "0xd5d73f5e74d1734b0e037eab9d757a948bec930ff1a4cb600c1f8b7331002f8b",
+                    "independent_usd_oracle": false
+                  }
+                },
+                "context_hash": "0x82c3d13c7690096a919f2db34cfbc0f1b4145f2361e2a5b74a8a5ffac5c13268",
+                "build_id": "v3_b6dd35ff705f58284da7bcb83d926b416bd7e733779ca0e0dac7cfe85c87a19f"
+              }
+            },
+            {
+              "node_id": "owner_scope",
+              "kind": "MANDATE",
+              "trust": "VERIFIED_RECORD",
+              "evidence_refs": [
+                "0x12195a23ac27f40240dd6299ebb81488aed58330fb9ea344046ade2eb801bc52"
+              ],
+              "data": {
+                "policy_hash": "0x12195a23ac27f40240dd6299ebb81488aed58330fb9ea344046ade2eb801bc52",
+                "authority": {
+                  "operation_mask": 3,
+                  "spend_limit_usd_e8": 300000000,
+                  "spend_used_usd_e8": 0,
+                  "max_actions": 8,
+                  "actions": 1,
+                  "cooldown": 0,
+                  "last_rebalance": 0
+                },
+                "chain_id": 43113,
+                "policy_version": 6
+              }
+            },
+            {
+              "node_id": "prior_0",
+              "kind": "TRANSACTION_OUTCOME",
+              "trust": "VERIFIED_RECORD",
+              "evidence_refs": [
+                "treasury_19b0ec80c83940af81411ed6f8fd2181"
+              ],
+              "data": {
+                "workflow_id": "treasury_19b0ec80c83940af81411ed6f8fd2181",
+                "intent": {
+                  "operation": "TOKEN_PAYMENT",
+                  "chain_id": 43113,
+                  "treasury": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+                  "session_id": "0xf37b522c6207552ff48a5fdfb332d249efa1e3b683242e397db9b3fc46713139",
+                  "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token_out": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "recipient": "0x52618f690a10393ae3245dcf7728e64d76c2c146",
+                  "amount": "1000000",
+                  "min_output": "0",
+                  "slippage_bps": 0,
+                  "deadline": 1795196151,
+                  "objective": "Pay exactly 1 USDC to the approved EOA",
+                  "rebalance": false
+                },
+                "status": "CONFIRMED",
+                "created_at": 1795195996,
+                "build_id": "v3_8634eaa292ad9d1e38b3c85bc1955be55ae207909ababe80f62b102a211f4b81",
+                "decision": {
+                  "verdict": "APPROVE",
+                  "reason_codes": [],
+                  "intent_hash": "0x895afbaf11deac659ed6182e1dcb096fe656f909d574f8f2c2b7f82d3498a974",
+                  "build_hash": "0xdcd6dfa63f6dd531bb1aa632f80f3845f064f9a5109ef94e8349dc63074ab23b",
+                  "evidence_root": "0x3fab9fd641820f268d73258648522347e9660399bb3b4d721b468b478d324dbe",
+                  "proof_hash": "0xeab6928ff39f876a86cae5ebb868389b63a7164c9901e0088ddcaee0de901233",
+                  "policy_hash": "0x12195a23ac27f40240dd6299ebb81488aed58330fb9ea344046ade2eb801bc52",
+                  "temporal_hash": "0xd8d1dd15c93f46e95fa85b5323e7cbf0c41f882ec794d0357d772e526259721f",
+                  "risk_hash": "0x0022632e8a6365c76649deb6dd4fa59c84353d953055c40ca7d8e7c8d912a983",
+                  "expires_at": 1795196151,
+                  "source": "SDE_V3"
+                },
+                "outcome": {
+                  "tx_hash": "0x2cfe861d65652246f71dc2607b1476d7df17cd28cc79c81587618b45ed0c8134",
+                  "block_number": 61388836,
+                  "block_hash": "0xd5d73f5e74d1734b0e037eab9d757a948bec930ff1a4cb600c1f8b7331002f8b",
+                  "gas_used": "356172",
+                  "confirmations": 1,
+                  "environment": "ANVIL_FORK",
+                  "public_chain_receipt": false,
+                  "system_gas_expense": {
+                    "payer": "SYSTEM_RELAYER",
+                    "gas_used": "356172",
+                    "effective_gas_price_wei": "1000000008",
+                    "actual_cost_wei": "356172002849376",
+                    "transaction_status": 1,
+                    "billing": false
+                  },
+                  "status": "CONFIRMED",
+                  "actual_deltas": [
+                    "-1000000",
+                    "0",
+                    "0",
+                    "0"
+                  ],
+                  "payee_received": "1000000"
+                },
+                "environment": "ANVIL_FORK"
+              }
+            }
+          ],
+          "edges": [
+            {
+              "edge_id": "authorized",
+              "source": "task_053a3ad56078c715",
+              "target": "candidate_053a3ad56078c715",
+              "kind": "AUTHORIZES",
+              "provenance": "AUTHORIZATION_RECORD",
+              "evidence_refs": [
+                "task_053a3ad56078c715"
+              ]
+            }
+          ]
+        },
+        "graph_hash": "0xa90a78b30b32cc3e3b9bf0d58c5a7eb6249fb14f4c1e32f19bc28d9844bf9ae2",
+        "intent_hash": "0x053a3ad56078c715932fe9157687f13c8f9fe217dd8ba65e7c66e2f4743613d6",
+        "history_hash": "0xa26f842da360c4cd76bff81f99d2d0fe1c075f4c2639aaa1eb45cd200c492791",
+        "shield": {
+          "session_id": "shield_v3_fe574d2f55fb4d8f94e1688f3e269427",
+          "revision": 1,
+          "config_hash": "0x59fbf4061741536768bf6c5fb7281f2c600020e31960655a254c9f59f880570f",
+          "check_ids": [
+            "shield_9ff19a6d52b343759440f885ceefc18c",
+            "shield_85bde84d18dc42988a2d4ed7459f0ce8",
+            "shield_07eee71acb454f05ad1971f4a94c5b50",
+            "shield_a8c2def541984e618365d36f0b7a523a",
+            "shield_96b99b2133ac4e81a696c9da239b8a3a",
+            "shield_a5cba39c1a044aa18fc4edcf5584a162"
+          ],
+          "proposal": {
+            "operation": "TOKEN_SWAP",
+            "chain_id": 43113,
+            "treasury": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+            "session_id": "[REDACTED_256BIT_OR_CREDENTIAL]",
+            "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+            "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+            "recipient": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+            "amount": "1",
+            "min_output": "0",
+            "slippage_bps": 40,
+            "deadline": 1795196151,
+            "objective": "Swap exactly 0.000001 Circle USDC for WAVAX to the treasury",
+            "rebalance": false
+          },
+          "unresolved_feedback": null
+        }
+      }
+    },
+    {
+      "stage": "PROOF",
+      "created_at": 1795196036,
+      "evidence": {
+        "version": 3,
+        "status": "VERIFIED",
+        "kind": 1,
+        "intent_hash": "0x053a3ad56078c715932fe9157687f13c8f9fe217dd8ba65e7c66e2f4743613d6",
+        "build_hash": "0x4e229a6b18efb7e5c60a5296d2d42a43402739dca9c48b0c283ba0c1a1b50aed",
+        "evidence_root": "0xa2b668c637d4782395c40f65fa1f2508ec37d50a52bbd4ba15731208c1de034e",
+        "context_hash": "0x82c3d13c7690096a919f2db34cfbc0f1b4145f2361e2a5b74a8a5ffac5c13268",
+        "phi": {
+          "before_balances": [
+            "4000000",
+            "0",
+            "0",
+            "0"
+          ],
+          "min_deltas": [
+            "-1",
+            "13213479508286",
+            "0",
+            "0"
+          ],
+          "receipt_credit": "0",
+          "max_wavax_balance": "201144676461863859"
+        },
+        "phi_hash": "0xe42b8843532e55f6f0a97976cdafa5b4245d0d0af645044f8d4ca7191ad1a112",
+        "risk_debit_usd_e8": "0",
+        "spend_debit_usd_e8": "101",
+        "solver_version": "4.15.4",
+        "queries": [
+          {
+            "name": "feasible_prices",
+            "result": "SAT",
+            "smt2": "(declare-fun price_0_usdE8 () Real)\n(declare-fun price_1_usdE8 () Real)\n(declare-fun price_2_usdE8 () Real)\n(declare-fun price_3_usdE8 () Real)\n(assert (>= price_0_usdE8 98981276.0))\n(assert (<= price_0_usdE8 100980898.0))\n(assert (>= price_1_usdE8 643127312.0))\n(assert (<= price_1_usdE8 656119784.0))\n(assert (>= price_2_usdE8 98981276.0))\n(assert (<= price_2_usdE8 100980898.0))\n(assert (>= price_3_usdE8 643127312.0))\n(assert (<= price_3_usdE8 656119784.0))\n(assert (>= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (<= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (= price_3_usdE8 price_1_usdE8))\n\n(check-sat)\n",
+            "hash": "0x1f272b99c290efc713ae0e8d2102b264bb7a32f8463e612f6847d8c1c897b402"
+          },
+          {
+            "name": "check_mode",
+            "result": "UNSAT",
+            "smt2": "(declare-fun price_0_usdE8 () Real)\n(declare-fun price_1_usdE8 () Real)\n(declare-fun price_2_usdE8 () Real)\n(declare-fun price_3_usdE8 () Real)\n(assert (>= price_0_usdE8 98981276.0))\n(assert (<= price_0_usdE8 100980898.0))\n(assert (>= price_1_usdE8 643127312.0))\n(assert (<= price_1_usdE8 656119784.0))\n(assert (>= price_2_usdE8 98981276.0))\n(assert (<= price_2_usdE8 100980898.0))\n(assert (>= price_3_usdE8 643127312.0))\n(assert (<= price_3_usdE8 656119784.0))\n(assert (>= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (<= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (= price_3_usdE8 price_1_usdE8))\n(assert (let ((a!1 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* (/ 13266545691051.0 1000000000000000000.0) price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8)))\n      (a!2 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* 0.0 price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8))))\n  (or (> a!1 (+ (* (/ 3.0 100.0) a!2) 0.0)) (> a!1 1000000000.0))))\n\n(check-sat)\n",
+            "hash": "0x07b52f854c5469e60a7a7651178e18cd33fba75512dec30451345a9222451c96"
+          },
+          {
+            "name": "compile_mode",
+            "result": "UNSAT",
+            "smt2": "(declare-fun price_0_usdE8 () Real)\n(declare-fun price_1_usdE8 () Real)\n(declare-fun price_2_usdE8 () Real)\n(declare-fun price_3_usdE8 () Real)\n(assert (>= price_0_usdE8 98981276.0))\n(assert (<= price_0_usdE8 100980898.0))\n(assert (>= price_1_usdE8 643127312.0))\n(assert (<= price_1_usdE8 656119784.0))\n(assert (>= price_2_usdE8 98981276.0))\n(assert (<= price_2_usdE8 100980898.0))\n(assert (>= price_3_usdE8 643127312.0))\n(assert (<= price_3_usdE8 656119784.0))\n(assert (>= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (<= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (= price_3_usdE8 price_1_usdE8))\n(assert (let ((a!1 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* (/ 6606739754143.0 500000000000000000.0) price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8)))\n      (a!2 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* 0.0 price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8))))\n  (> a!1 (+ (* (/ 3.0 100.0) a!2) 0.0))))\n\n(check-sat)\n",
+            "hash": "0x50933cdd9f8bb54e5ab01d0362742f52693a8346a33ac14e3ecbb35d196aeeec"
+          },
+          {
+            "name": "risk_bound",
+            "result": "UNSAT",
+            "smt2": "(declare-fun price_0_usdE8 () Real)\n(declare-fun price_1_usdE8 () Real)\n(declare-fun price_2_usdE8 () Real)\n(declare-fun price_3_usdE8 () Real)\n(assert (>= price_0_usdE8 98981276.0))\n(assert (<= price_0_usdE8 100980898.0))\n(assert (>= price_1_usdE8 643127312.0))\n(assert (<= price_1_usdE8 656119784.0))\n(assert (>= price_2_usdE8 98981276.0))\n(assert (<= price_2_usdE8 100980898.0))\n(assert (>= price_3_usdE8 643127312.0))\n(assert (<= price_3_usdE8 656119784.0))\n(assert (>= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (<= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (= price_3_usdE8 price_1_usdE8))\n(assert (let ((a!1 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* (/ 6606739754143.0 500000000000000000.0) price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8))))\n  (> a!1 0.0)))\n\n(check-sat)\n",
+            "hash": "0xbf81b4d2340043be5e2ddd8168f0925d9d9d4ea7185569b0dc832ddd0fc10d3a"
+          }
+        ],
+        "source_hash": "0xae183c1830fc80ced4532842b8d4fc5305ec75da0494497ef2062a5b4184c1c4",
+        "assumptions": [
+          "trusted balanceOf semantics",
+          "complete fixed registry",
+          "owner share-rate interval",
+          "prices inside independently validated bands",
+          "attestor integrity"
+        ],
+        "proof_hash": "0x5aeba819902949a52c9253c5c764c262f8df0970fb3d34f5f70a35fd9c593536"
+      }
+    },
+    {
+      "stage": "SDE",
+      "created_at": 1795196037,
+      "evidence": {
+        "verdict": "APPROVE",
+        "reason_codes": [],
+        "intent_hash": "0x053a3ad56078c715932fe9157687f13c8f9fe217dd8ba65e7c66e2f4743613d6",
+        "build_hash": "0x4e229a6b18efb7e5c60a5296d2d42a43402739dca9c48b0c283ba0c1a1b50aed",
+        "evidence_root": "0xa2b668c637d4782395c40f65fa1f2508ec37d50a52bbd4ba15731208c1de034e",
+        "proof_hash": "0x5aeba819902949a52c9253c5c764c262f8df0970fb3d34f5f70a35fd9c593536",
+        "policy_hash": "0x12195a23ac27f40240dd6299ebb81488aed58330fb9ea344046ade2eb801bc52",
+        "temporal_hash": "0x03de5f6d2c35989dab6647538af8e207be29e875d28699e8ad982535f55b16de",
+        "risk_hash": "0x6d96f106c3b5d6a409d31b87d57740bf085a506fe498764412137cf070cdf0a7",
+        "expires_at": 1795196151,
+        "source": "SDE_V3"
+      }
+    },
+    {
+      "stage": "ATTESTATION",
+      "created_at": 1795196040,
+      "evidence": {
+        "domain_version": "3",
+        "chain_id": 43113,
+        "verifying_contract": "0x0d585e0ccc095a3c0e67c39dedd3447627e53b13",
+        "signer": "0x76dd89f17dfafa09bab6fd82b9ea09c5f7f66fab",
+        "nonce": "1002",
+        "deadline": "1795196151",
+        "typed_data_hash": "0xf0c4133a09e2578257759000dbf5e1d4b00f3bf639d539c681554e8416a334e3",
+        "constraints_hash": "0xe42b8843532e55f6f0a97976cdafa5b4245d0d0af645044f8d4ca7191ad1a112"
+      }
+    },
+    {
+      "stage": "EXACT_SIGNED_PREFLIGHT",
+      "created_at": 1795196041,
+      "evidence": {
+        "source": "LOCAL_FORK_EVM",
+        "environment": "ANVIL_FORK",
+        "execution_status": "SUCCESS",
+        "build_hash": "0x4e229a6b18efb7e5c60a5296d2d42a43402739dca9c48b0c283ba0c1a1b50aed",
+        "source_block": 61388836,
+        "source_block_hash": "0xd5d73f5e74d1734b0e037eab9d757a948bec930ff1a4cb600c1f8b7331002f8b",
+        "before": [
+          "4000000",
+          "0",
+          "0",
+          "0"
+        ],
+        "after": [
+          "3999999",
+          "13266545691051",
+          "0",
+          "0"
+        ],
+        "deltas": [
+          "-1",
+          "13266545691051",
+          "0",
+          "0"
+        ],
+        "received": "0",
+        "allowances": [
+          "0",
+          "0"
+        ],
+        "gas_used": 418694,
+        "simulation_overrides": [],
+        "exact_signed_preflight": true,
+        "fork_tx_hash": "0x2671485d1fd0974e257367e9709ce56476920033477d5ad4a8cb0926bed93a93",
+        "public_chain_receipt": false
+      }
+    },
+    {
+      "stage": "OUTCOME",
+      "created_at": 1795196042,
+      "evidence": {
+        "tx_hash": "0x1414ffe2a736183a372d5c0cdcc5a1df62b40666e2fafd333003d61fee2a95c6",
+        "block_number": 61388837,
+        "block_hash": "0x0860067533cff9198f7500088524580b70eb38bbf800cff85bd2e8be99224174",
+        "gas_used": "418694",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "418694",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "418694003349552",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-1",
+          "13266545691051",
+          "0",
+          "0"
+        ],
+        "payee_received": "0"
+      }
+    }
+  ]
+}

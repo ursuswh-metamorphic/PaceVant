@@ -1,0 +1,79 @@
+{
+  "environment": "ANVIL_FORK",
+  "source_block": 61387667,
+  "public_writes": false,
+  "scope": "Real LFJ route compatibility and independent economic rejection; not a new public Fuji execution",
+  "results": [
+    {
+      "case": "FORWARD_QUOTER",
+      "status": "MATCHES_APPROVED_V1",
+      "selected_pairs": [
+        "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38"
+      ],
+      "selected_versions": [
+        0
+      ],
+      "scope": "Route-only adapter experiment below does not override the MVP authorization gate"
+    },
+    {
+      "case": "USDC_TO_WAVAX",
+      "status": "PASS",
+      "input": "1000",
+      "output": "13219520147757947",
+      "fork_tx_hash": "0xdf6a6912c59e8f98a3d4180d820b70cafbff4cc4dbf542c6b41ad68e0d946551"
+    },
+    {
+      "case": "FORWARD_QUOTER",
+      "status": "MATCHES_APPROVED_V1",
+      "selected_pairs": [
+        "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38"
+      ],
+      "selected_versions": [
+        0
+      ],
+      "scope": "Route-only adapter experiment below does not override the MVP authorization gate"
+    },
+    {
+      "case": "REVERSE_QUOTER",
+      "status": "REJECTED_BEFORE_BROADCAST",
+      "selected_pairs": [
+        "0xf3b3ad0c0ef783d45c70fcdd6e50cb9bffa887e4"
+      ],
+      "selected_versions": [
+        3
+      ],
+      "scope": "Route-only adapter experiment below does not override the MVP authorization gate"
+    },
+    {
+      "case": "WAVAX_TO_USDC",
+      "status": "PASS",
+      "input": "1000000000000000",
+      "output": "75",
+      "fork_tx_hash": "0x1cbfe3e6df93a734181d19f5cae12ed92b880fe337e9a06da8c6fbc32387c133"
+    },
+    {
+      "case": "FORWARD_ADVERSARIAL",
+      "status": "PASS"
+    },
+    {
+      "case": "FORWARD_QUOTER",
+      "status": "MATCHES_APPROVED_V1",
+      "selected_pairs": [
+        "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38"
+      ],
+      "selected_versions": [
+        0
+      ],
+      "scope": "Route-only adapter experiment below does not override the MVP authorization gate"
+    },
+    {
+      "case": "REVERSE_ADVERSARIAL",
+      "status": "PASS"
+    },
+    {
+      "case": "REVERSE_ECONOMICS",
+      "status": "NOT_VERIFIED",
+      "reason": "STALE_OR_UNVERIFIED_CHAINLINK_PRICE"
+    }
+  ]
+}

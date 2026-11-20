@@ -14,6 +14,7 @@ COPY backend backend
 COPY tools tools
 COPY contracts contracts
 COPY fixtures fixtures
+COPY deployments/treasury-fuji-v2.json deployments/treasury-fuji-v2.json
 COPY foundry.toml ./
 RUN uv sync --locked --no-dev --python /usr/local/bin/python
 RUN /app/.venv/bin/python tools/contracts/bootstrap.py && /app/.venv/bin/python tools/contracts/foundry.py forge build
@@ -24,6 +25,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 WORKDIR /app
 COPY --from=build /app /app
 COPY --from=foundry /usr/local/bin/anvil /usr/local/bin/anvil
+COPY --from=foundry /usr/local/bin/forge /usr/local/bin/forge
+# Attack Lab uses fixed offline tests; carry the compiler, not runtime downloads.
+COPY --from=build /root/.svm /root/.svm
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

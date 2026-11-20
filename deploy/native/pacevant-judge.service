@@ -1,0 +1,42 @@
+[Unit]
+Description=PaceVant isolated Fuji judge demo
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=6
+
+[Service]
+Type=simple
+User=pacevant
+Group=pacevant
+WorkingDirectory=/opt/pacevant/current
+EnvironmentFile=/etc/pacevant/judge.env
+Environment=PATH=/opt/pacevant/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=HOME=/var/lib/pacevant
+Environment=XDG_CACHE_HOME=/var/cache/pacevant
+Environment=PACEVANT_JUDGE_DATA_DIR=/var/lib/pacevant/judge
+Environment=PACEVANT_SERVE_FRONTEND=false
+Environment=B_ANVIL_BINARY=/opt/pacevant/bin/anvil
+ExecStart=/opt/pacevant/current/.venv/bin/python -m treasury_backend.operations.judge_serve --port 8000
+Restart=on-failure
+RestartSec=8s
+TimeoutStopSec=30s
+KillMode=control-group
+MemoryMax=2800M
+CPUQuota=180%
+TasksMax=192
+LimitNOFILE=4096
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/pacevant /var/cache/pacevant
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pacevant-judge
+
+[Install]
+WantedBy=multi-user.target

@@ -170,7 +170,7 @@ contract PolicyVault is Ownable, Pausable, ReentrancyGuard, EIP712 {
         return _hashTypedDataV4(keccak256(abi.encode(APPROVAL_TYPEHASH, a)));
     }
     function executeApprovedSwap(Approval calldata a, bytes calldata data, bytes calldata signature)
-        external nonReentrant whenNotPaused
+        external virtual nonReentrant whenNotPaused
     {
         if (v2Enabled) revert ProofRequired();
         if (!policyActive || a.policyHash != activePolicyHash || block.timestamp > policyExpiresAt) revert PolicyRevoked();
@@ -258,7 +258,7 @@ contract PolicyVault is Ownable, Pausable, ReentrancyGuard, EIP712 {
         return afterBal >= beforeBal ? int256(magnitude) : -int256(magnitude);
     }
     function executeApprovedSwapV2(ApprovalV2 calldata a, bytes calldata data,
-        PostConditionsV2 calldata phi, bytes calldata signature) external nonReentrant whenNotPaused
+        PostConditionsV2 calldata phi, bytes calldata signature) external virtual nonReentrant whenNotPaused
     {
         if (!v2Enabled) revert ProofRequired();
         if (!policyActive || a.policyHash != activePolicyHash || block.timestamp > policyExpiresAt) revert PolicyRevoked();

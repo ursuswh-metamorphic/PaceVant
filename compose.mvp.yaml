@@ -1,0 +1,10 @@
+# Use explicitly after Owner deployment and manifest signing:
+# docker compose -f compose.yaml -f compose.mvp.yaml up -d --build
+services:
+  backend:
+    environment:
+      PACEVANT_MVP_MANIFEST_FILE: /etc/secrets/treasury-fuji-mvp.json
+      PACEVANT_MVP_LIVE_ENABLED: "1"
+      WEB_CONCURRENCY: "1"
+    volumes:
+      - ./deploy/treasury-fuji-mvp.json:/etc/secrets/treasury-fuji-mvp.json:ro

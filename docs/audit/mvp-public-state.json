@@ -1,0 +1,173 @@
+{
+  "source": "PUBLIC_FUJI_READ_ONLY",
+  "observed_at": "2026-11-20T16:32:07.434841+00:00",
+  "chain_id": 43113,
+  "block_number": 61386636,
+  "block_hash": "0x33e41d011ed174b63fce612b349d586a933387506a90616483a43a15e1b69176",
+  "broadcast": false,
+  "accounts": {
+    "owner": {
+      "address": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+      "native_avax_wei": "27873064882675760",
+      "usdc_base_units": "20000004",
+      "wavax_base_units": "0",
+      "is_eoa": true
+    },
+    "attestor": {
+      "address": "0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989",
+      "native_avax_wei": "499999924946240",
+      "usdc_base_units": "20000000",
+      "wavax_base_units": "0",
+      "is_eoa": true
+    },
+    "relayer": {
+      "address": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C",
+      "native_avax_wei": "1999999706328263",
+      "usdc_base_units": "20000000",
+      "wavax_base_units": "0",
+      "is_eoa": true
+    },
+    "policy_vault": {
+      "address": "0xd8EC86820709505C3779a4Fe5D828e8ADE663E1D",
+      "native_avax_wei": "0",
+      "usdc_base_units": "1378",
+      "wavax_base_units": "66137381683518",
+      "is_eoa": false
+    }
+  },
+  "code_identity": {
+    "PolicyVault": {
+      "actual_hash": "0x893bef38ed64d6d4d347d5b4911a73ba497ecaab88a0d00726903538eb2685f0",
+      "manifest_hash": "0x893bef38ed64d6d4d347d5b4911a73ba497ecaab88a0d00726903538eb2685f0",
+      "matches": true
+    },
+    "LFJSwapAdapter": {
+      "actual_hash": "0xedfecc916373f8f0912d6dd41bf31ec980739b5e905aed76166900372141dcd7",
+      "manifest_hash": "0xedfecc916373f8f0912d6dd41bf31ec980739b5e905aed76166900372141dcd7",
+      "matches": true
+    },
+    "USDC": {
+      "actual_hash": "0x7140a935aa3bb55d334d6d325fea277e47674770b10823feefa6f8b2c58af5fc",
+      "manifest_hash": "0x7140a935aa3bb55d334d6d325fea277e47674770b10823feefa6f8b2c58af5fc",
+      "matches": true
+    },
+    "WAVAX": {
+      "actual_hash": "0xbe0979d9ff9e744b48d32e81fd67db0d32dfc74120989df9b7b1588e2aff8597",
+      "manifest_hash": "0xbe0979d9ff9e744b48d32e81fd67db0d32dfc74120989df9b7b1588e2aff8597",
+      "matches": true
+    }
+  },
+  "roles_match_manifest": true,
+  "three_distinct_eoas": true,
+  "policy": {
+    "paused": false,
+    "policyActive": true,
+    "activePolicyHash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "policyVersion": 7,
+    "policyExpiresAt": 1795757322,
+    "maxApprovalTtl": 300,
+    "maxPerSwap": 500000000,
+    "maxSpendPerDay": 1000000000
+  },
+  "proof_policy": {
+    "max_wavax_per_swap": 0,
+    "max_relative_loss_bps": 300,
+    "fixed_loss_usd_e8": 0,
+    "oracle_band_bps": 100,
+    "tolerance_bps": 40,
+    "max_oracle_age": 300,
+    "max_session_risk_usd_e8": 1000000000,
+    "global_daily_risk_usd_e8": 2000000000,
+    "oracle_source_hash": "0x49f4d3f0460b604b751ed50083ccc7d297570ca2c3a8ac1cc1a028e463ec3fdc",
+    "owner_approved": true
+  },
+  "session": {
+    "id": "0x9eb4d7b5afe9e3e516d0b31efa451f0823fbc97bf13a63e81361106c0eed9098",
+    "policy_hash": "0xdf3de5be39b1aa60185dc7c165cd0779d3d5f7e922bf9333265cc4e87b0c895c",
+    "starts_at": 1795162614,
+    "expires_at": 1795249014,
+    "risk_limit_usd_e8": "1000000000",
+    "risk_used_usd_e8": "0",
+    "active": true,
+    "currently_authorized": true
+  },
+  "lfj_route": {
+    "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+    "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+    "pair": "0x8436B8c75ed2F015a80b8472526dd1A79BF54E38",
+    "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+    "version": 0,
+    "version_name": "V1",
+    "bin_step": 0,
+    "token_path": [
+      "0x5425890298aed601595a70AB815c96711a31Bc65",
+      "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+    ],
+    "token0": "0x5425890298aed601595a70ab815c96711a31bc65",
+    "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+    "reserves": [
+      "279989",
+      "3725677119596704727"
+    ],
+    "bytecode_hashes": {
+      "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+      "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+      "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+      "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+    }
+  },
+  "token_decimals": {
+    "USDC": 6,
+    "WAVAX": 18
+  },
+  "reverse_adapter_probe": {
+    "supported": false,
+    "reason": "DEPLOYED_ADAPTER_REVERTS_REVERSE_QUOTE"
+  },
+  "oracle": {
+    "chain_id": 43113,
+    "vault_address": "0xd8ec86820709505c3779a4fe5d828e8ade663e1d",
+    "price_usdc_usd_e8": "99981087",
+    "price_wavax_usd_e8": "650952240",
+    "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+    "price_timestamp": 1795121325,
+    "oracle_observed_at": 1795192326,
+    "oracle_block_number": 61386636,
+    "oracle_block_hash": "0x33e41d011ed174b63fce612b349d586a933387506a90616483a43a15e1b69176",
+    "oracle_feeds": [
+      {
+        "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+        "description": "USDC/USD",
+        "decimals": 8,
+        "answer_raw": "99981087",
+        "round_id": "18446744073709552589",
+        "answered_in_round": "18446744073709552589",
+        "started_at": 1795121325,
+        "updated_at": 1795121325,
+        "max_age_seconds": 86400,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      },
+      {
+        "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+        "description": "AVAX/USD",
+        "decimals": 8,
+        "answer_raw": "650952240",
+        "round_id": "55340232221128821074",
+        "answered_in_round": "55340232221128821074",
+        "started_at": 1795192173,
+        "updated_at": 1795192173,
+        "max_age_seconds": 600,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      }
+    ]
+  },
+  "reverse_economic_reference": {
+    "amount_wavax_base_units": "1000000000000000",
+    "pool_quote_usdc_base_units": "74",
+    "chainlink_fair_usdc_base_units_floor": "6510",
+    "relative_loss_bps_floor": "9886",
+    "within_owner_relative_loss_limit": false
+  }
+}

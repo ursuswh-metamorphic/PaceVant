@@ -1,0 +1,13 @@
+{
+  "scope": "Final controller/replay/source, retained route reason and readiness-tool safety checks; overlaps full regression",
+  "counts": {
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "passed": 14,
+  "frontend_tests_passed": 10,
+  "typescript_and_vite_build": "PASS",
+  "bundle_warning": "Main chunk 532.20 KB minified / 169.23 KB gzip; Vite 500 KB warning, no build failure"
+}

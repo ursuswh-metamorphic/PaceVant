@@ -1,5 +1,7 @@
 # Deployment guidance
 
+> **Current MVP scope (21 November 2026):** follow the [single-tenant runbook](../MVP_DEMO_RUNBOOK.md) and [architecture](../MVP_FINAL_ARCHITECTURE.md). Demo User, HMAC browser personas and customer gas charging below are historical. Canonical runtime disables them. `runtime.env.example` includes the optional signed MVP manifest and explicit live-enable setting. Keep the old public manifest for history, mount the new signed manifest separately after Owner migration, and retain all persistent data. The frontend image now opens the two-operation MVP and proxies `/mvp/`. No new public deployment or container-hosting success is claimed.
+
 > **DOC STATUS: COMPONENT_REFERENCE** — đối chiếu runtime source `3f9f9af`, 20/11/2026. Hosting chưa có end-to-end smoke evidence. [Current design](../docs/AI_Treasury_Security_System_Design_v2.1.md) là nguồn tổng hợp chính.
 
 Backend dùng Python/FastAPI và native Anvil. Dockerfile root compile Solidity trong build stage, runtime dùng artifacts đã build để mô phỏng và tương tác với contracts trên Avalanche. Server không thay blockchain; không cần Node backend. Frontend có thể serve chung API hoặc Nginx/static host riêng.

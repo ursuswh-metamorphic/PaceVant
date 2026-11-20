@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "built_frontend": true,
+  "checks": [
+    "three tabs",
+    "1440x900",
+    "1920x1080",
+    "mobile width",
+    "replay evidence drawer",
+    "no fork explorer link",
+    "policy and solver details",
+    "reduced motion"
+  ],
+  "live_payment_from_browser": true,
+  "lost_response_reload_no_duplicate": true,
+  "browser": "headless Chromium"
+}

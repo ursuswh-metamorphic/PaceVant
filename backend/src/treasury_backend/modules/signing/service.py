@@ -43,6 +43,29 @@ class Attestor:
                 raise ControlError("ATTESTATION_RATE_LIMITED", 429, retryable=True)
             self.attempts.append(now)
 
+    def attest_operation(self, intent, built, effects, context, proof, decision, revalidate):
+        """Called only inside the durable V3 signing reservation, after all persisted gates."""
+        from treasury_contracts.crypto import content_hash
+        from treasury_contracts.proof_v3 import prove_operation
+        from treasury_contracts.v3 import Constraints, Operation, operation_digest
+        self._check_rate()
+        if (decision["verdict"] != "APPROVE" or self.clock() >= decision["expires_at"]
+                or decision["intent_hash"] != intent.hash or decision["build_hash"] != content_hash(built)
+                or decision["evidence_root"] != content_hash(effects) or decision["proof_hash"] != proof["proof_hash"]):
+            raise ControlError("DECISION_NOT_APPROVED", 403)
+        revalidate()
+        verified = prove_operation(intent, built, effects, context)
+        if verified != proof:
+            raise ControlError("PROOF_INVALID", 409)
+        phi = Constraints.model_validate(proof["phi"])
+        operation = Operation.model_validate(built["operation"] | {
+            "evidenceRoot": proof["evidence_root"], "proofContextHash": proof["proof_hash"],
+            "constraintsHash": phi.hash, "riskDebitUsdE8": proof["risk_debit_usd_e8"],
+            "spendDebitUsdE8": proof["spend_debit_usd_e8"]})
+        hash_ = operation_digest(intent.chain_id, intent.treasury, operation)
+        return {"operation": operation.model_dump(mode="json"), "phi": phi.model_dump(mode="json"),
+                "signature": sign_digest(self._key, bytes.fromhex(hash_[2:])), "typed_data_hash": hash_}
+
     def attest(self, id_, workflow_id, decision, built, scope, verify):
         self._check_rate()
         if decision.verdict != "APPROVE" or decision.decision_id != id_:

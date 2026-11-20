@@ -16,7 +16,8 @@ cache-foundry
 .control-data*
 .execution-data*
 data
-deployments
+deployments/*
+!deployments/treasury-fuji-v2.json
 deploy/*.env
 Proof-Gated-Signing
 **/*.sqlite*

@@ -1,0 +1,85 @@
+{
+  "environment": "LOCAL_TEST",
+  "semantic_scope": "REAL_CONFIGURED_PROVIDER",
+  "public_writes": false,
+  "status": "CONFIRMED",
+  "reason_code": null,
+  "returncode": 0,
+  "timeline": [
+    {
+      "stage": "OWNER_AUTHORITY"
+    },
+    {
+      "stage": "AGENT_PROPOSAL"
+    },
+    {
+      "stage": "BUILD"
+    },
+    {
+      "stage": "SIMULATION"
+    },
+    {
+      "stage": "RISK"
+    },
+    {
+      "stage": "ITAG"
+    },
+    {
+      "stage": "PROOF"
+    },
+    {
+      "stage": "SDE"
+    },
+    {
+      "stage": "ATTESTATION"
+    },
+    {
+      "stage": "EXACT_SIGNED_PREFLIGHT"
+    },
+    {
+      "stage": "OUTCOME"
+    }
+  ],
+  "actual_local_receipt": true,
+  "created_at": 1795195127,
+  "operation": "USDC_PAYMENT",
+  "amount_usdc_base_units": "1000000",
+  "risk_verdict": "PASS",
+  "itag_verdict": "PASS",
+  "proof": {
+    "status": "VERIFIED",
+    "risk_debit_usd_e8": "0",
+    "spend_debit_usd_e8": "101000000",
+    "proof_hash": "0x8fae9598bb8df7d60c009f9de2334dfb909b0443e5d6f283a3a59d3568a500bb",
+    "phi_hash": "0xff53f19aadbd382350d7d2c95a5beff7e11684dc6fef1f27f59e5c40e4e819ef"
+  },
+  "decision_verdict": "APPROVE",
+  "exact_signed_preflight": true,
+  "preflight_simulation_overrides": [],
+  "outcome": {
+    "tx_hash": "0x74e2655e13e641154c71eeb7567cd88ecbb160b776f5502a0ae4a3e6f034cf9e",
+    "block_number": 37,
+    "block_hash": "0xeb9a7fe70c22d1bcec389ff0ebedc007d3119b5ad2adc24cd5da611323f52c45",
+    "gas_used": "342066",
+    "confirmations": 1,
+    "environment": "LOCAL_TEST",
+    "public_chain_receipt": false,
+    "system_gas_expense": {
+      "payer": "SYSTEM_RELAYER",
+      "gas_used": "342066",
+      "effective_gas_price_wei": "1008799409",
+      "actual_cost_wei": "345075978638994",
+      "transaction_status": 1,
+      "billing": false
+    },
+    "status": "CONFIRMED",
+    "actual_deltas": [
+      "-1000000",
+      "0",
+      "0",
+      "0"
+    ],
+    "payee_received": "1000000"
+  },
+  "scope": "Real configured semantic provider, disposable local EVM and controlled local test assets/prices. Not public Fuji execution or a model attack-detection benchmark."
+}

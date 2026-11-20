@@ -163,12 +163,12 @@ class Profile:
             return local["attestor"], local["relayer"]
         if self.values.get("FUJI_TEST_WALLETS_ONLY", "").lower() != "true":
             raise OpsError("Set FUJI_TEST_WALLETS_ONLY=true for dedicated test wallets")
-        if self.values.get("B_FUJI_OWNER_PRIVATE_KEY"):
-            owner_address = key_account(self.values, "B_FUJI_OWNER_PRIVATE_KEY").address
-        elif not require_owner_key and self.deployment.is_file():
+        if not require_owner_key and self.deployment.is_file():
             owner_address = Web3.to_checksum_address(
                 json.loads(self.deployment.read_text())["owner"]
             )
+        elif self.values.get("B_FUJI_OWNER_PRIVATE_KEY"):
+            owner_address = key_account(self.values, "B_FUJI_OWNER_PRIVATE_KEY").address
         else:
             raise OpsError(
                 "Owner key is needed for deployment; serving needs an existing V2 manifest"

@@ -1,0 +1,20 @@
+{
+  "environment": "LOCAL_TEST",
+  "public_writes": false,
+  "scope": "Focused web/recovery/readiness/renewal/container checks, not full regression or actual VPS hosting",
+  "counts": {
+    "tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 26
+  },
+  "duration_seconds": 20.917,
+  "client_checks": [
+    "check_mvp_recovery.mjs PASS",
+    "check_mvp_deadline.mjs four cases PASS",
+    "16 frontend JS files syntax PASS"
+  ],
+  "compose": "Three overlays validated with placeholder runtime/hostname, no secrets or engine required",
+  "image_and_actual_vps": "NOT_VERIFIED_DOCKER_ENGINE_UNAVAILABLE"
+}

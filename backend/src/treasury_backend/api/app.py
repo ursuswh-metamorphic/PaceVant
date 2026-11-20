@@ -19,9 +19,11 @@ from treasury_backend.modules.workflows.client import VerifiedExecutionClient
 from treasury_backend.modules.workflows.service import utc_now
 
 
-def create_app(settings=None, execution_settings=None, clock=utc_now, execution_service=None, demo_settings=None):
+def create_app(settings=None, execution_settings=None, clock=utc_now, execution_service=None, demo_settings=None,
+               treasury_execution=None, legacy_demo_tests=False, semantic_provider=None):
     settings = settings or Settings.from_env(require_execution_http=False)
-    demo = demo_settings or DemoSettings.from_env()
+    # Environment cannot resurrect the retired Demo User product flow.
+    demo = demo_settings or DemoSettings()
     runtime = None
     if settings.mode != "MOCK":
         execution_settings = execution_settings or ExecutionSettings(_env_file=None)
@@ -44,13 +46,19 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
         or demo.access_token in {settings.operator_token, settings.internal_token, execution_settings.api_key.get_secret_value()}
     ):
         raise RuntimeError("Demo requires live execution, required ITAG, hardened Shield and a separate access token")
+    if demo.enabled and (not legacy_demo_tests or settings.mode!="LOCAL"):
+        raise RuntimeError("Demo User is retired; legacy billing is available only to isolated LOCAL regression fixtures")
 
     def client_factory(request_id, config, store):
         return VerifiedExecutionClient(LocalExecutionSDK(runtime, request_id), config, store)
 
-    app = create_control_app(settings, clock, client_factory=client_factory if runtime else None)
+    if semantic_provider is not None and settings.mode!="LOCAL":
+        raise RuntimeError("Explicit semantic fixtures are restricted to LOCAL tests")
+    app = create_control_app(settings, clock, client_factory=client_factory if runtime else None,shield_provider=semantic_provider)
     app.title = "PaceVant Treasury Backend"
     app.state.execution = runtime
+    app.state.treasury_v3 = None
+    app.state.treasury_mvp = None
     control_lifespan = app.router.lifespan_context
 
     @asynccontextmanager
@@ -63,7 +71,32 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
             ):
                 raise RuntimeError("FUJI serving requires the live LFJ V2 deployment; use LOCAL for mock contracts")
         async with control_lifespan(application):
+            autonomy = None
+            mvp_runtime = treasury_execution
+            if settings.v3_manifest_file is not None:
+                raise RuntimeError("V3 investment-vault/native-payment rollout is disabled in the two-operation MVP")
+            if mvp_runtime is None and settings.mvp_manifest_file is not None:
+                from treasury_backend.modules.execution.mvp import MvpExecution
+                from treasury_contracts.mvp import MvpManifest
+                if runtime is None:
+                    raise RuntimeError("MVP requires an explicit execution runtime")
+                manifest = MvpManifest.model_validate_json(settings.mvp_manifest_file.read_bytes())
+                mvp_runtime = MvpExecution(execution_settings, manifest, runtime.store,live_enabled=settings.mvp_live_enabled)
+            if mvp_runtime is not None:
+                from treasury_backend.modules.workflows.attack_lab import AttackLab
+                from treasury_backend.modules.workflows.autonomy import AutonomousTreasury
+                from treasury_backend.modules.workflows.treasury import TreasuryWorkflows
+                if getattr(mvp_runtime,"protocol",None)!="PACEVANT_MVP" or not settings.require_itag:
+                    raise RuntimeError("MVP permits only its two-operation execution port with required ITAG")
+                mvp_runtime.chain.isolated()
+                application.state.treasury_mvp = TreasuryWorkflows(application.state.control, mvp_runtime)
+                autonomy = AutonomousTreasury(application.state.treasury_mvp)
+                application.state.treasury_autonomy = autonomy
+                application.state.treasury_attack_lab = AttackLab()
+                autonomy.start()
             if demo.enabled:
+                if not runtime.chain.w3.client_version.lower().startswith("anvil"):
+                    raise RuntimeError("Legacy demo regression fixtures require Anvil")
                 chain = runtime.chain
                 gas = GasCreditLedger(runtime.store.db_path, demo, chain_id=chain.chain_id,
                                       vault=chain.deployment["vault_address"], relayer=chain.deployment["relayer"],
@@ -75,12 +108,24 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
             try:
                 yield
             finally:
+                if autonomy:
+                    autonomy.close()
                 if worker:
                     worker[0].set()
                     worker[1].join(timeout=45)
 
     app.router.lifespan_context = lifespan
     install_demo_routes(app, demo)
+    from treasury_backend.api.mvp import install_mvp_routes
+    install_mvp_routes(app, settings)
+
+    @app.middleware("http")
+    async def mvp_mutation_boundary(request,call_next):
+        if (getattr(app.state,"treasury_mvp",None) is not None and request.method not in {"GET","HEAD","OPTIONS"}
+            and (request.url.path.startswith("/execution/") or request.url.path in {
+                "/v1/workflows/start","/v1/agent/propose","/v1/approvals/attest"})):
+            return JSONResponse(status_code=410,content={"error":{"code":"MVP_USE_TYPED_OPERATIONS"}})
+        return await call_next(request)
     if runtime is not None:
         app.include_router(
             create_router(runtime, execution_settings), prefix="/execution", tags=["execution"]
@@ -101,7 +146,7 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
         )
 
     @app.get("/health", include_in_schema=False)
-    def health():
+    async def health():
         return {
             "status": "ok",
             "mode": settings.mode,

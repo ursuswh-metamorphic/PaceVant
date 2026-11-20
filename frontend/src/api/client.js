@@ -13,7 +13,14 @@ function apiBase() {
 export async function api(path, options) {
   const credential = path.startsWith("/v1/demo/") ? state.demoToken : state.operatorToken;
   const response = await fetch(apiBase() + path, {...options, redirect:"error", headers:{...options?.headers, ...(credential ? {Authorization:"Bearer " + credential} : {})}});
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.code ?? "REQUEST_FAILED");
+  let data;
+  try { data = await response.json(); }
+  catch { const error = new Error("SERVER_RESPONSE_UNAVAILABLE"); error.code = "SERVER_RESPONSE_UNAVAILABLE"; error.status = response.status; throw error; }
+  if (!response.ok) {
+    const error = new Error(data.error?.code ?? "REQUEST_FAILED");
+    error.code = data.error?.code ?? "REQUEST_FAILED";
+    error.status = response.status;
+    throw error;
+  }
   return data;
 }

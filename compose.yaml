@@ -10,6 +10,13 @@ services:
       - ./deploy/treasury-fuji-v2.json:/etc/secrets/treasury-fuji-v2.json:ro
     expose: ["10000"]
     restart: unless-stopped
+    init: true
+    stop_grace_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "/app/.venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:10000/healthz', timeout=3)"]
       interval: 15s
@@ -27,5 +34,11 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+    init: true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 volumes:
   treasury-data:

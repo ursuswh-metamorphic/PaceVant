@@ -28,4 +28,5 @@ if __name__ == "__main__":
         host=args.host,
         port=args.port,
         access_log=False,
+        workers=1,
     )

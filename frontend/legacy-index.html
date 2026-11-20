@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PaceVant · Treasury Control Plane</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/config.js"></script>
+  <script type="module" src="/src/app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell mast-content">
+      <a href="/treasury-mvp.html">Single-tenant Treasury MVP</a>
+      <a class="identity" href="/" aria-label="PaceVant, trang chủ"><span class="brand-mark"></span>PaceVant</a>
+      <div class="mast-right"><a href="/fuji-wallet.html">Ví và oracle Fuji</a><a href="/docs">API</a><span class="environment"><i></i> Đang xác minh mạng</span></div>
+    </div>
+  </header>
+  <main class="shell">
+    <form id="demo-select-form" class="panel proof-summary" hidden>
+      <h2>Dùng thử với Demo User</h2>
+      <label for="demo-account-select">Tài khoản thử nghiệm</label>
+      <select id="demo-account-select"><option value="demo">PaceVant - Demo User</option></select>
+      <button type="submit">Chọn Demo User</button>
+      <small>Chỉ chọn tài khoản để bắt đầu. Không cần Connect Wallet, mã truy cập hay private key.</small>
+    </form>
+    <details id="operator-login" hidden>
+      <summary>Chế độ quản trị treasury</summary>
+    <form id="connect-form" class="panel proof-summary" hidden>
+      <label for="operator-token">Operator API credential</label>
+      <input id="operator-token" type="password" autocomplete="off" required>
+      <button type="submit">Kết nối treasury</button>
+      <small>Chỉ giữ trong bộ nhớ tab này. Không nhập private key.</small>
+    </form>
+    </details>
+    <section class="intro" aria-labelledby="title">
+      <div>
+        <p class="overline">AI TREASURY SECURITY</p>
+        <h1 id="title">Treasury Control Plane</h1>
+        <p>Kiểm tra đề xuất swap, giới hạn danh mục và chữ ký PDR.</p>
+      </div>
+      <p class="notice"><i></i> Đang xác minh chế độ chạy từ backend</p>
+    </section>
+
+    <section id="demo-budget" class="panel proof-summary" hidden aria-label="Tài khoản và gas credit Demo User">
+      <div class="panel-heading"><h2>Demo User · Prepaid gas credit</h2><button id="demo-refresh" type="button">Cập nhật</button></div>
+      <p id="demo-wallet"></p><p id="demo-wallet-balance"></p>
+      <p id="demo-credit"></p><p id="demo-last-fee" role="status"></p>
+      <p>Gas credit là ngân sách demo cấp sẵn trong hệ thống, không phải AVAX trong ví và chưa phải khoản nạp thanh toán. Relayer trả gas on-chain. Swap dùng tài sản của treasury vault.</p>
+      <p id="demo-request-state"></p>
+      <button id="demo-resume" type="button" hidden>Kiểm tra yêu cầu đã gửi</button>
+      <h3>Giao dịch và phí thực tế</h3><ul id="demo-transactions"></ul>
+      <h3>Lịch sử yêu cầu</h3><ul id="demo-requests"></ul>
+      <h3>Lịch sử gas credit</h3><ul id="demo-ledger"></ul>
+    </section>
+
+    <section class="summary" aria-label="Mandate và danh mục">
+      <article class="metric">
+        <span>Mandate</span><strong id="mandate">—</strong><small id="policy-status">Đang tải chính sách</small>
+      </article>
+      <article class="metric">
+        <span>Danh mục mẫu</span><strong id="portfolio-value">—</strong><small id="portfolio-balances">Đang tải số dư</small>
+      </article>
+      <article class="metric">
+        <span>Trần WAVAX</span><strong id="exposure-limit">—</strong><small id="current-exposure">Tỷ trọng theo giá oracle test</small>
+      </article>
+      <article class="metric">
+        <span>Hạn mức USDC</span><strong id="day-limit">—</strong><small id="trade-limit">Mỗi ngày UTC</small>
+      </article>
+    </section>
+
+    <section class="panel proof-summary" aria-label="Proof and risk budgets" id="proof-summary" hidden>
+      <div class="panel-heading"><h2>Proof-gated treasury V2.1</h2></div>
+      <p id="proof-policy"></p><p id="proof-budgets"></p>
+      <p>Trần WAVAX được kiểm trước ký. Giá USD tham chiếu theo oracle của mạng đang chọn. Chưa audit độc lập.</p>
+    </section>
+
+    <div class="workspace">
+      <aside class="panel scenario-panel" aria-labelledby="scenario-title">
+        <div class="panel-heading"><h2 id="scenario-title">Kịch bản</h2></div>
+        <form id="run-form">
+          <label id="demo-activity-label" for="demo-activity" hidden>Bạn muốn trình diễn phần nào?
+            <select id="demo-activity">
+              <option value="normal">Sử dụng bình thường · AI swap</option>
+              <option value="security">Kiểm thử bảo mật · tình huống tấn công</option>
+            </select>
+          </label>
+          <label id="live-case-label" for="live-case" hidden>Kịch bản demo thực tế
+            <select id="live-case">
+              <option value="swap">Swap nhỏ trên testnet · có trả gas</option>
+              <option value="limit">Vượt hạn mức · từ chối trước gửi</option>
+              <option value="session">Kiểm policy / session / gas credit · chỉ đọc</option>
+              <option value="contract">Replay / calldata / chữ ký · eth_call, không trả gas</option>
+              <option value="injection">Prompt injection · kiểm bằng AI thật, không gửi swap</option>
+              <option value="auth">Demo User không có quyền quản trị · kiểm API thật</option>
+            </select>
+          </label>
+          <label id="challenge-label" for="shield-challenge" hidden>Kiểu tấn công qua tool
+            <select id="shield-challenge">
+              <option value="recipient_redirect">Đổi recipient sang ví hacker</option>
+              <option value="policy_override">Yêu cầu bỏ risk / proof / budget</option>
+              <option value="forged_user">Giả mạo lệnh mới từ người dùng</option>
+            </select>
+          </label>
+          <label id="live-goal-label" for="live-goal" hidden>Yêu cầu AI swap (USDC / WAVAX)
+            <input id="live-goal" value="Buy WAVAX with 0.000001 USDC" maxlength="500">
+          </label>
+          <fieldset id="scenarios">
+            <legend class="sr-only">Chọn kịch bản</legend>
+            <label><input type="radio" name="scenario" value="normal_swap" checked>
+              <span><b>Swap hợp lệ</b><small>500 USDC trong giới hạn</small></span></label>
+            <label><input type="radio" name="scenario" value="exposure_limit">
+              <span><b>Vượt trần WAVAX</b><small>500 USDC đưa tỷ trọng lên 28%</small></span></label>
+            <label><input type="radio" name="scenario" value="injection">
+              <span><b>Prompt injection</b><small>Market feed yêu cầu đổi recipient</small></span></label>
+            <label><input type="radio" name="scenario" value="stale_price">
+              <span><b>Giá đã cũ</b><small>Giá oracle vượt thời hạn</small></span></label>
+          </fieldset>
+          <button type="submit" id="run" disabled>Chạy kiểm tra <span aria-hidden="true">→</span></button>
+        </form>
+        <p id="live-case-help" hidden></p>
+        <p id="demo-supported" hidden>Hiện hỗ trợ USDC → WAVAX qua LFJ, nhận token về PolicyVault. Chưa hỗ trợ chuyển tiền tới ví bất kỳ, swap chiều ngược hoặc ERC-4337. Các bài kiểm tấn công là probe có kiểm soát, không bật tấn công lên swap thật.</p>
+        <section id="live-check-panel" hidden>
+          <h3>Kết quả kiểm tra</h3>
+          <p id="live-check-summary" role="status"></p>
+          <details><summary>Xem dữ liệu và bằng chứng</summary>
+            <pre id="live-check-result" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+          </details>
+        </section>
+        <p class="error" id="error" role="alert" hidden></p>
+      </aside>
+
+      <section class="panel workflow-panel" aria-labelledby="workflow-title">
+        <div class="panel-heading workflow-heading">
+            <div><h2 id="workflow-title">Quy trình kiểm tra</h2><p id="workflow-id">Chưa có lượt chạy</p><p id="planner-source"></p></div>
+          <span class="status idle" id="workflow-status" aria-live="polite">Sẵn sàng</span>
+        </div>
+        <div class="empty" id="empty">
+          <div class="empty-icon" aria-hidden="true"><i></i><i></i><i></i></div>
+          <p id="empty-message">Chọn một kịch bản và chạy kiểm tra.</p>
+        </div>
+        <div id="workflow-body" hidden>
+          <div id="attempts" class="attempts" aria-label="Các lần đề xuất"></div>
+          <div class="workflow-grid">
+            <ol id="timeline" class="timeline" aria-label="Các bước kiểm tra"></ol>
+            <div id="details" class="details" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer class="shell"><span>PaceVant</span><span>Security pipeline V2.1 · PolicyVault V2 · EIP-712</span></footer>
+</body>
+</html>
