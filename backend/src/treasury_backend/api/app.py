@@ -51,6 +51,8 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
     app = create_control_app(settings, clock, client_factory=client_factory if runtime else None)
     app.title = "PaceVant Treasury Backend"
     app.state.execution = runtime
+    from treasury_backend.api.local_transfers import LocalTransferExecution
+    app.state.transfer_execution = LocalTransferExecution(runtime)
     control_lifespan = app.router.lifespan_context
 
     @asynccontextmanager
@@ -80,6 +82,8 @@ def create_app(settings=None, execution_settings=None, clock=utc_now, execution_
                     worker[1].join(timeout=45)
 
     app.router.lifespan_context = lifespan
+    from treasury_backend.modules.transfers.api import install_transfer_routes
+    install_transfer_routes(app,settings)
     install_demo_routes(app, demo)
     if runtime is not None:
         app.include_router(

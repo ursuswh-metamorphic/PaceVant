@@ -59,6 +59,16 @@ class Store:
             raise PlaneError("NOT_FOUND", "Unknown resource", 404)
         return json.loads(row[0])
 
+    def transaction_nonce(self, address, pending):
+        """Allocate an EOA nonce across swap and transfer journals on this execution store."""
+        key="relayer-eoa:"+address.lower()
+        with self.db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row=db.execute("SELECT value FROM counters WHERE id=?", (key,)).fetchone()
+            value=max(pending,int(row[0]) if row else pending)
+            db.execute("INSERT INTO counters VALUES (?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value",(key,value+1))
+            return value
+
     def nonce(self, namespace):
         with self.db() as db:
             db.execute("BEGIN IMMEDIATE")

@@ -119,6 +119,110 @@ contract PolicyVault is Ownable, Pausable, ReentrancyGuard, EIP712 {
     event SwapExecuted(uint256 indexed nonce, bytes32 indexed policyHash, bytes32 evidenceRoot,
         address tokenIn, address tokenOut, uint256 amountIn, uint256 amountOut);
 
+
+    // Separate transfer domain and policy. Transfers are disabled until the owner configures a recipient.
+    struct TransferRecipient {
+        uint256 perTransfer;
+        uint256 perDay;
+        uint256 expiresAt;
+        uint256 priceUsdE8;
+        uint8 decimals;
+        bool active;
+    }
+    struct TransferApprovalV2 {
+        bytes32 intentHash;
+        bytes32 taskHash;
+        bytes32 policyHash;
+        bytes32 evidenceRoot;
+        bytes32 proofContextHash;
+        bytes32 sessionId;
+        uint256 transferPolicyVersion;
+        uint256 taskBudget;
+        uint256 riskDebitUsdE8;
+        uint256 nonce;
+        uint256 deadline;
+        address token;
+        address recipient;
+        uint256 amount;
+    }
+    bytes32 public constant TRANSFER_TYPEHASH = keccak256("TransferApprovalV2(bytes32 intentHash,bytes32 taskHash,bytes32 policyHash,bytes32 evidenceRoot,bytes32 proofContextHash,bytes32 sessionId,uint256 transferPolicyVersion,uint256 taskBudget,uint256 riskDebitUsdE8,uint256 nonce,uint256 deadline,address token,address recipient,uint256 amount)");
+    uint256 public transferPolicyVersion;
+    mapping(address => mapping(address => TransferRecipient)) public transferRecipients;
+    mapping(bytes32 => uint256) public transferDailySpent;
+    mapping(bytes32 => uint256) public transferTaskSpent;
+    mapping(bytes32 => uint256) public transferTaskBudgets;
+    event TransferRecipientUpdated(address indexed token, address indexed recipient, uint256 version);
+    event ApprovedTransferExecuted(uint256 indexed nonce, bytes32 indexed intentHash, bytes32 indexed taskHash,
+        address token, address recipient, uint256 amount, bytes32 evidenceRoot);
+
+    function configureTransferRecipient(address token, address recipient, TransferRecipient calldata rule) external onlyOwner {
+        if ((token != usdc && token != wavax) || recipient == address(0) || recipient == address(this)
+            || recipient == usdc || recipient == wavax || recipient == proofAdapter
+            || recipient == attestor || (rule.active && (rule.perTransfer == 0
+            || rule.perDay < rule.perTransfer || rule.expiresAt <= block.timestamp
+            || rule.priceUsdE8 == 0 || rule.decimals > 18
+            || IERC20Metadata(token).decimals() != rule.decimals))) revert InvalidConfiguration();
+        transferRecipients[token][recipient] = rule;
+        emit TransferRecipientUpdated(token, recipient, ++transferPolicyVersion);
+    }
+    function hashTransferApprovalV2(TransferApprovalV2 calldata a) public view returns (bytes32) {
+        bytes32 domain = keccak256(abi.encode(
+            keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+            keccak256("TreasuryPolicyVault"), keccak256("transfer-2"), block.chainid, address(this)));
+        return keccak256(abi.encodePacked(hex"1901", domain, keccak256(abi.encode(TRANSFER_TYPEHASH, a))));
+    }
+    function executeApprovedTransferV2(TransferApprovalV2 calldata a, bytes calldata signature)
+        external nonReentrant whenNotPaused
+    {
+        if (!v2Enabled) revert ProofRequired();
+        if (!policyActive || a.policyHash != activePolicyHash || block.timestamp > policyExpiresAt) revert PolicyRevoked();
+        if (a.deadline < block.timestamp || a.deadline > block.timestamp + maxApprovalTtl
+            || a.deadline > policyExpiresAt) revert ExpiredApproval();
+        if (usedNonce[a.nonce]) revert NonceReplay();
+        if (ECDSA.recover(hashTransferApprovalV2(a), signature) != attestor) revert BadSignature();
+        if (a.intentHash == bytes32(0) || a.taskHash == bytes32(0) || a.evidenceRoot == bytes32(0)
+            || a.proofContextHash == bytes32(0) || a.transferPolicyVersion != transferPolicyVersion) revert HashMismatch();
+        TransferRecipient storage rule = transferRecipients[a.token][a.recipient];
+        if (!rule.active || block.timestamp > rule.expiresAt || a.deadline > rule.expiresAt
+            || !allowedTokens[a.token] || (a.token != usdc && a.token != wavax)
+            || a.recipient == address(this) || a.recipient == proofAdapter || a.recipient == attestor
+            || a.amount == 0 || a.amount > rule.perTransfer
+            || IERC20Metadata(a.token).decimals() != rule.decimals) revert InvalidCall();
+        // Owner-configured LOCAL reference valuation, rounded up. Missing valuation cannot authorize outflow.
+        uint256 valueUsdE8 = (a.amount * rule.priceUsdE8 + 10**rule.decimals - 1) / 10**rule.decimals;
+        if (a.riskDebitUsdE8 < valueUsdE8) revert InvalidPostConditions();
+        Session storage session = sessions[a.sessionId];
+        if (!session.active || session.policyHash != activePolicyHash || block.timestamp < session.startsAt
+            || block.timestamp > session.expiresAt || a.deadline > session.expiresAt) revert SessionUnavailable();
+        if (session.riskUsedUsdE8 + a.riskDebitUsdE8 > session.riskLimitUsdE8) revert SessionRiskLimit();
+        uint256 day = block.timestamp / 1 days;
+        if (globalDailyRiskUsedUsdE8[day] + a.riskDebitUsdE8 > proofPolicy.globalDailyRiskUsdE8) revert GlobalRiskLimit();
+        bytes32 daily = keccak256(abi.encode(a.token, a.recipient, day));
+        if (transferDailySpent[daily] + a.amount > rule.perDay) revert DailySpendLimit();
+        // Task identity also binds token/recipient and budget, preventing scope substitution.
+        bytes32 task = keccak256(abi.encode(a.taskHash, a.token, a.recipient));
+        uint256 budget = transferTaskBudgets[task];
+        if (a.taskBudget == 0 || (budget != 0 && budget != a.taskBudget)
+            || transferTaskSpent[task] + a.amount > a.taskBudget) revert DailySpendLimit();
+        if (a.token == usdc && dailySpentUsdc[day] + a.amount > maxSpendPerDay) revert DailySpendLimit();
+        uint256 beforeVault = IERC20(a.token).balanceOf(address(this));
+        uint256 beforeRecipient = IERC20(a.token).balanceOf(a.recipient);
+        address other = a.token == usdc ? wavax : usdc;
+        uint256 beforeOther = IERC20(other).balanceOf(address(this));
+        usedNonce[a.nonce] = true;
+        transferTaskBudgets[task] = a.taskBudget;
+        transferTaskSpent[task] += a.amount;
+        transferDailySpent[daily] += a.amount;
+        if (a.token == usdc) dailySpentUsdc[day] += a.amount;
+        session.riskUsedUsdE8 += a.riskDebitUsdE8;
+        globalDailyRiskUsedUsdE8[day] += a.riskDebitUsdE8;
+        IERC20(a.token).safeTransfer(a.recipient, a.amount);
+        if (beforeVault < a.amount || IERC20(a.token).balanceOf(address(this)) != beforeVault - a.amount
+            || IERC20(a.token).balanceOf(a.recipient) != beforeRecipient + a.amount
+            || IERC20(other).balanceOf(address(this)) != beforeOther) revert PostConditionFailed();
+        emit ApprovedTransferExecuted(a.nonce, a.intentHash, a.taskHash, a.token, a.recipient, a.amount, a.evidenceRoot);
+    }
+
     constructor(address admin, address signer, address input, address output)
         Ownable(admin) EIP712("TreasuryPolicyVault", "1")
     {
