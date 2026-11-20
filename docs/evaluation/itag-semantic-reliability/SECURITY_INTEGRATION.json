@@ -1,0 +1,70 @@
+{
+ "provenance": "LOCAL_ANVIL",
+ "chain_id": 31337,
+ "public_broadcasts": 0,
+ "decisions": [
+  {
+   "sde": "APPROVE",
+   "shadow_sde": {
+    "wallet": "APPROVE",
+    "shield": "APPROVE",
+    "temporal": "APPROVE",
+    "shield_temporal": "APPROVE",
+    "hybrid": "APPROVE"
+   },
+   "signed": true,
+   "outcome": "CONFIRMED",
+   "risk": "PASS",
+   "proof": "VERIFIED",
+   "sde_reason_codes": [],
+   "semantic": "ALIGNED",
+   "protocol": "CATALOG"
+  },
+  {
+   "sde": "APPROVE",
+   "shadow_sde": {
+    "wallet": "APPROVE",
+    "shield": "APPROVE",
+    "temporal": "APPROVE",
+    "shield_temporal": "APPROVE",
+    "hybrid": "APPROVE"
+   },
+   "signed": true,
+   "outcome": "CONFIRMED",
+   "risk": "PASS",
+   "proof": "VERIFIED",
+   "sde_reason_codes": [],
+   "semantic": "ALIGNED",
+   "protocol": "CATALOG"
+  },
+  {
+   "sde": "REJECT",
+   "shadow_sde": {
+    "wallet": "APPROVE",
+    "shield": "APPROVE",
+    "temporal": "REJECT",
+    "shield_temporal": "REJECT",
+    "hybrid": "REJECT"
+   },
+   "signed": false,
+   "outcome": null,
+   "risk": "PASS",
+   "proof": "VERIFIED",
+   "sde_reason_codes": [
+    "ITAG_BUDGET_EXCEEDED",
+    "ITAG_BUDGET_ALREADY_SPENT"
+   ],
+   "semantic": "ALIGNED",
+   "protocol": "CATALOG"
+  }
+ ],
+ "api_signer_tests": {
+  "source": "backend/tests/control/test_itag_catalog.py::test_catalog_verdict_reaches_sde_and_signer",
+  "cases": [
+   "ALIGNED -> CONFIRMED",
+   "MISALIGNED -> REJECTED and attestor refusal",
+   "INVALID -> ESCALATED and attestor refusal"
+  ],
+  "scope": "Scripted provider + MOCK workflow. Exact test outcomes are in REGRESSION_RESULTS.json."
+ }
+}

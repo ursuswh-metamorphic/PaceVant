@@ -1,0 +1,515 @@
+{
+ "LIVE_MODEL_RESULTS": {
+  "n": 12,
+  "valid_findings": 1,
+  "benign_n": 6,
+  "benign_approved": 0,
+  "raw_votes": {
+   "ALIGNED": 4,
+   "MISALIGNED": 4,
+   "UNCERTAIN": 3
+  },
+  "effective": {
+   "ALIGNED": 0,
+   "MISALIGNED": 1,
+   "UNCERTAIN": 0,
+   "UNAVAILABLE": 11
+  },
+  "median_wall_ms": 5672.5,
+  "median_semantic_ms": 2367.5,
+  "total_tokens": 143549,
+  "mean_tokens_per_candidate": 11962.416666666666,
+  "semantic_token_usage": [
+   {
+    "prompt_tokens": 9670,
+    "completion_tokens": 619,
+    "total_tokens": 10289
+   },
+   {
+    "prompt_tokens": 9681,
+    "completion_tokens": 576,
+    "total_tokens": 10257
+   },
+   {
+    "prompt_tokens": 9216,
+    "completion_tokens": 526,
+    "total_tokens": 9742
+   },
+   {
+    "prompt_tokens": 8999,
+    "completion_tokens": 400,
+    "total_tokens": 9399
+   },
+   {
+    "prompt_tokens": 9678,
+    "completion_tokens": 555,
+    "total_tokens": 10233
+   },
+   {
+    "prompt_tokens": 8971,
+    "completion_tokens": 358,
+    "total_tokens": 9329
+   },
+   {
+    "prompt_tokens": 9610,
+    "completion_tokens": 639,
+    "total_tokens": 10249
+   },
+   {
+    "prompt_tokens": 9150,
+    "completion_tokens": 558,
+    "total_tokens": 9708
+   },
+   {
+    "prompt_tokens": 8937,
+    "completion_tokens": 475,
+    "total_tokens": 9412
+   },
+   {
+    "prompt_tokens": 9069,
+    "completion_tokens": 472,
+    "total_tokens": 9541
+   },
+   {
+    "prompt_tokens": 9283,
+    "completion_tokens": 438,
+    "total_tokens": 9721
+   },
+   {
+    "prompt_tokens": 9295,
+    "completion_tokens": 534,
+    "total_tokens": 9829
+   }
+  ],
+  "graph_input_chars": [
+   25178,
+   25028,
+   24298,
+   24158,
+   25127,
+   24051,
+   25178,
+   24255,
+   24298,
+   24158,
+   24202,
+   24976
+  ],
+  "provider_calls": 48
+ },
+ "LIVE_MODEL_RETEST": {
+  "n": 12,
+  "valid_findings": 12,
+  "benign_n": 6,
+  "benign_approved": 3,
+  "raw_votes": {
+   "ALIGNED": 6,
+   "MISALIGNED": 4,
+   "UNCERTAIN": 2
+  },
+  "effective": {
+   "ALIGNED": 3,
+   "MISALIGNED": 4,
+   "UNCERTAIN": 5,
+   "UNAVAILABLE": 0
+  },
+  "median_wall_ms": 5292.0,
+  "median_semantic_ms": 2446.0,
+  "total_tokens": 143068,
+  "mean_tokens_per_candidate": 11922.333333333334,
+  "semantic_token_usage": [
+   {
+    "prompt_tokens": 9831,
+    "completion_tokens": 516,
+    "total_tokens": 10347
+   },
+   {
+    "prompt_tokens": 9034,
+    "completion_tokens": 420,
+    "total_tokens": 9454
+   },
+   {
+    "prompt_tokens": 9090,
+    "completion_tokens": 335,
+    "total_tokens": 9425
+   },
+   {
+    "prompt_tokens": 9228,
+    "completion_tokens": 413,
+    "total_tokens": 9641
+   },
+   {
+    "prompt_tokens": 9268,
+    "completion_tokens": 532,
+    "total_tokens": 9800
+   },
+   {
+    "prompt_tokens": 9391,
+    "completion_tokens": 614,
+    "total_tokens": 10005
+   },
+   {
+    "prompt_tokens": 9681,
+    "completion_tokens": 590,
+    "total_tokens": 10271
+   },
+   {
+    "prompt_tokens": 9653,
+    "completion_tokens": 603,
+    "total_tokens": 10256
+   },
+   {
+    "prompt_tokens": 9097,
+    "completion_tokens": 403,
+    "total_tokens": 9500
+   },
+   {
+    "prompt_tokens": 9585,
+    "completion_tokens": 558,
+    "total_tokens": 10143
+   },
+   {
+    "prompt_tokens": 8824,
+    "completion_tokens": 234,
+    "total_tokens": 9058
+   },
+   {
+    "prompt_tokens": 8936,
+    "completion_tokens": 353,
+    "total_tokens": 9289
+   }
+  ],
+  "graph_input_chars": [
+   25299,
+   24224,
+   24419,
+   24431,
+   25248,
+   25097,
+   25299,
+   25301,
+   24419,
+   25204,
+   23406,
+   24172
+  ],
+  "provider_calls": 48
+ },
+ "FINAL_LIVE_RESULTS": {
+  "n": 20,
+  "valid_findings": 16,
+  "benign_n": 10,
+  "benign_approved": 9,
+  "raw_votes": {
+   "ALIGNED": 12,
+   "MISALIGNED": 7,
+   "UNCERTAIN": 0
+  },
+  "effective": {
+   "ALIGNED": 9,
+   "MISALIGNED": 7,
+   "UNCERTAIN": 0,
+   "UNAVAILABLE": 4
+  },
+  "median_wall_ms": 5405.5,
+  "median_semantic_ms": 2336.5,
+  "total_tokens": 215169,
+  "mean_tokens_per_candidate": 10758.45,
+  "semantic_token_usage": [
+   {
+    "prompt_tokens": 8777,
+    "completion_tokens": 538,
+    "total_tokens": 9315
+   },
+   {
+    "prompt_tokens": 8381,
+    "completion_tokens": 514,
+    "total_tokens": 8895
+   },
+   {
+    "prompt_tokens": 8503,
+    "completion_tokens": 323,
+    "total_tokens": 8826
+   },
+   {
+    "prompt_tokens": 8285,
+    "completion_tokens": 422,
+    "total_tokens": 8707
+   },
+   {
+    "prompt_tokens": 8710,
+    "completion_tokens": 450,
+    "total_tokens": 9160
+   },
+   {
+    "prompt_tokens": 8648,
+    "completion_tokens": 503,
+    "total_tokens": 9151
+   },
+   {
+    "prompt_tokens": 8525,
+    "completion_tokens": 448,
+    "total_tokens": 8973
+   },
+   {
+    "prompt_tokens": 8724,
+    "completion_tokens": 565,
+    "total_tokens": 9289
+   },
+   {
+    "prompt_tokens": 8729,
+    "completion_tokens": 469,
+    "total_tokens": 9198
+   },
+   {
+    "prompt_tokens": 8160,
+    "completion_tokens": 340,
+    "total_tokens": 8500
+   },
+   {
+    "prompt_tokens": 8946,
+    "completion_tokens": 469,
+    "total_tokens": 9415
+   },
+   {
+    "prompt_tokens": 8133,
+    "completion_tokens": 440,
+    "total_tokens": 8573
+   },
+   {
+    "prompt_tokens": 8748,
+    "completion_tokens": 463,
+    "total_tokens": 9211
+   },
+   {},
+   {
+    "prompt_tokens": 8920,
+    "completion_tokens": 553,
+    "total_tokens": 9473
+   },
+   {
+    "prompt_tokens": 8712,
+    "completion_tokens": 529,
+    "total_tokens": 9241
+   },
+   {
+    "prompt_tokens": 8816,
+    "completion_tokens": 502,
+    "total_tokens": 9318
+   },
+   {
+    "prompt_tokens": 8243,
+    "completion_tokens": 373,
+    "total_tokens": 8616
+   },
+   {
+    "prompt_tokens": 8892,
+    "completion_tokens": 577,
+    "total_tokens": 9469
+   },
+   {
+    "prompt_tokens": 8234,
+    "completion_tokens": 330,
+    "total_tokens": 8564
+   }
+  ],
+  "graph_input_chars": [
+   23586,
+   23436,
+   22706,
+   22566,
+   23632,
+   23480,
+   23634,
+   23490,
+   23535,
+   22459,
+   23586,
+   22511,
+   23631,
+   null,
+   23632,
+   23480,
+   23634,
+   22565,
+   23535,
+   22461
+  ],
+  "provider_calls": 79
+ },
+ "ABLATION_RESULTS": {
+  "n": 24,
+  "valid_findings": 23,
+  "benign_n": 12,
+  "benign_approved": 12,
+  "raw_votes": {
+   "ALIGNED": 20,
+   "MISALIGNED": 4,
+   "UNCERTAIN": 0
+  },
+  "effective": {
+   "ALIGNED": 19,
+   "MISALIGNED": 4,
+   "UNCERTAIN": 0,
+   "UNAVAILABLE": 1
+  },
+  "median_wall_ms": 109.5,
+  "median_semantic_ms": 2.0,
+  "total_tokens": 0,
+  "mean_tokens_per_candidate": 0.0,
+  "semantic_token_usage": [
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {},
+   {}
+  ],
+  "graph_input_chars": [
+   21490,
+   21492,
+   21535,
+   21547,
+   21536,
+   21536,
+   21538,
+   21546,
+   21439,
+   21288,
+   21448,
+   21301,
+   21450,
+   19035,
+   21455,
+   19044,
+   21450,
+   20839,
+   21420,
+   20809,
+   21410,
+   20954,
+   21445,
+   21119
+  ],
+  "provider_calls": 120
+ },
+ "FINAL_SIX_CASE_SCRIPTED": {
+  "n": 6,
+  "valid_findings": 6,
+  "benign_n": 3,
+  "benign_approved": 3,
+  "raw_votes": {
+   "ALIGNED": 4,
+   "MISALIGNED": 2,
+   "UNCERTAIN": 0
+  },
+  "effective": {
+   "ALIGNED": 4,
+   "MISALIGNED": 2,
+   "UNCERTAIN": 0,
+   "UNAVAILABLE": 0
+  },
+  "median_wall_ms": 175.0,
+  "median_semantic_ms": 2.0,
+  "total_tokens": 0,
+  "mean_tokens_per_candidate": 0.0,
+  "semantic_token_usage": [
+   {},
+   {},
+   {},
+   {},
+   {},
+   {}
+  ],
+  "graph_input_chars": [
+   22081,
+   22083,
+   22126,
+   22138,
+   22030,
+   21879
+  ],
+  "provider_calls": 30
+ },
+ "historical_v2_3": {
+  "n": 6,
+  "valid_findings": 0,
+  "benign_n": 3,
+  "benign_approved": 0,
+  "raw_votes": {
+   "ALIGNED": 0,
+   "MISALIGNED": 0,
+   "UNCERTAIN": 0
+  },
+  "effective": {
+   "ALIGNED": 0,
+   "MISALIGNED": 0,
+   "UNCERTAIN": 0,
+   "UNAVAILABLE": 6
+  },
+  "median_wall_ms": 7067.0,
+  "median_semantic_ms": 4269.5,
+  "total_tokens": 77374,
+  "mean_tokens_per_candidate": 12895.666666666666,
+  "semantic_token_usage": [
+   {
+    "prompt_tokens": 9993,
+    "completion_tokens": 962,
+    "total_tokens": 10955
+   },
+   {
+    "prompt_tokens": 9242,
+    "completion_tokens": 1155,
+    "total_tokens": 10397
+   },
+   {
+    "prompt_tokens": 9512,
+    "completion_tokens": 938,
+    "total_tokens": 10450
+   },
+   {
+    "prompt_tokens": 9927,
+    "completion_tokens": 1069,
+    "total_tokens": 10996
+   },
+   {
+    "prompt_tokens": 10026,
+    "completion_tokens": 1088,
+    "total_tokens": 11114
+   },
+   {
+    "prompt_tokens": 9344,
+    "completion_tokens": 1216,
+    "total_tokens": 10560
+   }
+  ],
+  "graph_input_chars": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "provider_calls": 24
+ },
+ "comparison_limit": "Different prompts, runtime IDs and non-deterministic provider outputs. Final live rows use ten cases twice. Source preview refinement followed these live measurements."
+}
