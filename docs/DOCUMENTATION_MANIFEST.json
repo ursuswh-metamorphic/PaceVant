@@ -4,6 +4,7 @@
   "runtime_source_commit": "3f9f9af91310040bd43eb3895d145a0fc46d776c",
   "canonical_design": "docs/AI_Treasury_Security_System_Design_v2.1.md",
   "review_guide": "docs/REVIEWER_GUIDE.md",
+  "current_review_pack": "docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md",
   "scope": "Repository-owned docs and Markdown component references, plus historical hosting template; excludes vendor/submodule and private runtime data",
   "authority_rule": "Actual source/config and scoped evidence first; current design summarizes; historical docs never certify HEAD readiness",
   "live_validation_performed_for_this_review": false,
@@ -1001,6 +1002,12 @@
       "status": "HISTORICAL_AUDIT",
       "purpose": "Historical checkpoint only; not current operating instructions or readiness",
       "replacement": "docs/AI_Treasury_Security_System_Design_v2.1.md"
+    },
+    {
+      "path": "docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md",
+      "status": "CURRENT_REVIEW_PACK",
+      "purpose": "Self-contained Markdown for external AI/reviewer: current architecture, module IO/status, real/mock/assumed sources, evidence and unverified limits; runtime source baseline unchanged",
+      "replacement": null
     },
     {
       "path": "docs/README.md",

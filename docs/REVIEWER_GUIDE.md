@@ -4,6 +4,8 @@
 
 ## Gửi tài liệu nào?
 
+Nếu chỉ muốn gửi **một file Markdown**, dùng [Hồ sơ hiện trạng và phản biện PaceVant](PACEVANT_CURRENT_SYSTEM_REVIEW.md). File tự chứa mô tả kiến trúc, từng module/input-output, data thật/mock/giả định, bằng chứng và các phần chưa kiểm chứng. Người chỉ nhận file này có thể phản biện thiết kế; để xác minh implementation/evidence độc lập vẫn cần source/artifacts tương ứng.
+
 Gửi [System Design V2.1](AI_Treasury_Security_System_Design_v2.1.md) làm bản chính. Đính kèm [sanitized inventory](current-system-inventory.json), [API catalog](current-api-catalog.json), [documentation manifest](DOCUMENTATION_MANIFEST.json) và [Demo User runbook](demo/DEMO_USER_GAS_CREDIT.md). Bộ này đủ để hiểu trách nhiệm, IO, trust boundaries, flows và trạng thái implementation hiện tại mà không cần đọc các design lịch sử.
 
 Để kiểm bằng chứng, thêm ba nhóm: [core Fuji validation](audit/system-security-live-validation.json) cùng [review](audit/SYSTEM_SECURITY_REAL_DATA_REVIEW.md)/[proof files](audit/system-security-live-proof/README.md); [demo billing validation](audit/demo-user-gas-credit-validation.json); [one-click auth validation](audit/demo-account-selection-validation.json). Mỗi nhóm có checkpoint/mode/scope riêng. Raw evidence không tự trở thành “test HEAD trên Fuji”.

@@ -6,6 +6,8 @@ PaceVant là treasury security system: AI đề xuất swap, hệ thống kiểm
 
 Đọc [System Design V2.1 hiện tại](docs/AI_Treasury_Security_System_Design_v2.1.md) để xem đầy đủ kiến trúc, từng module, input/output, sources, luồng bảo mật, Solidity enforcement, session/budget, gas accounting, storage/recovery và giới hạn. [Gói phản biện](docs/REVIEWER_GUIDE.md) chỉ rõ tài liệu nên gửi cho người review hoặc AI; [chỉ mục tài liệu](docs/README.md) phân biệt hiện hành với lịch sử.
 
+Muốn gửi AI **một file duy nhất**: [Hồ sơ hiện trạng, thiết kế và phản biện](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md), có trạng thái từng thành phần, data thật/mock, assumptions, bằng chứng và các việc còn mở.
+
 ## Hiện trạng thực tế
 
 - Core pipeline đã có transaction/receipt Fuji ở checkpoint trước; dùng Chainlink Fuji và LFJ với Circle test USDC → WAVAX. Không còn mô tả đây là đường controlled oracle/mock DEX trong live profile.

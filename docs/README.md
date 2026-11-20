@@ -6,6 +6,7 @@
 
 | Tài liệu | Dùng để làm gì? |
 | --- | --- |
+| [Hồ sơ gửi AI phản biện — một file](PACEVANT_CURRENT_SYSTEM_REVIEW.md) | Bản tự chứa: hiện trạng, từng thành phần/input-output, thật/mock/giả định, bằng chứng, thiếu sót và câu hỏi phản biện |
 | [System Design V2.1](AI_Treasury_Security_System_Design_v2.1.md) | Canonical as-built design: kiến trúc, module input/output, dữ liệu, API, security, proof, flows, budgets, accounting/recovery, limitations và evidence |
 | [Reviewer Guide](REVIEWER_GUIDE.md) | Gói tham chiếu cho ban giám khảo/AI, thứ tự đọc và câu hỏi phản biện |
 | [Demo User runbook](demo/DEMO_USER_GAS_CREDIT.md) | Chọn account không nhập token, gas credit và thao tác demo |
