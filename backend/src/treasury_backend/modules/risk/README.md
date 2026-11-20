@@ -22,6 +22,9 @@ Run from the repository root after `uv sync --locked`:
 
 ```sh
 uv run --locked python -m pytest backend/tests/control/test_v2_gates.py -q
+uv run --locked python -m pytest backend/tests/control/test_economic_risk.py -q
 ```
 
 Add focused tests under this module's `tests/` directory for new feature logic; pytest discovers them automatically. Existing regression tests remain under `backend/tests/`. Chain integration tests require native Foundry and compiled contracts; use [backend setup](../../../../README.md).
+
+The [economic risk review](../../../../../docs/audit/ECONOMIC_RISK_REVIEW.md) covers exact monetary/exposure/slippage/gas boundaries, nominal-vs-interval proof decisions, session/global headroom, historical Fuji input replay and a current read-only quote diagnostic. Fixture expectations are explicit test facts, not live market observations. No policy limits were relaxed for those tests.

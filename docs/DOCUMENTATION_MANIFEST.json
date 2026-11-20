@@ -1254,6 +1254,19 @@
       "path": "docs/audit/web-demo-live-proof/README.md",
       "status": "CURRENT_EVIDENCE_REFERENCE",
       "purpose": "Current live web implementation/evidence/runbook; read scoped limits"
+    },
+    {
+      "path": "docs/audit/ECONOMIC_RISK_REVIEW.md",
+      "status": "CURRENT_REVIEW_REPORT",
+      "purpose": "Economic risk tests, historic Fuji replay and current read-only quote diagnostic; no policy changes or public writes"
+    },
+    {
+      "path": "docs/audit/economic-risk-validation.json",
+      "status": "EVIDENCE_ARTIFACT",
+      "purpose": "2026-11-20 scoped economic risk validation; snapshot values are not future readiness",
+      "sha256": "665c2494353fa0ac52713449f72a753eb0c36803a68932fbd874987c609c67fb",
+      "sha256_lf_checkout": "a14201b792b70b798b81f6c864ef2cf27ea520c0b54ed6c39b0cc64bf481f12c",
+      "evidence_scope": "127 Python tests, 8 Solidity budget tests, historical original-input replay, one pinned quote diagnostic; zero new public transactions/model calls"
     }
   ],
   "runtime_revision": "Live web feature changes based on 713f867; source fingerprints updated"

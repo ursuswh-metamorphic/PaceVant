@@ -1,0 +1,110 @@
+{
+  "date": "2026-11-20",
+  "runtime_source_commit": "39342cb9ca78e95fc84672a0d98d80974173de4e",
+  "historical_fuji_replay": {
+    "scope": "Original stored inputs at original decision timestamp; not freshness approval for a new trade",
+    "workflow_id": "workflow_00370cd7f0c3479aacf9c9faced7940f",
+    "decision_id": "decision_b7a9f90ed84248f6b237f205a555bbb2",
+    "matches_saved_risk": true,
+    "risk": {
+      "intent_id": "intent_d6421a7a72eb4652a7dabaf77765651f",
+      "build_id": "build_a16697cf2a7a98e4d94defa735df2a975dfb797a9beb90a0e5c4761b36ed0a09",
+      "snapshot_id": "snapshot_5a95e3cb85e83a79b11fe417ea337b94a06b0b0a785dd38337c8e5edc98c4072",
+      "result": "PASS",
+      "projected_wavax_exposure_bps": 2492,
+      "max_wavax_exposure_bps": 2500,
+      "violations": [],
+      "calculation_version": "risk-v1"
+    },
+    "proof_status": "VERIFIED",
+    "risk_debit_usd_e8": "0",
+    "proof_context_matches": true,
+    "input_usdc_base_units": "1",
+    "output_wavax_base_units": "13266640314006",
+    "historical_block": 61375425,
+    "historical_time": 1795172127
+  },
+  "public_transactions_sent_for_this_review": 0,
+  "model_calls_for_this_review": 0,
+  "attack_testing_in_scope": false,
+  "current_fuji_readonly_diagnostic": {
+    "scope": "Read-only current balances, original Chainlink rounds and pinned LFJ quote; arithmetic diagnostic only, NOT simulated evidence or authorization",
+    "chain_id": 43113,
+    "block": 61376641,
+    "block_hash": "0xe96712bfb3f4aa58cc463d43120df9e6869884000bfcc1651ce49de6f7b1a8c9",
+    "observed_at": 1795174705,
+    "public_transactions_sent": 0,
+    "vault_usdc_base_units": "1378",
+    "vault_wavax_base_units": "66137381683518",
+    "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+    "price_usdc_usd_e8": "99981087",
+    "price_wavax_usd_e8": "690645278",
+    "quote_input_usdc_base_units": "1",
+    "quoted_wavax_base_units": "13266545691051",
+    "current_exposure_bps": 2490,
+    "quoted_projected_exposure_bps": 2849,
+    "exposure_limit_bps": 2500,
+    "passes_quoted_exposure_gate": false,
+    "oracle_feeds": [
+      {
+        "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+        "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+        "description": "USDC/USD",
+        "decimals": 8,
+        "answer_raw": "99981087",
+        "round_id": "18446744073709552589",
+        "answered_in_round": "18446744073709552589",
+        "started_at": 1795121325,
+        "updated_at": 1795121325,
+        "max_age_seconds": 86400,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      },
+      {
+        "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+        "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+        "description": "AVAX/USD",
+        "decimals": 8,
+        "answer_raw": "690645278",
+        "round_id": "55340232221128821043",
+        "answered_in_round": "55340232221128821043",
+        "started_at": 1795174377,
+        "updated_at": 1795174377,
+        "max_age_seconds": 600,
+        "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+      }
+    ],
+    "additional_usdc_base_units_for_this_quote_only": "269"
+  },
+  "python_tests": {
+    "passed": 127,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scopes": [
+      "economic risk arithmetic/boundaries",
+      "existing workflow and SDE gates",
+      "Chainlink provenance/freshness regressions",
+      "bounded PGS proof"
+    ],
+    "new_economic_test_cases": 47,
+    "seeded_fraction_comparisons": 150,
+    "test_data": "Explicit LOCAL fixtures for boundary tests; real historical inputs for replay; current RPC reads for diagnostic"
+  },
+  "solidity_tests": {
+    "passed": 8,
+    "failed": 0,
+    "scope": "PolicyVaultV2 economic/session/global/daily budget enforcement on local EVM",
+    "fuzz_budget_runs": 256,
+    "public_chain_writes": false
+  },
+  "findings": {
+    "runtime_changes_required": false,
+    "summary": "No new economic calculation/enforcement bug found in tested scope. The observed next-trade exposure failure is a valid policy refusal, not a bug.",
+    "limits": [
+      "Quote diagnostic is not complete simulation/proof/signing readiness.",
+      "Reference USD on test assets is not realized redeemable profit.",
+      "Gas economic reference budget, certified risk debit and demo gas credit are separate.",
+      "No attack-lab changes, policy relaxation, model calls or public transactions."
+    ]
+  }
+}
