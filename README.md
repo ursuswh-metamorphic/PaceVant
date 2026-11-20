@@ -54,7 +54,7 @@ Kịch bản trên **LOCAL Anvil**: người dùng cấp ngân sách **20 USDC**
 
 ---
 
-## 🎯 Vấn đề chúng tôi giải quyết
+## Vấn đề chúng tôi giải quyết
 
 Một AI Agent được giao nhiệm vụ “đổi 100 USDC sang WAVAX” có thể tạo ra giao dịch **đúng cú pháp, hợp lệ theo policy của ví, nhưng không đúng mục đích được người dùng cho phép**. Trong tác vụ dài hơn, từng giao dịch có thể hợp lệ riêng lẻ nhưng cả chuỗi vượt ngân sách, thay đổi mục tiêu hoặc phụ thuộc vào nội dung từ công cụ không đáng tin cậy.
 
@@ -68,7 +68,7 @@ Kiểm tra chữ ký, allowlist và hạn mức mỗi giao dịch là cần thi�
 | Thiệt hại kinh tế dù call hợp lệ | Slippage, tác động thanh khoản, exposure | Anvil simulation, MEV stress, oracle và economic risk |
 | Bỏ qua quyết định off-chain | Gửi calldata bị sửa, replay hoặc vượt session | Signed PDR, revalidation, PolicyVault |
 
-## ✨ Ba đóng góp kỹ thuật chính
+## Ba đóng góp kỹ thuật chính
 
 <p align="center">
   <img src="docs/assets/readme/innovations.svg" alt="Ba lớp đổi mới: Hybrid TaskShield, Hybrid ITAG và Proof-bound PolicyVault" width="100%">
@@ -102,7 +102,7 @@ PaceVant xây exact calldata, mô phỏng chính giao dịch qua **Anvil fork**,
 
 [System Design V2.1](docs/AI_Treasury_Security_System_Design_v2.1.md) · [Smart contracts](contracts/README.md) · [Shared hashes & proof engine](packages/contracts-api/README.md)
 
-## 🎬 Demo và bằng chứng thực thi
+## Demo và bằng chứng thực thi
 
 ### Những tình huống có thể trình diễn
 
@@ -124,7 +124,7 @@ PaceVant xây exact calldata, mô phỏng chính giao dịch qua **Anvil fork**,
 
 > Chưa đặt liên kết hosted demo/video ở đây vì repository chưa có bằng chứng nghiệm thu hosting. Không bấm “Swap” để health-check: nếu đủ điều kiện, thao tác đó có thể broadcast giao dịch testnet thật.
 
-## 🧭 Kiến trúc end-to-end
+## Kiến trúc end-to-end
 
 <p align="center">
   <img src="docs/assets/readme/architecture.svg" alt="PaceVant security architecture từ intent đến policy enforcement và monitor" width="100%">
@@ -163,7 +163,7 @@ flowchart TD
 
 **Kiến trúc triển khai:** một **Python/FastAPI modular monolith**, không phải kiến trúc microservices. Frontend browser HTML/CSS/JavaScript; workflow gọi execution adapter trong process; SQLite lưu trạng thái điều khiển và execution journal; Anvil chạy subprocess để fork EVM. [Sơ đồ module](backend/MODULES.md) · [Canonical system design](docs/AI_Treasury_Security_System_Design_v2.1.md).
 
-## 🛡️ Các tầng kiểm soát bảo mật
+## Các tầng kiểm soát bảo mật
 
 | Tầng | Input chính | Output / nguyên tắc |
 | --- | --- | --- |
@@ -182,7 +182,7 @@ flowchart TD
 
 Để review từng trường và trust boundary, đọc [security coverage matrix](docs/research/SECURITY_COVERAGE_MATRIX.md) và [System Design — threat model](docs/AI_Treasury_Security_System_Design_v2.1.md#17-threat-model-invariants-và-coverage).
 
-## 🧪 Đánh giá và ablation
+## Đánh giá và ablation
 
 ### A. TaskShield — 300 mẫu single-transaction alignment
 
@@ -221,7 +221,7 @@ flowchart TD
 
 [Research index](docs/research/RESEARCH_INDEX.md) · [Fuji live report](docs/audit/WEB_DEMO_LIVE_REVIEW.md) · [Solidity tests](contracts/test/README.md)
 
-## 🧰 Công nghệ sử dụng
+## Công nghệ sử dụng
 
 | Nhóm | Công nghệ / thành phần đã triển khai | Chức năng |
 | --- | --- | --- |
@@ -241,7 +241,7 @@ flowchart TD
 
 **Không có trong live flow:** ERC-4337 bundler/paymaster, ERC-7579 module account, fully autonomous arbitrary-protocol trading, ZK proving, multi-tenant custody. [Technology inventory có source links](docs/research/TECHNOLOGY_INVENTORY.md).
 
-## 🏗️ Các module đã phát triển
+## Các module đã phát triển
 
 Hệ thống chia thành **15 business capabilities** trong backend; chúng là các module trong **một** FastAPI app, không phải 15 microservices.
 
@@ -265,7 +265,7 @@ Hệ thống chia thành **15 business capabilities** trong backend; chúng là 
 
 [Module map và import boundaries](backend/MODULES.md) · [Backend overview](backend/README.md) · [Frontend](frontend/README.md) · [Contracts API](packages/contracts-api/README.md)
 
-## 🚀 Chạy thử và tái hiện
+## Chạy thử và tái hiện
 
 **Điều kiện:** Python 3.12, uv, Foundry/Anvil và quyền truy cập phù hợp cho từng mode. Đọc [runbook demo](docs/demo/LIVE_WEB_DEMO.md) và [config/deployment](deploy/README.md) trước khi sử dụng môi trường public.
 
@@ -301,7 +301,7 @@ uv run --locked python tools/quality/scan_secrets.py
 
 Tái hiện từng benchmark theo đúng frozen dataset, checkpoint, provider credential và chế độ model/scripted được mô tả trong [TaskShield results](docs/evaluation/HYBRID_TASK_ALIGNMENT_RESULTS.md) và [ITAG final validation](docs/evaluation/itag-final/FINAL_VALIDATION.md). Không commit file `.env`, keys, signed raw transactions hay local runtime journals.
 
-## 📚 Thư viện nghiên cứu và tài liệu chuyên sâu
+## Thư viện nghiên cứu và tài liệu chuyên sâu
 
 README này là **cửa vào**, không thay thế artifact và lịch sử nghiên cứu. Mỗi kết quả cần truy được: **question → method → dataset/fixture → source commit → metrics/limitations → raw evidence**.
 
@@ -316,7 +316,7 @@ README này là **cửa vào**, không thay thế artifact và lịch sử nghi�
 | [Documentation Manifest](docs/DOCUMENTATION_MANIFEST.json) | Phân loại hồ sơ hiện hành / lịch sử và raw artifacts |
 | [Live Web Demo](docs/demo/LIVE_WEB_DEMO.md) | Quy trình demo Fuji và các cảnh báo chain-writing |
 
-## ⚖️ Threat model, giới hạn và công việc tiếp theo
+## Threat model, giới hạn và công việc tiếp theo
 
 PaceVant **không trao quyền ký cho LLM**. Hệ thống dựa trên authenticated IntentSpec/Mandate, trusted operator/attestor, nguồn chain/oracle, kiểm tra bằng chứng, revalidation, contract allowlists và signing policies. **Owner hoặc attestor bị xâm phạm** vẫn là trust assumptions đáng kể; on-chain không tự xác minh độ đúng của một diễn giải ngữ nghĩa do LLM tạo.
 
