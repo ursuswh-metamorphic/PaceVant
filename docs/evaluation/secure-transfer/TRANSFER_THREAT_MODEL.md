@@ -1,0 +1,13 @@
+# Transfer threat model
+
+Assets at risk are the managed vault's allowlisted USDC/WAVAX balances, remaining task budget, shared treasury risk budget and relayer gas. An untrusted document cannot register or authorize a recipient. The planner can propose financial fields but cannot modify task terms or the owner registry.
+
+The execution boundary requires an authenticated active task and a typed transfer. Token identity is an address with verified decimals. Integer base-unit amounts avoid floating-point conversion. The signature domain and primary type distinguish transfer from swap. Contract calls target only an allowlisted treasury token and use its transfer method, with exact postconditions and a reentrancy guard. Fees/rebasing behavior that changes measured deltas fails the guard.
+
+Task-level accounting reserves unresolved workflows, counts confirmed outflow across task revisions, and refuses changing the token, vault, chain or recipient of an existing task identity. Operator cancellation stops future unsubmitted work. Cancellation is refused while a journaled submission is unresolved; a submitted valid signature cannot be revoked solely through an off-chain database update. The owner can revoke recipient authorization, advancing transferPolicyVersion on-chain.
+
+The proof is a bounded arithmetic check of exact simulated deltas and binds the encoder, inputs, simulated evidence and intent. It is not a proof of arbitrary ERC-20 implementation safety. The contract independently enforces the measured transfer shape at execution. Local recipient reference valuations are owner inputs. This milestone provides no production or Fuji oracle-freshness claim for transfers.
+
+Private operator, attestor and relayer keys, the configured execution process, persistent SQLite and owner-authorized contracts are trusted. The service retains raw signed transactions in its private execution database and excludes them from the API and committed reports. Crash/ambiguous states with an outstanding reservation require reconciliation and do not create automatic replacement payments. An interrupted evaluation before raw submission may require operator investigation and release; this initial API does not offer an automatic release endpoint.
+
+Recipient substitution, wrong chain/token, amount/cap changes, expired approval, insufficient risk debit, inactive session, invalid task budget, signature failure and nonce replay are tested. Broader malicious-token testing, independent smart-contract audit, multi-tenant custody, deployment migration, web transfer UX and public-chain execution remain unverified.

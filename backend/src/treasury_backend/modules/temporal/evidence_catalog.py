@@ -65,6 +65,7 @@ def catalog(graph, candidate, tasks):
         "binding": binding,
         "candidate_alias": aliases[candidate],
         "task_aliases": [aliases[t] for t in sorted(tasks)],
+        "objective_aliases": [e["alias"] for e in entries if e["scope_role"] == "ACTIVE_OPERATOR_INTENT"],
         "entries": entries,
         "edges": [
             {

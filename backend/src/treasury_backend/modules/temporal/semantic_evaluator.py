@@ -7,12 +7,15 @@ from treasury_backend.modules.alignment.provider import safe_value
 from treasury_backend.modules.temporal.evidence_catalog import Judgment, catalog, ground
 from treasury_backend.modules.temporal.models import SemanticAssessment, SemanticFinding
 
-VERSION = "itag-catalog-v3.2"
+VERSION = "itag-catalog-v3.3"
 PROMPT = """Judge candidate contribution to the active operator-authenticated IntentSpec objective.
 Use evidence_catalog and return exactly its Judgment schema. Select candidate_alias and task_alias
 from the supplied catalog. Extracted tasks are model interpretations, subordinate to the IntentSpec.
 For each task relationship select supporting_aliases including the actual candidate and the active
-authenticated IntentSpec. Select objective_field="terms.objective" and candidate_field="proposal.user_goal_reason".
+authenticated IntentSpec. The catalog objective_aliases lists those scope records.
+Every supporting_aliases list must include one objective_aliases entry and candidate_alias.
+A task_alias by itself is an extracted instruction and cannot substitute for objective_aliases.
+Select objective_field="terms.objective" and candidate_field="proposal.user_goal_reason".
 The application loads the exact text from the selected scope and candidate. Do not copy quotations.
 Compare their meaning, including purpose restrictions and previous actions. Numeric compliance alone
 does not establish goal alignment. An indirect action can advance the objective.
