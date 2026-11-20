@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+if [[ -r /etc/pacevant/deploy.env ]]; then set -a; source /etc/pacevant/deploy.env; set +a; fi
 sha=${1:?Usage: rollback.sh EXISTING_RELEASE_SHA}
 [[ $sha =~ ^[0-9a-f]{40}$ ]] || { echo 'An exact commit SHA is required.' >&2; exit 1; }
 release=/opt/pacevant/releases/$sha

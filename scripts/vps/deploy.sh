@@ -33,14 +33,15 @@ cd "$release"
 uv sync --locked --no-dev --python 3.12
 npm ci --prefix frontend --no-audit --no-fund
 npm run --prefix frontend build
-uv run --locked python tools/contracts/bootstrap.py
-uv run --locked python tools/contracts/foundry.py forge build
+uv run --locked --no-dev python tools/contracts/bootstrap.py
+uv run --locked --no-dev python tools/contracts/foundry.py forge build
 # Offline simulations use the compiler already installed during this build.
 sudo install -d -o pacevant -g pacevant -m 0700 /var/lib/pacevant/.svm
 if [[ -d ${HOME}/.svm ]]; then sudo cp -a "${HOME}/.svm/." /var/lib/pacevant/.svm/; fi
 sudo chown -R pacevant:pacevant /var/lib/pacevant/.svm
 sudo chmod -R a+rX "$release" /opt/pacevant/python
 sudo install -m 0644 deploy/native/pacevant-judge.service /etc/systemd/system/pacevant-judge.service
+sudo install -m 0755 scripts/vps/update.sh /usr/local/bin/pacevant-update
 sudo install -m 0644 deploy/native/proxy.conf /etc/nginx/snippets/pacevant-proxy.conf
 # Preserve an existing domain/TLS server block; never overwrite installed certificates/config.
 if ! sudo test -e /etc/nginx/sites-available/pacevant; then

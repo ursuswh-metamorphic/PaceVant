@@ -27,14 +27,14 @@ def export(source, scenario):
     directory=ROOT/'fixtures/judge'
     directory.mkdir(parents=True,exist_ok=True)
     path=directory/(scenario+'.json')
-    path.write_text(text,encoding='utf-8')
+    path.write_text(text,encoding='utf-8',newline='\n')
     index=directory/'manifest.json'
     manifest=json.loads(index.read_text()) if index.exists() else {}
     manifest[scenario]={'file':path.name,'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
                         'recorded_at':workflow['created_at'],'source_environment':'ANVIL_FORK',
                         'active_stage':value.get('active_stage'),
                         'public_chain_broadcast':False}
-    index.write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
+    index.write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8',newline='\n')
 
 
 def main():

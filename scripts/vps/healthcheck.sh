@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+if [[ -r /etc/pacevant/deploy.env ]]; then source /etc/pacevant/deploy.env; fi
 base=${1:-http://127.0.0.1:8000}
 curl --fail --silent --show-error --max-time 10 "$base/healthz" >/dev/null
 curl --fail --silent --show-error --max-time 10 "$base/judge/config" >/dev/null
