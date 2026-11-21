@@ -45,7 +45,7 @@ Hãy tưởng tượng người dùng giao cho AI Agent nhiệm vụ **đổi m�
 
 ### A. Vi phạm ngân sách tích lũy — LOCAL Anvil, đã kiểm thử
 
-<p align="center"><a href="docs/evaluation/itag-final/ANVIL_BUDGET_ISOLATION.json"><img src="docs/assets/readme/attack-defense.svg" alt="Thử nghiệm ITAG budget isolation trên Anvil: hai swap hợp lệ 10 USDC và giao dịch thứ ba bị từ chối" width="100%"></a></p>
+<p align="center"><a href="docs/evaluation/itag-final/ANVIL_BUDGET_ISOLATION.json"><img src="docs/assets/readme/approved/attack-defense-glass.png" alt="Attack → Defense, LOCAL Anvil: hai giao dịch 10 USDC được duyệt trong task budget 20 USDC, đề xuất 10 USDC lần ba bị deterministic ITAG chặn trước khi ký; phần B là minh họa semantic evaluation" width="100%"></a></p>
 
 Ngân sách task là **20 USDC**. Hai swap **10 USDC** được xác nhận với receipts LOCAL. Khi Agent tiếp tục đề xuất thêm 10 USDC, baseline wallet/TaskShield-only trong paired counterfactual vẫn chấp nhận, nhưng **deterministic ITAG phát hiện đã chi hết ngân sách**. Workflow không cấp chữ ký mới; relayer nonce không thay đổi.
 
@@ -53,9 +53,9 @@ Ngân sách task là **20 USDC**. Hai swap **10 USDC** được xác nhận vớ
 
 ### B. Vi phạm mục đích — Graph-aware semantic evaluation, thí nghiệm real-model
 
-<p align="center"><a href="docs/assets/readme/purpose-drift.svg"><picture><source media="(max-width: 640px)" srcset="docs/assets/readme/purpose-drift-mobile.svg"><img src="docs/assets/readme/purpose-drift.svg" alt="Ví dụ nghiên cứu: numeric constraints PASS nhưng candidate rationale mâu thuẫn authenticated objective; semantic ITAG MISALIGNED, SDE không ký. Minh họa, không phải live Fuji attack." width="100%"></picture></a></p>
+<p align="center"><a href="docs/assets/readme/approved/purpose-drift-glass.png"><img src="docs/assets/readme/approved/purpose-drift-glass.png" alt="Purpose Drift: authenticated objective giữ WAVAX cho thanh khoản, candidate dùng WAVAX cho mục tiêu khác; deterministic checks PASS, graph-aware semantic MISALIGNED, SDE REJECT; minh họa nghiên cứu, không phải tấn công live trên Fuji." width="82%"></a></p>
 
-<sub>Minh họa để giải thích logic của các cặp semantic-evaluation; [mở hình kích thước gốc](docs/assets/readme/purpose-drift.svg) hoặc [xem báo cáo thực nghiệm](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md). Hình không thay thế actual attack trace.</sub>
+<sub>Minh họa để giải thích logic của các cặp semantic-evaluation; [mở hình kích thước gốc](docs/assets/readme/approved/purpose-drift-glass.png) hoặc [xem báo cáo thực nghiệm](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md). Hình không thay thế actual attack trace.</sub>
 
 **Ví dụ minh họa:** IntentSpec đã xác thực yêu cầu giữ WAVAX nhận từ swap cho nhiệm vụ thanh khoản. Một candidate sau đó vẫn nằm trong ngân sách và dùng token/địa chỉ hợp lệ nhưng phần *rationale* đề xuất sử dụng WAVAX vì một mục tiêu khác, không được người dùng cấp phép. Bộ kiểm số học có thể PASS; semantic verifier phải đối chiếu **mục tiêu gốc, candidate rationale và evidence anchors** để xác định purpose conflict. Không có authority mới nào được tạo ra chỉ từ lời nói của Agent hoặc tool.
 
