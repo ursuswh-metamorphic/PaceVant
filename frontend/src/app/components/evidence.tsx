@@ -10,24 +10,28 @@ import {dictionary, type Language} from '@/lib/i18n';
 
 export function CopyHash({value}: {value?: string}) {
   const [copied, setCopied] = useState(false);
-  if (!value) return <span className="text-slate-400">Unavailable</span>;
+  if (!value) return <span className="hash-empty">Unavailable</span>;
 
   return (
-    <span className="inline-flex items-center gap-1.5 font-mono text-xs">
-      <span className="text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md" title={value}>
+    <span className="hash" translate="no">
+      <span className="hash-value" title={value}>
         {short(value)}
       </span>
       <button
-        className="rounded-md p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-        aria-label="Copy full value"
+        type="button"
+        className="hash-copy"
+        aria-label={copied ? 'Copied' : 'Copy full value'}
         onClick={() =>
           navigator.clipboard
             .writeText(value)
-            .then(() => setCopied(true))
+            .then(() => {
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 1600);
+            })
             .catch(() => setCopied(false))
         }
       >
-        {copied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+        {copied ? <Check size={13} style={{color: 'var(--ok)'}} /> : <Copy size={13} />}
       </button>
     </span>
   );
@@ -209,12 +213,12 @@ export function EvidenceDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="module-sheet !max-w-2xl">
+      <DialogContent className="module-sheet evidence-sheet">
         <div className="p-6 pb-2">
-          <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-primary mb-2">
-            <LockKeyhole size={14} />
-            VERIFIABLE AUDIT & EXECUTION EVIDENCE
-          </div>
+          <span className="chip tone-running" style={{marginBottom: 10}}>
+            <LockKeyhole size={12} aria-hidden="true" />
+            {vi ? 'Bằng chứng kiểm toán' : 'Audit evidence'}
+          </span>
           <DialogTitle className="text-xl font-bold tracking-tight text-slate-900">
             {vi ? 'Bằng chứng thực thi có thể kiểm chứng' : 'Verifiable Execution Record'}
           </DialogTitle>
@@ -223,7 +227,7 @@ export function EvidenceDrawer({
           </DialogDescription>
         </div>
 
-        <div className="px-6 pb-6 max-h-[60vh] overflow-y-auto">
+        <div className="evidence-sheet-body px-6 pb-6">
           <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 mb-4">
             <span className="text-xs font-semibold text-slate-700">Workflow ID</span>
             <CopyHash value={job?.workflow?.workflow_id ?? job?.job_id} />
@@ -248,7 +252,7 @@ export function EvidenceDrawer({
           </details>
         </div>
 
-        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <div className="evidence-sheet-foot">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
             {t.close}
           </Button>

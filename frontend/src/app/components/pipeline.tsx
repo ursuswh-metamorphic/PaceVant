@@ -1,40 +1,38 @@
-import {useState, useMemo, useEffect, useRef} from 'react';
+import {useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent} from 'react';
 import {
   ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
-  useNodesInitialized,
-  useReactFlow,
+  ReactFlowProvider,
+  BaseEdge,
   Handle,
   Position,
   MarkerType,
+  useReactFlow,
+  type Edge,
+  type EdgeProps,
   type Node,
   type NodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
-  Check,
-  Circle,
-  CircleAlert,
-  LoaderCircle,
-  Minus,
-  Bot,
-  ShieldCheck,
-  Boxes,
-  Box,
   Activity,
   BadgeCheck,
-  ScanLine,
-  Layers,
-  ReceiptText,
-  GitBranch,
-  Sigma,
-  Focus,
-  Maximize2,
+  Bot,
+  Box,
+  Boxes,
   ChevronLeft,
   ChevronRight,
-  ArrowDownRight,
+  CircleDashed,
+  Crosshair,
+  GitBranch,
+  Layers,
+  Maximize2,
+  Minus,
+  Plus,
+  ReceiptText,
+  ScanLine,
+  ShieldCheck,
+  Sigma,
+  Workflow,
 } from 'lucide-react';
 import {useReducedMotion} from 'motion/react';
 import {StageDetail} from '@/components/stage-detail';
@@ -46,176 +44,193 @@ import {
   workflowNodeState,
   type ModuleState,
 } from '@/lib/workflow-nodes';
+import {PHASES, summarizePhase, phaseMembers} from '@/lib/phases';
 import {dictionary, type Language} from '@/lib/i18n';
 import type {Job} from '@/lib/types';
 import {cn} from '@/lib/utils';
+import {stateIcons} from './pipeline-icons';
 
 export const nodeState = workflowNodeState;
 
-type SecurityNodeData = {
-  index: number;
-  state: ModuleState;
-  language: Language;
+const icons = [ShieldCheck, Bot, Boxes, Box, Activity, GitBranch, Sigma, ShieldCheck, BadgeCheck, ScanLine, Layers, ReceiptText];
+
+/* ---------------------------------------------------------------------------
+ * Phase-aware layout
+ * Three phase rows stacked vertically. Within a row nodes run left → right in
+ * their real execution order. The layout is computed from the measured canvas
+ * width so the graph renders at zoom 1: text never shrinks to fit. If a row
+ * cannot hold all of its nodes at the minimum readable width, it continues on
+ * a second line inside the same phase (narrow screens only).
+ * ------------------------------------------------------------------------- */
+const L = {
+  pad: 8,
+  gutter: 36,
+  padRight: 14,
+  headerH: 42,
+  nodeH: 128,
+  padBottom: 12,
+  groupGap: 22,
+  colGap: 26,
+  lineGap: 32,
+  minNodeW: 118,
+  maxNodeW: 248,
 };
 
-type StageGroupData = {
-  phase: number;
-  phaseLabel: string;
-  title: string;
-  subtitle: string;
-};
+interface Placement {x: number; y: number; w: number; line: number; phase: number}
+interface GroupBox {x: number; y: number; w: number; h: number}
+interface GraphLayout {height: number; nodes: Placement[]; groups: GroupBox[]; gutterX: number}
 
-const icons = [
-  ShieldCheck,
-  Bot,
-  Boxes,
-  Box,
-  Activity,
-  GitBranch,
-  Sigma,
-  ShieldCheck,
-  BadgeCheck,
-  ScanLine,
-  Layers,
-  ReceiptText,
-];
+function computeLayout(width: number): GraphLayout {
+  const groupW = Math.max(260, width - 2 * L.pad);
+  const innerX = L.pad + L.gutter;
+  const innerW = groupW - L.gutter - L.padRight;
+  const placements: Placement[] = new Array(nodes.length);
+  const groups: GroupBox[] = [];
+  let y = L.pad;
 
-// Node coordinates: 3 rows corresponding to the 3 phases
-const NODE_WIDTH = 215;
-const NODE_HEIGHT = 126;
+  PHASES.forEach((_, phase) => {
+    const members = phaseMembers(phase);
+    const fit = Math.floor((innerW + L.colGap) / (L.minNodeW + L.colGap));
+    // When a phase must wrap, balance its lines (5 → 3 + 2, never 4 + 1).
+    const lines = Math.ceil(members.length / Math.max(1, Math.min(members.length, fit)));
+    const cols = Math.ceil(members.length / lines);
+    const w = Math.min(L.maxNodeW, (innerW - (cols - 1) * L.colGap) / cols);
+    members.forEach((index, k) => {
+      const line = Math.floor(k / cols);
+      placements[index] = {
+        x: innerX + (k % cols) * (w + L.colGap),
+        y: y + L.headerH + line * (L.nodeH + L.lineGap),
+        w,
+        line,
+        phase,
+      };
+    });
+    const h = L.headerH + lines * L.nodeH + (lines - 1) * L.lineGap + L.padBottom;
+    groups.push({x: L.pad, y, w: groupW, h});
+    y += h + L.groupGap;
+  });
 
-const nodeLayoutCoordinates: Array<{x: number; y: number}> = [
-  // Phase 0: Chuẩn bị (Preparation) - 3 nodes
-  {x: 50, y: 55},
-  {x: 300, y: 55},
-  {x: 550, y: 55},
+  return {height: y - L.groupGap + L.pad, nodes: placements, groups, gutterX: L.pad + L.gutter / 2};
+}
 
-  // Phase 1: Xác minh (Verification) - 4 nodes
-  {x: 50, y: 235},
-  {x: 300, y: 235},
-  {x: 550, y: 235},
-  {x: 800, y: 235},
+/** Rough width check (13px semibold Inter ≈ 7.2px per glyph) so only nodes whose title wraps give up a subtitle line. */
+function titleWraps(label: string, width: number) {
+  return label.length * 7.2 > width - 22;
+}
 
-  // Phase 2: Thực thi (Execution) - 5 nodes
-  {x: 50, y: 415},
-  {x: 300, y: 415},
-  {x: 550, y: 415},
-  {x: 800, y: 415},
-  {x: 1050, y: 415},
-];
+/* --------------------------------------------------------------------------- */
+
+type SecurityNodeData = {index: number; state: ModuleState; language: Language; compact: boolean; onOpen: (index: number) => void};
+type PhaseRowData = {phase: number; state: ModuleState; language: Language};
+type ReturnEdgeData = {midY: number; gutterX: number};
 
 function SecurityGraphNode({data}: NodeProps<Node<SecurityNodeData, 'security'>>) {
-  const {index, state, language} = data;
+  const {index, state, language, compact, onOpen} = data;
   const node = nodes[index];
   const t = dictionary[language];
   const Icon = icons[index];
-
-  const StatusIcon =
-    state === 'passed'
-      ? Check
-      : state === 'running'
-        ? LoaderCircle
-        : ['rejected', 'failed', 'unknown'].includes(state)
-          ? CircleAlert
-          : state === 'skipped'
-            ? Minus
-            : Circle;
+  const StatusIcon = stateIcons[state];
+  const number = String(index + 1).padStart(2, '0');
 
   return (
     <div
-      className={cn('security-node', 'state-' + state)}
+      className={cn('security-node', 'state-' + state, compact && 'is-compact')}
       tabIndex={0}
       role="button"
-      aria-label={`${String(index + 1).padStart(2, '0')} ${node.label} - ${t[state]}`}
+      aria-label={`${number} ${node.label}: ${t[state]}`}
+      data-testid={'node-' + index}
+      onKeyDown={(event: KeyboardEvent) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpen(index);
+        }
+      }}
     >
-      {/* Handles for intra-row and inter-row connections */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="target-left"
-        className="node-handle"
-      />
-      <Handle
-        type="target"
-        position={Position.Top}
-        id="target-top"
-        className="node-handle"
-      />
-
-      <div className="security-node-heading">
-        <span className="security-node-icon">
-          <Icon size={16} strokeWidth={1.8} />
-        </span>
-        <span className="security-node-number">{String(index + 1).padStart(2, '0')}</span>
-      </div>
-
+      <Handle type="target" position={Position.Left} id="target-left" className="node-handle" isConnectable={false} />
+      <Handle type="target" position={Position.Top} id="target-top" className="node-handle" isConnectable={false} />
+      <span className="security-node-number" aria-hidden="true">{number}</span>
+      <span className="security-node-icon" aria-hidden="true">
+        <Icon size={16} strokeWidth={1.9} />
+      </span>
       <strong>{node.label}</strong>
       <p>{node.description[language === 'vi' ? 0 : 1]}</p>
-
-      <span className="security-node-status">
-        <StatusIcon
-          size={11}
-          className={state === 'running' ? 'animate-spin' : ''}
-        />
+      <span className={'chip tone-' + state}>
+        <StatusIcon size={11} strokeWidth={2.6} className={state === 'running' ? 'animate-spin' : ''} aria-hidden="true" />
         {t[state]}
       </span>
-
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="source-right"
-        className="node-handle"
-      />
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="source-bottom"
-        className="node-handle"
-      />
+      <Handle type="source" position={Position.Right} id="source-right" className="node-handle" isConnectable={false} />
+      <Handle type="source" position={Position.Bottom} id="source-bottom" className="node-handle" isConnectable={false} />
     </div>
   );
 }
 
-function StageGroupNode({data}: NodeProps<Node<StageGroupData, 'stageGroup'>>) {
+function PhaseRowNode({data}: NodeProps<Node<PhaseRowData, 'phaseRow'>>) {
+  const {phase, state, language} = data;
+  const vi = language === 'vi';
+  const t = dictionary[language];
+  const copy = PHASES[phase];
+  const StatusIcon = stateIcons[state];
+  const label =
+    state === 'passed' ? (vi ? 'Hoàn thành' : 'Complete') : state === 'idle' ? t.idle : t[state];
   return (
-    <div className="stage-group-box">
-      <div className="stage-group-top">
-        <span className="stage-group-pill">{data.phaseLabel}</span>
-        <span className="stage-group-name">{data.title}</span>
-        <span className="stage-group-desc">{data.subtitle}</span>
+    <div className="phase-row" data-state={state}>
+      <div className="phase-row-head">
+        <span className="phase-index">{String(phase + 1).padStart(2, '0')}</span>
+        <strong>{copy.title[vi ? 0 : 1]}</strong>
+        <span className="phase-row-desc">{copy.description[vi ? 0 : 1]}</span>
+        <span className="phase-row-side">
+          <span className={'chip tone-' + state}>
+            <StatusIcon size={11} strokeWidth={2.6} className={state === 'running' ? 'animate-spin' : ''} aria-hidden="true" />
+            {label}
+          </span>
+        </span>
       </div>
     </div>
   );
 }
 
-const nodeTypes = {
-  security: SecurityGraphNode,
-  stageGroup: StageGroupNode,
-};
+/** Carriage-return edge: leaves the end of a row, runs back along the left gutter, enters the next row's first node. */
+function ReturnEdge({id, sourceX, sourceY, targetX, targetY, markerEnd, style, data}: EdgeProps<Edge<ReturnEdgeData, 'return'>>) {
+  const {midY, gutterX} = data ?? {midY: (sourceY + targetY) / 2, gutterX: targetX - 18};
+  const r = 10;
+  const path = [
+    `M ${sourceX} ${sourceY}`,
+    `L ${sourceX} ${midY - r}`,
+    `Q ${sourceX} ${midY} ${sourceX - r} ${midY}`,
+    `L ${gutterX + r} ${midY}`,
+    `Q ${gutterX} ${midY} ${gutterX} ${midY + r}`,
+    `L ${gutterX} ${targetY - r}`,
+    `Q ${gutterX} ${targetY} ${gutterX + r} ${targetY}`,
+    `L ${targetX} ${targetY}`,
+  ].join(' ');
+  return <BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} />;
+}
 
-function ViewportNavigation({job, language}: {job?: Job; language: Language}) {
-  const initialized = useNodesInitialized();
-  const {fitView, setCenter, getZoom} = useReactFlow();
+const nodeTypes = {security: SecurityGraphNode, phaseRow: PhaseRowNode};
+const edgeTypes = {return: ReturnEdge};
+
+const EDGE = {idle: '#c3ccdc', passed: '#5cb48f', running: '#3d5ce8', rejected: '#d9646f'};
+
+function GraphTools({
+  job,
+  layout,
+  language,
+  zoomed,
+}: {
+  job?: Job;
+  layout: GraphLayout;
+  language: Language;
+  zoomed: boolean;
+}) {
+  const {setViewport, setCenter, getZoom, zoomIn, zoomOut} = useReactFlow();
   const reduced = useReducedMotion();
   const [follow, setFollow] = useState(true);
   const last = useRef('');
-  const [activePhase, setActivePhase] = useState<number | 'all'>('all');
   const vi = language === 'vi';
 
-  // Initial fit view showing the whole 3-row architecture clearly
+  // Follow the active module when the user has zoomed in; at 1:1 the whole graph is already visible.
   useEffect(() => {
-    if (!initialized) return;
-    void fitView({
-      padding: 0.1,
-      minZoom: 0.5,
-      maxZoom: 1,
-      duration: reduced ? 0 : 400,
-    });
-  }, [initialized, fitView, reduced]);
-
-  // Auto-follow running stage smoothly
-  useEffect(() => {
-    if (!initialized || !job || !follow) return;
+    if (!job || !follow || !zoomed) return;
     const index =
       job.terminal && job.workflow?.outcome
         ? nodes.length - 1
@@ -223,350 +238,241 @@ function ViewportNavigation({job, language}: {job?: Job; language: Language}) {
     const key = job.job_id + ':' + job.active_stage + ':' + job.status;
     if (index < 0 || key === last.current) return;
     last.current = key;
-    setActivePhase(nodes[index].phase);
-
-    const pos = nodeLayoutCoordinates[index];
-    if (pos) {
-      void setCenter(pos.x + NODE_WIDTH / 2, pos.y + NODE_HEIGHT / 2, {
-        zoom: Math.max(0.85, getZoom()),
-        duration: reduced ? 0 : 300,
-      });
-    }
-  }, [
-    initialized,
-    job?.job_id,
-    job?.active_stage,
-    job?.status,
-    follow,
-    getZoom,
-    setCenter,
-    reduced,
-  ]);
-
-  function focusPhase(value: number | 'all') {
-    setFollow(false);
-    setActivePhase(value);
-    if (value === 'all') {
-      void fitView({padding: 0.1, duration: reduced ? 0 : 300});
-      return;
-    }
-
-    const phaseCenters = [
-      {x: 410, y: 115, zoom: 0.95}, // Phase 0
-      {x: 540, y: 295, zoom: 0.88}, // Phase 1
-      {x: 670, y: 475, zoom: 0.82}, // Phase 2
-    ];
-    const target = phaseCenters[value];
-    if (target) {
-      void setCenter(target.x, target.y, {zoom: target.zoom, duration: reduced ? 0 : 300});
-    }
-  }
-
-  const phaseLabels = vi
-    ? ['Toàn bộ', '01 Chuẩn bị', '02 Xác minh', '03 Thực thi']
-    : ['All', '01 Prepare', '02 Verify', '03 Execute'];
+    const p = layout.nodes[index];
+    void setCenter(p.x + p.w / 2, p.y + L.nodeH / 2, {zoom: getZoom(), duration: reduced ? 0 : 300});
+  }, [job?.job_id, job?.active_stage, job?.status, follow, zoomed, layout, reduced, setCenter, getZoom]);
 
   return (
-    <div className="graph-navigation">
-      <div
-        className="graph-phases"
-        role="group"
-        aria-label={vi ? 'Các giai đoạn xử lý' : 'Workflow phases'}
+    <>
+      <button
+        type="button"
+        className="tool-btn"
+        aria-pressed={follow}
+        title={vi ? 'Khi phóng to, tự di chuyển đến bước đang chạy' : 'When zoomed in, keep the running step in view'}
+        onClick={() => {
+          last.current = '';
+          setFollow(value => !value);
+        }}
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-pressed={activePhase === 'all'}
-          onClick={() => focusPhase('all')}
-        >
-          {phaseLabels[0]}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-pressed={activePhase === 0}
-          onClick={() => focusPhase(0)}
-        >
-          {phaseLabels[1]}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-pressed={activePhase === 1}
-          onClick={() => focusPhase(1)}
-        >
-          {phaseLabels[2]}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-pressed={activePhase === 2}
-          onClick={() => focusPhase(2)}
-        >
-          {phaseLabels[3]}
-        </Button>
-      </div>
-
-      <div className="graph-controls-pill">
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-label={vi ? 'Khung nhìn đầy đủ' : 'Fit full view'}
-          onClick={() => {
-            setActivePhase('all');
-            void fitView({padding: 0.1, duration: reduced ? 0 : 300});
-          }}
-          className="graph-follow"
-        >
-          <Maximize2 size={13} />
-          {vi ? 'Vừa khung' : 'Fit'}
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-pressed={follow}
-          onClick={() => {
-            last.current = '';
-            setFollow(value => !value);
-          }}
-          className="graph-follow"
-        >
-          <Focus size={13} />
-          {vi ? 'Theo dõi' : 'Follow'}
-        </Button>
-      </div>
-    </div>
+        <Crosshair size={13} aria-hidden="true" />
+        {vi ? 'Theo dõi' : 'Follow'}
+      </button>
+      <span className="tool-group" role="group" aria-label={vi ? 'Thu phóng' : 'Zoom'}>
+        <button type="button" className="tool-btn tool-icon" aria-label={vi ? 'Thu nhỏ' : 'Zoom out'} onClick={() => void zoomOut({duration: reduced ? 0 : 200})}>
+          <Minus size={13} aria-hidden="true" />
+        </button>
+        <button type="button" className="tool-btn tool-icon" aria-label={vi ? 'Phóng to' : 'Zoom in'} onClick={() => void zoomIn({duration: reduced ? 0 : 200})}>
+          <Plus size={13} aria-hidden="true" />
+        </button>
+      </span>
+      <button
+        type="button"
+        className="tool-btn"
+        aria-label={vi ? 'Hiển thị toàn bộ ba giai đoạn' : 'Show all three phases'}
+        onClick={() => void setViewport({x: 0, y: 0, zoom: 1}, {duration: reduced ? 0 : 280})}
+      >
+        <Maximize2 size={13} aria-hidden="true" />
+        {vi ? 'Vừa khung' : 'Fit'}
+      </button>
+    </>
   );
 }
 
-export function Pipeline({job, language}: {job?: Job; language: Language}) {
+function runTone(job?: Job): {state: ModuleState; label: [string, string]} {
+  if (!job) return {state: 'idle', label: ['Chờ chạy', 'Ready']};
+  if (!job.terminal) return {state: 'running', label: ['Đang chạy', 'Running']};
+  if (job.status === 'CONFIRMED') return {state: 'passed', label: ['Hoàn tất', 'Completed']};
+  if (job.status === 'REJECTED') return {state: 'rejected', label: ['Đã chặn', 'Blocked']};
+  if (job.status === 'UNKNOWN' || job.status === 'INTERRUPTED') return {state: 'unknown', label: ['Chưa xác định', 'Unresolved']};
+  return {state: 'failed', label: ['Không hoàn tất', 'Not completed']};
+}
+
+export function Pipeline(props: {job?: Job; language: Language}) {
+  return (
+    <ReactFlowProvider>
+      <PipelineCanvas {...props} />
+    </ReactFlowProvider>
+  );
+}
+
+function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
   const t = dictionary[language];
   const vi = language === 'vi';
   const reduced = useReducedMotion();
   const [selected, setSelected] = useState<number | null>(null);
+  const [width, setWidth] = useState(0);
+  const [zoomed, setZoomed] = useState(false);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
-  // Group background nodes framing the 3 phases
-  const stageGroupNodes = useMemo<Node[]>(() => {
-    return [
-      {
-        id: 'group-phase-0',
-        type: 'stageGroup',
-        position: {x: 20, y: 15},
-        style: {width: 780, height: 175, zIndex: -1},
-        data: {
-          phase: 0,
-          phaseLabel: vi ? 'Phase 01' : 'Phase 01',
-          title: vi ? 'Chuẩn bị (Preparation)' : 'Preparation',
-          subtitle: vi
-            ? 'Owner Policy · Intent Proposal · Calldata Builder'
-            : 'Owner Policy · Intent Proposal · Calldata Builder',
-        },
-        selectable: false,
-        draggable: false,
-        focusable: false,
+  useLayoutEffect(() => {
+    const element = viewportRef.current;
+    if (!element) return;
+    const measure = () => setWidth(Math.round(element.getBoundingClientRect().width));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  const layout = useMemo(() => computeLayout(width || 800), [width]);
+  const states = useMemo(() => nodes.map((_, index) => nodeState(job, index)), [job]);
+
+  const graphNodes = useMemo<Node[]>(() => {
+    const rows: Node[] = layout.groups.map((group, phase) => ({
+      id: 'group-phase-' + phase,
+      type: 'phaseRow',
+      position: {x: group.x, y: group.y},
+      width: group.w,
+      height: group.h,
+      zIndex: -1,
+      data: {
+        phase,
+        language,
+        state: summarizePhase(phaseMembers(phase).map(index => states[index]), !!job?.terminal),
       },
-      {
-        id: 'group-phase-1',
-        type: 'stageGroup',
-        position: {x: 20, y: 195},
-        style: {width: 1030, height: 175, zIndex: -1},
-        data: {
-          phase: 1,
-          phaseLabel: vi ? 'Phase 02' : 'Phase 02',
-          title: vi ? 'Xác minh (Verification)' : 'Verification',
-          subtitle: vi
-            ? 'EVM Simulation · Economic Risk · ITAG Shield · Z3 Formal Proof'
-            : 'EVM Simulation · Economic Risk · ITAG Shield · Z3 Formal Proof',
-        },
-        selectable: false,
-        draggable: false,
-        focusable: false,
-      },
-      {
-        id: 'group-phase-2',
-        type: 'stageGroup',
-        position: {x: 20, y: 375},
-        style: {width: 1280, height: 175, zIndex: -1},
-        data: {
-          phase: 2,
-          phaseLabel: vi ? 'Phase 03' : 'Phase 03',
-          title: vi ? 'Thực thi (Execution)' : 'Execution',
-          subtitle: vi
-            ? 'Security Decision · EIP-712 Attestation · Exact Preflight · Relayer & PolicyVault'
-            : 'Security Decision · EIP-712 Attestation · Exact Preflight · Relayer & PolicyVault',
-        },
-        selectable: false,
-        draggable: false,
-        focusable: false,
-      },
-    ];
-  }, [vi]);
+      selectable: false,
+      draggable: false,
+      focusable: false,
+    }));
+    const modules: Node[] = nodes.map((node, index) => ({
+      id: String(index),
+      type: 'security',
+      position: {x: layout.nodes[index].x, y: layout.nodes[index].y},
+      width: layout.nodes[index].w,
+      height: L.nodeH,
+      data: {index, state: states[index], language, compact: titleWraps(node.label, layout.nodes[index].w), onOpen: setSelected},
+      ariaLabel: node.label,
+      draggable: false,
+      selectable: false,
+      focusable: false,
+    }));
+    return [...rows, ...modules];
+  }, [layout, states, language, job?.terminal]);
 
-  // 12 Security Nodes placed across the 3 horizontal rows
-  const securityNodes = useMemo<Node[]>(
-    () =>
-      nodes.map((node, index) => ({
-        id: String(index),
-        type: 'security',
-        width: NODE_WIDTH,
-        height: NODE_HEIGHT,
-        position: nodeLayoutCoordinates[index],
-        data: {index, state: nodeState(job, index), language},
-        ariaLabel: node.label,
-        draggable: false,
-      })),
-    [job, language],
-  );
-
-  const graphNodes = useMemo(() => {
-    return [...stageGroupNodes, ...securityNodes];
-  }, [stageGroupNodes, securityNodes]);
-
-  // Edges connecting nodes left-to-right within rows, and smooth transition from Row 1 -> Row 2, Row 2 -> Row 3
-  const edges = useMemo(() => {
-    const list = [];
+  // Edges follow the real execution order 0 → 11; ids are unchanged from the previous graph.
+  const edges = useMemo<Edge[]>(() => {
+    const list: Edge[] = [];
     for (let i = 0; i < nodes.length - 1; i++) {
-      const isRowTransition = i === 2 || i === 6;
-      const targetState = nodeState(job, i + 1);
-      const sourceState = nodeState(job, i);
-      const isRunning = !reduced && targetState === 'running';
-      const isPassed = sourceState === 'passed';
-
+      const from = layout.nodes[i];
+      const to = layout.nodes[i + 1];
+      const sameLine = from.phase === to.phase && from.line === to.line;
+      const source = states[i];
+      const target = states[i + 1];
+      const running = target === 'running';
+      const color =
+        target === 'rejected' || target === 'failed'
+          ? EDGE.rejected
+          : running
+            ? EDGE.running
+            : source === 'passed'
+              ? EDGE.passed
+              : EDGE.idle;
+      const midY =
+        from.phase === to.phase
+          ? from.y + L.nodeH + L.lineGap / 2
+          : layout.groups[from.phase].y + layout.groups[from.phase].h + L.groupGap / 2;
       list.push({
         id: `edge-${i}-${i + 1}`,
         source: String(i),
         target: String(i + 1),
-        sourceHandle: isRowTransition ? 'source-bottom' : 'source-right',
-        targetHandle: isRowTransition ? 'target-top' : 'target-left',
-        type: 'smoothstep',
-        pathOptions: {borderRadius: 16},
-        animated: isRunning,
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 14,
-          height: 14,
-          color: isPassed ? '#10b981' : isRunning ? '#3861fb' : '#cbd5e1',
-        },
-        style: {
-          stroke: isPassed ? '#10b981' : isRunning ? '#3861fb' : '#cbd5e1',
-          strokeWidth: isRowTransition ? 2 : 1.75,
-          strokeDasharray: isRunning ? '5 5' : undefined,
-        },
-        label: isRowTransition
-          ? vi
-            ? i === 2
-              ? 'Sang Xác minh'
-              : 'Sang Thực thi'
-            : i === 2
-              ? 'To Verification'
-              : 'To Execution'
-          : undefined,
-        labelStyle: {fill: '#64748b', fontSize: 10, fontWeight: 700},
-        labelBgStyle: {fill: '#ffffff', rx: 6, ry: 6, fillOpacity: 0.95},
-        labelBgPadding: [6, 4] as [number, number],
+        sourceHandle: sameLine ? 'source-right' : 'source-bottom',
+        targetHandle: 'target-left',
+        type: sameLine ? 'straight' : 'return',
+        data: sameLine ? undefined : {midY, gutterX: layout.gutterX},
+        animated: running && !reduced,
+        selectable: false,
+        focusable: false,
+        markerEnd: {type: MarkerType.ArrowClosed, width: 14, height: 14, color},
+        style: {stroke: color, strokeWidth: sameLine ? 1.75 : 1.6},
       });
     }
     return list;
-  }, [job, reduced, vi]);
+  }, [layout, states, reduced]);
 
   const selectedNode = selected !== null ? nodes[selected] : undefined;
   const SelectedIcon = selected !== null ? icons[selected] : Bot;
+  const tone = runTone(job);
+  const ToneIcon = stateIcons[tone.state];
 
   return (
     <div className="execution-canvas" data-testid="execution-pipeline">
-      <div className="canvas-title">
-        <h3>{t.graph}</h3>
-        <span>
-          {vi
-            ? '3 giai đoạn: Chuẩn bị → Xác minh → Thực thi (Chọn module để xem chi tiết)'
-            : '3 Phases: Preparation → Verification → Execution (Click module to inspect)'}
-        </span>
+      <div className="canvas-head">
+        <div className="canvas-head-title">
+          <span className="panel-head-icon" aria-hidden="true">
+            <Workflow size={17} />
+          </span>
+          <div>
+            <h2>{t.graph}</h2>
+            <p>
+              {vi
+                ? 'Chọn một module để xem đầu vào, kết quả và bằng chứng.'
+                : 'Select a module to inspect its input, result and evidence.'}
+            </p>
+          </div>
+        </div>
+        <div className="canvas-tools">
+          <span className={'chip tone-' + tone.state} data-testid="graph-run-state">
+            {tone.state === 'running' ? <span className="live-dot" aria-hidden="true" /> : <ToneIcon size={11} strokeWidth={2.6} aria-hidden="true" />}
+            {tone.label[vi ? 0 : 1]}
+          </span>
+          <GraphTools job={job} layout={layout} language={language} zoomed={zoomed} />
+        </div>
       </div>
 
-      <div className="flow-viewport">
-        <ReactFlow
-          nodes={graphNodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          minZoom={0.25}
-          maxZoom={1.5}
-          nodesConnectable={false}
-          onNodeClick={(_, node) => {
-            if (node.type === 'security') {
-              setSelected(Number(node.id));
+      <div className="flow-viewport" ref={viewportRef} style={{height: layout.height}}>
+        {width > 0 && (
+          <ReactFlow
+            nodes={graphNodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            defaultViewport={{x: 0, y: 0, zoom: 1}}
+            minZoom={0.6}
+            maxZoom={2}
+            nodesConnectable={false}
+            nodesDraggable={false}
+            nodesFocusable={false}
+            edgesFocusable={false}
+            elementsSelectable={false}
+            panOnDrag={zoomed}
+            panOnScroll={false}
+            zoomOnScroll={false}
+            zoomOnDoubleClick={false}
+            preventScrolling={false}
+            onMoveEnd={(_, viewport) =>
+              setZoomed(Math.abs(viewport.zoom - 1) > 0.01 || Math.abs(viewport.x) > 1 || Math.abs(viewport.y) > 1)
             }
-          }}
-          onKeyDown={event => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              const id = (event.target as HTMLElement)
-                .closest('.react-flow__node')
-                ?.getAttribute('data-id');
-              if (id && !id.startsWith('group-')) {
-                event.preventDefault();
-                setSelected(Number(id));
-              }
-            }
-          }}
-          proOptions={{hideAttribution: true}}
-        >
-          <ViewportNavigation job={job} language={language} />
-          <Background gap={24} size={1} color="#e2e8f0" />
-          <Controls showInteractive={false} />
-          <MiniMap
-            pannable
-            zoomable
-            nodeColor={node => {
-              if (node.type === 'stageGroup') return 'rgba(241, 245, 249, 0.4)';
-              const state = node.data?.state;
-              return state === 'passed'
-                ? '#10b981'
-                : state === 'running'
-                  ? '#3861fb'
-                  : state === 'rejected'
-                    ? '#e11d48'
-                    : '#cbd5e1';
+            onNodeClick={(_, node) => {
+              if (node.type === 'security') setSelected(Number(node.id));
             }}
-            ariaLabel={vi ? 'Sơ đồ 3 giai đoạn xử lý' : '3-phase workflow map'}
-          />
-        </ReactFlow>
+            proOptions={{hideAttribution: true}}
+            aria-label={vi ? 'Sơ đồ ba giai đoạn kiểm tra giao dịch' : 'Three-phase transaction verification graph'}
+          >
+            <ViewportSync width={width} />
+          </ReactFlow>
+        )}
       </div>
 
-      <div className="graph-legend">
-        <span>
-          <i className="legend-idle" />
-          {t.idle}
-        </span>
-        <span>
-          <i className="legend-running" />
-          {t.running}
-        </span>
-        <span>
-          <i className="legend-passed" />
-          {t.passed}
-        </span>
-        <span>
-          <i className="legend-rejected" />
-          {t.rejected}
-        </span>
+      <div className="graph-legend" aria-label={vi ? 'Chú thích trạng thái' : 'State legend'}>
+        <span><i className="legend-idle" />{t.idle}</span>
+        <span><i className="legend-running" />{t.running}</span>
+        <span><i className="legend-passed" />{t.passed}</span>
+        <span><i className="legend-rejected" />{t.rejected}</span>
+        <span><i className="legend-failed" />{t.failed}</span>
+        <span><i className="legend-unknown" />{t.unknown}</span>
       </div>
 
-      <Dialog
-        open={selected !== null}
-        onOpenChange={open => {
-          if (!open) setSelected(null);
-        }}
-      >
+      <Dialog open={selected !== null} onOpenChange={open => !open && setSelected(null)}>
         <DialogContent className="module-sheet">
           {selectedNode && selected !== null && (
             <>
               <div className="module-sheet-heading">
                 <span className="module-sheet-icon">
-                  <SelectedIcon size={26} />
+                  <SelectedIcon size={24} />
                 </span>
                 <div>
                   <DialogTitle>{selectedNode.label}</DialogTitle>
-                  <span className={'module-state state-' + nodeState(job, selected)}>
+                  <span className={'chip tone-' + nodeState(job, selected)}>
                     {t[nodeState(job, selected)]}
                   </span>
                 </div>
@@ -577,12 +483,7 @@ export function Pipeline({job, language}: {job?: Job; language: Language}) {
               </DialogDescription>
 
               <div className="module-sequence">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={selected === 0}
-                  onClick={() => setSelected(selected - 1)}
-                >
+                <Button variant="ghost" size="sm" disabled={selected === 0} onClick={() => setSelected(selected - 1)}>
                   <ChevronLeft size={14} />
                   {vi ? 'Trước' : 'Previous'}
                 </Button>
@@ -603,11 +504,7 @@ export function Pipeline({job, language}: {job?: Job; language: Language}) {
               <section className="module-guide">
                 <h3>{vi ? 'Module này làm gì?' : 'What does this module do?'}</h3>
                 <ul>
-                  {(
-                    workflowNodeChecks[
-                      selected === 11 ? 'RECONCILIATION' : selectedNode.events[0]
-                    ] ?? []
-                  ).map(check => (
+                  {(workflowNodeChecks[selected === 11 ? 'RECONCILIATION' : selectedNode.events[0]] ?? []).map(check => (
                     <li key={check[1]}>{check[vi ? 0 : 1]}</li>
                   ))}
                 </ul>
@@ -616,10 +513,12 @@ export function Pipeline({job, language}: {job?: Job; language: Language}) {
               {!job?.workflow?.timeline.some(
                 event =>
                   selectedNode.events.includes(event.stage) ||
-                  (selectedNode.events.includes('PROOF') &&
-                    event.stage === 'PROOF_REJECTION'),
+                  (selectedNode.events.includes('PROOF') && event.stage === 'PROOF_REJECTION'),
               ) && (
                 <div className="module-empty">
+                  {nodeState(job, selected) === 'running' ? (
+                    <CircleDashed size={15} className="animate-spin" aria-hidden="true" />
+                  ) : null}
                   {nodeState(job, selected) === 'running'
                     ? vi
                       ? 'Bước này đang xử lý. Đầu ra sẽ xuất hiện khi backend ghi nhận kết quả.'
@@ -629,24 +528,26 @@ export function Pipeline({job, language}: {job?: Job; language: Language}) {
                       : 'No processing result has been recorded for this step.'}
                   {job?.terminal && selectedNode.active.includes(job.active_stage ?? '') && (
                     <span className="module-stop">
-                      {job.reason_code ??
-                        job.workflow?.reason_code ??
-                        t[nodeState(job, selected)]}
+                      {job.reason_code ?? job.workflow?.reason_code ?? t[nodeState(job, selected)]}
                     </span>
                   )}
                 </div>
               )}
 
-              <StageDetail
-                job={job}
-                index={selected}
-                events={selectedNode.events}
-                language={language}
-              />
+              <StageDetail job={job} index={selected} events={selectedNode.events} language={language} />
             </>
           )}
         </DialogContent>
       </Dialog>
     </div>
   );
+}
+
+/** Keeps the graph at 1:1 whenever the measured width (and therefore the layout) changes. */
+function ViewportSync({width}: {width: number}) {
+  const {setViewport} = useReactFlow();
+  useEffect(() => {
+    void setViewport({x: 0, y: 0, zoom: 1});
+  }, [width, setViewport]);
+  return null;
 }

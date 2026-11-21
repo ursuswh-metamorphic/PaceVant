@@ -1,145 +1,242 @@
-import {ArrowRight, Bot, LockKeyhole, ShieldCheck, CheckCircle2, ShieldAlert, Cpu} from 'lucide-react';
-import {Button} from '@/components/ui/button';
+import {motion, useReducedMotion} from 'motion/react';
+import {
+  ArrowRight,
+  BarChart3,
+  BadgeCheck,
+  ChevronRight,
+  FileSearch,
+  Layers,
+  Link2,
+  PlayCircle,
+  Settings2,
+  ShieldCheck,
+  Sparkles,
+  Workflow,
+  Zap,
+  ArrowLeftRight,
+  Banknote,
+} from 'lucide-react';
 import {overviewCopy} from '@/lib/overview-copy';
+import {workflowNodes} from '@/lib/workflow-nodes';
+import {PHASES, phaseMembers} from '@/lib/phases';
 import type {Language} from '@/lib/i18n';
+import {ChainPlatformArt, ChecklistArt, ShieldOrbitArt, ShieldStackArt} from './illustrations';
 
-export function Overview({language, onDemo}: {language: Language; onDemo: () => void}) {
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+export function Overview({
+  language,
+  onDemo,
+  onEvidence,
+}: {
+  language: Language;
+  onDemo: () => void;
+  onEvidence: () => void;
+}) {
   const t = overviewCopy[language];
   const vi = language === 'vi';
+  const reduced = useReducedMotion();
+  const storyArt = [ShieldOrbitArt, ChecklistArt, ChainPlatformArt];
+  const featureIcons = [ShieldCheck, Layers, Link2, Zap];
+  const proofIcons = [Banknote, ArrowLeftRight, FileSearch];
+
+  // The single authored moment on this page: the preview pipeline lights up once, left to right.
+  const tile = (step: number) =>
+    reduced
+      ? {}
+      : {
+          initial: {opacity: 0, y: 8},
+          animate: {opacity: 1, y: 0},
+          transition: {duration: 0.42, delay: 0.25 + step * 0.16, ease: EASE},
+        };
 
   return (
-    <div className="editorial-overview">
-      {/* Hero Section */}
-      <section className="editorial-hero" aria-labelledby="overview-headline">
-        <div className="editorial-eyebrow">
-          <span className="eyebrow-rule" />
-          {t.badge}
-          <span className="eyebrow-rule" />
+    <div className="overview">
+      <section className="hero" aria-labelledby="overview-headline">
+        <div className="hero-copy">
+          <p className="hero-tagline">{t.tagline}</p>
+          <h1 id="overview-headline">
+            {t.headline[0]} <span className="hl">{t.headline[1]}</span> {t.headline[2]}{' '}
+            <span className="hl">{t.headline[3]}</span> {t.headline[4]}
+          </h1>
+          <p className="hero-lede">{t.description}</p>
+          <div className="hero-actions">
+            <button type="button" className="btn-primary" onClick={onDemo} data-testid="launch-demo">
+              {t.cta}
+              <ArrowRight size={18} className="arrow-nudge" aria-hidden="true" />
+            </button>
+            <a className="btn-glass glass" href="#how-it-works">
+              <PlayCircle size={18} aria-hidden="true" style={{position: 'relative', zIndex: 2}} />
+              <span style={{position: 'relative', zIndex: 2}}>{t.secondary}</span>
+            </a>
+          </div>
+          <p className="hero-helper">{t.helper}</p>
         </div>
 
-        <h1 id="overview-headline">
-          {t.headline.split('. ')[0]}.
-          <br className="headline-mobile-break" /> {t.headline.split('. ').slice(1).join('. ')}
-          <span>{t.highlight}</span>
-        </h1>
+        <figure className="preview-window glass" style={{margin: 0}} aria-label={t.preview.window}>
+          <div className="preview-frame">
+            <div className="preview-rail" aria-hidden="true">
+              <span><Layers size={16} /></span>
+              <span><BarChart3 size={16} /></span>
+              <span><ShieldCheck size={16} /></span>
+              <span><Settings2 size={16} /></span>
+            </div>
+            <div>
+              <div className="preview-top">
+                <ShieldCheck size={17} aria-hidden="true" />
+                PaceVant
+              </div>
+              <div className="preview-body">
+                <div className="preview-heading">
+                  <span>
+                    <Workflow size={14} aria-hidden="true" style={{color: 'var(--accent)'}} />
+                    {t.preview.window}
+                  </span>
+                  <span className="chip tone-idle">{t.preview.badge}</span>
+                </div>
+                <div className="preview-flow">
+                  <motion.div className="preview-tile" {...tile(0)}>
+                    <Sparkles size={22} aria-hidden="true" />
+                    <span>
+                      <strong>{t.preview.agent[0]}</strong>
+                      <br />
+                      <small>{t.preview.agent[1]}</small>
+                    </span>
+                  </motion.div>
+                  <span className="preview-connector" aria-hidden="true">
+                    <ChevronRight size={16} />
+                  </span>
+                  <motion.div className="preview-tile" data-core="true" {...tile(1)}>
+                    <ShieldCheck size={22} aria-hidden="true" />
+                    <span>
+                      <strong>{t.preview.core[0]}</strong>
+                      <br />
+                      <small>{t.preview.core[1]}</small>
+                    </span>
+                  </motion.div>
+                  <span className="preview-connector" aria-hidden="true">
+                    <ChevronRight size={16} />
+                  </span>
+                  <motion.div className="preview-tile" {...tile(2)}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="12" r="11" fill="#e8414a" />
+                      <path d="M12 6.5 L17.5 16 H6.5 Z" fill="#fff" />
+                    </svg>
+                    <span>
+                      <strong>{t.preview.chain[0]}</strong>
+                      <br />
+                      <small>{t.preview.chain[1]}</small>
+                    </span>
+                  </motion.div>
+                </div>
+                <dl className="preview-facts">
+                  {t.preview.facts.map(([label, value]) => (
+                    <div key={label}>
+                      <dt>{label}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+              <figcaption className="preview-caption">{t.preview.caption}</figcaption>
+            </div>
+          </div>
+        </figure>
+      </section>
 
-        <p className="editorial-intro">{t.description}</p>
-
+      <section className="about-strip glass" aria-labelledby="about-heading">
+        <ShieldStackArt className="about-art" />
         <div>
-          <Button className="editorial-cta" onClick={onDemo} data-testid="launch-demo">
-            {t.cta}
-            <ArrowRight size={18} aria-hidden="true" />
-          </Button>
-          <p className="editorial-helper">{t.helper}</p>
+          <h2 id="about-heading">{t.aboutTitle}</h2>
+          <p>{t.aboutBody}</p>
         </div>
+        <ul className="about-features">
+          {t.features.map(([title, body], index) => {
+            const Icon = featureIcons[index];
+            return (
+              <li key={title}>
+                <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
+                <strong>{title}</strong>
+                <span>{body}</span>
+              </li>
+            );
+          })}
+        </ul>
       </section>
 
-      {/* Architecture Ribbon / Interactive Product Visual */}
-      <section
-        className="architecture-ribbon"
-        aria-label={vi ? 'Kiến trúc bảo mật rút gọn' : 'Security architecture overview'}
-      >
-        <div className="ribbon-caption">
-          <span>PACEVANT SECURE TRANSACTION RUNTIME</span>
-          <span>{vi ? 'TỪ Ý ĐỊNH ĐẾN THỰC THI ON-CHAIN' : 'FROM INTENT TO ON-CHAIN EXECUTION'}</span>
-        </div>
-        <div className="ribbon-flow">
-          <div className="ribbon-endpoint">
-            <Bot size={28} strokeWidth={1.8} aria-hidden="true" />
-            <div>
-              <span>01 / PREPARATION</span>
-              <h2>AI Agent Proposal</h2>
-              <p>{vi ? 'Đề xuất intent trong phạm vi Owner cho phép' : 'Propose intent within owner-authorized scope'}</p>
-            </div>
-          </div>
-
-          <ArrowRight className="ribbon-arrow" size={22} aria-hidden="true" />
-
-          <div className="ribbon-engine">
-            <ShieldCheck size={32} strokeWidth={1.8} aria-hidden="true" />
-            <div>
-              <span>02 / VERIFICATION (12 SECURITY GATES)</span>
-              <h2>PaceVant Security Engine</h2>
-              <p>Shield · ITAG · EVM Simulation · Economic Risk · Z3 Formal Proof</p>
-            </div>
-          </div>
-
-          <ArrowRight className="ribbon-arrow" size={22} aria-hidden="true" />
-
-          <div className="ribbon-endpoint">
-            <LockKeyhole size={28} strokeWidth={1.8} aria-hidden="true" />
-            <div>
-              <span>03 / EXECUTION</span>
-              <h2>PolicyVault on Fuji</h2>
-              <p>{vi ? 'Ký EIP-712 và thực thi atomic trên blockchain' : 'Sign EIP-712 and enforce atomically on-chain'}</p>
-            </div>
-          </div>
-        </div>
+      <section className="story-grid" aria-label={vi ? 'Câu chuyện sản phẩm' : 'Product story'}>
+        {t.story.map((item, index) => {
+          const Art = storyArt[index];
+          return (
+            <article className="story-card" key={item.title}>
+              <div>
+                <span className="story-step" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
+              <Art className="story-art" />
+            </article>
+          );
+        })}
       </section>
 
-      {/* Problem vs Solution Comparison */}
-      <section className="editorial-problem" aria-labelledby="problem-heading">
-        <div className="editorial-section-lead">
-          <span className="editorial-index">01 — {vi ? 'VẤN ĐỀ CẦN GIẢI QUY' : 'THE CORE CHALLENGE'}</span>
-          <h2 id="problem-heading">{t.problemHeading}</h2>
-          <p>{t.problemSubtitle}</p>
+      <section className="phases-section" id="how-it-works" aria-labelledby="phases-heading">
+        <div className="section-title">
+          <h2 id="phases-heading">{t.phasesTitle}</h2>
+          <p>{t.phasesBody}</p>
         </div>
-
-        <div className="editorial-comparison">
-          <div className="comparison-row">
-            <span className="comparison-label">{vi ? 'RỦI RO TỰ ĐỘNG HÓA' : 'AUTONOMOUS RISK'}</span>
-            <h3>{t.problemTitle}</h3>
-            <p>{t.problemDescription}</p>
-            <ul>
-              {t.problems.map((item, i) => (
-                <li key={item}>
-                  <span>0{i + 1}</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="comparison-row comparison-solution">
-            <span className="comparison-label">{vi ? 'CƠ CHẾ BẢO VỆ CỦA PACEVANT' : 'PACEVANT APPROACH'}</span>
-            <h3>{t.solutionTitle}</h3>
-            <p>{t.solutionDescription}</p>
-            <ul>
-              {t.solutions.map((item, i) => (
-                <li key={item}>
-                  <span>0{i + 1}</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* 4-Step Process Flow */}
-      <section className="editorial-method" aria-labelledby="method-heading">
-        <div className="editorial-method-heading">
-          <span className="editorial-index">02 — {vi ? 'QUY TRÌNH BẢO MẬT' : 'THE VERIFICATION PROCESS'}</span>
-          <h2 id="method-heading">{t.howHeading}</h2>
-          <p className="mt-2 text-slate-500 text-sm max-w-xl">{t.howSubtitle}</p>
-        </div>
-
-        <ol className="editorial-steps">
-          {t.steps.map((step, index) => (
-            <li key={step.title}>
-              <span className="method-number">STEP 0{index + 1}</span>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
+        <ol className="phase-stack">
+          {PHASES.map((phase, index) => (
+            <li className="phase-line" key={phase.title[1]}>
+              <div className="phase-line-head">
+                <span className="phase-index">{String(index + 1).padStart(2, '0')}</span>
+                <strong>{phase.title[vi ? 0 : 1]}</strong>
+              </div>
+              <div className="phase-modules">
+                {phaseMembers(index).map((member, position) => (
+                  <span key={member} style={{display: 'contents'}}>
+                    {position > 0 && <ChevronRight size={14} aria-hidden="true" />}
+                    <span>{workflowNodes[member].label}</span>
+                  </span>
+                ))}
+              </div>
             </li>
           ))}
         </ol>
+      </section>
 
-        <div className="text-center mt-12">
-          <Button className="editorial-cta" onClick={onDemo}>
+      <section aria-labelledby="proof-heading">
+        <div className="section-title" style={{marginBottom: 8}}>
+          <h2 id="proof-heading">{t.proofTitle}</h2>
+        </div>
+        <div className="demo-proof">
+          {t.proof.map(([title, body], index) => {
+            const Icon = proofIcons[index];
+            return (
+              <div className="proof-item" key={title}>
+                <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="cta-band glass" aria-labelledby="cta-heading">
+        <div>
+          <h2 id="cta-heading">{t.ctaTitle}</h2>
+          <p>{t.ctaBody}</p>
+        </div>
+        <div className="cta-actions">
+          <button type="button" className="btn-primary" onClick={onDemo}>
             {t.cta}
-            <ArrowRight size={18} aria-hidden="true" />
-          </Button>
-          <p className="editorial-helper">{t.note}</p>
+            <ArrowRight size={18} className="arrow-nudge" aria-hidden="true" />
+          </button>
+          <button type="button" className="btn-glass" style={{background: 'rgba(255,255,255,.75)', boxShadow: 'inset 0 0 0 1px var(--line), var(--shadow-1)'}} onClick={onEvidence}>
+            <BadgeCheck size={17} aria-hidden="true" />
+            {t.ctaSecondary}
+          </button>
         </div>
       </section>
     </div>

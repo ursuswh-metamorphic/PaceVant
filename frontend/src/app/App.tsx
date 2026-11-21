@@ -1,7 +1,7 @@
 import {Suspense, lazy, useEffect, useRef, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
-import {ArrowLeftRight, Banknote, Check, LoaderCircle, Play, Shield, ShieldX} from 'lucide-react';
+import {ArrowLeftRight, Banknote, CircleCheck, Layers3, LoaderCircle, Play, ShieldCheck, ShieldX} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {EvidenceDrawer} from '@/components/evidence';
@@ -11,6 +11,7 @@ import {LanguageSwitcher, SiteFooter} from '@/components/site-chrome';
 import {Overview} from '@/components/overview';
 import {ExecutionStatus, ExecutionHistory} from '@/components/execution-panels';
 import {RunSession} from '@/components/run-session';
+import {AmbientRibbons} from '@/components/illustrations';
 import {api, ApiError} from '@/lib/api';
 import {
   beginAttempt,
@@ -22,13 +23,12 @@ import {
   clearViewedRun,
   type SavedAttempt,
 } from '@/lib/recovery';
-import {reason} from '@/lib/format';
+import {reason, units} from '@/lib/format';
 import type {Job, ScenarioId} from '@/lib/types';
 import {cn} from '@/lib/utils';
 import {dictionary, type Language} from '@/lib/i18n';
 
 const scenarioIcons = {payment: Banknote, swap: ArrowLeftRight, guard: ShieldX};
-const scenarioColors = {payment: 'blue', swap: 'violet', guard: 'red'};
 
 function savedState() {
   try {
@@ -99,6 +99,15 @@ export default function App() {
     queryFn: () => api.job(activeId!),
     enabled: config.isSuccess && !!activeId,
     refetchInterval: query => (query.state.data?.terminal ? false : 1000),
+    retry: 1,
+  });
+
+  // Read-only on-chain context for the Evidence page (contract addresses, policy, oracle).
+  const source = useQuery({
+    queryKey: ['judge-source'],
+    queryFn: api.snapshot,
+    enabled: config.isSuccess && tab === 'history',
+    refetchInterval: 60000,
     retry: 1,
   });
 
@@ -211,44 +220,88 @@ export default function App() {
   const names = {payment: t.payment, swap: t.swap, guard: t.guard};
   const descriptions = {payment: t.payDesc, swap: t.swapDesc, guard: t.guardDesc};
   const ready = !!config.data?.configured && !config.data.busy && quota?.remaining_today !== 0;
+  const vi = language === 'vi';
+  const selectedScenario = config.data?.scenarios.find(value => value.id === baseScenario);
+  const tabs = [
+    {value: 'overview', label: t.overview, testId: undefined},
+    {value: 'live', label: t.demo, testId: 'tab-live'},
+    {value: 'history', label: t.evidence, testId: 'tab-history'},
+  ];
+
+  const session = (saved || activeId) && (
+    <RunSession
+      job={current}
+      scenario={saved?.body.scenario ?? current?.scenario ?? scenario}
+      restoring={restoring || (!!saved && !saved.job_id && !start.isPending && !recovered.isError)}
+      disconnected={
+        job.isError ||
+        (recovered.isError &&
+          !(recovered.error instanceof ApiError && recovered.error.code === 'JUDGE_REQUEST_NOT_FOUND'))
+      }
+      needsResume={!!saved && !saved.job_id && recovered.isError && !start.isPending}
+      pending={start.isPending}
+      onResume={() => (saved && !saved.job_id ? void run(saved.body.scenario) : void job.refetch())}
+      onDemo={() => setTab('live')}
+      onClear={
+        !saved && job.error instanceof ApiError && job.error.status === 404
+          ? () => {
+              clearViewedRun();
+              setActiveId(undefined);
+            }
+          : undefined
+      }
+      showDemo={tab !== 'live'}
+      language={language}
+            />
+  );
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-tab={tab}>
+      <a className="skip-link" href="#main-content">
+        {vi ? 'Bỏ qua đến nội dung' : 'Skip to content'}
+      </a>
+      <div className="ambient" aria-hidden="true">
+        <AmbientRibbons />
+      </div>
+
       <Tabs value={tab} onValueChange={setTab}>
-        {/* Floating Liquid Glass Header */}
+        {/* Floating Liquid Glass navigation */}
         <header className="site-header">
-          <div className="header-inner">
-            <a href="/" className="brand">
-              <span className="brand-icon">
-                <Shield size={18} strokeWidth={2.4} />
+          <div className="header-inner glass">
+            <a href="/" className="brand chrome-layer" aria-label="PaceVant">
+              <span className="brand-mark" aria-hidden="true">
+                <ShieldCheck size={22} strokeWidth={2.1} />
               </span>
-              PaceVant
-              <span className="brand-divider" />
-              <span className="brand-subtitle">AI Agent Security</span>
+              <span className="brand-name-full">PaceVant</span>
             </a>
 
-            <TabsList className="main-nav" aria-label="Navigation">
-              <TabsTrigger value="overview">{t.overview}</TabsTrigger>
-              <TabsTrigger value="live" data-testid="tab-live">
-                {t.demo}
-                {ownRunActive && <span className="nav-run-dot" aria-label={t.running} />}
-              </TabsTrigger>
-              <TabsTrigger value="history" data-testid="tab-history">
-                {t.evidence}
-              </TabsTrigger>
+            <TabsList className="main-nav chrome-layer" aria-label={vi ? 'Điều hướng chính' : 'Main navigation'}>
+              {tabs.map(item => (
+                <TabsTrigger key={item.value} value={item.value} data-testid={item.testId}>
+                  {tab === item.value && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="nav-pill"
+                      transition={reduced ? {duration: 0} : {type: 'spring', stiffness: 520, damping: 42}}
+                    />
+                  )}
+                  {item.label}
+                  {item.value === 'live' && ownRunActive && <span className="nav-run-dot" aria-label={t.running} />}
+                </TabsTrigger>
+              ))}
             </TabsList>
 
-            <div className="header-status">
+            <div className="header-status chrome-layer">
               <LanguageSwitcher language={language} onChange={setLanguage} />
             </div>
           </div>
         </header>
 
-        <main className="page-container new-page">
+        <main id="main-content" className="page-container" data-wide={tab === 'live'}>
           {config.isPending && (
-            <div className="page-loading" role="status" aria-label={t.processing}>
-              <LoaderCircle size={22} className="animate-spin text-primary" />
-              <span>{t.processing}</span>
+            <div className="page-loading" role="status">
+              <LoaderCircle size={20} className="animate-spin text-primary" aria-hidden="true" />
+              <span>{t.processing}…</span>
             </div>
           )}
 
@@ -269,11 +322,7 @@ export default function App() {
                   variant="outline"
                   size="sm"
                   disabled={start.isPending}
-                  onClick={() =>
-                    saved.job_id
-                      ? void job.refetch()
-                      : void run(saved.body.scenario)
-                  }
+                  onClick={() => (saved.job_id ? void job.refetch() : void run(saved.body.scenario))}
                 >
                   {t.retry}
                 </Button>
@@ -281,108 +330,115 @@ export default function App() {
             </div>
           )}
 
-          {(saved || activeId) && (
-            <RunSession
-              job={current}
-              scenario={saved?.body.scenario ?? current?.scenario ?? scenario}
-              restoring={
-                restoring ||
-                (!!saved && !saved.job_id && !start.isPending && !recovered.isError)
-              }
-              disconnected={
-                job.isError ||
-                (recovered.isError &&
-                  !(
-                    recovered.error instanceof ApiError &&
-                    recovered.error.code === 'JUDGE_REQUEST_NOT_FOUND'
-                  ))
-              }
-              needsResume={!!saved && !saved.job_id && recovered.isError && !start.isPending}
-              pending={start.isPending}
-              onResume={() =>
-                saved && !saved.job_id ? void run(saved.body.scenario) : void job.refetch()
-              }
-              onDemo={() => setTab('live')}
-              onClear={
-                !saved && job.error instanceof ApiError && job.error.status === 404
-                  ? () => {
-                      clearViewedRun();
-                      setActiveId(undefined);
-                    }
-                  : undefined
-              }
-              showDemo={tab !== 'live'}
-              language={language}
-            />
-          )}
+          {tab !== 'live' && session}
 
           <AnimatePresence mode="wait">
             <motion.div
               key={tab}
-              initial={reduced ? false : {opacity: 0, filter: 'blur(6px)', y: 6}}
-              animate={{opacity: 1, filter: 'blur(0px)', y: 0}}
-              exit={{opacity: 0, filter: reduced ? 'blur(0px)' : 'blur(4px)'}}
+              initial={reduced ? false : {opacity: 0, y: 6}}
+              animate={{opacity: 1, y: 0}}
+              exit={reduced ? undefined : {opacity: 0}}
               transition={{duration: 0.22, ease: [0.16, 1, 0.3, 1]}}
             >
               {tab === 'overview' && (
                 <TabsContent value="overview">
-                  <Overview language={language} onDemo={() => setTab('live')} />
+                  <Overview language={language} onDemo={() => setTab('live')} onEvidence={() => setTab('history')} />
                 </TabsContent>
               )}
 
               {tab === 'live' && (
                 <TabsContent value="live" data-testid="live-demo-panel">
+                  <div className="page-head">
+                    <div>
+                      <h1>
+                        <em>PaceVant</em> Live Demo
+                      </h1>
+                      <p>
+                        {vi
+                          ? 'Chạy một giao dịch do AI đề xuất và theo dõi từng lớp bảo mật ra quyết định trên Avalanche Fuji.'
+                          : 'Run an AI-proposed transaction and watch each security layer decide on Avalanche Fuji.'}
+                      </p>
+                    </div>
+                    {session}
+                  </div>
+
                   <div className="workspace-grid">
-                    {/* Left Sidebar: Scenario Selector & Attack Configuration */}
-                    <aside className="workspace-card scenario-panel">
-                      <div className="workspace-section-title">
-                        <h2>{t.choose}</h2>
+                    {/* Left: scenario & security-check configuration */}
+                    <aside className="panel scenario-panel" aria-label={t.choose}>
+                      <div className="panel-head">
+                        <span className="panel-head-icon" aria-hidden="true">
+                          <Layers3 size={17} />
+                        </span>
+                        <div>
+                          <h2>{t.choose}</h2>
+                          <p>{vi ? 'Chọn luồng giao dịch để kiểm tra.' : 'Choose the transaction flow to verify.'}</p>
+                        </div>
                       </div>
 
-                      <div className="compact-scenarios">
+                      <div className="compact-scenarios" role="group" aria-label={t.choose}>
                         {config.isPending
-                          ? [0, 1].map(i => (
-                              <div key={i} className="skeleton scenario-skeleton" />
-                            ))
+                          ? [0, 1].map(i => <div key={i} className="skeleton scenario-skeleton" />)
                           : config.data?.scenarios
                               .filter(value => value.id !== 'guard')
                               .map(value => {
                                 const Icon = scenarioIcons[value.id];
+                                const active = baseScenario === value.id;
                                 return (
                                   <button
                                     key={value.id}
+                                    type="button"
                                     data-testid={'scenario-' + value.id}
-                                    aria-pressed={baseScenario === value.id}
+                                    aria-pressed={active}
                                     disabled={liveBusy}
                                     onClick={() => {
                                       setBaseScenario(value.id);
                                       setAttackPreset('none');
                                       setScenario(value.id);
                                     }}
-                                    className={cn(
-                                      'compact-scenario',
-                                      baseScenario === value.id && 'selected',
-                                    )}
+                                    className={cn('compact-scenario', active && 'selected')}
                                   >
-                                    <span
-                                      className={
-                                        'scenario-icon scenario-' +
-                                        scenarioColors[value.id]
-                                      }
-                                    >
-                                      <Icon size={18} strokeWidth={2} />
+                                    <span className="scenario-icon" aria-hidden="true">
+                                      <Icon size={18} strokeWidth={1.9} />
                                     </span>
                                     <span>
                                       <strong>{names[value.id]}</strong>
                                       <small>{descriptions[value.id]}</small>
                                     </span>
-                                    {baseScenario === value.id && (
-                                      <Check size={16} strokeWidth={2.4} />
+                                    {active ? (
+                                      <CircleCheck size={18} className="scenario-check" aria-hidden="true" />
+                                    ) : (
+                                      <span />
                                     )}
                                   </button>
                                 );
                               })}
                       </div>
+
+                      {selectedScenario && (
+                        <div className="scenario-terms" aria-label={vi ? 'Điều khoản giao dịch' : 'Transaction terms'}>
+                          <dl className="fact-rows">
+                            <div>
+                              <dt>{t.amount}</dt>
+                              <dd className="mono">
+                                {units(selectedScenario.amount, selectedScenario.input_decimals, selectedScenario.input_decimals)}{' '}
+                                {selectedScenario.token_in}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>{vi ? 'Tài sản' : 'Assets'}</dt>
+                              <dd>
+                                {selectedScenario.token_in === selectedScenario.token_out
+                                  ? selectedScenario.token_in
+                                  : selectedScenario.token_in + ' → ' + selectedScenario.token_out}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>{vi ? 'Người nhận' : 'Recipient'}</dt>
+                              <dd title={selectedScenario.recipient_label}>{selectedScenario.recipient_label}</dd>
+                            </div>
+                          </dl>
+                        </div>
+                      )}
 
                       <AttackSelect
                         value={attackPreset}
@@ -393,53 +449,57 @@ export default function App() {
                       />
 
                       <div className="run-action">
-                        <Button
-                          className="w-full"
-                          disabled={
-                            liveBusy ||
-                            start.isPending ||
-                            (attackPreset === 'none' && !ready)
-                          }
-                          onClick={() =>
-                            attackPreset === 'none'
-                              ? void run(scenario)
-                              : setAttackPreview(true)
-                          }
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          disabled={liveBusy || start.isPending || (attackPreset === 'none' && !ready)}
+                          onClick={() => (attackPreset === 'none' ? void run(scenario) : setAttackPreview(true))}
                           data-testid="run-scenario"
                         >
                           {ownRunActive || restoring ? (
-                            <LoaderCircle size={16} className="animate-spin" />
+                            <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />
                           ) : (
-                            <Play size={16} fill="currentColor" />
+                            <Play size={16} fill="currentColor" aria-hidden="true" />
                           )}
                           {restoring
-                            ? language === 'vi'
+                            ? vi
                               ? 'Đang khôi phục phiên'
                               : 'Restoring run'
                             : ownRunActive
-                              ? language === 'vi'
+                              ? vi
                                 ? 'Đang xử lý kịch bản'
                                 : 'Scenario running'
                               : attackPreset === 'none'
                                 ? t.run
-                                : language === 'vi'
+                                : vi
                                   ? 'Xem kịch bản tấn công'
                                   : 'Preview attack scenario'}
-                        </Button>
-                        {attackPreset === 'none' &&
-                          !ready &&
-                          !ownRunActive &&
-                          !restoring && <p className="mode-hint">{t.busy}</p>}
+                        </button>
+                        {attackPreset === 'none' && !ready && !ownRunActive && !restoring && (
+                          <p className="mode-hint">{t.busy}</p>
+                        )}
                       </div>
+
+                      {quota && (
+                        <div className="sidebar-foot">
+                          <div className="quota-meter">
+                            <span>{vi ? 'Lượt chạy còn lại hôm nay' : 'Runs left today'}</span>
+                            <span>
+                              {quota.remaining_today}/{quota.daily_limit}
+                            </span>
+                          </div>
+                          {t.noWallet}
+                        </div>
+                      )}
                     </aside>
 
-                    {/* Center Workspace: 3-Row Security Pipeline Graph */}
-                    <section className="workspace-card graph-panel">
+                    {/* Center: three stacked phase rows */}
+                    <section className="panel graph-panel" aria-label={t.graph}>
                       <Suspense
                         fallback={
                           <div className="flow-placeholder" aria-busy="true">
-                            <LoaderCircle size={22} className="animate-spin text-primary" />
-                            {t.processing}
+                            <LoaderCircle size={20} className="animate-spin text-primary" aria-hidden="true" />
+                            {t.processing}…
                           </div>
                         }
                       >
@@ -447,10 +507,11 @@ export default function App() {
                       </Suspense>
                     </section>
 
-                    {/* Right Sidebar: Security Verdict & Results Panel */}
+                    {/* Right: verdict & evidence */}
                     <ExecutionStatus
                       job={current}
                       language={language}
+                      mode={config.data?.mode}
                       onEvidence={() => {
                         setHistoryJob(current);
                         setDrawer(true);
@@ -467,7 +528,11 @@ export default function App() {
                     language={language}
                     pending={history.isPending}
                     error={history.isError}
-                    onRefresh={() => void history.refetch()}
+                    source={{data: source.data, pending: source.isPending, error: source.isError}}
+                    onRefresh={() => {
+                      void history.refetch();
+                      void source.refetch();
+                    }}
                     onOpen={value => void openHistory(value)}
                     onDemo={() => setTab('live')}
                   />
@@ -488,12 +553,7 @@ export default function App() {
         language={language}
       />
 
-      <EvidenceDrawer
-        job={historyJob ?? current}
-        open={drawer}
-        onOpenChange={setDrawer}
-        language={language}
-      />
+      <EvidenceDrawer job={historyJob ?? current} open={drawer} onOpenChange={setDrawer} language={language} />
     </div>
   );
 }
