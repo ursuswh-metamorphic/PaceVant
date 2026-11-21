@@ -6,7 +6,7 @@
 
 - **Vòng 0 — hiện trạng trước lượt chỉnh:** README đã có dữ liệu nghiên cứu tốt, nhưng một lần phản biện trước chấm **8,1/10** do phần kiến trúc quá dày, hình ITAG chỉ nêu budget và khó theo dõi bằng chứng E2E.
 - **Vòng 1 — sửa thông điệp/kiến trúc/bằng chứng:** Giữ 16 bước giải thích ở tài liệu chuyên sâu; README rút còn 8 chặng, có ba câu hỏi trực quan; bổ sung semantic purpose-drift visual và **một job Fuji gắn các gate verdict, proof hash, attestation và receipt**. Tự kiểm thấy vẫn còn chữ nhỏ trên mobile và thiếu hai nghiên cứu trong bảng prior work; **chưa được coi là hoàn thành**.
-- **Vòng 2 — sửa những lỗi tự phát hiện:** Thêm infographic mobile, nguồn evidence minh bạch, glossary 16 thuật ngữ cho người mới, bổ sung đủ **4 bài báo nền tảng**, phân biệt graph-vs-history là research question chưa được giải quyết độc lập. Kiểm tra 25/25 relative file/image links có thể fetch trên review branch; giữ deep-dive và research catalog. Qua rubric tổng hợp dưới đây.
+- **Vòng 2 — sửa những lỗi tự phát hiện:** Thêm infographic mobile, nguồn evidence minh bạch, glossary 16 thuật ngữ cho người mới, bổ sung đủ **4 bài báo nền tảng**, phân biệt graph-vs-history là research question chưa được giải quyết độc lập. Kiểm tra 26/26 relative file/image links có thể fetch trên review branch; giữ deep-dive và research catalog. Qua rubric tổng hợp dưới đây.
 
 ## Rubric cuối: 9.19/10 (tự đánh giá có trọng số)
 
@@ -43,7 +43,7 @@
 - Đối chiếu mã điều phối `TreasuryWorkflows.run()`, ITAG `temporal/operations.py`, Solidity `PolicyVaultMVP/V3`, frontend `package.json` và public Fuji acceptance ở ref `main`.
 - Đối chiếu số liệu: TaskShield Hybrid **95,67% = constraints-only 95,67%** trên 300 adapted swaps; ITAG **8/12 scripted deterministic interventions**, **7/8 validated real-model semantic observations** trên sample nhỏ; không gom thành security accuracy.
 - Kiểm `ARCHITECTURE_EXPLAINED.md`: đúng **16 stage headings**, mỗi stage đủ **Input / Mục đích / Cách làm / Output / Chặn / Giới hạn**.
-- Kiểm **25/25** paths file/asset được tham chiếu trực tiếp trong README có thể truy cập bằng connector GitHub trên đúng review branch (ba batch). Đây là existence check, không phải render test hoặc kiểm mọi external HTTP URL.
+- Kiểm **26/26** paths file/asset được tham chiếu trực tiếp trong README có thể truy cập bằng connector GitHub trên đúng review branch (ba batch). Đây là existence check, không phải render test hoặc kiểm mọi external HTTP URL.
 - Thêm ảnh giải thích purpose drift có `alt` text và responsive mobile variant, **chưa chạy screenshot browser acceptance** cho lần chỉnh docs này.
 - Không chạy model benchmark mới, không thực thi giao dịch Fuji, không sửa backend, contract, configs hoặc secrets. Các tx được dẫn từ đã có báo cáo công khai.
 
