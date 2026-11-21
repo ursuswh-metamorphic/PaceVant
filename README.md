@@ -17,18 +17,16 @@
 
 ### PaceVant trong 60 giây — dành cho giám khảo
 
-**Hãy tưởng tượng bạn giao cho AI quản lý quỹ tài sản số:** đổi USDC sang WAVAX để phục vụ một nhiệm vụ, với ngân sách và giới hạn rủi ro rõ ràng. **Giao dịch chạy thành công chưa chắc là giao dịch nên được phép thực hiện:** AI có thể làm sai yêu cầu, chi vượt ngân sách sau nhiều lần hoặc đổi token với kết quả bất lợi.
+**PaceVant** bảo vệ quỹ tài sản số khi **AI Agent đề xuất thanh toán hoặc hoán đổi token**. **Vấn đề:** một giao dịch có thể chạy thành công nhưng vẫn sai nhiệm vụ, vượt tổng ngân sách hoặc gây thiệt hại tài chính. **TaskShield** kiểm từng đề xuất có đúng yêu cầu người dùng không. Nhưng nếu AI chia nhỏ chi tiêu hoặc dần chuyển sang mục đích khác, kiểm từng giao dịch là chưa đủ. **ITAG — đổi mới cốt lõi —** kết nối nhiệm vụ đã xác thực, lịch sử, quyền hạn và bằng chứng để phát hiện **vi phạm tích lũy và sai lệch mục tiêu qua nhiều bước**.
 
-**PaceVant** là lớp bảo vệ đặt **giữa AI Agent và quyền chuyển tiền**, xử lý lần lượt các rủi ro đó. **TaskShield** kiểm đề xuất hiện tại có đúng yêu cầu người dùng hay không. Nhưng nếu *mỗi giao dịch đều đúng mà cả chuỗi hành động lại sai* thì sao? **ITAG — đổi mới cốt lõi của nhóm —** liên kết nhiệm vụ gốc, lịch sử giao dịch, quyền hạn và bằng chứng để phát hiện **vượt ngân sách tích lũy** hoặc **chuyển sang mục đích khác dù từng giao dịch vẫn hợp lệ**.
+**Ngay cả giao dịch đúng mục tiêu vẫn có thể gây lỗ.** **EVM Simulation** chạy thử chính lệnh đó trên **bản sao trạng thái blockchain** để xem token nào ra/vào ví, số dư và quyền sử dụng tài sản thay đổi thế nào. **Economic Risk** đối chiếu kết quả với **giá Chainlink, danh mục tài sản và các giới hạn rủi ro**, giúp phát hiện swap bất lợi hoặc tài sản bị tập trung quá mức.
 
-Ngay cả khi AI làm đúng nhiệm vụ, **một giao dịch vẫn có thể gây thiệt hại tài chính**. Vì vậy, **EVM Simulation chạy thử chính giao dịch đó trên bản sao trạng thái blockchain** để xem token nào sẽ đi ra/đi vào ví, số dư và quyền sử dụng tài sản thay đổi ra sao. **Economic Risk** kết hợp kết quả mô phỏng với **giá tham chiếu Chainlink và danh mục tài sản** để kiểm trượt giá, tổn thất và tỷ trọng tài sản có vượt giới hạn không.
+**Mô phỏng chỉ phản ánh trạng thái lúc kiểm tra; giá hoặc pool có thể đổi trước khi thực thi.** **Z3** kiểm các giới hạn an toàn trong **dải giá và giả định được xác định**; các điều kiện **Φ (Phi)** được smart contract kiểm lại **ngay lúc chạy giao dịch**. **SDE** chỉ phê duyệt khi các bước bắt buộc đạt, **Attestor** mới ký **EIP-712 PDR** ràng buộc với giao dịch và **PolicyVault** kiểm chữ ký, nonce, điều kiện trước khi chuyển tiền. **AI không giữ khóa ký.**
 
-**Vấn đề cuối cùng:** thị trường có thể thay đổi *sau khi mô phỏng nhưng trước khi giao dịch được ghi lên blockchain*. **Z3** kiểm xem các giới hạn an toàn có thể bị vi phạm **trong dải giá và giả định đã xác định** hay không; các điều kiện **Φ (Phi)** được đưa vào hợp đồng để **kiểm lại khi thực thi**. Chỉ khi các lớp kiểm tra đạt yêu cầu, **SDE** mới cho phép **Attestor ký phê duyệt EIP-712**, và **PolicyVault** mới thực thi theo đúng quyền hạn đã cấp. **AI không giữ khóa ký.**
+**Đã có MVP trên Avalanche Fuji Testnet** với USDC payment/swap có receipt; ITAG có thử nghiệm LOCAL Anvil và real-model riêng. **Đây là prototype chưa audit độc lập**, không phải ví mainnet.
 
-**Đã có MVP trên Avalanche Fuji Testnet:** thanh toán USDC và hoán đổi USDC → WAVAX có biên nhận công khai; ITAG có kiểm thử ngân sách trên **LOCAL Anvil** và thực nghiệm ngữ nghĩa riêng. Đây là **prototype testnet, chưa audit độc lập**.
-
-**Xem nhanh bằng chứng:** [Live Demo](https://pacevant.live) · [ITAG chặn vượt ngân sách](#itag) · [Rủi ro kinh tế có số liệu](#economic-case) · [Giao dịch Fuji thật](#evidence) · [Các benchmark](#evaluation).  
-**Đọc sâu:** Sử dụng mục lục bên dưới. Kết quả **PUBLIC FUJI / LOCAL ANVIL / REAL MODEL / SCRIPTED / READ-ONLY** được phân biệt theo nguồn; website triển khai từ `develop`, có thể khác README `main`. [Runbook](docs/PUBLIC_FUJI_RUNBOOK.md).
+**Xem nhanh:** [Live Demo](https://pacevant.live) · [ITAG](#itag) · [Economic Risk có số liệu](#economic-case) · [Fuji receipts](#evidence) · [Benchmark](#evaluation).  
+**Đọc sâu:** Mục lục bên dưới. Các kết quả **PUBLIC FUJI / LOCAL ANVIL / REAL MODEL / SCRIPTED / READ-ONLY** được phân biệt; website triển khai từ `develop` và có thể khác README `main`. [Runbook](docs/PUBLIC_FUJI_RUNBOOK.md).
 
 ### Mục lục
 
