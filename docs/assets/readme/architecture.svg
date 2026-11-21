@@ -4,7 +4,7 @@
 <text x="63" y="57" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="800" letter-spacing="2.5" fill="#187F75">PACEVANT · SOURCE-ALIGNED ARCHITECTURE</text>
 <text x="63" y="108" font-family="Arial,Helvetica,sans-serif" font-size="33" font-weight="800" fill="#162F42">Bảo mật nhiệm vụ → Xác minh hậu quả → Ràng buộc thực thi</text>
 <rect x="60" y="126" width="1480" height="160" rx="21" fill="#EAF4F1" stroke="#C7E0D8" stroke-width="1.5"/>
-<text x="84" y="154" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing="1.6" fill="#4E7180">ZONE 1 — INTENT & AGENT SECURITY</text><rect x="85" y="182" width="460" height="84" rx="16" fill="#FFFFFF" stroke="#B9D3D9" stroke-width="1.5"/>
+<text x="84" y="154" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing="1.6" fill="#4E7180">ZONE 1 — INTENT &amp; AGENT SECURITY</text><rect x="85" y="182" width="460" height="84" rx="16" fill="#FFFFFF" stroke="#B9D3D9" stroke-width="1.5"/>
   <circle cx="113" cy="211" r="14" fill="#5ED5B6" fill-opacity=".17" stroke="#5ED5B6" stroke-width="1.5"/>
   <text x="113" y="216" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="800" fill="#234759">01</text>
   <text x="136" y="216" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="800" fill="#1C3546">Owner Mandate + IntentSpec</text>
@@ -17,7 +17,7 @@
   <text x="1085" y="216" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="800" fill="#234759">03</text>
   <text x="1108" y="216" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="800" fill="#1C3546">Trusted Builder</text>
   <text x="1108" y="243" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#66818F">Exact operation / canonical calldata</text><rect x="60" y="314" width="1480" height="160" rx="21" fill="#ECF2F9" stroke="#C9D7E8" stroke-width="1.5"/>
-<text x="84" y="342" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing="1.6" fill="#4E7180">ZONE 2 — EFFECT & ECONOMIC VERIFICATION</text><rect x="85" y="370" width="460" height="84" rx="16" fill="#FFFFFF" stroke="#B9D3D9" stroke-width="1.5"/>
+<text x="84" y="342" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing="1.6" fill="#4E7180">ZONE 2 — EFFECT &amp; ECONOMIC VERIFICATION</text><rect x="85" y="370" width="460" height="84" rx="16" fill="#FFFFFF" stroke="#B9D3D9" stroke-width="1.5"/>
   <circle cx="113" cy="399" r="14" fill="#8BB0EE" fill-opacity=".17" stroke="#8BB0EE" stroke-width="1.5"/>
   <text x="113" y="404" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="800" fill="#234759">04</text>
   <text x="136" y="404" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="800" fill="#1C3546">Anvil Baseline + Evidence</text>
@@ -30,7 +30,7 @@
   <text x="1085" y="404" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="800" fill="#234759">06</text>
   <text x="1108" y="404" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="800" fill="#1C3546">Z3 / Phi + SDE</text>
   <text x="1108" y="431" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#66818F">Conditional proof · Mandatory veto</text><rect x="60" y="502" width="1480" height="160" rx="21" fill="#EAF3F1" stroke="#C7E0D8" stroke-width="1.5"/>
-<text x="84" y="530" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing="1.6" fill="#4E7180">ZONE 3 — CRYPTOGRAPHIC & ON-CHAIN ENFORCEMENT</text><rect x="85" y="558" width="460" height="84" rx="16" fill="#FFFFFF" stroke="#B9D3D9" stroke-width="1.5"/>
+<text x="84" y="530" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing="1.6" fill="#4E7180">ZONE 3 — CRYPTOGRAPHIC &amp; ON-CHAIN ENFORCEMENT</text><rect x="85" y="558" width="460" height="84" rx="16" fill="#FFFFFF" stroke="#B9D3D9" stroke-width="1.5"/>
   <circle cx="113" cy="587" r="14" fill="#8FD5B8" fill-opacity=".17" stroke="#8FD5B8" stroke-width="1.5"/>
   <text x="113" y="592" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="800" fill="#234759">07</text>
   <text x="136" y="592" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="800" fill="#1C3546">Attestor + EIP-712 PDR</text>
