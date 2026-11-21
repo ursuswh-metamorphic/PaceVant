@@ -16,7 +16,16 @@ from treasury_contracts.v3 import OperationIntent
 def atomic(path, value):
     temporary = path.with_suffix(".tmp")
     temporary.write_text(json.dumps(value), encoding="utf-8")
-    os.replace(temporary, path)
+    # Windows readers can briefly hold a handle without delete sharing. Retry
+    # the same bytes rather than turning a transient UI read into a gate error.
+    for attempt in range(30):
+        try:
+            os.replace(temporary, path)
+            break
+        except PermissionError:
+            if attempt==29:
+                raise
+            time.sleep(.01)
 
 
 def job_event_writer(store,request_key,publish):

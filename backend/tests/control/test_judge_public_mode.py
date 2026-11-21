@@ -79,3 +79,21 @@ def test_shared_reconciliation_never_publishes_another_workflow_to_current_job()
     assert published==[]
     writer('current','OWNER_AUTHORITY',{},3)
     assert published==[{'workflow':{'workflow_id':'current'}}]
+
+
+def test_progress_replace_retries_transient_windows_reader_without_changing_data(tmp_path,monkeypatch):
+    from treasury_backend.operations import judge_worker
+
+    real_replace=judge_worker.os.replace
+    attempts=[]
+    def replace(source,target):
+        attempts.append(target)
+        if len(attempts)<3:
+            raise PermissionError('controlled reader sharing violation')
+        return real_replace(source,target)
+    monkeypatch.setattr(judge_worker.os,'replace',replace)
+    monkeypatch.setattr(judge_worker.time,'sleep',lambda _:None)
+    target=tmp_path/'progress.json'
+    judge_worker.atomic(target,{'active_stage':'ITAG','proof':'real persisted value'})
+    assert len(attempts)==3
+    assert json.loads(target.read_text())=={'active_stage':'ITAG','proof':'real persisted value'}
