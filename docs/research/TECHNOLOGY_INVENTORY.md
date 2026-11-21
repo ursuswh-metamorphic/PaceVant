@@ -1,5 +1,27 @@
 # Technology Inventory — Toàn bộ công nghệ PaceVant
 
+## Cập nhật bắt buộc — Public MVP ngày 21/11/2026
+
+**Ưu tiên bảng này cho public deployment; các bảng bên dưới giữ inventory các thành phần và checkpoint nghiên cứu (bao gồm legacy).** Việc một module tồn tại trong repo **không** đồng nghĩa module được expose trên public website.
+
+| Thành phần | Trạng thái public MVP mới | Nguồn xác thực |
+| --- | --- | --- |
+| Website | **React 19 + TypeScript + Vite 8**, React Flow (`@xyflow/react`), Tailwind v4, Radix UI, TanStack Query, Motion, Lucide, static Nginx | [package.json](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/frontend/package.json), [current review](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) |
+| Backend | Python/FastAPI modular monolith, public Judge worker, SQLite journal, systemd service; **không** có Node server/Docker production | [public runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md) |
+| Contract | **PolicyVaultMVP + PolicyVaultV3 base, LFJSwapAdapterV3**, signed EIP-712 domain v3, exact operation | [PolicyVaultMVP.sol](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/contracts/src/PolicyVaultMVP.sol), [deployment report](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/mvp-public-deployment-20261121.json) |
+| Public operations | **USDC_PAYMENT (0,01 test USDC)** và **SWAP_EXACT_IN (0,000001 test USDC → WAVAX)** qua allowlisted scope | [current system review](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) |
+| Simulation & risk | Anvil **baseline pinned fork** + effect extraction, Chainlink reference, economic/effect checks, ITAG, Z3/Phi | [runtime coordinator](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/backend/src/treasury_backend/modules/workflows/treasury.py), [economic audit](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/MVP_ECONOMIC_RISK_AUDIT.md) |
+| MEV research | Hypothetical reserve-shift/stress **LOCAL/research**; **không** phải engine MEV stress độc lập mặc định của public `TreasuryWorkflows.run()` | [Simulation research module](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/backend/src/treasury_backend/modules/execution/simulation/README.md) |
+| Research/legacy only | ERC-20 transfer LOCAL, V2/V3 research, Demo User gas credit, optional rebalance/autonomy | [merge analysis](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/MAIN_MERGE_20261121.md), [current review](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) |
+
+**Bằng chứng của public deployed path:** [Fuji receipts, code hashes và browser acceptance](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json) (tương ứng release/checkpoint trong JSON; **không** phải xác nhận mọi commit `main` được deploy). Public có fixed scenario và six UI **attack previews**; không có backend attack injection khi chọn preview.
+
+---
+
+### Inventory nguồn trước đây (bảo lưu để truy vết nghiên cứu)
+
+
+
 > **Phạm vi:** mô tả **các thành phần đã có trong mã nguồn**, source references và những tính năng **không** thuộc runtime hiện tại. Những tên công nghệ xuất hiện trong nghiên cứu nhưng chưa chạy không được tự động gán nhãn “đã tích hợp”. Đối chiếu cuối với [module map](../../backend/MODULES.md) và [System Design V2.1](../AI_Treasury_Security_System_Design_v2.1.md).
 
 ## 1. AI Agent & AI Security
