@@ -160,16 +160,37 @@ flowchart TD
 
 **Cách đọc:** Mỗi chặng trả lời *vì sao phải tồn tại*, không chỉ nêu tên công nghệ. Thứ tự dưới đây là cách gộp dễ hiểu, còn [16 bước giải thích đầy đủ](docs/architecture/ARCHITECTURE_EXPLAINED.md) giữ input, phương pháp, output, threat, giới hạn và source tương ứng từng module.
 
-| Chặng | Câu hỏi thực tế / đầu ra | Nếu bỏ qua thì sao? |
-| --- | --- | --- |
-| **1. Cấp quyền (Mandate + Intent)** | Owner đặt chính sách, task được xác thực: *AI được phép làm gì, trong bao lâu, với bao nhiêu tiền?* → scope/IntentSpec | Nội dung do AI hoặc tool tự viết có thể bị hiểu nhầm thành quyền người dùng cấp. |
-| **2. AI đề xuất + TaskShield** | Model tạo proposal; TaskShield kiểm token, amount, recipient, task binding và nguồn dữ liệu → verdict + typed violations | Giao dịch đúng EVM nhưng sai yêu cầu vẫn được đi tiếp. |
-| **3. Trusted Builder + Anvil Simulation** | Backend dựng **exact calldata**, fork blockchain để chạy thử; đo before/after token, approvals, logs → effects | Tin nguyên calldata hoặc lời khẳng định “an toàn” của Agent mà không kiểm hậu quả. |
-| **4. Portfolio, Oracle + Economic Risk** | Dùng Chainlink và số dư thật để kiểm slippage, minOut, loss, exposure, gas → PASS/FAIL | Swap đúng nhiệm vụ nhưng nhận quá ít WAVAX hoặc đẩy tài sản vượt tỷ trọng được phép. |
-| **5. ITAG — history và purpose** | Kiểm ngân sách/thứ tự từ lịch sử bằng rule; đối chiếu mục tiêu/candidate rationale bằng graph-aware semantic có evidence → PASS/REJECT | Nhiều transaction riêng lẻ hợp lệ có thể vượt task budget hoặc sai mục đích. |
-| **6. Z3 + Phi** | Kiểm những giới hạn hữu hạn trong price bands đã định; biên dịch postconditions Solidity có thể thực thi → proof/Φ | Simulation chỉ cho biết một trạng thái; khi chain thay đổi không còn ràng buộc hậu quả. |
-| **7. SDE + Attestor + signed PDR** | Tổng hợp mọi gate; chỉ APPROVE mới được ký dữ liệu EIP-712 gắn với operation/constraints → quyền ký có điều kiện | AI tự quyết hoặc thay transaction sau khi được duyệt. |
-| **8. Preflight + Relayer + PolicyVault + Monitor** | Kiểm lại trước gửi; Vault kiểm chữ ký, nonce, session, hạn mức, deltas và allowance; cuối cùng đối soát public receipt → execution hoặc reject/revert | Off-chain verdict có thể bị bỏ qua, replay hoặc UI tuyên bố thành công sai. |
+1. **Cấp quyền (Mandate + Intent)**
+   - *Câu hỏi thực tế / đầu ra:* Owner đặt chính sách, task được xác thực: *AI được phép làm gì, trong bao lâu, với bao nhiêu tiền?* → scope/IntentSpec
+   - *Nếu bỏ qua thì sao?* Nội dung do AI hoặc tool tự viết có thể bị hiểu nhầm thành quyền người dùng cấp.
+
+2. **AI đề xuất + TaskShield**
+   - *Câu hỏi thực tế / đầu ra:* Model tạo proposal; TaskShield kiểm token, amount, recipient, task binding và nguồn dữ liệu → verdict + typed violations
+   - *Nếu bỏ qua thì sao?* Giao dịch đúng EVM nhưng sai yêu cầu vẫn được đi tiếp.
+
+3. **Trusted Builder + Anvil Simulation**
+   - *Câu hỏi thực tế / đầu ra:* Backend dựng **exact calldata**, fork blockchain để chạy thử; đo before/after token, approvals, logs → effects
+   - *Nếu bỏ qua thì sao?* Tin nguyên calldata hoặc lời khẳng định “an toàn” của Agent mà không kiểm hậu quả.
+
+4. **Portfolio, Oracle + Economic Risk**
+   - *Câu hỏi thực tế / đầu ra:* Dùng Chainlink và số dư thật để kiểm slippage, minOut, loss, exposure, gas → PASS/FAIL
+   - *Nếu bỏ qua thì sao?* Swap đúng nhiệm vụ nhưng nhận quá ít WAVAX hoặc đẩy tài sản vượt tỷ trọng được phép.
+
+5. **ITAG — history và purpose**
+   - *Câu hỏi thực tế / đầu ra:* Kiểm ngân sách/thứ tự từ lịch sử bằng rule; đối chiếu mục tiêu/candidate rationale bằng graph-aware semantic có evidence → PASS/REJECT
+   - *Nếu bỏ qua thì sao?* Nhiều transaction riêng lẻ hợp lệ có thể vượt task budget hoặc sai mục đích.
+
+6. **Z3 + Phi**
+   - *Câu hỏi thực tế / đầu ra:* Kiểm những giới hạn hữu hạn trong price bands đã định; biên dịch postconditions Solidity có thể thực thi → proof/Φ
+   - *Nếu bỏ qua thì sao?* Simulation chỉ cho biết một trạng thái; khi chain thay đổi không còn ràng buộc hậu quả.
+
+7. **SDE + Attestor + signed PDR**
+   - *Câu hỏi thực tế / đầu ra:* Tổng hợp mọi gate; chỉ APPROVE mới được ký dữ liệu EIP-712 gắn với operation/constraints → quyền ký có điều kiện
+   - *Nếu bỏ qua thì sao?* AI tự quyết hoặc thay transaction sau khi được duyệt.
+
+8. **Preflight + Relayer + PolicyVault + Monitor**
+   - *Câu hỏi thực tế / đầu ra:* Kiểm lại trước gửi; Vault kiểm chữ ký, nonce, session, hạn mức, deltas và allowance; cuối cùng đối soát public receipt → execution hoặc reject/revert
+   - *Nếu bỏ qua thì sao?* Off-chain verdict có thể bị bỏ qua, replay hoặc UI tuyên bố thành công sai.
 
 **Ba sự phân biệt dễ nhầm:** TaskShield kiểm *đúng nhiệm vụ*, Economic Risk kiểm *hậu quả kinh tế*, ITAG kiểm *tính nhất quán qua lịch sử/mục tiêu*. Z3 **không** chạy trên blockchain; Phi là ràng buộc để Solidity kiểm. Relayer trả **AVAX gas**, không phải người được AI giao quyền tự tiêu treasury.
 
