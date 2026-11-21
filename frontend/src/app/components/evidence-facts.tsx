@@ -1,3 +1,5 @@
+import {formatGasPaid} from '@/lib/format';
+import {publicEvidence} from '@/lib/security-evidence';
 import {Accordion, AccordionItem} from '@/components/ui/accordion';
 import {describeReason} from '@/lib/run-feedback';
 import {units} from '@/lib/format';
@@ -41,6 +43,8 @@ Object.assign(labels, {
 const ignored=new Set(['smt2','trace','graph','signature','owner_signature','raw_tx','raw_transaction']);
 export function Facts({value,language,context,depth=0,field=''}:{value:Json;language:Language;context?:Evidence;depth?:number;field?:string}) {
  const vi=language==='vi';
+ if(field==='actual_cost_wei')return <span>{formatGasPaid(value,language)}</span>;
+ value=publicEvidence(value) as Json;
  if(value===null)return <span>{vi?'Không có':'None'}</span>;
  if(Array.isArray(value)){
    if(field==='price_intervals')return <div className="price-bounds">{value.map((bounds,i)=><div key={i}><span>{['USDC','WAVAX',vi?'Tài sản khác':'Other asset','AVAX'][i]??String(i+1)}</span><strong>{Array.isArray(bounds)&&bounds.length===2?units(String(bounds[0]),8,8)+' – '+units(String(bounds[1]),8,8)+' USD':String(bounds)}</strong></div>)}</div>;

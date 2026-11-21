@@ -186,6 +186,13 @@
   line-height: 1.6;
   margin-top: 12px;
 }
+.module-stop > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.module-stop > svg {
+  flex-shrink: 0;
+}
 
 /* Stage Input / Output blocks inside modal */
 .stage-input,
@@ -478,6 +485,7 @@
   font-family: var(--font-mono);
   color: var(--ink-3);
   padding: 4px 0;
+  overflow-wrap: anywhere;
 }
 
 /* Stage evidence detail (restored from 0e29aaf; dropped in the previous checkpoint) */

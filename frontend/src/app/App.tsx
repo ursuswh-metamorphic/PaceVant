@@ -11,6 +11,8 @@ import {Overview} from '@/components/overview';
 import {RunComposer} from '@/components/live/run-composer';
 import {ExecutionStatus, ExecutionHistory} from '@/components/execution-panels';
 import {RunSession} from '@/components/run-session';
+import {workflowNodes} from '@/lib/workflow-nodes';
+const SecurityResearch = lazy(() => import('@/components/security-research').then(module => ({default: module.SecurityResearch})));
 import {api, ApiError} from '@/lib/api';
 import {
   beginAttempt,
@@ -41,6 +43,7 @@ export default function App() {
   // React transition that yields to the browser, so the header animation never stalls.
   const [navTab, setNavTab] = useState(tab);
   function setTab(value: string) {
+    setFocusGate(undefined);
     setNavTab(value);
     startTransition(() => setPageTab(value));
   }
@@ -93,6 +96,7 @@ export default function App() {
     initial.attempt ? initial.attempt.job_id : initial.view?.job_id,
   );
   const [message, setMessage] = useState(initial.error);
+  const [focusGate, setFocusGate] = useState<{index: number; sequence: number}>();
   const [drawer, setDrawer] = useState(false);
   const [historyJob, setHistoryJob] = useState<Job>();
   const [opening, setOpening] = useState(false);
@@ -250,6 +254,7 @@ export default function App() {
   const tabs = [
     {value: 'overview', label: t.overview, testId: undefined},
     {value: 'live', label: t.demo, testId: 'tab-live'},
+    {value: 'research', label: vi ? 'Nghiên cứu' : 'Research', testId: 'tab-research'},
     {value: 'history', label: t.evidence, testId: 'tab-history'},
   ];
 
@@ -410,7 +415,7 @@ export default function App() {
                           </div>
                         }
                       >
-                        <Pipeline job={current} language={language} />
+                        <Pipeline job={current} language={language} focusGate={focusGate}/>
                       </Suspense>
                     </section>
 
@@ -423,6 +428,15 @@ export default function App() {
                           job={current}
                           language={language}
                           mode={config.data?.mode}
+                          onGate={() => {
+                            const matching = workflowNodes.findIndex(node => node.active.includes(current?.active_stage ?? ''));
+                            if (current?.status === 'CONFIRMED' || matching >= 0) {
+                              setFocusGate({index: current?.status === 'CONFIRMED' ? 11 : matching, sequence: Date.now()});
+                            } else {
+                              setHistoryJob(current);
+                              setDrawer(true);
+                            }
+                          }}
                           onEvidence={() => {
                             setHistoryJob(current);
                             setDrawer(true);
@@ -433,6 +447,8 @@ export default function App() {
                   </div>
                 </TabsContent>
               )}
+
+              {tab === 'research' && <TabsContent value="research" forceMount><Suspense fallback={<p role="status">{t.processing}…</p>}><SecurityResearch language={language}/></Suspense></TabsContent>}
 
               {tab === 'history' && (
                 <TabsContent value="history" forceMount>

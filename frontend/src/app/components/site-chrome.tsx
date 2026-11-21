@@ -105,7 +105,7 @@ export function SiteHeader({
         <TabsList
           className="main-nav chrome-layer"
           aria-label={vi ? 'Điều hướng chính' : 'Main navigation'}
-          style={{'--i': index} as CSSProperties}
+          style={{'--i': index, '--tab-count': tabs.length} as CSSProperties}
         >
           <span className="nav-pill" aria-hidden="true" />
           {tabs.map(item => (

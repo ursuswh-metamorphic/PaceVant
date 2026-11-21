@@ -1,0 +1,121 @@
+{
+  "scope": "LOCAL_BROWSER_RECORDED_RESPONSES; NOT NEW EXECUTIONS",
+  "frontend_index_sha256": "76a637d1aab2bd21d78cdaae3c712cfd351d85d56dd8abc0882e0e1a524ad9a3",
+  "research_sha256": "fdd9625929bf3b8cc5f98f60c427aae620221a7a6c1333e22198e0c1d982328e",
+  "status": "PASS",
+  "renders": [
+    {
+      "case": "payment-amount",
+      "language": "en",
+      "viewport": "390x844",
+      "scope": "HISTORICAL FUJI ETH_CALL",
+      "gate": 9,
+      "state": "rejected"
+    },
+    {
+      "case": "payment-amount",
+      "language": "vi",
+      "viewport": "390x844",
+      "scope": "HISTORICAL FUJI ETH_CALL",
+      "gate": 9,
+      "state": "rejected"
+    },
+    {
+      "case": "payment-replay",
+      "language": "en",
+      "viewport": "390x844",
+      "scope": "HISTORICAL FUJI ETH_CALL",
+      "gate": 9,
+      "state": "rejected"
+    },
+    {
+      "case": "payment-replay",
+      "language": "vi",
+      "viewport": "390x844",
+      "scope": "HISTORICAL FUJI ETH_CALL",
+      "gate": 9,
+      "state": "rejected"
+    },
+    {
+      "case": "swap-slippage",
+      "language": "en",
+      "viewport": "390x844",
+      "scope": "HISTORICAL FUJI ETH_CALL",
+      "gate": 9,
+      "state": "rejected"
+    },
+    {
+      "case": "swap-slippage",
+      "language": "vi",
+      "viewport": "390x844",
+      "scope": "HISTORICAL FUJI ETH_CALL",
+      "gate": 9,
+      "state": "rejected"
+    },
+    {
+      "case": "swap-route",
+      "language": "en",
+      "viewport": "390x844",
+      "scope": "HISTORICAL FUJI ETH_CALL",
+      "gate": 9,
+      "state": "rejected"
+    },
+    {
+      "case": "swap-route",
+      "language": "vi",
+      "viewport": "390x844",
+      "scope": "HISTORICAL FUJI ETH_CALL",
+      "gate": 9,
+      "state": "rejected"
+    },
+    {
+      "case": "payment",
+      "language": "en",
+      "viewport": "390x844",
+      "scope": "PUBLIC FUJI EXECUTION",
+      "gate": 11,
+      "state": "passed"
+    },
+    {
+      "case": "payment",
+      "language": "vi",
+      "viewport": "390x844",
+      "scope": "PUBLIC FUJI EXECUTION",
+      "gate": 11,
+      "state": "passed"
+    },
+    {
+      "case": "swap",
+      "language": "en",
+      "viewport": "390x844",
+      "scope": "PUBLIC FUJI EXECUTION",
+      "gate": 11,
+      "state": "passed"
+    },
+    {
+      "case": "swap",
+      "language": "vi",
+      "viewport": "390x844",
+      "scope": "PUBLIC FUJI EXECUTION",
+      "gate": 11,
+      "state": "passed"
+    }
+  ],
+  "checks": [
+    "payment-amount: recorded status, scope, actual gate, evidence drawer, keyboard, mobile VI/EN, reload, history",
+    "payment-replay: recorded status, scope, actual gate, evidence drawer, keyboard, mobile VI/EN, reload, history",
+    "swap-slippage: recorded status, scope, actual gate, evidence drawer, keyboard, mobile VI/EN, reload, history",
+    "swap-route: recorded status, scope, actual gate, evidence drawer, keyboard, mobile VI/EN, reload, history",
+    "payment: recorded status, scope, actual gate, evidence drawer, keyboard, mobile VI/EN, reload, history",
+    "swap: recorded status, scope, actual gate, evidence drawer, keyboard, mobile VI/EN, reload, history",
+    "Research en: step 3 unsigned, exact graph counts, node evidence, keyboard, desktop/mobile/tablet overflow",
+    "Research vi: step 3 unsigned, exact graph counts, node evidence, keyboard, desktop/mobile/tablet overflow",
+    "UNAVAILABLE: partial workflow does not synthesize PASS or history; missing data/long reason mobile",
+    "UNKNOWN: partial workflow does not synthesize PASS or history; missing data/long reason mobile",
+    "RUNNING: partial workflow does not synthesize PASS or history; missing data/long reason mobile",
+    "Synthetic missing-history UI fixture: exactly 3 supplied nodes and 1 edge; no fabricated outcomes",
+    "Interrupted recovery: Resume reads the original request key; restores recorded terminal job without POST"
+  ],
+  "browser_errors": [],
+  "writes": []
+}

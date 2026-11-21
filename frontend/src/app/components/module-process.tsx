@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {lazy, Suspense, useState} from 'react';
 import {Activity, CheckCircle2, CircleAlert, XCircle, ChevronDown, Clock3, GitBranch, Link2, LoaderCircle} from 'lucide-react';
 import {Accordion, AccordionItem} from './ui/accordion';
 import {Facts} from './evidence-facts';
@@ -6,6 +6,9 @@ import {checkTitle, jsonRows, latestChecks, publicGraph, statusText, stepEvents}
 import {object, stage, text, units} from '@/lib/format';
 import type {Evidence, Job} from '@/lib/types';
 import type {Language} from '@/lib/i18n';
+
+import {BindingChain} from './security-evidence';
+const InteractiveGraph = lazy(() => import('./itag-graph').then(module => ({default: module.ItagGraph})));
 
 const at=(seconds:number,language:Language)=>new Date(seconds*1000).toLocaleTimeString(language==='vi'?'vi-VN':'en-GB',{timeZone:'Asia/Ho_Chi_Minh',hour12:false});
 export function ProcessLog({job,index,language,context}:{job:Job;index:number;language:Language;context:Evidence}){
@@ -44,7 +47,7 @@ export function IntentGraph({job,language,context}:{job:Job;language:Language;co
  const trust:Record<string,[string,string]>={AUTHENTICATED:['Đã xác thực nguồn','Authenticated source'],UNTRUSTED:['Cần được kiểm tra','Untrusted proposal'],VERIFIED_RECORD:['Bản ghi đã xác minh','Verified record']};
  const name=(id:string)=>{const n=nodes.find(n=>n.node_id===id);return n?(kind[text(n.kind)]?.[vi?0:1]??text(n.kind)):id;};
  return <section className="module-special"><h4><GitBranch size={16}/>{vi?'Đồ thị ý định và nguồn gốc bằng chứng':'Intent and provenance graph'}</h4><p className="module-note">{vi?'Các nút và quan hệ được backend ghi nhận; đề xuất của AI luôn tách khỏi quyền chủ ví.':'Backend-recorded nodes and relationships keep AI proposals separate from owner authority.'}</p>
-  <ol className="provenance-nodes">{nodes.map((node,index)=><li key={text(node.node_id)}><span className="provenance-number">{index+1}</span><div><strong>{name(text(node.node_id))}</strong><span className="provenance-trust">{trust[text(node.trust)]?.[vi?0:1]??text(node.trust)}</span><code>{text(node.node_id)}</code><Accordion type="single" collapsible><AccordionItem value="node" title={vi?'Nguồn dữ liệu và tham chiếu':'Source data and references'}><Facts value={{evidence_refs:node.evidence_refs??[],...object(node.data)}} language={language} context={context}/></AccordionItem></Accordion></div></li>)}</ol>
+  <Suspense fallback={<p>{vi?'Đang tải đồ thị…':'Loading ITAG…'}</p>}><InteractiveGraph graph={graph} language={language}/></Suspense><details><summary>{vi?'Danh sách nguồn dữ liệu':'Source record list'}</summary><ol className="provenance-nodes">{nodes.map((node,index)=><li key={text(node.node_id)}><span className="provenance-number">{index+1}</span><div><strong>{name(text(node.node_id))}</strong><span className="provenance-trust">{trust[text(node.trust)]?.[vi?0:1]??text(node.trust)}</span><code>{text(node.node_id)}</code><Accordion type="single" collapsible><AccordionItem value="node" title={vi?'Nguồn dữ liệu và tham chiếu':'Source data and references'}><Facts value={{evidence_refs:node.evidence_refs??[],...object(node.data)}} language={language} context={context}/></AccordionItem></Accordion></div></li>)}</ol></details>
   {!!edges.length&&<ul className="provenance-links">{edges.map((edge,index)=><li key={index}><Link2 size={14}/><span>{name(text(edge.source))} <span aria-hidden="true">→</span> {name(text(edge.target))}<small>{edge.kind==='AUTHORIZES'?(vi?'Quan hệ cấp quyền đã ghi nhận':'Recorded authorization relationship'):text(edge.kind)} · {text(edge.provenance)}</small></span></li>)}</ul>}
   {!!stage(job.workflow,'ITAG')?.graph_hash&&<div className="binding-hash"><span>{vi?'Dấu vân tay đồ thị':'Graph hash'}</span><code>{text(stage(job.workflow,'ITAG')?.graph_hash)}</code></div>}
  </section>;
@@ -56,11 +59,7 @@ export function OracleEvidence({job,language,context}:{job:Job;language:Language
  return <section className="module-special"><h4><Activity size={16}/>{vi?'Nguồn giá Chainlink độc lập':'Independent Chainlink reference'}</h4><p className="module-note">{vi?'Giá Chainlink được kiểm tra độc lập với báo giá LFJ. Tuổi giá tính tại thời điểm backend đọc dữ liệu, không phải lúc xem lại.':'Chainlink is verified independently of LFJ. Age is measured at the backend observation time.'}</p><div className="oracle-observations">{feeds.map(feed=><div key={text(feed.feed)}><strong>{text(feed.description)}</strong><span className="oracle-price">{units(text(feed.answer_raw),Number(feed.decimals),8)} USD</span><dl><div><dt>{vi?'Tuổi giá khi quan sát':'Age at observation'}</dt><dd>{Number.isFinite(observed)&&feed.updated_at!==undefined?Math.max(0,observed-Number(feed.updated_at))+' '+(vi?'giây':'seconds'):'—'}</dd></div><div><dt>{vi?'Tuổi tối đa của nguồn':'Feed age limit'}</dt><dd>{text(feed.max_age_seconds)} {vi?'giây':'seconds'}</dd></div><div><dt>{vi?'Vòng cập nhật':'Round'}</dt><dd>{text(feed.round_id)}</dd></div></dl></div>)}</div><Facts value={{oracle_valid_until:context.oracle_valid_until??null,max_oracle_age:object(context.proof_policy).max_oracle_age??null,price_intervals:context.price_intervals??null}} language={language} context={context}/></section>;
 }
 export function EvidenceBindings({job,language}:{job:Job;language:Language}){
- const vi=language==='vi',proof=stage(job.workflow,'PROOF'),attestation=stage(job.workflow,'ATTESTATION');
- if(!proof)return null;
- const signed=object(attestation?.signed_fields),receipt=job.workflow?.activity?.filter(e=>e.check_id==='VAULT_EFFECTS').at(-1),actual=job.workflow?.outcome?.status==='CONFIRMED'?object(receipt?.observed):{};
- const rows=[[vi?'Ý định':'Intent',proof.intent_hash,signed.intentHash],[vi?'Bằng chứng mô phỏng':'Measured effects',proof.evidence_root,signed.evidenceRoot,actual.evidence_root],[vi?'Chứng minh Z3':'Z3 proof',proof.proof_hash,signed.proofContextHash,actual.proof_hash],[vi?'Điều kiện Phi':'Phi constraints',proof.phi_hash,attestation?.constraints_hash]];
- return <section className="module-special"><h4><Link2 size={16}/>{vi?'Chuỗi bằng chứng: chứng minh → chữ ký → thực thi':'Evidence chain: proof → signature → execution'}</h4><p className="module-note">{vi?'Cùng một ý định, bằng chứng và điều kiện bảo vệ phải được giữ nguyên qua các bước. Dữ liệu chưa được backend ghi nhận được đánh dấu rõ.':'Intent, evidence and protection conditions must remain bound across the workflow. Unrecorded links remain explicit.'}</p><div className="binding-rows">{rows.map(([label,expected,signedHash,receiptHash])=><div key={text(label)}><strong>{text(label)}</strong><span>{signedHash?(expected===signedHash?(vi?'Khớp với dữ liệu ký':'Matches signed data'):(vi?'Chưa khớp — cần kiểm tra':'Mismatch — inspect evidence')):(vi?'Chưa có trường ký để đối chiếu':'Signed field not recorded')}{receiptHash?' · '+(receiptHash===expected?(vi?'Khớp sự kiện hợp đồng':'Matches contract event'):(vi?'Sự kiện chưa khớp':'Event mismatch')):''}</span><code>{text(expected,vi?'Chưa có dữ liệu':'Not recorded')}</code></div>)}</div></section>;
+ return <BindingChain job={job} language={language}/>;
 }
 
 export function ModelMetrics({job,language,context}:{job:Job;language:Language;context:Evidence}){

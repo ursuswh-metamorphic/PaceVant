@@ -180,6 +180,7 @@ export function RunSession({
         />
       </span>
       <div className="run-session-copy">
+        {job?.execution_kind === 'HISTORICAL_ETH_CALL' && <span className="evidence-scope">HISTORICAL FUJI ETH_CALL</span>}
         <div>
           <strong>{title}</strong>
           <span className="run-scenario-name">

@@ -4,6 +4,7 @@ import {FileInput, FileOutput, Database, Clock3, ChevronRight, ShieldCheck} from
 import {Accordion, AccordionItem} from './ui/accordion';
 import {Facts} from './evidence-facts';
 import {EvidenceBindings, IntentGraph, ModelMetrics, OracleEvidence, ProcessLog} from './module-process';
+import {FormalScope, HistoricalProbeEvidence, RiskComparison, ScopeBadge} from './security-evidence';
 import {nodeTitle, workflowNodes} from '@/lib/workflow-nodes';
 import {pick, sourceTitle, stepEvents, stepInputs} from '@/lib/module-evidence';
 import {describeReason} from '@/lib/run-feedback';
@@ -57,7 +58,7 @@ export function StageDetail({job,index,events,language}:{job?:Job;index:number;e
  const additional=pick(output,Object.keys(output??{}).filter(key=>!Object.keys(curated).includes(key)&&!['graph','queries','signature','raw_tx','owner_signature'].includes(key)));
  const start=activity.find(e=>e.kind==='started'),beforeWorkflow=index===0&&!workflow;
  return <div className="stage-detail-content" data-module={index}>
-  <div className="module-value"><ShieldCheck size={17}/><p>{usp[index]?.[vi?0:1]}</p></div>
+  <ScopeBadge job={job}/><div className="module-value"><ShieldCheck size={17}/><p>{usp[index]?.[vi?0:1]}</p></div>
   <div className="evidence-provenance"><Database size={16}/><div><strong>{job.environment==='VERIFIED_REPLAY'?(vi?'Dữ liệu từ bản ghi thực thi':'Recorded execution data'):(vi?'Dữ liệu do backend ghi nhận':'Backend-recorded evidence')}</strong><span>{workflow?.workflow_id??job.job_id}</span></div></div>
   <nav className="detail-section-nav" aria-label={vi?'Nội dung chi tiết bước':'Step detail sections'}><span className="detail-step-context">{nodeTitle(index,language)}</span>{[[vi?'Đầu vào':'Inputs',inputRef],[vi?'Xử lý':'Processing',processRef],[vi?'Đầu ra':'Outputs',outputRef]].map(([label,ref])=><button type="button" key={String(label)} onClick={()=>{const target=ref as typeof inputRef;target.current?.scrollIntoView({block:'start',behavior:'instant'});}}>{String(label)}</button>)}</nav>
   <section className="stage-input" ref={inputRef}><h4><FileInput size={16}/>{vi?'Đầu vào và nguồn dữ liệu':'Inputs and data sources'}</h4>
@@ -69,6 +70,9 @@ export function StageDetail({job,index,events,language}:{job?:Job;index:number;e
   <div ref={processRef} className="process-anchor"><ProcessLog job={job} index={index} language={language} context={context}/></div>
   {index===5&&<><IntentGraph job={job} language={language} context={context}/><Accordion type="single" collapsible className="shield-history"><AccordionItem value="shield" title={vi?'Các lần Shield kiểm tra xuyên suốt quy trình':'Shield checks throughout the workflow'}><ProcessLog job={{...job,workflow:workflow?{...workflow,activity:workflow.activity?.filter(e=>e.check_id?.startsWith('SHIELD_')).map(e=>({...e,stage:'ITAG'}))}:undefined}} index={5} language={language} context={context}/></AccordionItem></Accordion></>}
   {(index===0||index===4)&&<OracleEvidence job={job} language={language} context={context}/>}
+  {index===4&&<RiskComparison job={job} language={language}/>}
+  {index===6&&<FormalScope job={job} language={language}/>}
+  {index===9&&job.attack&&<HistoricalProbeEvidence job={job} language={language}/>}
   {index>=7&&<EvidenceBindings job={job} language={language}/>}
   {(index===1||index===11)&&<ModelMetrics job={job} language={language} context={context}/>}
   <section className="stage-output" ref={outputRef}><h4><FileOutput size={16}/>{vi?'Đầu ra và kết quả mới nhất':'Latest output and result'}</h4>

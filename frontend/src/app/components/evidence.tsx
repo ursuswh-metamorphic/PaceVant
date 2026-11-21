@@ -4,8 +4,10 @@ import {Accordion, AccordionItem} from './ui/accordion';
 import {Dialog, DialogContent, DialogTitle, DialogDescription} from './ui/dialog';
 import {Button} from './ui/button';
 import {BlockReason} from './run-session';
-import {date, environment, object, short, stage, text} from '@/lib/format';
+import {date, object, short, stage, text} from '@/lib/format';
 import type {Evidence, Job} from '@/lib/types';
+import {publicEvidence} from '@/lib/security-evidence';
+import {BindingChain, FormalScope, HistoricalProbeEvidence, ReceiptGas, RiskComparison, ScopeBadge} from './security-evidence';
 import {dictionary, type Language} from '@/lib/i18n';
 
 export function CopyHash({value}: {value?: string}) {
@@ -40,7 +42,7 @@ export function CopyHash({value}: {value?: string}) {
 export function RawEvidence({value}: {value: unknown}) {
   return (
     <pre className="evidence-json">
-      {JSON.stringify(value ?? {status: 'Unavailable'}, null, 2)}
+      {JSON.stringify(publicEvidence(value) ?? {status: 'Unavailable'}, null, 2)}
     </pre>
   );
 }
@@ -224,7 +226,7 @@ export function EvidenceDrawer({
             {vi ? 'Bằng chứng thực thi có thể kiểm chứng' : 'Verifiable Execution Record'}
           </DialogTitle>
           <DialogDescription className="mt-1 text-xs text-slate-500">
-            {environment(job?.environment)} · {date(job?.created_at)}
+            <ScopeBadge job={job}/> · {date(job?.created_at)}
           </DialogDescription>
         </div>
 
@@ -234,7 +236,11 @@ export function EvidenceDrawer({
             <CopyHash value={job?.workflow?.workflow_id ?? job?.job_id} />
           </div>
 
-          {job && <BlockReason job={job} language={language} />}
+          {job && <><BlockReason job={job} language={language}/>{job.attack && <HistoricalProbeEvidence job={job} language={language}/>}</>}
+          <ReceiptGas job={job} language={language}/>
+          <RiskComparison job={job} language={language}/>
+          <FormalScope job={job} language={language}/>
+          <BindingChain job={job} language={language}/>
 
           <div className="mt-4">
             <EvidenceSections job={job} language={language} />

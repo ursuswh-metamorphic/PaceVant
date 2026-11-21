@@ -12,10 +12,12 @@ import {
   LoaderCircle,
   RotateCcw,
 } from 'lucide-react';
-import {date, publicExplorer, short, stage, units} from '@/lib/format';
+import {date, formatGasPaid, publicExplorer, short, stage, units} from '@/lib/format';
 import {PHASES, workflowProgress} from '@/lib/phases';
 import {nodeTitle, workflowNodes} from '@/lib/workflow-nodes';
 import {BlockReason} from './run-session';
+import {evidenceScope} from '@/lib/security-evidence';
+import {HistoricalProbeEvidence, RiskComparison, ScopeBadge} from './security-evidence';
 import {CopyHash} from './evidence';
 import {VerdictMark} from './illustrations';
 import {stateIcons} from './pipeline-icons';
@@ -199,7 +201,7 @@ function verdictFor(job: Job | undefined, language: Language): {tone: Tone; titl
   if (job.status === 'REJECTED')
     return {
       tone: 'rejected',
-      title: vi ? 'Bị chặn bởi policy' : 'Rejected by policy',
+      title: job.execution_kind === 'HISTORICAL_ETH_CALL' ? (vi ? 'Hợp đồng từ chối probe' : 'Contract rejected probe') : (vi ? 'Bị chặn bởi policy' : 'Rejected by policy'),
       detail: vi ? 'Một lớp kiểm tra đã từ chối giao dịch. Xem lý do bên dưới.' : 'A security layer rejected the transaction. See the reason below.',
     };
   if (outcome && !['CONFIRMED', 'REVERTED'].includes(outcome.status))
@@ -239,11 +241,13 @@ export function ExecutionStatus({
   language,
   mode,
   onEvidence,
+  onGate,
 }: {
   job?: Job;
   language: Language;
   mode?: Job['environment'];
   onEvidence: () => void;
+  onGate?: () => void;
 }) {
   const t = copy[language];
   const d = dictionary[language];
@@ -270,6 +274,8 @@ export function ExecutionStatus({
         </div>
       </div>
 
+      <ScopeBadge job={job}/>
+      {job && onGate && <button type="button" className="security-evidence-link" onClick={onGate}>{vi?'Xem bước kiểm tra và bằng chứng':'Inspect gate and evidence'}</button>}
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={verdict.tone + verdict.title}
@@ -342,27 +348,17 @@ export function ExecutionStatus({
               ? vi
                 ? 'Tác động mô phỏng nằm trong giới hạn tổn thất và chi phí của Owner.'
                 : "Simulated effects stay within the Owner's loss and cost limits."
-              : vi
-                ? 'Tác động mô phỏng vượt giới hạn được cho phép.'
-                : 'Simulated effects exceed the permitted limits.'}
+              : risk.result === 'FAIL'
+                ? (vi ? 'Tác động mô phỏng vượt giới hạn được cho phép.' : 'Simulated effects exceed the permitted limits.')
+                : (vi ? 'Chưa có kết luận rủi ro được xác minh.' : 'No verified risk verdict is available.')}
           </p>
         </section>
       )}
 
       {job && <BlockReason job={job} language={language} />}
 
-      {job?.attack && (
-        <section className="panel-section" data-testid="attack-evidence">
-          <h3>{vi ? 'Bằng chứng ca kiểm thử' : 'Security test evidence'}</h3>
-          <p className="risk-summary">{vi ? 'Kiểm tra eth_call trên trạng thái Fuji lịch sử với giao dịch đối chứng đã thành công. Không ký mới, không phát giao dịch; các bước AI không chạy trong ca này.' : 'Historical Fuji eth_call with a successful control transaction. No new signing or broadcast; AI stages do not run in this test.'}</p>
-          <dl className="fact-rows">
-            <div><dt>{vi ? 'Ca thử' : 'Case'}</dt><dd>{job.attack}</dd></div>
-            <div><dt>{vi ? 'Đối chứng' : 'Control'}</dt><dd>{String(job.attack_evidence?.control ?? '—')}</dd></div>
-            <div><dt>{vi ? 'Lỗi dự kiến' : 'Expected error'}</dt><dd>{String(job.attack_evidence?.expected_error ?? '—')}</dd></div>
-            <div><dt>{vi ? 'Lỗi thực tế' : 'Observed selector'}</dt><dd>{String(job.attack_evidence?.observed_selector ?? '—')}</dd></div>
-          </dl>
-        </section>
-      )}
+      {job?.attack && <HistoricalProbeEvidence job={job} language={language}/>}
+      {risk && <RiskComparison job={job} language={language}/>}
 
       <section className="panel-section">
         <div className="panel-label">
@@ -374,7 +370,7 @@ export function ExecutionStatus({
         <dl className="fact-rows">
           <div>
             <dt>{vi ? 'Mạng' : 'Network'}</dt>
-            <dd>{networkLabel(job?.environment ?? mode, language)}</dd>
+            <dd>{job ? evidenceScope(job) : networkLabel(mode, language)}</dd>
           </div>
           <div>
             <dt>{vi ? 'Trạng thái' : 'Status'}</dt>
@@ -387,11 +383,10 @@ export function ExecutionStatus({
             <dd>{outcome?.tx_hash ? <CopyHash value={outcome.tx_hash} /> : <span className="hash-empty">—</span>}</dd>
           </div>
           {outcome &&
-            ['CONFIRMED', 'REVERTED'].includes(outcome.status) &&
-            outcome.system_gas_expense?.actual_cost_wei && (
+            ['CONFIRMED', 'REVERTED'].includes(outcome.status) && (
               <div>
                 <dt>{job?.environment === 'REAL_FUJI_EXECUTION' ? (vi ? 'Gas đã trả' : 'Gas paid') : 'Gas EVM'}</dt>
-                <dd>{units(outcome.system_gas_expense.actual_cost_wei, 18, 6)} AVAX</dd>
+                <dd>{formatGasPaid(outcome.system_gas_expense?.actual_cost_wei, language)}</dd>
               </div>
             )}
         </dl>
@@ -447,7 +442,7 @@ function toneOf(job: Job) {
   if (job.status === 'CONFIRMED') return 'passed';
   if (job.status === 'REJECTED') return 'rejected';
   if (!job.terminal) return 'running';
-  if (job.status === 'UNKNOWN' || job.status === 'INTERRUPTED') return 'unknown';
+  if (job.status === 'UNKNOWN' || job.status === 'INTERRUPTED' || job.status === 'UNAVAILABLE') return 'unknown';
   return 'failed';
 }
 
@@ -544,7 +539,7 @@ export function ExecutionHistory({
                         <td data-label={t.operation}>
                           <span>
                             <strong>{t[job.scenario]}</strong>
-                            <span className="cell-sub">{networkLabel(job.environment, language)}</span>
+                            <span className="cell-sub">{evidenceScope(job)}</span>
                           </span>
                         </td>
                         <td data-label={t.result}>

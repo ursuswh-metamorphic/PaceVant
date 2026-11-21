@@ -282,7 +282,7 @@ function runTone(job?: Job): {state: ModuleState; label: [string, string]} {
   return {state: 'failed', label: ['Không hoàn tất', 'Not completed']};
 }
 
-export function Pipeline(props: {job?: Job; language: Language}) {
+export function Pipeline(props: {job?: Job; language: Language; focusGate?: {index: number; sequence: number}}) {
   return (
     <ReactFlowProvider>
       <PipelineCanvas {...props} />
@@ -290,11 +290,12 @@ export function Pipeline(props: {job?: Job; language: Language}) {
   );
 }
 
-function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
+function PipelineCanvas({job, language, focusGate}: {job?: Job; language: Language; focusGate?: {index: number; sequence: number}}) {
   const t = dictionary[language];
   const vi = language === 'vi';
   const reduced = useReducedMotion();
   const [selected, setSelected] = useState<number | null>(null);
+  useEffect(() => {if (focusGate && focusGate.index >= 0 && focusGate.index < 12) setSelected(focusGate.index);}, [focusGate]);
   const [width, setWidth] = useState(0);
   const [maxHeight, setMaxHeight] = useState(Infinity);
   const [zoomed, setZoomed] = useState(false);

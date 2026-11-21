@@ -17,17 +17,17 @@ const payment: AttackPreset[] = [
     id: 'payment-amount',
     title: ['Nâng số tiền thanh toán', 'Payment amount inflation'],
     description: [
-      'Nội dung không đáng tin yêu cầu trả nhiều USDC hơn số tiền được cho phép.',
+      'Đổi số tiền từ 0,01 thành 0,02 USDC nhưng giữ chữ ký gốc. Historical Fuji eth_call kiểm tra hợp đồng từ chối dữ liệu đã bị sửa.',
       'Increase the payment from 0.01 to 0.02 USDC with the original signature; the contract must reject the changed data.',
     ],
     change: [
       'Số tiền cố định → số tiền lớn hơn yêu cầu',
       'Fixed authorized amount → larger payment amount',
     ],
-    checks: ['Agent & Intent', 'Economic Risk', 'Z3 & Phi'],
+    checks: ['Historical Fuji eth_call', 'PolicyVault signature integrity'],
     expected: [
-      'Kiểm tra số tiền chính xác, hạn mức chi tiêu và thay đổi tài sản đo được.',
-      'Check exact amount, spend limits and measured asset changes.',
+      'BadSignature: bảo toàn dữ liệu đã ký; không phải AI phát hiện tấn công.',
+      'BadSignature: signed-data integrity; not AI attack detection.',
     ],
   },
   {
@@ -41,7 +41,7 @@ const payment: AttackPreset[] = [
       'Nonce còn hiệu lực → nonce đã sử dụng',
       'Valid nonce → previously used nonce',
     ],
-    checks: ['Attestor', 'Exact Preflight', 'Relayer & PolicyVault'],
+    checks: ['Historical Fuji eth_call', 'PolicyVault nonce replay enforcement'],
     expected: [
       'Kiểm tra lại nonce, trạng thái và hiệu lực chữ ký; không cho phép thanh toán trùng.',
       'Revalidate nonce, state and signature validity to prevent duplicate payment.',
@@ -54,34 +54,34 @@ const swap: AttackPreset[] = [
     id: 'swap-slippage',
     title: ['Hạ đầu ra tối thiểu', 'Minimum output manipulation'],
     description: [
-      'Báo giá độc hại cố nới điều kiện nhận WAVAX để che giấu tổn thất.',
+      'Hạ minOutput xuống 1 đơn vị gốc nhưng giữ chữ ký cũ. Historical Fuji eth_call kiểm tra ràng buộc dữ liệu đã ký.',
       'Lower minimum WAVAX output to 1 base unit with the original signature; the contract must reject it.',
     ],
     change: [
       'Đầu ra được bảo vệ → đầu ra dưới giới hạn cho phép',
       'Protected output → output below the allowed bound',
     ],
-    checks: ['Trusted Builder', 'EVM Simulation', 'Economic Risk', 'Z3 & Phi'],
+    checks: ['Historical Fuji eth_call', 'PolicyVault signature integrity'],
     expected: [
-      'Đối chiếu đầu ra mô phỏng với intent, báo giá độc lập và giới hạn tổn thất.',
-      'Compare simulated output with intent, independent pricing and loss limits.',
+      'BadSignature: dữ liệu thay đổi không còn khớp chữ ký; không chứng minh cổng slippage đã chạy.',
+      'BadSignature: mutated data no longer matches its signature; does not establish slippage-gate execution.',
     ],
   },
   {
     id: 'swap-route',
     title: ['Thay router ngoài phạm vi', 'Unauthorized swap router'],
     description: [
-      'Phản hồi công cụ cố chuyển giao dịch sang contract ngoài phạm vi được cấp quyền.',
+      'Thay router nhưng giữ chữ ký gốc. Historical Fuji eth_call kiểm tra hợp đồng từ chối dữ liệu khác với dữ liệu đã ký.',
       'Replace the swap target with an unapproved router while retaining the original signature; the contract must reject it.',
     ],
     change: [
       'Đường giao dịch được duyệt → router ngoài phạm vi',
       'Approved route → unauthorized router',
     ],
-    checks: ['Trusted Builder', 'Shield + ITAG', 'Relayer & PolicyVault'],
+    checks: ['Historical Fuji eth_call', 'PolicyVault signature integrity'],
     expected: [
-      'Ràng buộc contract đích, đường giao dịch và calldata với phạm vi được phép.',
-      'Bind target contract, route and calldata to the authorized scope.',
+      'BadSignature: ràng buộc chữ ký; không phải Shield hay ITAG phát hiện router độc hại.',
+      'BadSignature: signature binding; not Shield or ITAG detection of a malicious router.',
     ],
   },
 ];

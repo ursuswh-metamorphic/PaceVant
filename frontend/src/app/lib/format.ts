@@ -6,6 +6,12 @@ export function units(value: string | undefined, decimals = 6, precision = 6) {
   const scale = 10n ** BigInt(decimals), tail = (number % scale).toString().padStart(decimals, '0').slice(0, precision).replace(/0+$/, '');
   return (negative ? '−' : '') + (number / scale).toLocaleString('en-US') + (tail ? '.' + tail : '');
 }
+/** Actual receipt expense only. Keep every wei, including amounts below 10^-6 AVAX. */
+export function formatGasPaid(value: unknown, language: 'vi' | 'en' = 'en'): string {
+  const raw = typeof value === 'string' ? value : typeof value === 'number' && Number.isSafeInteger(value) ? String(value) : '';
+  if (!/^\d+$/.test(raw)) return language === 'vi' ? 'Chưa có dữ liệu' : 'Unavailable';
+  return units(raw, 18, 18) + ' AVAX';
+}
 export function short(value?: string, length = 6) {return value ? value.slice(0, length + 2) + '…' + value.slice(-length) : 'Unavailable';}
 export function date(seconds?: number) {return seconds ? new Date(seconds * 1000).toLocaleString('en-GB', {timeZone:'Asia/Ho_Chi_Minh', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false}) + ' UTC+7' : 'Unavailable';}
 export function stage(workflow: Workflow | undefined, name: string): Evidence | undefined {return workflow?.timeline.slice().reverse().find(event => event.stage === name)?.evidence;}
