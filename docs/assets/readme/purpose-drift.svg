@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1040" role="img" aria-label="Ví dụ purpose drift trong nghiên cứu ITAG: một hành động có thể pass numeric constraints nhưng mâu thuẫn mục tiêu người dùng, graph-aware semantic evaluator kết luận MISALIGNED. Đây là minh họa kịch bản synthetic real-model evaluation, không phải Fuji attack.">
+<defs>
+<linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#0B1326"/><stop offset="1" stop-color="#132B39"/></linearGradient>
+<linearGradient id="cyan" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#58D8C4"/><stop offset="1" stop-color="#7FBCEB"/></linearGradient>
+<marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0L11 6L0 12" fill="none" stroke="#68BFD2" stroke-width="2"/></marker>
+</defs>
+<rect width="1000" height="1040" rx="28" fill="url(#bg)"/>
+<rect x="40" y="40" width="920" height="960" rx="24" fill="#101F30" stroke="#385165" stroke-width="2"/>
+<text x="82" y="99" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#70D9BD">LONG-HORIZON · PURPOSE DRIFT</text>
+<text x="82" y="142" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700" fill="#F1F7FA">Đúng giới hạn số học vẫn có thể sai mục tiêu</text>
+
+<rect x="83" y="185" width="834" height="146" rx="20" fill="#183D40" stroke="#62B9B4" stroke-width="2"/>
+<text x="111" y="228" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#7AE1CC" font-weight="700">01 · AUTHENTICATED USER OBJECTIVE</text>
+<text x="111" y="272" font-family="Arial,Helvetica,sans-serif" font-size="31" fill="#F3FAFD" font-weight="700">Giữ WAVAX cho nhiệm vụ thanh khoản</text>
+<text x="111" y="307" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#B9C8D0">Nguồn được xác thực · Có task / mandate</text>
+
+<path d="M500 336V388" stroke="#68BFD2" stroke-width="4" marker-end="url(#arrow)"/>
+<rect x="83" y="405" width="834" height="150" rx="20" fill="#273042" stroke="#8392B0" stroke-width="2"/>
+<text x="111" y="450" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#C5D1EC" font-weight="700">02 · CANDIDATE ACTION + RATIONALE</text>
+<text x="111" y="493" font-family="Arial,Helvetica,sans-serif" font-size="31" fill="#F3FAFD" font-weight="700">Đề xuất sử dụng WAVAX cho mục đích khác</text>
+<text x="111" y="530" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#B9C8D0">Amount / token / policy vẫn trong hạn mức</text>
+
+<path d="M500 560V614" stroke="#68BFD2" stroke-width="4" marker-end="url(#arrow)"/>
+<rect x="83" y="628" width="394" height="183" rx="20" fill="#123631" stroke="#3BA786" stroke-width="2"/>
+<text x="110" y="677" font-family="Arial,Helvetica,sans-serif" font-size="25" fill="#C7EEE2" font-weight="700">DETERMINISTIC</text>
+<text x="110" y="712" font-family="Arial,Helvetica,sans-serif" font-size="23" fill="#AEC9C2">Chỉ kiểm ràng buộc số học</text>
+<text x="110" y="773" font-family="Arial,Helvetica,sans-serif" font-size="40" fill="#6DE0AE" font-weight="700">PASS</text>
+
+<rect x="523" y="628" width="394" height="183" rx="20" fill="#3B2835" stroke="#F59B9B" stroke-width="2"/>
+<text x="550" y="677" font-family="Arial,Helvetica,sans-serif" font-size="25" fill="#FFD5D1" font-weight="700">GRAPH + SEMANTIC</text>
+<text x="550" y="712" font-family="Arial,Helvetica,sans-serif" font-size="23" fill="#D3BBC7">Đối chiếu objective / evidence</text>
+<text x="550" y="773" font-family="Arial,Helvetica,sans-serif" font-size="40" fill="#FFAEA4" font-weight="700">MISALIGNED</text>
+<path d="M720 816V847" stroke="#F59B9B" stroke-width="4" marker-end="url(#arrow)"/>
+<rect x="83" y="862" width="834" height="82" rx="18" fill="#402735" stroke="#EF9398" stroke-width="2"/>
+<text x="111" y="914" font-family="Arial,Helvetica,sans-serif" font-size="34" fill="#FFE1E0" font-weight="700">SDE REJECT → KHÔNG KÝ PDR</text>
+<text x="83" y="982" font-family="Arial,Helvetica,sans-serif" font-size="21" fill="#C0D0D7">Minh họa loại case của thí nghiệm real-model v3.2 · Không phải Fuji live attack.</text>
+</svg>
