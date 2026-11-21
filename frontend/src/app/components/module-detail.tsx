@@ -15,7 +15,7 @@ export function stageDescription(index:number,language:Language){return workflow
 const fields:Record<string,string[]>={
  OWNER_AUTHORITY:['policy_active','session_active','paused','policy_version','policy_expires_at','session_expires_at','balances','authority','proof_policy','recipient_allowlist','token_allowlist','max_payment_usdc','payment_spend_remaining_usdc','daily_payment_remaining_usdc'],
  AGENT_PROPOSAL:['typed_intent','candidate_plan','explanation'],BUILD:['build_id','min_output','quote','route','call','operation','context_hash'],
- SIMULATION:['execution_status','before','after','deltas','received','allowances','gas_used','source_block','source_block_hash'],
+ SIMULATION:['execution_status','before','after','deltas','output_token','output_amount','output_recipient','received','allowances','gas_used','source_block','source_block_hash'],
  RISK:['result','reason_codes','oracle_source','gas_economics'],ITAG:['verdict','reason_codes','semantic','shield','history_hash'],
  PROOF:['status','risk_debit_usd_e8','spend_debit_usd_e8','phi','phi_hash','assumptions'],PROOF_REJECTION:['status','counterexample'],
  SDE:['verdict','reason_codes','expires_at','intent_hash','build_hash','evidence_root','proof_hash','risk_hash','temporal_hash'],

@@ -99,7 +99,10 @@ def run_attack(case, rpc_url, manifest_file, job_id):
         "source_block": attack_block,
         "workflow": {"workflow_id": job_id, "status": "REJECTED" if verified else "FAILED", "created_at": now,
             "intent": intent, "reason_code": reason, "timeline": [
-                {"stage": "OWNER_AUTHORITY", "created_at": now, "evidence": {"manifest_verified": True, "code_identity_verified": True}},
+                {"stage": "OWNER_AUTHORITY", "created_at": now, "evidence": {
+                    "manifest_verified": True, "code_identity_verified": True,
+                    "treasury": manifest.treasury, "usdc": manifest.usdc, "wavax": manifest.wavax,
+                    "source_block": attack_block, "scope": evidence["scope"]}},
                 {"stage": "EXACT_SIGNED_PREFLIGHT", "created_at": now, "evidence": evidence},
                 {"stage": "REJECTION_OR_RECOVERY", "created_at": now, "evidence": {"code": reason, "signed": False}},
             ]}}
