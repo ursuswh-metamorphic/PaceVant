@@ -12,6 +12,34 @@
 
 Ví dụ xuyên suốt: người dùng cho phép **swap một lượng Circle test USDC sang WAVAX** trong treasury; public demo là *fixed amount, fixed asset/route*, không cho AI tự do chọn arbitrary protocol. Một hành động có thể đúng mục tiêu nhưng sai giá; đúng giá nhưng vượt ngân sách; hoặc đúng mọi ràng buộc định lượng nhưng lý do thực hiện lại khác mục tiêu được giao. Vì vậy phải có nhiều loại kiểm tra độc lập.
 
+## Từ điển tối thiểu cho người mới với Web3
+
+<details>
+<summary><strong>Mở giải thích 16 thuật ngữ (đọc khi cần)</strong></summary>
+
+| Thuật ngữ | Hiểu đơn giản |
+| --- | --- |
+| **Treasury** | Quỹ tài sản do một bên quản lý, ở đây nằm trong hợp đồng vault trên testnet. |
+| **EVM** | Môi trường chạy smart contract của Ethereum và các blockchain tương thích như Avalanche C-Chain. |
+| **ERC-20** | Chuẩn token như USDC và WAVAX, có hàm chuyển tiền, cấp quyền và truy vấn số dư. |
+| **Owner** | Bên có quyền cấu hình chính sách, hạn mức và session của vault. |
+| **Mandate** | Sự ủy quyền có phạm vi: làm gì, số tiền tối đa bao nhiêu, với ai, trong thời gian nào. |
+| **IntentSpec** | Yêu cầu người dùng đã xác thực và được chuyển thành các trường có cấu trúc để kiểm tra. |
+| **Policy / Session** | Quy định bảo vệ vault / phiên được ủy quyền có thời hạn và ngân sách riêng. |
+| **TaskShield** | Bộ kiểm tra từng hành động có đúng yêu cầu và nguồn quyền được xác thực không. |
+| **ITAG** | Đồ thị và bộ kiểm tra xem hành động có phù hợp lịch sử, giới hạn và mục tiêu dài hạn không. |
+| **Anvil fork** | Bản sao tạm thời của trạng thái blockchain để thử giao dịch mà không tiêu tiền trên chain công khai. |
+| **Oracle / Chainlink** | Nguồn giá thị trường tham chiếu; luôn cần kiểm tài sản, độ mới và giới hạn tin cậy. |
+| **Z3 / Phi (Φ)** | Solver kiểm một số ràng buộc toán học / bộ điều kiện để smart contract có thể cưỡng chế. |
+| **Attestor / PDR** | Thành phần ký độc lập / bản phê duyệt có chữ ký ràng buộc operation với các điều kiện. |
+| **Relayer / Gas** | Ví gửi transaction lên mạng / phí trả bằng AVAX; không phải người tự được cấp quyền chi treasury. |
+| **Nonce / Replay** | Số định danh dùng một lần / hành vi phát lại cùng một approval để tiêu thêm. |
+| **Receipt / Revert** | Biên nhận thực thi từ chain / toàn bộ thay đổi bị hoàn tác nếu giao dịch không thỏa kiểm tra bắt buộc. |
+
+**Lưu ý:** "test USDC" trên Fuji là tài sản kiểm thử, không phải USD thật được đảm bảo quy đổi. Giới hạn đang dùng trong demo là cấu hình của Owner, không phải tiêu chuẩn tài chính áp dụng cho mọi người.
+
+</details>
+
 ## Kiến trúc và ranh giới tin cậy
 
 ```mermaid
