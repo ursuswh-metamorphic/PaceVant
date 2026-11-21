@@ -1,4 +1,4 @@
-"""Public judge mode has no public-chain signing capability or client-selected terms."""
+"""Bounded judge settings; public signing needs explicit activation and authority."""
 
 import os
 from dataclasses import dataclass
@@ -55,8 +55,8 @@ class JudgeSettings:
             daily_limit=integer("PACEVANT_JUDGE_VISITOR_DAILY_LIMIT", 6, 1, 30),
             ip_hourly_limit=integer("PACEVANT_JUDGE_IP_HOURLY_LIMIT", 6, 1, 60),
             global_daily_limit=integer("PACEVANT_JUDGE_GLOBAL_DAILY_LIMIT", 30, 1, 200),
-            timeout_seconds=integer("PACEVANT_JUDGE_TIMEOUT_SECONDS", 240, 60, 360),
-            wait_oracle_seconds=integer("PACEVANT_JUDGE_ORACLE_WAIT_SECONDS", 45, 0, 90),
+            timeout_seconds=integer("PACEVANT_JUDGE_TIMEOUT_SECONDS", 240, 60, 900 if mode=='REAL_FUJI_EXECUTION' else 360),
+            wait_oracle_seconds=integer("PACEVANT_JUDGE_ORACLE_WAIT_SECONDS", 45, 0, 720 if mode=='REAL_FUJI_EXECUTION' else 90),
             secure_cookie=flag("PACEVANT_JUDGE_SECURE_COOKIE", "1"))
 
     def configured(self):

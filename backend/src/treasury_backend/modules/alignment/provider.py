@@ -15,6 +15,16 @@ import httpx
 from treasury_backend.core.errors import ControlError
 
 _inference_deadline = ContextVar("pacevant_inference_deadline", default=None)
+_json_object_response = ContextVar("pacevant_json_object_response", default=False)
+
+
+@contextmanager
+def json_object_response():
+    token = _json_object_response.set(True)
+    try:
+        yield
+    finally:
+        _json_object_response.reset(token)
 
 
 @contextmanager
@@ -360,6 +370,8 @@ class ChatProvider:
         if self.config.provider == "deepseek":
             payload["max_tokens"] = payload.pop("max_completion_tokens")
             payload["thinking"] = {"type": "disabled"}
+            if _json_object_response.get():
+                payload['response_format'] = {'type':'json_object'}
         if self.config.api_style == "responses":
             path = "/responses"
             payload = {

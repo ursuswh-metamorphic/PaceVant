@@ -60,6 +60,7 @@ def test_native_key_cannot_be_forwarded_to_other_host():
 
 
 def test_official_deepseek_wire_and_endpoint_isolation():
+    from treasury_backend.modules.alignment.provider import json_object_response
     config = ShieldConfig(provider="deepseek", model="deepseek-flash",
                           base_url="https://api.deepseek.com", api_key="test-deepseek")
 
@@ -69,10 +70,17 @@ def test_official_deepseek_wire_and_endpoint_isolation():
         body = json.loads(request.content)
         assert body["thinking"] == {"type": "disabled"}
         assert body["max_tokens"] == 4096 and "max_completion_tokens" not in body
+        assert body.get('response_format') == ({'type':'json_object'} if request_json else None)
         return httpx.Response(200, json={"choices": [{"finish_reason": "stop", "message": {"content": "[]"}}]})
 
     with httpx.Client(transport=httpx.MockTransport(handler)) as http:
         provider = ChatProvider(config, http)
+        request_json=False
         assert provider.complete([{"role": "user", "content": "Return []"}]).content == "[]"
+        request_json=True
+        with json_object_response():
+            provider.complete([{'role':'user','content':'Return a JSON object'}])
+        request_json=False
+        provider.complete([{'role':'user','content':'Return []'}])
     with pytest.raises(ValueError):
         replace(config, base_url="https://unrelated.invalid")

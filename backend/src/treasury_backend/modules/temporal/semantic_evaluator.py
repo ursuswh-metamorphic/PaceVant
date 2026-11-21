@@ -3,11 +3,11 @@ from time import monotonic
 
 from treasury_backend.core.errors import ControlError
 from treasury_backend.modules.alignment.engine import strict_json
-from treasury_backend.modules.alignment.provider import safe_value
+from treasury_backend.modules.alignment.provider import json_object_response, safe_value
 from treasury_backend.modules.temporal.evidence_catalog import Judgment, catalog, ground
 from treasury_backend.modules.temporal.models import SemanticAssessment, SemanticFinding
 
-VERSION = "itag-catalog-v3.3"
+VERSION = "itag-catalog-v3.4"
 PROMPT = """Judge candidate contribution to the active operator-authenticated IntentSpec objective.
 Use evidence_catalog and return exactly its Judgment schema. Select candidate_alias and task_alias
 from the supplied catalog. Extracted tasks are model interpretations, subordinate to the IntentSpec.
@@ -144,12 +144,13 @@ class TemporalSemanticEvaluator:
                 reasons.append("ITAG_CONTEXT_BUDGET")
             else:
                 try:
-                    response = self.shield.provider.complete(
-                        [
-                            {"role": "system", "content": PROMPT},
-                            {"role": "user", "content": payload},
-                        ]
-                    )
+                    with json_object_response():
+                        response = self.shield.provider.complete(
+                            [
+                                {"role": "system", "content": PROMPT},
+                                {"role": "user", "content": payload},
+                            ]
+                        )
                     usage = response.usage
                     raw = strict_json(response.content)
                     if not isinstance(raw, dict):

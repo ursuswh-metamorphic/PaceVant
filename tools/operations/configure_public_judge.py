@@ -18,7 +18,7 @@ def configure(source,output,manifest,data_dir):
         PACEVANT_JUDGE_EXECUTION_MODE='REAL_FUJI_EXECUTION',PACEVANT_MVP_LIVE_ENABLED='1',
         PACEVANT_MVP_MANIFEST_FILE=str(manifest),PACEVANT_JUDGE_DATA_DIR=str(data_dir),
         PACEVANT_JUDGE_RPC_URL='https://api.avax-test.network/ext/bc/C/rpc',
-        PACEVANT_JUDGE_ORACLE_WAIT_SECONDS='90',PACEVANT_JUDGE_TIMEOUT_SECONDS='360')
+        PACEVANT_JUDGE_ORACLE_WAIT_SECONDS='720',PACEVANT_JUDGE_TIMEOUT_SECONDS='900')
     if any('\n' in value or '\r' in value or '\0' in value for value in selected.values()):
         raise ValueError('INVALID_ENV_VALUE')
     output.parent.mkdir(parents=True,exist_ok=True)

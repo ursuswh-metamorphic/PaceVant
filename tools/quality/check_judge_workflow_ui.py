@@ -1,4 +1,4 @@
-"""Exercise real local judge UI, without mocks or public-chain writes."""
+"""Exercise the judge UI; public testnet spending requires explicit --public."""
 import json
 import sys
 import time
@@ -40,7 +40,7 @@ with sync_playwright() as play:
             jobs[value['job_id']] = value
             if response.request.method == 'POST':
                 posts.append({'job_id': value['job_id'], 'scenario': value['scenario']})
-            event = {'job_id': value['job_id'], 'status': value['status'], 'phase': value.get('phase'), 'active_stage': value.get('active_stage'), 'stages': [e['stage'] for e in value.get('workflow', {}).get('timeline', [])], 'observed_at': time.time()}
+            event = {'job_id': value['job_id'], 'status': value['status'], 'phase': value.get('phase'), 'active_stage': value.get('active_stage'), 'stages': [e['stage'] for e in (value.get('workflow') or {}).get('timeline', [])], 'observed_at': time.time()}
             observations.append(event)
             if len(observations) == 1 or {k:v for k,v in event.items() if k!='observed_at'} != {k:v for k,v in observations[-2].items() if k!='observed_at'}:
                 print(json.dumps(event), flush=True)
@@ -100,6 +100,7 @@ with sync_playwright() as play:
                     page.wait_for_timeout(30000)
             expect(page.get_by_test_id('run-scenario')).to_be_enabled(timeout=15000)
             before = len(posts)
+            page.context.storage_state(path=str(OUT/'browser-private-state.json'))
             page.get_by_test_id('run-scenario').click()
             expect(page.get_by_test_id('run-session')).to_be_visible()
             print('Run clicked: '+page.locator('.notice').all_inner_texts().__repr__().encode('ascii','backslashreplace').decode(), flush=True)
@@ -113,7 +114,7 @@ with sync_playwright() as play:
             reloaded, inspected_ai = False, False
             while time.monotonic() < deadline:
                 value = jobs[job_id]
-                timeline = value.get('workflow', {}).get('timeline', [])
+                timeline = (value.get('workflow') or {}).get('timeline', [])
                 if not reloaded and value['status'] == 'RUNNING':
                     page.get_by_role('tab',name='Tổng quan',exact=True).click()
                     expect(page.get_by_test_id('run-session')).to_be_visible()
@@ -140,7 +141,7 @@ with sync_playwright() as play:
             run = {'scenario': scenario, 'job_id': job_id, 'status': value['status'], 'reason_code': value.get('reason_code'), 'reload_recovered': reloaded, 'ai_panel_data_matched': inspected_ai, 'post_count': len(posts)-before, 'modules': []}
             report['runs'].append(run)
             save()
-            workflow = value.get('workflow', {})
+            workflow = (value.get('workflow') or {})
             timeline = workflow.get('timeline', [])
             stages = [event['stage'] for event in timeline]
             run['stages'] = stages

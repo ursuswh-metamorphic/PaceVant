@@ -117,7 +117,7 @@ def run(scenario, directory, recipient_index=None):
             if status not in {"CONFIRMED", "REJECTED", "UNKNOWN"}:
                 status = "FAILED" if status != "UNAVAILABLE" else status
             state.update(status=status, reason_code=reason, workflow=record, phase="FINISHED", terminal=True,
-                public_chain_broadcast=public and bool(record.get('outcome',{}).get('tx_hash')),
+                public_chain_broadcast=public and bool((record.get('outcome') or {}).get('tx_hash')),
                 scope="Public Avalanche Fuji execution using owner-approved test assets and real relayer gas." if public else "Isolated Fuji fork. Temporary role keys, copied token balances and fork-only setup. No public asset movement.")
     except Exception as error:
         state.update(status="UNAVAILABLE", reason_code=code(error), terminal=True)

@@ -62,6 +62,15 @@ def test_unsigned_manifest_cannot_configure_live_service(enabled_public):
     assert not settings.configured()
 
 
+def test_public_can_wait_for_real_oracle_without_extending_fork_limits(enabled_public,monkeypatch):
+    monkeypatch.setenv('PACEVANT_JUDGE_TIMEOUT_SECONDS','900')
+    monkeypatch.setenv('PACEVANT_JUDGE_ORACLE_WAIT_SECONDS','720')
+    assert JudgeSettings.from_env().wait_oracle_seconds==720
+    monkeypatch.setenv('PACEVANT_JUDGE_EXECUTION_MODE','ANVIL_FORK')
+    with pytest.raises(ValueError,match='INVALID_JUDGE_LIMIT'):
+        JudgeSettings.from_env()
+
+
 def test_shared_reconciliation_never_publishes_another_workflow_to_current_job():
     from types import SimpleNamespace
 
