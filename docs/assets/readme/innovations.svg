@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 468" role="img" aria-label="Ba đổi mới: Hybrid TaskShield, Intent-Aware Temporal Action Graph và Evidence-Bound PolicyVault">
 <defs><linearGradient id="back" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0A1521"/><stop offset="1" stop-color="#142737"/></linearGradient><linearGradient id="c1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5BE8BB"/><stop offset="1" stop-color="#66BEDE"/></linearGradient></defs>
 <rect width="1600" height="468" rx="24" fill="url(#back)"/>
-<text x="55" y="61" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" letter-spacing="3" fill="#7DEBC8">THREE SECURITY INNOVATIONS</text>
-<text x="55" y="101" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="800" fill="#F4F9FC">Kiểm tra ý định · Theo dõi chuỗi hành động · Ràng buộc thực thi</text>
+<text x="55" y="61" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" letter-spacing="3" fill="#7DEBC8">THREE SECURITY CAPABILITIES</text>
+<text x="55" y="101" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="800" fill="#F4F9FC">Task Integrity · Long-Horizon Intent · Proof-Bound Execution</text>
 <g font-family="Arial,Helvetica,sans-serif">
 <rect x="53" y="136" width="480" height="287" rx="22" fill="#172C38" stroke="#335260" stroke-width="1.6"/>
 <rect x="559" y="136" width="480" height="287" rx="22" fill="#172C38" stroke="#335260" stroke-width="1.6"/>
@@ -10,7 +10,7 @@
 
 <circle cx="107" cy="194" r="28" fill="#244F47" stroke="#63DEB9" stroke-width="1.8"/>
 <path d="M94 194l9 9 18-20" fill="none" stroke="#7BFFD0" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="150" y="185" font-size="16" letter-spacing=".5" font-weight="700" fill="#6DE9C4">01 · ALIGNMENT</text>
+<text x="150" y="185" font-size="16" letter-spacing=".5" font-weight="700" fill="#6DE9C4">01 · TASK INTEGRITY</text>
 <text x="83" y="248" font-size="27" font-weight="800" fill="#F4F9FC">Hybrid TaskShield</text>
 <text x="83" y="281" font-size="17" fill="#B2C8D3">Nguồn quyền hạn + constraints</text>
 <text x="83" y="308" font-size="17" fill="#B2C8D3">+ AI semantic + strict fusion.</text>
@@ -19,8 +19,8 @@
 
 <circle cx="613" cy="194" r="28" fill="#303753" stroke="#A7ACF9" stroke-width="1.8"/>
 <circle cx="604" cy="188" r="6" fill="#B3B7FF"/><circle cx="625" cy="185" r="6" fill="#B3B7FF"/><circle cx="618" cy="206" r="6" fill="#B3B7FF"/><path d="M610 188l9-2m-10 7l7 9m8-12l-4 11" stroke="#B3B7FF" stroke-width="2"/>
-<text x="657" y="185" font-size="16" letter-spacing=".5" font-weight="700" fill="#AEB6FF">02 · TEMPORAL</text>
-<text x="589" y="248" font-size="27" font-weight="800" fill="#F4F9FC">Hybrid ITAG</text>
+<text x="657" y="185" font-size="16" letter-spacing=".5" font-weight="700" fill="#AEB6FF">02 · LONG-HORIZON</text>
+<text x="589" y="248" font-size="27" font-weight="800" fill="#F4F9FC">Hybrid ITAG (Research)</text>
 <text x="589" y="281" font-size="17" fill="#B2C8D3">Task graph + budget tích lũy</text>
 <text x="589" y="308" font-size="17" fill="#B2C8D3">+ evidence-bound purpose checks.</text>
 <line x1="589" y1="350" x2="1009" y2="350" stroke="#395564"/>
@@ -28,8 +28,8 @@
 
 <circle cx="1119" cy="194" r="28" fill="#26455A" stroke="#8ACDEB" stroke-width="1.8"/>
 <path d="M1119 174l17 7v15c0 14-8 23-17 28-9-5-17-14-17-28v-15z" stroke="#A8E4FF" stroke-width="2.3" fill="none"/><path d="M1111 194l6 6 12-13" stroke="#A8E4FF" stroke-width="3" fill="none" stroke-linecap="round"/>
-<text x="1163" y="185" font-size="16" letter-spacing=".5" font-weight="700" fill="#9BDCF4">03 · ENFORCEMENT</text>
-<text x="1095" y="248" font-size="27" font-weight="800" fill="#F4F9FC">Proof-bound PolicyVault</text>
+<text x="1163" y="185" font-size="16" letter-spacing=".5" font-weight="700" fill="#9BDCF4">03 · EXECUTION GUARANTEE</text>
+<text x="1095" y="248" font-size="27" font-weight="800" fill="#F4F9FC">Proof-Bound Execution</text>
 <text x="1095" y="281" font-size="17" fill="#B2C8D3">EVM simulation + Z3 + PDR</text>
 <text x="1095" y="308" font-size="17" fill="#B2C8D3">+ Solidity policy enforcement.</text>
 <line x1="1095" y1="350" x2="1515" y2="350" stroke="#395564"/>
