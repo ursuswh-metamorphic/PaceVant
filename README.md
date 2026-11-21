@@ -15,22 +15,12 @@
   <a href="docs/research/SECURITY_COVERAGE_MATRIX.md"><img alt="Not independently audited" src="https://img.shields.io/badge/Independent%20Audit-Not%20Audited-64748B?style=flat-square"></a>
 </p>
 
-**Một giao dịch có thể hợp lệ. Nhưng cả chuỗi hành động vẫn có thể đi sai mục tiêu.**
+### PaceVant trong 60 giây — dành cho giám khảo
 
-**PaceVant** là lớp bảo mật cho **AI Agent quản lý tài sản on-chain**. AI có thể đề xuất thanh toán hoặc hoán đổi token, nhưng **không được tự quyết định chuyển tiền**. Trước khi được ký, mỗi hành động phải đáp ứng nhiệm vụ người dùng đã cấp, giới hạn rủi ro tài chính và điều kiện bảo mật có thể kiểm chứng.
+**PaceVant** là lớp bảo mật cho **AI Agent tự quản lý treasury trên blockchain**: AI có thể đề xuất thanh toán hoặc swap, nhưng **không được tự ký hay tự ý chuyển tài sản**. Một giao dịch đúng cú pháp vẫn có thể **sai nhiệm vụ, vượt ngân sách qua nhiều bước hoặc gây thiệt hại tài chính**. Đổi mới cốt lõi của nhóm là **ITAG (Intent-Aware Temporal Action Graph)**, kết nối ý định đã xác thực, lịch sử hành động, quyền hạn và bằng chứng để phát hiện **chi tiêu tích lũy vượt mức** hoặc **lệch mục đích dù từng giao dịch vẫn hợp lệ**. Song song, **EVM Simulation** chạy thử calldata trên fork, đo token ra/vào, allowance và hậu quả dự kiến; **Chainlink, Portfolio State và Economic Risk** đánh giá trượt giá, tổn thất, ngân sách và mức độ tập trung tài sản. **Z3/Φ** kiểm các ràng buộc đã mô hình hóa; **SDE** quyết định cho phép hay từ chối; chỉ khi đủ điều kiện, **Attestor mới ký EIP-712 PDR** để **PolicyVault cưỡng chế on-chain**. MVP đã có **payment USDC và swap USDC → WAVAX thành công trên Avalanche Fuji**, cùng bằng chứng từ chối, kiểm thử ITAG trên LOCAL Anvil và thực nghiệm real-model về purpose drift. **Đây là prototype testnet, chưa audit độc lập hoặc hỗ trợ mainnet/custody đa người dùng.**
 
-**Hai năng lực làm nên PaceVant:**
-
-- **ITAG — giữ AI đi đúng mục tiêu dài hạn.** *Intent-Aware Temporal Action Graph* liên kết ý định đã xác thực, quyền hạn Owner, giao dịch trước đó, hành động AI đề xuất và nguồn bằng chứng. ITAG phát hiện **vượt ngân sách tích lũy** và kiểm tra **sai lệch mục đích ngữ nghĩa** — kể cả khi một giao dịch riêng lẻ vẫn đúng các giới hạn số học.
-- **EVM Simulation + Economic Risk — đo trước hậu quả tài chính.** Giao dịch được **chạy thử trên EVM fork** để quan sát số dư trước/sau, token gửi/nhận, allowance và chi phí thực thi dự kiến. Kết quả được đánh giá cùng **Chainlink, portfolio và các giới hạn kinh tế** nhằm nhận ra trượt giá, đầu ra quá thấp, rủi ro tổn thất hoặc exposure vượt mức **trước khi ký**.
-
-Các kết quả này đi qua **Z3/Φ**, **Security Decision Engine**, phê duyệt có chữ ký **EIP-712** và **PolicyVault** để ràng buộc quyền thực thi on-chain. **AI không giữ signing authority**, nên không thể bỏ qua kiểm tra rồi tự tiêu tài sản.
-
-**Đã triển khai:** MVP trên **Avalanche Fuji Testnet (chain ID 43113)** với các giao dịch **payment USDC** và **swap USDC → WAVAX** có receipt công khai. Đây là **treasury testnet với hai nghiệp vụ giới hạn**, chưa audit độc lập, chưa phải mainnet hoặc custody đa người dùng.
-
-**Khám phá:** [Live Demo](https://pacevant.live) · [Bằng chứng giao dịch Fuji](docs/evidence/FUJI_WORKFLOW_EVIDENCE.md) · [Thư viện thí nghiệm](docs/research/EXPERIMENT_CATALOG.md).
-
-> **Phạm vi bằng chứng:** Giao dịch public Fuji, các bài test LOCAL Anvil, phản hồi real-model và historical `eth_call` là **những loại bằng chứng khác nhau**. Website public triển khai theo nhánh `develop`; README mới trên `main` không đồng nghĩa mọi tính năng đã lên VPS. Xem [runbook](docs/PUBLIC_FUJI_RUNBOOK.md).
+**Xem trong 1 phút:** [Demo](https://pacevant.live) · [Hai ca ITAG](#itag) · [Economic Risk có số liệu](#economic-case) · [Fuji transaction & bằng chứng](#evidence) · [Kết quả benchmark](#evaluation).  
+**Đọc sâu:** Chọn mục trong mục lục phía dưới. Mỗi kết quả có nhãn **PUBLIC FUJI / LOCAL ANVIL / REAL MODEL / SCRIPTED / READ-ONLY** để tránh nhầm giữa giao dịch thật và nghiên cứu. Website triển khai từ `develop`, còn README ở `main` có thể đi trước bản public; xem [runbook](docs/PUBLIC_FUJI_RUNBOOK.md).
 
 ### Mục lục
 
@@ -52,59 +42,51 @@ Các kết quả này đi qua **Z3/Φ**, **Security Decision Engine**, phê duy�
 <a id="problem"></a>
 ## Vấn đề: Đúng giao dịch chưa chắc đúng mục tiêu
 
-**Tình huống:** Người dùng giao cho AI Agent nhiệm vụ đổi USDC sang WAVAX để phục vụ treasury. Một giao dịch có thể hợp lệ về mặt smart contract, nhưng vẫn **sai yêu cầu, vượt ngân sách qua nhiều lần hoặc gây thiệt hại kinh tế**.
+**Ví dụ xuyên suốt:** AI được giao đổi USDC sang WAVAX với ngân sách và mục đích rõ ràng. Calldata hợp lệ, transaction không revert **chưa đủ** để kết luận an toàn:
 
-| Điều có thể xảy ra | Vì sao kiểm tra từng giao dịch chưa đủ? | PaceVant giải quyết ở đâu? |
-| --- | --- | --- |
-| **Sai ngay từ giao dịch đầu tiên** | Token, người nhận hoặc số tiền không khớp yêu cầu nhưng calldata vẫn hợp lệ | **TaskShield** đối chiếu proposal với nhiệm vụ đã xác thực |
-| **Vượt ngân sách tích lũy** | Ba lần tiêu 10 USDC, mỗi lần hợp lệ, nhưng nhiệm vụ chỉ có 20 USDC | **Deterministic ITAG** kiểm lịch sử và ngân sách đã sử dụng |
-| **Sai mục đích dài hạn** | Các con số đều đúng, nhưng lý do dùng tài sản đã chuyển sang mục tiêu khác | **Semantic ITAG** đối chiếu mục đích và nguồn bằng chứng trên đồ thị |
-| **Tổn thất tài chính** | Giao dịch chạy thành công nhưng nhận quá ít token hoặc tăng exposure vượt ngưỡng | **EVM Simulation + Chainlink/Portfolio + Economic Risk + Z3** |
-| **Thay đổi trạng thái trước lúc thực thi** | Giá, pool hoặc policy không còn như lúc chạy thử | **Revalidation + Signed PDR + PolicyVault** kiểm lại các điều kiện |
+| Điều có thể sai | Cơ chế PaceVant |
+| --- | --- |
+| Sai token, amount hoặc người nhận so với yêu cầu gốc | **TaskShield:** kiểm từng action với nhiệm vụ đã xác thực |
+| Ba lần chi 10 USDC dù task chỉ được cấp 20 USDC | **Deterministic ITAG:** kiểm history và ngân sách tích lũy |
+| Dùng tài sản cho mục đích khác dù vẫn tuân thủ giới hạn số học | **Semantic ITAG:** đối chiếu mục tiêu và evidence liên quan |
+| Swap thành công nhưng nhận quá ít, trượt giá hoặc vượt exposure | **Simulation + Chainlink/Portfolio + Economic Risk:** đo hậu quả trước ký |
+| Giá/pool/policy thay đổi sau khi chạy thử | **Z3/Φ, revalidation, Signed PDR và PolicyVault:** ràng buộc khi thực thi |
 
-**Điểm cốt lõi:** PaceVant tách biệt việc *hiểu mục tiêu* (TaskShield/ITAG), *đo hậu quả tài chính* (Simulation/Risk), *kiểm điều kiện* (Z3) và *cưỡng chế quyền chuyển tài sản* (Signed PDR/PolicyVault). Không có một LLM duy nhất được tự quyết định “SAFE”.
+**Nguyên tắc:** AI có thể diễn giải nhiệm vụ, nhưng **không một nhận định “SAFE” từ LLM nào tự động cấp quyền ký**.
 
 <a id="overview"></a>
 ## Trong 60 giây: Vì sao PaceVant cần nhiều lớp bảo mật?
 
-Hãy xem hệ thống như **ba câu hỏi phải được trả lời trước khi AI được phép tiêu tiền**:
+Ba nhóm kiểm tra đảm nhiệm **ba câu hỏi không thể thay thế nhau**:
 
-| Câu hỏi | Thành phần chính | Hiểu đơn giản |
+| Kiểm tra | Câu hỏi | Đầu ra |
 | --- | --- | --- |
-| **AI còn làm đúng nhiệm vụ không?** | **TaskShield + ITAG** | Kiểm action hiện tại **và** mục đích, lịch sử, ngân sách của cả chuỗi hành động |
-| **Nếu chạy, tài sản sẽ bị ảnh hưởng thế nào?** | **Trusted Builder + EVM Simulation + Chainlink/Portfolio + Economic Risk + Z3** | Chạy thử để đo token ra/vào, allowance, gas; kiểm slippage, tổn thất, exposure và giới hạn đã cấp |
-| **Ai bảo đảm các kiểm tra không bị bỏ qua?** | **SDE + Attestor + Signed PDR + PolicyVault** | Chỉ cấp chữ ký khi đủ điều kiện; smart contract kiểm chữ ký, nonce, session và hậu điều kiện |
+| **TaskShield + ITAG** | AI còn làm **đúng việc, đúng mục tiêu dài hạn**? | Alignment, history/budget, semantic verdict |
+| **Simulation + Economic Risk + Z3** | Dòng tiền dự kiến, loss/slippage/exposure **có chấp nhận được**? | State diff, risk assessment, bounded proof |
+| **SDE + Signed PDR + PolicyVault** | Điều kiện đã duyệt **có được cưỡng chế khi thực thi**? | APPROVE/REJECT → chữ ký có điều kiện → receipt/revert |
 
-**Sự kết hợp mới quan trọng:** ITAG xem **hành trình và mục tiêu**; simulation xem **hậu quả dự kiến**; contract kiểm **quyền thực thi cuối cùng**. [Xem thiết kế kỹ thuật 16 bước](docs/architecture/ARCHITECTURE_EXPLAINED.md).
+[Kiến trúc chi tiết 16 bước](docs/architecture/ARCHITECTURE_EXPLAINED.md).
 
 <a id="itag"></a>
 ## Attack → Defense: Hai vấn đề khác nhau của long-horizon
 
-**ITAG (Intent-Aware Temporal Action Graph)** là đóng góp nghiên cứu trọng tâm của nhóm. Thay vì chỉ hỏi “giao dịch này hợp lệ không?”, hệ thống xem **nhiệm vụ gốc → các hành động trong lịch sử → đề xuất tiếp theo → bằng chứng**, để kiểm liệu AI còn theo đuổi đúng mục đích xuyên nhiều bước hay không.
-
-ITAG kết hợp hai hướng: **temporal/deterministic** kiểm ngân sách, thứ tự và trạng thái đã ghi nhận; **graph-aware semantic** đối chiếu ý định với mục đích được thể hiện trong đề xuất, dựa trên nguồn bằng chứng. AI semantic không thể tự cấp quyền mới cho ví.
+**ITAG là điểm khác biệt nghiên cứu của PaceVant:** nối **ý định gốc → hành động trước đó → đề xuất mới → nguồn bằng chứng**, rồi kiểm tra cả vi phạm **định lượng theo thời gian** lẫn **xung đột mục đích ngữ nghĩa**. AI chỉ cung cấp phân tích semantic; quyền hạn vẫn đến từ Owner và các kiểm tra bắt buộc.
 
 ### A. Vi phạm ngân sách tích lũy — LOCAL Anvil, đã kiểm thử
 
-<p align="center"><a href="docs/evaluation/itag-final/ANVIL_BUDGET_ISOLATION.json"><img src="docs/assets/readme/approved/attack-defense-glass.png" alt="LOCAL Anvil: 10 + 10 USDC đã dùng hết ngân sách 20 USDC, đề xuất 10 USDC tiếp theo bị ITAG từ chối trước ký" width="100%"></a></p>
+<p align="center"><a href="docs/evaluation/itag-final/ANVIL_BUDGET_ISOLATION.json"><img src="docs/assets/readme/approved/attack-defense-glass.png" alt="Hai giao dịch 10 USDC thành công, giao dịch thứ ba bị ITAG từ chối do ngân sách task 20 USDC" width="100%"></a></p>
 
-**Ví dụ có kết quả chạy EVM cục bộ:** Chủ ví cấp **20 USDC** cho cả nhiệm vụ. Hai swap đầu, mỗi lần **10 USDC**, được xác nhận trên LOCAL Anvil. Khi AI đề xuất lần thứ ba thêm 10 USDC, giao dịch này *riêng lẻ vẫn đúng mức 10 USDC*, nhưng tổng chi sẽ lên **30 USDC**. **ITAG từ chối trước khi ký**, relayer nonce không tăng.
-
-Trong phép đối chứng trên cùng điều kiện (*paired counterfactual*), wallet-only và TaskShield-only vẫn chấp nhận ứng viên thứ ba. Đây là bằng chứng về **history/budget enforcement**, không phải việc AI nhận ra semantic hijacking. [Kết quả, so sánh và receipts](docs/evaluation/itag-final/FINAL_VALIDATION.md).
+**Task budget 20 USDC:** hai swap **10 + 10 USDC** đã có receipt LOCAL Anvil. AI đề xuất thêm **10 USDC**: giao dịch riêng lẻ vẫn hợp lệ, nhưng tổng chi sẽ là **30 USDC**. **ITAG từ chối trước ký**, nonce không tăng. Trong paired counterfactual, wallet/TaskShield-only vẫn chấp nhận. Đây là **temporal budget enforcement**, không phải kết quả AI semantic. [Artifact và đối chứng](docs/evaluation/itag-final/FINAL_VALIDATION.md).
 
 ### B. Vi phạm mục đích — Graph-aware semantic evaluation, thí nghiệm real-model
 
-<p align="center"><a href="docs/assets/readme/approved/purpose-drift-glass.png"><img src="docs/assets/readme/approved/purpose-drift-glass.png" alt="Minh họa: giới hạn số học đạt nhưng mục đích hành động đã khác yêu cầu đã xác thực" width="82%"></a></p>
+<p align="center"><a href="docs/assets/readme/approved/purpose-drift-glass.png"><img src="docs/assets/readme/approved/purpose-drift-glass.png" alt="Semantic goal drift: rule số học PASS nhưng purpose khác nhiệm vụ đã xác thực" width="82%"></a></p>
 
-*Hình diễn giải ý tưởng, không phải ảnh chụp một cuộc tấn công public Fuji.* [Xem hình gốc](docs/assets/readme/approved/purpose-drift-glass.png).
+*Hình minh họa nghiên cứu; không phải cuộc tấn công public Fuji.*
 
-**Ví dụ:** Người dùng dành WAVAX cho một nhu cầu treasury cụ thể. AI đề xuất hành động tiếp theo vẫn tuân thủ amount/token/recipient nhưng *lý do sử dụng* lại chuyển sang một mục tiêu khác. Rule số học **PASS**; semantic ITAG đối chiếu nhiệm vụ gốc, candidate rationale và evidence trên graph, có thể đưa ra **MISALIGNED** để SDE từ chối.
+**Ví dụ:** WAVAX được cấp cho một mục đích treasury cụ thể; AI đề xuất dùng token hợp lệ với amount/recipient hợp lệ **nhưng chuyển sang mục tiêu khác**. Bộ kiểm số học PASS; semantic ITAG có thể ghi **MISALIGNED** từ nhiệm vụ, rationale và evidence, để SDE từ chối.
 
-Bản nghiên cứu real-model v3.2 ghi nhận **7/8 purpose-conflict observations** tạo validated semantic lift, **9/10 benign observations** được duyệt và **16/19 graph-model outputs** hợp lệ. Đây là **tập nhỏ, lịch sử tổng hợp, lặp tình huống và chưa có đánh giá nhãn độc lập** — không phải production detection rate. Chưa có ablation chứng minh graph representation vượt việc đưa lịch sử dạng văn bản cho LLM.
-
-**ITAG mang lại điều gì?** Một đề xuất có thể đúng từng giới hạn nhưng vẫn sai **toàn bộ nhiệm vụ**. ITAG giúp hệ thống xét thêm lịch sử và mục đích trước bước ký, trong khi Simulation/Risk/Z3 xử lý một lớp vấn đề khác là **tổn thất kinh tế và giới hạn thực thi**.
-
-[Báo cáo semantic, bao gồm kết quả thất bại trước đó](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md) · [Code ITAG](backend/src/treasury_backend/modules/temporal/README.md).
+Thí nghiệm v3.2 với real model: **7/8 purpose-conflict observations** tạo validated semantic lift; **9/10 benign** được duyệt; **16/19 graph-model outputs** hợp lệ. Đây là **mẫu nhỏ, lịch sử tổng hợp và chưa có nhãn độc lập**; chưa chứng minh graph tốt hơn plain-history LLM. [Báo cáo semantic](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md) · [Code ITAG](backend/src/treasury_backend/modules/temporal/README.md).
 
 ---
 
@@ -113,7 +95,7 @@ Bản nghiên cứu real-model v3.2 ghi nhận **7/8 purpose-conflict observatio
 
 <p align="center"><a href="docs/audit/public-fuji-live-acceptance-20261121.json"><img src="docs/assets/readme/approved/metrics-glass.png" alt="Tổng quan các bằng chứng PaceVant: Fuji, ITAG và TaskShield" width="100%"></a></p>
 
-**Điểm quan trọng với giám khảo:** PaceVant đã **thực sự thực hiện và đối soát** payment/swap trên Avalanche Fuji. Đây không chỉ là video UI hoặc số liệu mô phỏng. Tuy nhiên, testnet live mới mở **hai nghiệp vụ cố định**, không phải ví cho mọi giao thức DeFi.
+**Đã kiểm chứng trên Avalanche Fuji:** USDC payment và USDC → WAVAX swap với public receipts. Public web mới hỗ trợ **hai nghiệp vụ giới hạn**.
 
 ### Does it execute? — Public Fuji acceptance
 
@@ -123,6 +105,24 @@ Bản nghiên cứu real-model v3.2 ghi nhận **7/8 purpose-conflict observatio
 | **USDC payment** | **0,01 Circle test USDC** từ Vault đến payee allowlisted; receipt thành công, payee nhận **10.000 base units** | [Fuji transaction](https://testnet.snowtrace.io/tx/0x10f6a04e22179f4186459e3738c61597048e9b2aac724c01347ba306f4470b8c) |
 | **USDC → WAVAX swap** | **0,000001 Circle test USDC → WAVAX**, output về Vault và token deltas được đối soát | [Fuji transaction](https://testnet.snowtrace.io/tx/0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d) |
 | **Bằng chứng audit trail** | Code hash, receipt, balance snapshots, EIP-712, phí gas và browser acceptance | [Public Fuji acceptance](docs/audit/public-fuji-live-acceptance-20261121.json) · [Current Review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) |
+
+<a id="economic-case"></a>
+### Economic Risk thực tế: Khi giao dịch chạy được nhưng không nên chạy
+
+**Một ví dụ có số liệu từ Fuji — không phải giả định marketing:** Trong một lần kiểm tra **read-only** tại block **61.376.641**, treasury đang có tỷ trọng WAVAX **24,90%**. Nếu đổi thêm **1 base unit USDC** theo **LFJ quote** ở block đó, tỷ trọng WAVAX dự kiến tăng lên **28,49%**, vượt trần **25%**. Vì vậy **đề xuất này không đạt điều kiện exposure**, dù quote có thể tồn tại và calldata swap có thể hợp lệ.
+
+| Bước | Giá trị trong evidence | Ý nghĩa |
+| --- | --- | --- |
+| **Portfolio trước giao dịch** | WAVAX exposure **2.490 bps = 24,90%** | Đang dưới trần |
+| **Dự báo với Chainlink + LFJ quote** | WAVAX exposure **2.849 bps = 28,49%** | Vượt trần **2.500 bps = 25%** |
+| **Economic Risk gate (đánh giá theo quote)** | **Không đạt exposure gate** | Không đủ điều kiện phê duyệt với snapshot và quote này |
+| **Quyết định thực thi** | **Không có ký/gửi giao dịch từ phép kiểm này** | Đây là **quote-only/read-only diagnostic**, **chưa** phải full EVM simulation → SDE REJECT trên Fuji |
+
+**Đối chứng có thực thi:** Một swap **PUBLIC FUJI** khác đi qua các stage `SIMULATION → RISK PASS → PROOF VERIFIED → SDE APPROVE`, được ký và có [receipt thành công](https://testnet.snowtrace.io/tx/0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d): Vault **−1 USDC base unit, +13.266.545.691.051 wei WAVAX**. Receipt xác minh *kết quả thực thi*; acceptance report chỉ ghi **stage summaries**, không phát hành đầy đủ raw simulation state diff để tái tính mọi risk decision độc lập.
+
+**Kết luận kỹ thuật:** **Simulation** đo thay đổi trạng thái dự kiến trên EVM; **Economic Risk** dùng các hiệu ứng này cùng oracle/portfolio để quyết định có nằm trong giới hạn hay không. Ví dụ **28,49%** ở trên chỉ là *read-only quote diagnostic* cho **một snapshot cũ**, không được trình bày như một lần simulation/rejection hoàn chỉnh.
+
+**Nguồn:** [Economic Risk Review](docs/audit/ECONOMIC_RISK_REVIEW.md) · [Số liệu JSON gốc](docs/audit/economic-risk-validation.json) · [Public Fuji acceptance](docs/audit/public-fuji-live-acceptance-20261121.json).
 
 ### Một workflow, một đường truy vết từ AI đến blockchain
 
@@ -140,7 +140,7 @@ Một job swap được ghi nhận đi qua **Risk PASS → ITAG PASS / semantic 
 - **ITAG LOCAL Anvil:** khi 20 USDC đã dùng hết, đề xuất thêm 10 USDC bị từ chối trước attestation, relayer nonce giữ nguyên. [Raw artifact](docs/evaluation/itag-final/ANVIL_BUDGET_ISOLATION.json).
 - **Contract tests:** kiểm nonce replay, fields đã ký, caps, policy, rollback và postconditions. [Forge tests](contracts/test/README.md).
 
-**Lưu ý:** Các lựa chọn mô tả tình huống trong UI không tự động là cuộc tấn công live; luôn xem nhãn `PUBLIC FUJI`, `LOCAL ANVIL` hay `HISTORICAL ETH_CALL`.
+**Phân biệt nhãn môi trường:** `PUBLIC FUJI` ≠ `LOCAL ANVIL` ≠ `HISTORICAL ETH_CALL`.
 
 ### Does long-horizon analysis add value?
 
@@ -158,17 +158,13 @@ Trên cùng benchmark scripted, các cấu hình đều giữ **12/12 benign app
 <a id="architecture"></a>
 ## Kiến trúc: Mỗi lớp tồn tại để làm gì?
 
-**Dòng chảy cơ bản:** AI **đề xuất** → PaceVant **xác minh mục tiêu và chạy thử hậu quả** → các gate **quyết định cấp chữ ký hay từ chối** → smart contract **thực thi có điều kiện** → hệ thống **đối soát bằng chứng on-chain**.
+**Luồng chính:** AI đề xuất → TaskShield/ITAG xác minh mục tiêu → Trusted Builder **chạy thử EVM** → Economic Risk/Z3 kiểm hậu quả và giới hạn → SDE quyết định → Attestor ký → PolicyVault thực thi → backend đối soát receipt.
 
-<p align="center"><img src="docs/assets/readme/approved/architecture-glass.png" alt="Ba vùng kiến trúc: ITAG & TaskShield, EVM Simulation & Economic Risk, Signed PDR & PolicyVault" width="100%"></p>
+<p align="center"><img src="docs/assets/readme/approved/architecture-glass.png" alt="Ba vùng kiến trúc: intent, economic verification và enforcement" width="100%"></p>
 
-**Ba vùng trách nhiệm:**
+**Ba ranh giới bảo mật:** **(1) Intent** — Mandate, Planner, TaskShield và ITAG; **(2) Economic & Proof** — Anvil, state diff, Chainlink/Portfolio, Risk, Z3/Φ; **(3) Enforcement** — SDE, Signed PDR, Relayer, PolicyVault và Outcome. **MEV stress/reserve-shift là nghiên cứu LOCAL**, không phải stage chạy mặc định trên mọi public swap.
 
-1. **Intent & Agent Security:** Owner Mandate, ý định đã xác thực, AI Planner, **TaskShield + ITAG** — kiểm quyền, đúng nhiệm vụ và tính nhất quán của chuỗi hành động.
-2. **Transaction & Economic Verification:** Trusted Builder, **Anvil EVM Simulation**, state diff, Chainlink/Portfolio, **Economic Risk, Z3/Φ và SDE** — đo trước tác động kinh tế và xác minh những điều kiện giới hạn.
-3. **Cryptographic & On-chain Enforcement:** Attestor, **EIP-712 Signed PDR**, exact signed preflight, Relayer, **PolicyVault** và outcome reconciliation — không cho phép bỏ qua gate hay sửa/replay payload.
-
-**Sơ đồ workflow (hiển thị trực tiếp):**
+**Sơ đồ Mermaid mở sẵn — workflow public:**
 
 ```mermaid
 flowchart TD
@@ -190,54 +186,49 @@ flowchart TD
     H -.-> G
 ```
 
-*Sơ đồ mô tả **pipeline xử lý**, không phải ITAG graph. MEV reserve-shift/stress hiện được thực nghiệm ở môi trường LOCAL, **không** phải một engine độc lập mặc định chạy trong mọi lần public swap.*
+*Sơ đồ mô tả pipeline; **ITAG graph** là cấu trúc dữ liệu kiểm lịch sử và mục đích ở một bước trong pipeline.*
 
 ### Tám chặng để hiểu kiến trúc (không cần biết trước blockchain)
 
-| Chặng | PaceVant làm gì? | Vì sao cần? |
-| --- | --- | --- |
-| **1. Owner Mandate & Intent** | Nhận quyền và nhiệm vụ đã xác thực: tài sản, địa chỉ, ngân sách, mục tiêu, thời hạn | Model hoặc tool không tự tạo ra quyền của người dùng |
-| **2. AI Proposal + TaskShield** | AI tạo đề xuất; TaskShield kiểm sự phù hợp với từng điều khoản bắt buộc | Call hợp lệ có thể sai yêu cầu |
-| **3. Trusted Builder + EVM Simulation** | Tạo calldata chính xác, **chạy thử trên Anvil fork**, đo token ra/vào, allowance, logs, gas, state trước/sau | **Không đoán hậu quả kinh tế chỉ từ câu trả lời AI** |
-| **4. Chainlink + Portfolio + Economic Risk** | Đối chiếu hiệu ứng mô phỏng với giá tham chiếu, slippage, minOut, loss, exposure và policy | **Swap thành công vẫn có thể gây thiệt hại tài chính** |
-| **5. ITAG: Temporal + Semantic** | Đối chiếu lịch sử chi tiêu và mục đích sử dụng trên graph có nguồn | Nhiều action đúng vẫn có thể cộng thành nhiệm vụ sai |
-| **6. Z3 + Φ** | Kiểm bounded constraints và tạo postconditions cho smart contract | Simulation tại một trạng thái không bảo đảm điều kiện vẫn đúng khi giao dịch được đưa lên chain |
-| **7. SDE + Attestor + Signed PDR** | Tổng hợp các gate và chỉ ký EIP-712 cho operation/constraints đủ điều kiện | AI không tự ký hoặc tự đổi giao dịch sau duyệt |
-| **8. Preflight + Relayer + PolicyVault + Receipt** | Kiểm lại chính xác payload, relay, contract enforce và đối soát token/gas receipt | Không thể bỏ qua quyết định kiểm soát rồi tự tuyên bố thành công |
+| Chặng | Input → Xử lý → Output |
+| --- | --- |
+| **1. Mandate & Intent** | Owner cấp chính sách và mục tiêu đã xác thực → `IntentSpec` và phạm vi quyền |
+| **2. Planner + TaskShield** | AI đề xuất hành động → kiểm action-task binding và điều khoản bắt buộc → alignment verdict |
+| **3. Trusted Builder + Simulation** | Dựng exact calldata → chạy trên **pinned Anvil fork**, đo balances/allowances/logs/gas → simulation evidence |
+| **4. Oracle/Portfolio + Economic Risk** | State diff + Chainlink + portfolio → kiểm loss, minOut, slippage, gas, exposure, ngân sách → risk verdict |
+| **5. ITAG** | History, task, proposal, graph evidence → kiểm ngân sách tích lũy và semantic purpose → long-horizon verdict |
+| **6. Z3 + Φ** | Evidence/price bounds → kiểm bounded SMT conditions, tạo postconditions → proof/Φ |
+| **7. SDE + Attestor** | Tổng hợp các gate → APPROVE mới ký **EIP-712 PDR** gắn chính xác operation/constraints |
+| **8. Preflight + PolicyVault + Outcome** | Kiểm lại → Relayer gửi, contract kiểm chữ ký/nonce/Φ → receipt, token/gas reconciliation |
 
-**Thuật ngữ nhanh:** *Simulation* = chạy thử giao dịch trên EVM fork; *state diff* = chênh lệch trạng thái trước/sau; *Z3* = công cụ giải ràng buộc logic/số học; *Φ* = điều kiện hợp đồng sẽ kiểm khi thực thi; *PDR* = bản phê duyệt được ràng buộc với giao dịch và bằng chứng.
+**Các thuật ngữ quan trọng:** *Simulation* là chạy thử, không phải giao dịch public; *Z3* giải điều kiện **off-chain** trong giả định đã mô hình hóa; *Φ* là hậu điều kiện smart contract kiểm; *PDR* là quyết định phê duyệt gắn với dữ liệu cụ thể. AI không giữ signing authority; khi thiếu nguồn hoặc kiểm tra thất bại, hệ thống có thể dừng theo hướng **fail-closed**.
 
-**Ranh giới tin cậy:** Z3 chạy **off-chain**, và kết luận chỉ đúng trong mô hình/assumptions đã lập; Φ chỉ enforce điều kiện đã biên dịch. Oracle/RPC/model vẫn có thể không khả dụng; vì nguyên tắc **fail-closed**, nguồn hoặc schema không đủ tin cậy có thể làm chậm hoặc tạm dừng tác vụ hợp lệ. Owner cấp policy, Attestor nắm quyền ký độc lập, Relayer trả gas AVAX.
-
-[**Đào sâu 16 bước, input/output/threat và source**](docs/architecture/ARCHITECTURE_EXPLAINED.md) · [Xem hash và receipt của workflow thật](docs/evidence/FUJI_WORKFLOW_EVIDENCE.md).
+[Đọc kiến trúc 16 bước và trust boundaries](docs/architecture/ARCHITECTURE_EXPLAINED.md) · [Xem chain of evidence thật](docs/evidence/FUJI_WORKFLOW_EVIDENCE.md).
 
 ### Tại sao không thể chỉ dùng một cơ chế?
 
-| Nếu chỉ dùng… | Khoảng trống | PaceVant bổ sung |
-| --- | --- | --- |
-| AI Planner | AI có thể hiểu sai task hoặc tin tool output không đáng tin | Authenticated Intent + TaskShield |
-| TaskShield | Action đúng yêu cầu nhưng nhận về quá ít token, chịu lỗ | **EVM Simulation + Economic Risk** |
-| Simulation | Giá/trạng thái có thể đổi trước khi transaction được include | Revalidation + Z3/Φ + PolicyVault |
-| Wallet allowlist | Không kiểm ngân sách tích lũy và purpose relation | **Hybrid ITAG** |
-| LLM/Graph verdict | Kết luận off-chain không tự enforce trên chain | Signed PDR + PolicyVault |
-| Smart contract thuần | Không hiểu nhiệm vụ bằng ngôn ngữ tự nhiên | TaskShield + ITAG |
+| Chỉ một lớp | Rủi ro còn lại |
+| --- | --- |
+| **TaskShield không có ITAG** | Không thấy tổng chi qua lịch sử hoặc purpose drift |
+| **TaskShield/ITAG không có Simulation/Risk** | Đúng nhiệm vụ nhưng swap vẫn gây thiệt hại kinh tế |
+| **Simulation không có Z3/Φ và revalidation** | Pool/giá có thể đổi trước inclusion |
+| **AI verdict không có PDR/PolicyVault** | Không có cưỡng chế quyền ký và hạn chế on-chain |
 
 ### Một hành trình end-to-end: được duyệt và bị chặn
 
-**Trường hợp được duyệt (PUBLIC FUJI):** AI đề xuất swap USDC → WAVAX; Builder dựng call; Simulation trích xuất tác động; Risk, ITAG, Z3 và SDE đưa ra verdict; Attestor ký, PolicyVault thực thi. Trong [giao dịch đã xác nhận](https://testnet.snowtrace.io/tx/0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d), Vault giảm **1 base unit USDC** và tăng **13.266.545.691.051 wei WAVAX**.
-
-**Trường hợp bị chặn:** Trên LOCAL Anvil, task đã dùng 20 USDC nên đề xuất chi thêm 10 USDC bị ITAG từ chối trước ký. Trên public Fuji, guard từ chối payee không allowlisted trước broadcast. **Không đánh đồng** LOCAL budget case và public guard case với cùng một attack hay transaction.
+- **PUBLIC FUJI được duyệt:** [Swap USDC → WAVAX](https://testnet.snowtrace.io/tx/0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d) có `Risk PASS / ITAG PASS / Z3 VERIFIED / SDE APPROVE` và receipt thành công.
+- **LOCAL ANVIL bị chặn:** đề xuất chi 10 USDC sau khi task 20 USDC đã dùng hết bị ITAG veto trước ký. **PUBLIC FUJI guard** từ chối `PAYEE_NOT_ALLOWED` trước broadcast. Không gộp ba trường hợp thành một kiểu bằng chứng.
 
 <a id="capabilities"></a>
 ## Ba lớp năng lực bảo mật
 
-<p align="center"><img src="docs/assets/readme/approved/capabilities-glass.png" alt="Ba nhóm năng lực PaceVant" width="100%"></p>
+<p align="center"><img src="docs/assets/readme/approved/capabilities-glass.png" alt="Task Integrity, Long-Horizon Intent, Proof-Bound Execution" width="100%"></p>
 
-| Lớp | Nói dễ hiểu | Năng lực kỹ thuật / tình trạng |
-| --- | --- | --- |
-| **Task Integrity — Hybrid TaskShield** | *AI có làm đúng việc đang được giao không?* | Authenticated source/intent binding, mandatory constraints, semantic checks, fail-closed. Có benchmark 300 mẫu; Hybrid **chưa hơn** constraints-only về accuracy trên tập này |
-| **Long-Horizon Intent — Hybrid ITAG** | *Sau nhiều hành động, AI còn theo đúng mục tiêu hay không?* | **Core research differentiator:** task/action/evidence graph, temporal budget/history và semantic purpose checks. Có bằng chứng bước đầu, chưa independent held-out evaluation |
-| **Proof-Bound Economic Execution — Simulation/Risk/Z3/PDR/PolicyVault** | *Giao dịch sẽ gây tác động tài chính gì, và ai enforce điều kiện an toàn?* | EVM state diff, Chainlink/portfolio/risk, bounded proof, EIP-712 và on-chain checks. Kết hợp nhiều công nghệ đã có trong các hướng nghiên cứu trước |
+| Năng lực | Vai trò và trạng thái |
+| --- | --- |
+| **Task Integrity — Hybrid TaskShield** | Kiểm từng action với authenticated task; benchmark 300 swap cases cho thấy Hybrid **95,67% bằng constraints-only**, chưa chứng minh AI làm tăng accuracy |
+| **Long-Horizon Intent — ITAG** | **Đóng góp nghiên cứu chính:** task/action/history/evidence graph, budget verification và semantic purpose checks; có kiểm thử bước đầu |
+| **Proof-Bound Economic Execution** | **Anvil Simulation → Economic Risk → Z3/Φ → Signed PDR → PolicyVault**, bảo vệ hậu quả dự kiến và cưỡng chế điều kiện khi thực thi |
 
 [Research Index](docs/research/RESEARCH_INDEX.md) · [Security Coverage](docs/research/SECURITY_COVERAGE_MATRIX.md).
 
@@ -273,9 +264,9 @@ flowchart TD
 
 **Dữ liệu:** tập nhỏ real-model với bốn purpose-conflict tasks, mỗi task lặp hai lần, cùng benign controls.
 
-**Kết quả v3.2:** 7/8 validated lift observations; 9/10 benign approvals; 16/19 valid model-catalog responses; 1 benign false intervention.
+**Kết quả v3.2:** **7/8** validated conflict observations, **9/10** benign approvals, **16/19** valid model-catalog responses; có 1 benign false intervention.
 
-**Negative result được giữ:** v2.3 có 0 valid findings vì lỗi source binding/schema; các bản v3.x giải quyết bằng evidence catalog và grounding. Không suy ra performance trên unseen attacker/protocol. [Báo cáo phương pháp & phiên bản](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md).
+**Kết quả không thuận lợi cũng được lưu:** v2.3 có 0 valid findings vì lỗi evidence/schema; v3.x bổ sung grounding. Chưa chứng minh hiệu quả trên attack/protocol chưa gặp. [Báo cáo phương pháp & phiên bản](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md).
 
 ### 4. LOCAL Anvil, formal guards và public Fuji
 
@@ -283,12 +274,12 @@ flowchart TD
 - **Simulation/proof/economic:** EVM fork đo state diff trước/sau, Chainlink/Portfolio/Risk đánh giá mức tổn thất, trượt giá và exposure, Z3 SAT/UNSAT cùng Φ kiểm điều kiện trên bounded assumptions; Solidity có unit/fuzz/integration checks. **Không** bịa “Z3 accuracy” hay “MEV prevention rate” khi không có số đo cùng chuẩn. [Proof source](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/packages/contracts-api/treasury_contracts/proof_v3.py) · [Economic audit](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/MVP_ECONOMIC_RISK_AUDIT.md).
 - **Public Fuji:** payment, swap và public guard refusal được báo cáo với receipt/codehash/historical balance evidence; testnet và release-specific, không phải independent mainnet audit. [Acceptance](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json).
 
-**Kiểm thử và provenance:** [Experiment Catalog](docs/research/EXPERIMENT_CATALOG.md) giữ baseline, attempts, negative results, môi trường, raw logs và cách tái hiện; không ghi scripted model như inference thực.
+[Experiment Catalog](docs/research/EXPERIMENT_CATALOG.md) lưu baseline, raw logs, kết quả âm và hướng dẫn tái hiện.
 
 <a id="prior-work"></a>
 ## Chúng tôi khác gì với những hướng trước?
 
-**Điểm chúng tôi đóng góp không phải phát minh lại** simulation, EIP-712, allowlist hay Z3. Thay vào đó, PaceVant kết hợp **kiểm mục tiêu dài hạn bằng ITAG** và **đánh giá tác động kinh tế từ EVM simulation** trước khi giao dịch được phép đi qua phê duyệt có chữ ký và PolicyVault. Phần ITAG là hướng nghiên cứu cần tiếp tục ablation độc lập.
+**Đóng góp khác biệt:** kết hợp **ITAG dài hạn** với **EVM economic verification** trước bước ký có điều kiện. Simulation, EIP-712, allowlist và Z3 là nền tảng đã có; ITAG vẫn cần ablation độc lập.
 
 | Hướng / nghiên cứu tham khảo | Trọng tâm chính | PaceVant bổ sung / khác biệt ở mức thiết kế |
 | --- | --- | --- |
@@ -299,14 +290,14 @@ flowchart TD
 | [When LLM Agents Act On-Chain — ICT Express 2026](https://doi.org/10.1016/j.icte.2026.09.014) | Phân tích gap xuyên **Agent / Trust / Infrastructure**, quyền định danh DID/VC và các tấn công ghép tầng | PaceVant hiện thực hóa **một phần** hướng agent-intent + execution: tách quyền ký, gate có bằng chứng, PolicyVault; **chưa có DID/VC, A2A credential delegation hoặc bảo vệ xuyên mọi giao thức**. |
 | LLM semantic reviewer độc lập | Đánh giá ngôn ngữ, dễ gặp schema và provenance errors | Evidence-bound catalog, deterministic veto và explicit uncertainty |
 
-**Chưa có benchmark đối đầu trên cùng attack set/protocol** chứng minh PaceVant vượt PACE hoặc PGS về attack-prevention rate. Đóng góp ITAG hiện là **research differentiator có bằng chứng bước đầu**, không phải novelty đã được đánh giá peer review.
+**Chưa có benchmark đối đầu độc lập** chứng minh vượt PACE/PGS. ITAG là hướng nghiên cứu có bằng chứng bước đầu, chưa peer review.
 
-**Câu hỏi nghiên cứu còn mở cần nói thẳng:** ITAG đã chứng minh giá trị của *temporal budgets* và có real-model evidence cho một số **declared purpose conflicts**; nhưng chưa có so sánh cùng mẫu `history + deterministic rules` vs `history + plain LLM` vs `graph-aware LLM` vs `graph + evidence grounding`. Public MVP graph hiện có task/candidate/mandate/recent outcomes, cạnh `AUTHORIZES`; không nên gọi đây là full causal graph hay chứng minh đã kiểm mọi đường phụ thuộc nhiều bước. [Xem implementation](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/backend/src/treasury_backend/modules/temporal/operations.py).
+**Cần nghiên cứu tiếp:** ablation `deterministic history` vs `plain-history LLM` vs `graph-aware LLM` vs `graph + evidence`; graph MVP chưa phải full causal graph. [Implementation](backend/src/treasury_backend/modules/temporal/operations.py).
 
 <a id="technology"></a>
 ## Technology stack & triển khai thực tế
 
-Bảng dưới đây phân biệt **công nghệ có trong source**, **thành phần đang chạy trên public Fuji** và **thí nghiệm LOCAL**, để giám khảo hiểu đúng những gì nhóm đã xây.
+Các thành phần dưới đây thuộc **public runtime hoặc research-only**, không đồng nghĩa mọi module đều được bật trên web.
 
 | Nhóm | Công nghệ được xác nhận | Vai trò / trạng thái |
 | --- | --- | --- |
@@ -318,12 +309,12 @@ Bảng dưới đây phân biệt **công nghệ có trong source**, **thành ph
 | **Frontend** | **React, TypeScript, Vite, React Flow, Tailwind CSS v4, Radix UI, TanStack Query, Motion, Lucide** | Web dashboard, evidence panels, bilingual UI, graph, job/history |
 | **Tests & tooling** | pytest, Foundry/Forge, Anvil, Ruff, Vitest, Docker cho các nhánh cũ | Research regressions, contract tests; public VPS dùng Nginx + systemd (không Docker/Node production server) |
 
-Các công cụ có code trong repo **không nhất thiết thuộc mọi public run**. Ví dụ ERC-20 transfer LOCAL, optional rebalance/autonomy, legacy Demo User gas-credit và V2/V3 research paths không tự động được expose từ Judge website. [Technology Inventory](docs/research/TECHNOLOGY_INVENTORY.md) · [Module map](backend/MODULES.md) · [Current review](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md).
+Các module **LOCAL/legacy** như rebalance, gas-credit và research paths không mặc nhiên là public features. [Technology Inventory](docs/research/TECHNOLOGY_INVENTORY.md) · [Module map](backend/MODULES.md) · [Current review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md).
 
 <a id="getting-started"></a>
 ## Bắt đầu nhanh & tái hiện an toàn
 
-**Giám khảo có thể bắt đầu ở [pacevant.live](https://pacevant.live):** (1) Xem **Swap/Payment** và các bước xác minh, (2) mở **Evidence** để kiểm receipt public hoặc các historical `eth_call` có chứng cứ, (3) trên bản frontend có tab **Nghiên cứu**, xem lại budget/purpose-drift ITAG với graph có nguồn. Public demo có quota và đôi khi phải chờ Chainlink; các tình huống mô tả không tự gửi transaction. **Ưu tiên recorded evidence** khi cần đánh giá nhanh. [Runbook](docs/PUBLIC_FUJI_RUNBOOK.md) · [Frontend UX upgrade](docs/audit/LIVE_DEMO_SECURITY_UX_UPGRADE.md).
+**Xem ngay:** [Live Demo](https://pacevant.live) → Swap/Payment → **Evidence** và receipt; trên release đã có Research tab, xem **ITAG graph** và hai case budget/purpose drift. Website có quota, có thể phải đợi Chainlink; **ưu tiên recorded evidence**, không cần tạo giao dịch mới. [Runbook](docs/PUBLIC_FUJI_RUNBOOK.md) · [UX Upgrade](docs/audit/LIVE_DEMO_SECURITY_UX_UPGRADE.md).
 
 **Chạy mã nguồn cho phát triển / kiểm thử (không tự bật public Fuji):**
 
@@ -335,18 +326,18 @@ uv run --locked python tools/contracts/bootstrap.py
 uv run --locked python -m treasury_backend.operations.judge_serve --port 8000
 ```
 
-Lệnh judge local mặc định phục vụ chế độ isolated/model-only fork theo cấu hình; **không tự động activate public treasury**.
+Các lệnh trên chạy local, **không tự kích hoạt public treasury**.
 
-Public mode cần Owner-signed manifest, effective configuration, roles và explicit activation theo [Public Fuji Runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md). Không chạy deploy, fund, renew policy/session hoặc submit giao dịch thật như health-check. Không commit `.env`, owner/attestor/relayer secrets, raw signed tx/journal hay visitor credentials.
+Public mode cần Owner-signed manifest và kích hoạt tường minh theo [runbook](docs/PUBLIC_FUJI_RUNBOOK.md). Không dùng deploy/gửi transaction làm health-check; không commit keys, `.env`, signed tx hoặc journals.
 
-**Kiểm thử có thể tái hiện:** `uv run --locked python -m pytest -q`, `uv run --locked python tools/contracts/foundry.py forge test -vv`, `npm test --prefix frontend`, `uv run --locked ruff check backend/src backend/tests tools`. Đây là **lệnh hướng dẫn**, không phải tuyên bố đã chạy lại trong lần sửa README. Các benchmark real-model cần cấu hình provider credential riêng và đọc provenance trong từng báo cáo.
+**Kiểm thử:** `uv run --locked python -m pytest -q`, `uv run --locked python tools/contracts/foundry.py forge test -vv`, `npm test --prefix frontend`, `uv run --locked ruff check backend/src backend/tests tools`. Đây là **lệnh tái hiện**, không phải lời xác nhận đã chạy trong lần sửa tài liệu; real-model cần credentials riêng.
 
 ---
 
 <a id="research"></a>
 ## Research Library — Không bỏ mất công sức nghiên cứu
 
-Nếu muốn kiểm chứng thuật toán, dữ liệu, cách đo hoặc các phiên bản hệ thống, giám khảo có thể đọc tiếp theo bảng dưới đây. **Source code và raw evidence được ưu tiên hơn số liệu truyền thông.**
+Đọc sâu về thuật toán, phương pháp đánh giá và provenance; **ưu tiên raw evidence hơn lời quảng bá**.
 
 | Tài liệu | Nội dung |
 | --- | --- |
@@ -368,7 +359,7 @@ Nếu muốn kiểm chứng thuật toán, dữ liệu, cách đo hoặc các ph
 <a id="references"></a>
 ## References — Cơ sở khoa học và tài liệu tham khảo
 
-PaceVant được phát triển trên cơ sở **nghiên cứu đã công bố, bản thảo học thuật và tiêu chuẩn kỹ thuật** về AI Agent Security, kiểm tra ý định giao dịch, mô phỏng rủi ro kinh tế và thực thi smart contract có điều kiện. Dưới đây là các nguồn **liên quan trực tiếp đến những quyết định thiết kế đã được mô tả trong dự án**, kèm giải thích cụ thể phần nào được tham khảo và phần nào nhóm tự tích hợp, mở rộng hoặc kiểm thử.
+Các nguồn nghiên cứu/tiêu chuẩn dưới đây là **cơ sở thiết kế**, không phải kết quả thực nghiệm của PaceVant. Mỗi nguồn ghi rõ phần được tham khảo và phần nhóm tự tích hợp.
 
 ### Nghiên cứu học thuật
 
@@ -387,7 +378,7 @@ PaceVant được phát triển trên cơ sở **nghiên cứu đã công bố, 
 - **[8] [EIP-712 — Typed Structured Data Hashing and Signing](https://eips.ethereum.org/EIPS/eip-712):** tiêu chuẩn định dạng và ký dữ liệu có cấu trúc, được sử dụng để ràng buộc phê duyệt của **Attestor** với operation, domain, nonce và các commitment liên quan. Đây là **tiêu chuẩn kỹ thuật**, không phải paper nghiên cứu của nhóm.
 - **[9] [INTENT-TX-18K — Dataset for Auditable LLM Arbiter](https://github.com/duanyiyao/intent-tx-18k):** nguồn dữ liệu nghiên cứu về **intent–transaction alignment**. Cách chọn, chuẩn hóa, điều chỉnh và đánh giá **300 swap cases** của PaceVant được giải thích trong [báo cáo benchmark](docs/evaluation/HYBRID_TASK_ALIGNMENT_RESULTS.md) và [data quality report](docs/evaluation/curated-300/benchmark_300_quality_report.md).
 
-**Đối chiếu kết quả của chính PaceVant:** các paper trên giải thích *động lực và cơ sở kỹ thuật*, **không thay thế bằng chứng triển khai hoặc chứng minh chất lượng của hệ thống nhóm**. Kết quả **TaskShield 300 cases**, **ITAG 12 adverse/12 benign**, **semantic purpose observations**, **LOCAL Anvil** và **Public Fuji receipts** phải đọc trong [Experiment Catalog](docs/research/EXPERIMENT_CATALOG.md), [ITAG Final Validation](docs/evaluation/itag-final/FINAL_VALIDATION.md), [Semantic Reliability Report](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md) và [Fuji Workflow Evidence](docs/evidence/FUJI_WORKFLOW_EVIDENCE.md).
+**Bằng chứng của PaceVant (khác với nguồn tham khảo):** [Experiment Catalog](docs/research/EXPERIMENT_CATALOG.md) · [ITAG Evaluation](docs/evaluation/itag-final/FINAL_VALIDATION.md) · [Semantic Reliability](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md) · [Public Fuji Evidence](docs/evidence/FUJI_WORKFLOW_EVIDENCE.md).
 
 
 ---
