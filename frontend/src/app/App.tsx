@@ -1,17 +1,17 @@
-import {Suspense, lazy, useEffect, useRef, useState} from 'react';
+import {Suspense, lazy, startTransition, useEffect, useRef, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
-import {ArrowLeftRight, Banknote, CircleCheck, Layers3, LoaderCircle, Play, ShieldCheck, ShieldX} from 'lucide-react';
+import {motion, useReducedMotion} from 'motion/react';
+import {LoaderCircle, Play} from 'lucide-react';
 import {Button} from '@/components/ui/button';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import {Tabs, TabsContent} from '@/components/ui/tabs';
 import {EvidenceDrawer} from '@/components/evidence';
 const Pipeline = lazy(() => import('@/components/pipeline').then(module => ({default: module.Pipeline})));
-import {AttackSelect, AttackPreview} from '@/components/attack-select';
-import {LanguageSwitcher, SiteFooter} from '@/components/site-chrome';
+import {AttackPreview} from '@/components/attack-select';
+import {SiteFooter, SiteHeader, type BackendState} from '@/components/site-chrome';
 import {Overview} from '@/components/overview';
+import {RunComposer} from '@/components/live/run-composer';
 import {ExecutionStatus, ExecutionHistory} from '@/components/execution-panels';
 import {RunSession} from '@/components/run-session';
-import {AmbientRibbons} from '@/components/illustrations';
 import {api, ApiError} from '@/lib/api';
 import {
   beginAttempt,
@@ -23,12 +23,9 @@ import {
   clearViewedRun,
   type SavedAttempt,
 } from '@/lib/recovery';
-import {reason, units} from '@/lib/format';
+import {describeReason} from '@/lib/run-feedback';
 import type {Job, ScenarioId} from '@/lib/types';
-import {cn} from '@/lib/utils';
 import {dictionary, type Language} from '@/lib/i18n';
-
-const scenarioIcons = {payment: Banknote, swap: ArrowLeftRight, guard: ShieldX};
 
 function savedState() {
   try {
@@ -40,7 +37,14 @@ function savedState() {
 
 export default function App() {
   const [initial] = useState(savedState);
-  const [tab, setTab] = useState(initial.attempt || initial.view ? 'live' : 'overview');
+  const [tab, setPageTab] = useState(initial.attempt || initial.view ? 'live' : 'overview');
+  // The header (tabs, indicator, CTA) switches immediately; the page body renders as a
+  // React transition that yields to the browser, so the header animation never stalls.
+  const [navTab, setNavTab] = useState(tab);
+  function setTab(value: string) {
+    setNavTab(value);
+    startTransition(() => setPageTab(value));
+  }
   const [language, setLanguage] = useState<Language>(() => {
     try {
       return localStorage.getItem('pacevant.language') === 'en' ? 'en' : 'vi';
@@ -56,6 +60,25 @@ export default function App() {
     } catch {}
     document.documentElement.lang = language;
   }, [language]);
+
+  // Warm the graph bundle while the browser is idle, so opening Live Demo never
+  // blocks the main thread on a network fetch + parse in the middle of the tab animation.
+  useEffect(() => {
+    const load = () => void import('@/components/pipeline');
+    const idle = (window as Window & {requestIdleCallback?: (cb: () => void) => number}).requestIdleCallback;
+    if (idle) idle(load);
+    else window.setTimeout(load, 800);
+  }, []);
+
+  // A new page always opens at its top, so switching from deep in the Overview never lands mid-page.
+  const firstTab = useRef(true);
+  useEffect(() => {
+    if (firstTab.current) {
+      firstTab.current = false;
+      return;
+    }
+    window.scrollTo({top: 0, left: 0, behavior: 'instant'});
+  }, [tab]);
 
   const [scenario, setScenario] = useState<ScenarioId>(
     initial.attempt?.body.scenario ?? initial.view?.scenario ?? 'payment',
@@ -89,7 +112,7 @@ export default function App() {
   const history = useQuery({
     queryKey: ['history'],
     queryFn: api.history,
-    enabled: config.isSuccess,
+    enabled: config.isSuccess && tab === 'history',
     refetchInterval: 30000,
     retry: 1,
   });
@@ -188,8 +211,8 @@ export default function App() {
     onError: error =>
       setMessage(
         error instanceof ApiError
-          ? reason(error.code)
-          : 'The response was interrupted. Your exact request is saved; use Resume safely.',
+          ? describeReason(error.code,language)
+          : language==='vi'?'Phản hồi bị gián đoạn. Yêu cầu đã được lưu; dùng Tiếp tục để kiểm tra lại đúng phiên.':'The response was interrupted. Your exact request is saved; use Resume safely.',
       ),
   });
 
@@ -217,11 +240,15 @@ export default function App() {
     }
   }
 
-  const names = {payment: t.payment, swap: t.swap, guard: t.guard};
-  const descriptions = {payment: t.payDesc, swap: t.swapDesc, guard: t.guardDesc};
   const ready = !!config.data?.configured && !config.data.busy && quota?.remaining_today !== 0;
   const vi = language === 'vi';
-  const selectedScenario = config.data?.scenarios.find(value => value.id === baseScenario);
+  const backend: BackendState = config.isError
+    ? 'offline'
+    : config.isPending
+      ? 'pending'
+      : config.data?.configured
+        ? 'ready'
+        : 'limited';
   const tabs = [
     {value: 'overview', label: t.overview, testId: undefined},
     {value: 'live', label: t.demo, testId: 'tab-live'},
@@ -261,41 +288,20 @@ export default function App() {
         {vi ? 'Bỏ qua đến nội dung' : 'Skip to content'}
       </a>
       <div className="ambient" aria-hidden="true">
-        <AmbientRibbons />
+        <div className="ambient-grid" />
       </div>
 
-      <Tabs value={tab} onValueChange={setTab}>
-        {/* Floating Liquid Glass navigation */}
-        <header className="site-header">
-          <div className="header-inner glass">
-            <a href="/" className="brand chrome-layer" aria-label="PaceVant">
-              <span className="brand-mark" aria-hidden="true">
-                <ShieldCheck size={22} strokeWidth={2.1} />
-              </span>
-              <span className="brand-name-full">PaceVant</span>
-            </a>
-
-            <TabsList className="main-nav chrome-layer" aria-label={vi ? 'Điều hướng chính' : 'Main navigation'}>
-              {tabs.map(item => (
-                <TabsTrigger key={item.value} value={item.value} data-testid={item.testId}>
-                  {tab === item.value && (
-                    <motion.span
-                      layoutId="nav-pill"
-                      className="nav-pill"
-                      transition={reduced ? {duration: 0} : {type: 'spring', stiffness: 520, damping: 42}}
-                    />
-                  )}
-                  {item.label}
-                  {item.value === 'live' && ownRunActive && <span className="nav-run-dot" aria-label={t.running} />}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <div className="header-status chrome-layer">
-              <LanguageSwitcher language={language} onChange={setLanguage} />
-            </div>
-          </div>
-        </header>
+      <Tabs value={navTab} onValueChange={setTab}>
+        <SiteHeader
+          tab={navTab}
+          tabs={tabs}
+          language={language}
+          onLanguage={setLanguage}
+          runActive={ownRunActive}
+          runLabel={t.running}
+          backend={backend}
+          onDemo={() => setTab('live')}
+        />
 
         <main id="main-content" className="page-container" data-wide={tab === 'live'}>
           {config.isPending && (
@@ -332,167 +338,67 @@ export default function App() {
 
           {tab !== 'live' && session}
 
-          <AnimatePresence mode="wait">
-            <motion.div
+          {/* The next page mounts immediately and fades in: no blank frame, no page-height
+              collapse, so the scrollbar and header never jump between tabs. */}
+          <motion.div
               key={tab}
-              initial={reduced ? false : {opacity: 0, y: 6}}
-              animate={{opacity: 1, y: 0}}
-              exit={reduced ? undefined : {opacity: 0}}
-              transition={{duration: 0.22, ease: [0.16, 1, 0.3, 1]}}
+              initial={reduced ? false : {opacity: 0}}
+              animate={{opacity: 1}}
+              transition={{duration: 0.28, ease: [0.16, 1, 0.3, 1]}}
             >
               {tab === 'overview' && (
-                <TabsContent value="overview">
-                  <Overview language={language} onDemo={() => setTab('live')} onEvidence={() => setTab('history')} />
+                <TabsContent value="overview" forceMount>
+                  <Overview language={language} onDemo={() => setTab('live')} active={navTab === 'overview'} />
                 </TabsContent>
               )}
 
               {tab === 'live' && (
-                <TabsContent value="live" data-testid="live-demo-panel">
-                  <div className="page-head">
-                    <div>
-                      <h1>
-                        <em>PaceVant</em> Live Demo
-                      </h1>
-                      <p>
-                        {vi
-                          ? 'Chạy một giao dịch do AI đề xuất và theo dõi từng lớp bảo mật ra quyết định trên Avalanche Fuji.'
-                          : 'Run an AI-proposed transaction and watch each security layer decide on Avalanche Fuji.'}
-                      </p>
-                    </div>
-                    {session}
-                  </div>
+                <TabsContent value="live" forceMount data-testid="live-demo-panel" className="live-page">
+                  <h1 className="sr-only">PaceVant Live Demo</h1>
+
+                  <RunComposer
+                    language={language}
+                    config={config.data}
+                    loading={config.isPending}
+                    scenario={baseScenario}
+                    onScenario={id => {
+                      setBaseScenario(id);
+                      setAttackPreset('none');
+                      setScenario(id);
+                    }}
+                    attack={attackPreset}
+                    onAttack={setAttackPreset}
+                    busy={liveBusy}
+                    runDisabled={liveBusy || start.isPending || (attackPreset === 'none' && !ready)}
+                    onRun={() => (attackPreset === 'none' ? void run(baseScenario) : setAttackPreview(true))}
+                    onGuard={() => {setAttackPreset('none');void run('guard');}}
+                    guardDisabled={liveBusy || start.isPending || !ready}
+                    runIcon={
+                      ownRunActive || restoring ? (
+                        <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Play size={16} fill="currentColor" aria-hidden="true" />
+                      )
+                    }
+                    runLabel={
+                      restoring
+                        ? vi
+                          ? 'Đang khôi phục phiên'
+                          : 'Restoring run'
+                        : ownRunActive
+                          ? vi
+                            ? 'Đang xử lý kịch bản'
+                            : 'Scenario running'
+                          : attackPreset === 'none'
+                            ? t.run
+                            : vi
+                              ? 'Xem kịch bản tấn công'
+                              : 'Preview attack scenario'
+                    }
+                    hint={attackPreset === 'none' && !ready && !ownRunActive && !restoring ? t.busy : undefined}
+                  />
 
                   <div className="workspace-grid">
-                    {/* Left: scenario & security-check configuration */}
-                    <aside className="panel scenario-panel" aria-label={t.choose}>
-                      <div className="panel-head">
-                        <span className="panel-head-icon" aria-hidden="true">
-                          <Layers3 size={17} />
-                        </span>
-                        <div>
-                          <h2>{t.choose}</h2>
-                          <p>{vi ? 'Chọn luồng giao dịch để kiểm tra.' : 'Choose the transaction flow to verify.'}</p>
-                        </div>
-                      </div>
-
-                      <div className="compact-scenarios" role="group" aria-label={t.choose}>
-                        {config.isPending
-                          ? [0, 1].map(i => <div key={i} className="skeleton scenario-skeleton" />)
-                          : config.data?.scenarios
-                              .filter(value => value.id !== 'guard')
-                              .map(value => {
-                                const Icon = scenarioIcons[value.id];
-                                const active = baseScenario === value.id;
-                                return (
-                                  <button
-                                    key={value.id}
-                                    type="button"
-                                    data-testid={'scenario-' + value.id}
-                                    aria-pressed={active}
-                                    disabled={liveBusy}
-                                    onClick={() => {
-                                      setBaseScenario(value.id);
-                                      setAttackPreset('none');
-                                      setScenario(value.id);
-                                    }}
-                                    className={cn('compact-scenario', active && 'selected')}
-                                  >
-                                    <span className="scenario-icon" aria-hidden="true">
-                                      <Icon size={18} strokeWidth={1.9} />
-                                    </span>
-                                    <span>
-                                      <strong>{names[value.id]}</strong>
-                                      <small>{descriptions[value.id]}</small>
-                                    </span>
-                                    {active ? (
-                                      <CircleCheck size={18} className="scenario-check" aria-hidden="true" />
-                                    ) : (
-                                      <span />
-                                    )}
-                                  </button>
-                                );
-                              })}
-                      </div>
-
-                      {selectedScenario && (
-                        <div className="scenario-terms" aria-label={vi ? 'Điều khoản giao dịch' : 'Transaction terms'}>
-                          <dl className="fact-rows">
-                            <div>
-                              <dt>{t.amount}</dt>
-                              <dd className="mono">
-                                {units(selectedScenario.amount, selectedScenario.input_decimals, selectedScenario.input_decimals)}{' '}
-                                {selectedScenario.token_in}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>{vi ? 'Tài sản' : 'Assets'}</dt>
-                              <dd>
-                                {selectedScenario.token_in === selectedScenario.token_out
-                                  ? selectedScenario.token_in
-                                  : selectedScenario.token_in + ' → ' + selectedScenario.token_out}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>{vi ? 'Người nhận' : 'Recipient'}</dt>
-                              <dd title={selectedScenario.recipient_label}>{selectedScenario.recipient_label}</dd>
-                            </div>
-                          </dl>
-                        </div>
-                      )}
-
-                      <AttackSelect
-                        value={attackPreset}
-                        onChange={setAttackPreset}
-                        disabled={liveBusy}
-                        language={language}
-                        scenario={baseScenario}
-                      />
-
-                      <div className="run-action">
-                        <button
-                          type="button"
-                          className="btn-primary"
-                          disabled={liveBusy || start.isPending || (attackPreset === 'none' && !ready)}
-                          onClick={() => (attackPreset === 'none' ? void run(scenario) : setAttackPreview(true))}
-                          data-testid="run-scenario"
-                        >
-                          {ownRunActive || restoring ? (
-                            <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />
-                          ) : (
-                            <Play size={16} fill="currentColor" aria-hidden="true" />
-                          )}
-                          {restoring
-                            ? vi
-                              ? 'Đang khôi phục phiên'
-                              : 'Restoring run'
-                            : ownRunActive
-                              ? vi
-                                ? 'Đang xử lý kịch bản'
-                                : 'Scenario running'
-                              : attackPreset === 'none'
-                                ? t.run
-                                : vi
-                                  ? 'Xem kịch bản tấn công'
-                                  : 'Preview attack scenario'}
-                        </button>
-                        {attackPreset === 'none' && !ready && !ownRunActive && !restoring && (
-                          <p className="mode-hint">{t.busy}</p>
-                        )}
-                      </div>
-
-                      {quota && (
-                        <div className="sidebar-foot">
-                          <div className="quota-meter">
-                            <span>{vi ? 'Lượt chạy còn lại hôm nay' : 'Runs left today'}</span>
-                            <span>
-                              {quota.remaining_today}/{quota.daily_limit}
-                            </span>
-                          </div>
-                          {t.noWallet}
-                        </div>
-                      )}
-                    </aside>
-
                     {/* Center: three stacked phase rows */}
                     <section className="panel graph-panel" aria-label={t.graph}>
                       <Suspense
@@ -507,22 +413,28 @@ export default function App() {
                       </Suspense>
                     </section>
 
-                    {/* Right: verdict & evidence */}
-                    <ExecutionStatus
-                      job={current}
-                      language={language}
-                      mode={config.data?.mode}
-                      onEvidence={() => {
-                        setHistoryJob(current);
-                        setDrawer(true);
-                      }}
-                    />
+                    {/* Right: run session + verdict. On desktop this column never sets the
+                        row height (the graph does); it scrolls internally if needed. */}
+                    <div className="status-slot">
+                      <div className="status-slot-inner">
+                        {session}
+                        <ExecutionStatus
+                          job={current}
+                          language={language}
+                          mode={config.data?.mode}
+                          onEvidence={() => {
+                            setHistoryJob(current);
+                            setDrawer(true);
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </TabsContent>
               )}
 
               {tab === 'history' && (
-                <TabsContent value="history">
+                <TabsContent value="history" forceMount>
                   <ExecutionHistory
                     jobs={history.data?.jobs ?? []}
                     language={language}
@@ -538,8 +450,7 @@ export default function App() {
                   />
                 </TabsContent>
               )}
-            </motion.div>
-          </AnimatePresence>
+          </motion.div>
         </main>
 
         <SiteFooter language={language} />

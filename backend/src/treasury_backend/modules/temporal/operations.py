@@ -5,7 +5,7 @@ from treasury_contracts.crypto import content_hash
 from treasury_contracts.v3 import KINDS
 
 
-def evaluate_operation(temporal, intent, built, context, history, runtime, plan):
+def evaluate_operation(temporal, intent, built, context, history, runtime, plan, *, on_check=None):
     violations = []
     auth = context["authority"]
     if (
@@ -98,9 +98,20 @@ def evaluate_operation(temporal, intent, built, context, history, runtime, plan)
             )
         ],
     )
+    if on_check:
+        on_check("ITAG_AUTHORITY_HISTORY", "FAIL" if violations else "PASS",
+                 expected={"reason_codes": []}, observed={"reason_codes": violations, "history_count": len(history), "actions": auth["actions"], "max_actions": auth["max_actions"]})
+        on_check("ITAG_GRAPH", "PASS", observed={
+            "nodes": [{"node_id": n.node_id, "kind": n.kind, "trust": n.trust, "evidence_refs": n.evidence_refs} for n in graph.nodes],
+            "edges": [e.model_dump(mode="json") for e in graph.edges],
+        })
+        on_check("ITAG_SEMANTIC", "RUNNING", expected="ALIGNED")
     semantic = temporal.semantic.before_decision(
         graph, candidate, "ALIGNED", shield_blocked=runtime.last_feedback is not None
     )
+    if on_check:
+        on_check("ITAG_SEMANTIC", "PASS" if semantic.verdict == "ALIGNED" else "UNKNOWN" if semantic.verdict == "UNCERTAIN" else "FAIL",
+                 expected="ALIGNED", observed=semantic.model_dump(mode="json"))
     if semantic.verdict != "ALIGNED":
         violations.extend(semantic.reason_codes or ["ITAG_SEMANTIC_NOT_ALIGNED"])
     proof = runtime.proof(intent)

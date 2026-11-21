@@ -8,7 +8,7 @@ export function units(value: string | undefined, decimals = 6, precision = 6) {
 }
 export function short(value?: string, length = 6) {return value ? value.slice(0, length + 2) + '…' + value.slice(-length) : 'Unavailable';}
 export function date(seconds?: number) {return seconds ? new Date(seconds * 1000).toLocaleString('en-GB', {timeZone:'Asia/Ho_Chi_Minh', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false}) + ' UTC+7' : 'Unavailable';}
-export function stage(workflow: Workflow | undefined, name: string): Evidence | undefined {return workflow?.timeline.find(event => event.stage === name)?.evidence;}
+export function stage(workflow: Workflow | undefined, name: string): Evidence | undefined {return workflow?.timeline.slice().reverse().find(event => event.stage === name)?.evidence;}
 export function intentAmount(workflow: Workflow | undefined) {
   if (!workflow) return 'Pending';
   const context = stage(workflow, 'OWNER_AUTHORITY');

@@ -14,6 +14,15 @@ CREATE TABLE IF NOT EXISTS treasury_requests(
 CREATE TABLE IF NOT EXISTS treasury_evidence(
  sequence INTEGER PRIMARY KEY AUTOINCREMENT, workflow_id TEXT NOT NULL REFERENCES treasury_requests(id),
  stage TEXT NOT NULL, created_at INTEGER NOT NULL, body TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS treasury_activity(
+ sequence INTEGER PRIMARY KEY AUTOINCREMENT, workflow_id TEXT NOT NULL REFERENCES treasury_requests(id),
+ stage TEXT NOT NULL, created_at INTEGER NOT NULL, body TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS treasury_activity_workflow ON treasury_activity(workflow_id,sequence);
+CREATE INDEX IF NOT EXISTS treasury_evidence_workflow ON treasury_evidence(workflow_id,sequence);
+CREATE TRIGGER IF NOT EXISTS treasury_activity_no_update BEFORE UPDATE ON treasury_activity
+BEGIN SELECT RAISE(ABORT,'immutable treasury activity'); END;
+CREATE TRIGGER IF NOT EXISTS treasury_activity_no_delete BEFORE DELETE ON treasury_activity
+BEGIN SELECT RAISE(ABORT,'immutable treasury activity'); END;
 CREATE TRIGGER IF NOT EXISTS treasury_evidence_no_update BEFORE UPDATE ON treasury_evidence
 BEGIN SELECT RAISE(ABORT,'immutable treasury evidence'); END;
 CREATE TRIGGER IF NOT EXISTS treasury_evidence_no_delete BEFORE DELETE ON treasury_evidence
@@ -62,6 +71,14 @@ class TreasuryStore:
                 (id_, stage, now, json.dumps(value)),
             )
 
+    def activity(self, id_, stage, value, now):
+        """Public operational observations, separate from signed evidence/hashes."""
+        with self.store.connection(write=True) as db:
+            db.execute(
+                "INSERT INTO treasury_activity(workflow_id,stage,created_at,body) VALUES(?,?,?,?)",
+                (id_, stage, now, json.dumps(value)),
+            )
+
     def update(self, id_, state, **values):
         with self.store.connection(write=True) as db:
             row = db.execute("SELECT body FROM treasury_requests WHERE id=?", (id_,)).fetchone()
@@ -101,6 +118,13 @@ class TreasuryStore:
                 {"stage": r[0], "created_at": r[1], "evidence": json.loads(r[2])}
                 for r in db.execute(
                     "SELECT stage,created_at,body FROM treasury_evidence WHERE workflow_id=? ORDER BY sequence",
+                    (id_,),
+                )
+            ]
+            record["activity"] = [
+                {"sequence": r[0], "stage": r[1], "created_at": r[2], **json.loads(r[3])}
+                for r in db.execute(
+                    "SELECT sequence,stage,created_at,body FROM treasury_activity WHERE workflow_id=? ORDER BY sequence",
                     (id_,),
                 )
             ]

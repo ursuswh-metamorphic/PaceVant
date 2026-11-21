@@ -172,6 +172,9 @@ class JudgeController:
             id_ = "judge_" + uuid4().hex
             value = {"job_id":id_, "scenario":scenario, "status":"QUEUED", "created_at":now, "environment":self.settings.execution_mode,
                 "phase":"QUEUED", "public_chain_broadcast":False, "terminal":False, "semantic_scope":"REAL_CONFIGURED_PROVIDER"}
+            value["request"] = next(dict(s) for s in SCENARIOS if s["id"] == scenario)
+            if scenario == "guard":
+                value["request"] = {"id": "guard", "scope": "SERVER_SELECTED_SECURITY_CASE"}
             if self.settings.execution_mode=='REAL_FUJI_EXECUTION' and scenario=='payment':
                 value['recipient_index']=db.execute("SELECT COUNT(*) FROM judge_jobs WHERE scenario='payment'").fetchone()[0]%3
             db.execute("INSERT INTO judge_jobs VALUES(?,?,?,?,?,?,?,?)", (id_, visitor, ip_hash, key, scenario, "QUEUED", now, json.dumps(value)))
@@ -243,7 +246,7 @@ class JudgeController:
             if path.exists():
                 try:
                     progress = json.loads(path.read_text())
-                    value.update({k:progress[k] for k in ("workflow", "phase", "active_stage", "source_block", "semantic_scope") if k in progress})
+                    value.update({k:progress[k] for k in ("workflow", "phase", "active_stage", "source_block", "semantic_scope", "preparation", "oracle_observation") if k in progress})
                 except (OSError, ValueError):
                     pass
         return value

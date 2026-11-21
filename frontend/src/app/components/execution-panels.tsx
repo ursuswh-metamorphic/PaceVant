@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import {date, publicExplorer, short, stage, units} from '@/lib/format';
 import {PHASES, workflowProgress} from '@/lib/phases';
+import {nodeTitle, workflowNodes} from '@/lib/workflow-nodes';
 import {BlockReason} from './run-session';
 import {CopyHash} from './evidence';
 import {VerdictMark} from './illustrations';
@@ -122,6 +123,10 @@ const stages: Record<string, [string, string]> = {
 };
 
 function stageLabel(value: string | undefined, language: Language) {
+  if(value==='OUTCOME'||value==='RECONCILIATION')return 'Receipt';
+  const index=workflowNodes.findIndex(node=>node.events.includes(value??'')||node.active.includes(value??''));
+  if(index>=0)return nodeTitle(index,language);
+  if(value==='PROOF_REJECTION')return 'Z3 & Phi';
   return value ? (stages[value]?.[language === 'vi' ? 0 : 1] ?? value) : copy[language].noStage;
 }
 
@@ -286,7 +291,7 @@ export function ExecutionStatus({
         <div className="progress-head">
           {vi ? 'Tiến độ kiểm tra' : 'Verification progress'}
           <span>
-            {progress.passed}/{progress.total} {vi ? 'module' : 'modules'}
+            {progress.passed}/{progress.total} {vi ? 'bước' : 'steps'}
           </span>
         </div>
         <div
@@ -295,7 +300,7 @@ export function ExecutionStatus({
           aria-valuemin={0}
           aria-valuemax={progress.total}
           aria-valuenow={progress.passed}
-          aria-label={vi ? 'Số module đã xác minh' : 'Modules verified'}
+          aria-label={vi ? 'Số bước đã xác minh' : 'Steps verified'}
         >
           <div className="progress-fill" data-tone={fillTone} style={{width: percent + '%'}} />
         </div>

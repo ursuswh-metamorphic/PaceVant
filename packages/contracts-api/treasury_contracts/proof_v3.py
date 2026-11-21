@@ -22,12 +22,12 @@ class ProofRejected(ValueError):
         self.counterexample=counterexample
 
 
-def prove_operation(intent, build, effects, context):
+def prove_operation(intent, build, effects, context, *, on_query=None):
     with _SOLVER_LOCK:
-        return _prove(intent, build, effects, context)
+        return _prove(intent, build, effects, context, on_query=on_query)
 
 
-def _prove(intent, build, effects, context):
+def _prove(intent, build, effects, context, *, on_query=None):
     if build["intent"] != intent.model_dump(mode="json") or build["operation"]["intentHash"] != intent.hash:
         raise ValueError("INTENT_BUILD_MISMATCH")
     if context.get("mvp"):
@@ -78,12 +78,16 @@ def _prove(intent, build, effects, context):
     queries = []
 
     def query(name, clauses, expected):
+        if on_query:
+            on_query(name, "RUNNING", expected, None)
         solver = z3.Solver()
         solver.set(timeout=2000)
         solver.add(*assumptions, *clauses)
         # sexpr uses query-local let names; to_smt2 embeds process-global AST IDs.
         raw = solver.sexpr() + "\n(check-sat)\n"
         result = str(solver.check()).upper()
+        if on_query:
+            on_query(name, "PASS" if result == expected else "FAIL", expected, result)
         queries.append({"name": name, "result": result, "smt2": raw, "hash": keccak(raw.encode())})
         if result != expected:
             witness={str(p):str(solver.model().eval(p,model_completion=True)) for p in prices} if result=="SAT" else None

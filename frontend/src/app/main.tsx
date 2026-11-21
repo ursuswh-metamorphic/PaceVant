@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {MotionConfig} from 'motion/react';
 import App from './App';
-import '@fontsource-variable/inter';
 import './styles.css';
 import './workflow-detail.css';
 

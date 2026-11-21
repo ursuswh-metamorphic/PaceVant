@@ -1,0 +1,142 @@
+{
+  "date": "2026-11-21",
+  "timezone": "Asia/Saigon",
+  "live_scope": "Real configured model, isolated Fuji EVM fork; no public sends; no API mocking",
+  "runs": [
+    {
+      "job_id": "judge_89cc7d398e37416abead2bf9a31d6ea7",
+      "scenario": "payment",
+      "status": "CONFIRMED",
+      "reason_code": null,
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "activity_events": 86,
+      "timeline_stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ],
+      "reload_recovered": true,
+      "post_count": 1,
+      "outcome": {
+        "tx_hash": "0x6a0b3efead2094bac6c790c298222f047f754646dd606ed7834b7c19c6059104",
+        "block_number": 61418931,
+        "block_hash": "0x5a2ff7e39fd51669e1a037de17fd2448e5ed5b72294eedd4cfed57080a30fa26",
+        "gas_used": "356276",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "356276",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "356276002850208",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-10000",
+          "0",
+          "0",
+          "0"
+        ],
+        "payee_received": "10000"
+      }
+    },
+    {
+      "job_id": "judge_f19883e32c8c4308ac4549ced52ecf3f",
+      "scenario": "swap",
+      "status": "CONFIRMED",
+      "reason_code": null,
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "activity_events": 86,
+      "timeline_stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ],
+      "reload_recovered": true,
+      "post_count": 1,
+      "outcome": {
+        "tx_hash": "0xfcfd4357af4c1bad9765b0ad3755b71b87a264bc2535937772bda989df17bcf4",
+        "block_number": 61418967,
+        "block_hash": "0xccc62fd2ca9bce0c3c0aa599c24e0dd43f69d04fe5715c409deff401123361ac",
+        "gas_used": "453094",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "453094",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "453094003624752",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-1",
+          "13266451069110",
+          "0",
+          "0"
+        ],
+        "payee_received": "0"
+      }
+    },
+    {
+      "job_id": "judge_80f60a972cd745d88a22a9b4bda267b1",
+      "scenario": "guard",
+      "status": "REJECTED",
+      "reason_code": "LFJ_UNSUPPORTED_ROUTE",
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "activity_events": 15,
+      "timeline_stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "REJECTION_OR_RECOVERY"
+      ],
+      "reload_recovered": true,
+      "post_count": 1,
+      "outcome": null
+    }
+  ],
+  "frontend_tests_passed": 29,
+  "typescript_and_build": "PASS",
+  "display_panels": 48,
+  "final_display_smoke_panels": 8,
+  "browser_errors": [],
+  "module_names": "English in VI and EN",
+  "name_checks": [
+    {
+      "language": "vi",
+      "live_modules": 12,
+      "overview_modules": 12,
+      "dialog_title": "Owner Policy"
+    },
+    {
+      "language": "en",
+      "live_modules": 12,
+      "overview_modules": 12,
+      "dialog_title": "Owner Policy"
+    }
+  ]
+}

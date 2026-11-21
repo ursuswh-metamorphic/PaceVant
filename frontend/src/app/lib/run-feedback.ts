@@ -1,8 +1,14 @@
 import type {Language} from './i18n';
 import type {Evidence, Job, Json} from './types';
-import {workflowNodes} from './workflow-nodes';
+import {nodeTitle,workflowNodes} from './workflow-nodes';
 
 const phrases:Record<string,[string,string]>={
+ DEMO_NOT_CONFIGURED:['Chạy trực tiếp chưa được cấu hình. Bạn vẫn có thể xem các bản ghi đã xác minh ở Tổng quan.','Live execution is not configured. Verified recordings remain available in Overview.'],
+ DEMO_BUSY:['Một lượt chạy khác đang xử lý. Hãy chờ hoàn tất rồi thử lại.','Another run is active. Wait for it to finish and retry.'],
+ DEMO_RATE_LIMIT:['Đã đạt giới hạn lượt chạy của phiên hoặc địa chỉ kết nối.','The visitor or network request allowance has been reached.'],
+ DEMO_DAILY_LIMIT:['Hệ thống đã đạt giới hạn lượt chạy trong ngày.','The system daily run allowance has been reached.'],
+ INVALID_AGENT_PLAN:['Phản hồi của AI chưa đúng cấu trúc yêu cầu; hệ thống chưa cấp quyền ký.','The AI response did not match the required schema; signing is not authorized.'],
+ STALE_REQUIRES_REEVALUATION:['Trạng thái đã thay đổi hoặc bằng chứng hết hiệu lực; cần kiểm tra lại trước khi ký hay gửi.','State changed or evidence expired; revalidation is required.'],
  PAYEE_NOT_ALLOWED:['Địa chỉ nhận không nằm trong danh sách được chủ ví cho phép.','The recipient is outside the owner-approved allowlist.'],
  MIN_OUTPUT_NOT_MET:['Lượng token đầu ra trong mô phỏng thấp hơn mức tối thiểu được bảo vệ.','Simulated output is below the protected minimum.'],
  PAYEE_RECEIPT_SHORTFALL:['Người nhận không nhận đủ số token tối thiểu được yêu cầu.','The payee receives less than the required minimum.'],
@@ -43,11 +49,11 @@ export function describeReason(code:string,language:Language){
 const phases:Record<string,[string,string]>={QUEUED:['Đang chờ xử lý','Queued'],PREPARING_FORK:['Chuẩn bị dữ liệu giao dịch','Preparing transaction data'],WAITING_FOR_ORACLE:['Chờ giá tham chiếu hợp lệ','Waiting for a valid reference price'],WORKFLOW_RUNNING:['Đang kiểm tra giao dịch','Verifying transaction']};
 export function processingLabel(job:Job|undefined,language:Language){
  const node=workflowNodes.find(node=>node.active.includes(job?.active_stage??''));
- return node?.label??phases[job?.phase??'']?.[language==='vi'?0:1]??(language==='vi'?'Đang chuẩn bị lượt chạy':'Preparing the run');
+ return (node?nodeTitle(workflowNodes.indexOf(node),language):undefined)??phases[job?.phase??'']?.[language==='vi'?0:1]??(language==='vi'?'Đang chuẩn bị lượt chạy':'Preparing the run');
 }
 function codes(value:Json|undefined){return Array.isArray(value)?value.filter((item):item is string=>typeof item==='string'):[];}
 function record(value:Json|undefined):Evidence{return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}
-export function runIssue(job:Job){
+export function runIssue(job:Job,language:Language='en'){
  if(!job.terminal||job.status==='CONFIRMED')return null;
  const timeline=job.workflow?.timeline??[],evidence=(name:string)=>timeline.slice().reverse().find(event=>event.stage===name)?.evidence;
  const reasons:string[]=[],stages:string[]=[];
@@ -63,6 +69,6 @@ export function runIssue(job:Job){
  const node=workflowNodes.find(node=>node.events.includes(stages[0]))??workflowNodes.find(node=>node.active.includes(job.active_stage??''));
  const semantic=record(evidence('ITAG')?.semantic),finding=record(semantic.finding);
  const explanation=['MISALIGNED','UNCERTAIN'].includes(String(semantic.verdict))&&typeof finding.reasoning_summary==='string'?finding.reasoning_summary:undefined;
- return {codes:all,reasons:displayCodes,stage:node?.label,explanation,
+ return {codes:all,reasons:displayCodes,stage:node?nodeTitle(workflowNodes.indexOf(node),language):undefined,explanation,
   unsigned:evidence('REJECTION_OR_RECOVERY')?.signed===false&&!evidence('ATTESTATION')&&!job.workflow?.outcome?.tx_hash};
 }

@@ -36,10 +36,13 @@ def prepared_public(directory,shield,progress):
     # while waiting, and no fixture price can authorize execution.
     until=time.monotonic()+int(os.environ.get('PACEVANT_JUDGE_ORACLE_WAIT_SECONDS','45'))
     while True:
+        observation = {"observed_at": int(time.time()), "required_remaining_seconds": 180, "source": "CHAINLINK_FUJI"}
         try:
             header=execution.chain.w3.eth.get_block('latest')
             policy=execution.chain.vault.functions.proofPolicy().call(block_identifier=header.number)
             _,_,_,valid_until=execution.chain.reference(header.number,{'max_oracle_age':policy[5]},int(time.time()))
+            observation.update(source_block=header.number, oracle_valid_until=valid_until,
+                               remaining_seconds=valid_until-int(time.time()))
             # Reserve the full existing approval TTL before starting expensive gates.
             if valid_until-int(time.time())>=180:
                 break
@@ -48,7 +51,7 @@ def prepared_public(directory,shield,progress):
                 raise
         if time.monotonic()>=until:
             raise ValueError('FRESH_CHAINLINK_SIGNING_WINDOW_UNAVAILABLE')
-        progress(phase='WAITING_FOR_ORACLE')
+        progress(phase='WAITING_FOR_ORACLE',oracle_observation=observation)
         time.sleep(5)
     control_settings=replace(ControlSettings(),mode='FUJI',db=root/'control.sqlite3',require_itag=True,
         shield=shield,attestor_key=os.environ['PACEVANT_ATTESTOR_KEY'],chain_rpc_url=rpc,

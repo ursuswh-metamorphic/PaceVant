@@ -7,7 +7,7 @@ import type {Language} from '@/lib/i18n';
 import {dictionary} from '@/lib/i18n';
 
 export function BlockReason({job, language}: {job: Job; language: Language}) {
-  const issue = runIssue(job);
+  const issue = runIssue(job, language);
   const vi = language === 'vi';
   if (!issue) return null;
 
@@ -18,7 +18,7 @@ export function BlockReason({job, language}: {job: Job; language: Language}) {
         {vi ? 'Vì sao lượt chạy dừng?' : 'Why did the run stop?'}
       </h3>
       <p className="block-stage">
-        {vi ? 'Bước phát hiện vi phạm: ' : 'Intercepted at gate: '}
+        {vi ? 'Bước dừng xử lý: ' : 'Stopped at: '}
         <strong>{issue.stage ?? processingLabel(job, language)}</strong>
       </p>
 
@@ -40,7 +40,7 @@ export function BlockReason({job, language}: {job: Job; language: Language}) {
         <p className="block-unsigned">
           <CheckCircle2 size={13} />
           {vi
-            ? 'Giao dịch đã được ngăn chặn trước khi ký và không chuyển sang blockchain.'
+            ? 'Quy trình dừng trước khi ký; chưa gửi giao dịch lên blockchain.'
             : 'Execution stopped prior to signing; no unverified transaction was submitted.'}
         </p>
       )}
@@ -95,7 +95,7 @@ export function RunSession({
   const vi = language === 'vi';
   const t = dictionary[language];
   const terminal = !!job?.terminal;
-  const issue = job ? runIssue(job) : null;
+  const issue = job ? runIssue(job, language) : null;
 
   const Icon = disconnected
     ? CircleAlert

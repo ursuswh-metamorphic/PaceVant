@@ -10,7 +10,7 @@ export default defineConfig({
   // Preserve the browser-facing Host so the backend's same-origin check sees
   // the same authority as the Origin header. Vite's string shorthand rewrites it.
   server: {proxy: Object.fromEntries(['/judge', '/mvp', '/healthz'].map(prefix => [prefix, {
-    target:'http://127.0.0.1:18040', changeOrigin:false,
+    target:process.env.PACEVANT_API_TARGET || 'http://127.0.0.1:18040', changeOrigin:false,
   }]))},
   build: {outDir: 'dist', sourcemap: false},
 });

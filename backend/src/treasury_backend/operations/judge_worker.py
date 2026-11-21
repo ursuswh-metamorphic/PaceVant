@@ -28,8 +28,8 @@ def atomic(path, value):
             time.sleep(.01)
 
 
-def job_event_writer(store,request_key,publish):
-    original_event=store.event
+def job_event_writer(store,request_key,publish,method="event"):
+    original_event=getattr(store,method)
 
     def event(id_,stage,value,now):
         original_event(id_,stage,value,now)
@@ -48,6 +48,20 @@ def run(scenario, directory, recipient_index=None):
     started, meter, setup = monotonic(), None, []
 
     def progress(**value):
+        now = time.time()
+        phase = value.get("phase")
+        if phase and phase != "WORKFLOW_RUNNING":
+            preparation = state.setdefault("preparation", [])
+            if not preparation or preparation[-1]["phase"] != phase:
+                if preparation:
+                    preparation[-1]["duration_ms"] = round((now - preparation[-1]["started_at"]) * 1000, 3)
+                if phase != "FINISHED":
+                    preparation.append({"phase": phase, "started_at": now})
+            if preparation and phase != "FINISHED":
+                preparation[-1].update(updated_at=now, **{k:v for k,v in value.items() if k != "phase"})
+        elif phase == "WORKFLOW_RUNNING" and state.get("preparation"):
+            preparation = state["preparation"]
+            preparation[-1].setdefault("duration_ms", round((now - preparation[-1]["started_at"]) * 1000, 3))
         state.update(value)
         atomic(directory / "progress.json", state)
 
@@ -99,6 +113,7 @@ def run(scenario, directory, recipient_index=None):
             request_key='judge-fixed-'+directory.name
             # Shared state reconciles old transactions; publish only this job.
             workflows.store.event=job_event_writer(workflows.store,request_key,progress)
+            workflows.store.activity=job_event_writer(workflows.store,request_key,progress,"activity")
             workflows.on_progress = lambda stage:progress(active_stage=stage, phase="WORKFLOW_RUNNING")
             progress(phase="WORKFLOW_RUNNING", active_stage="PLANNING", source_block=prepared.source_block)
             record = workflows.run(intent, request_key)
@@ -121,6 +136,9 @@ def run(scenario, directory, recipient_index=None):
                 scope="Public Avalanche Fuji execution using owner-approved test assets and real relayer gas." if public else "Isolated Fuji fork. Temporary role keys, copied token balances and fork-only setup. No public asset movement.")
     except Exception as error:
         state.update(status="UNAVAILABLE", reason_code=code(error), terminal=True)
+    if state.get("preparation"):
+        last = state["preparation"][-1]
+        last.setdefault("duration_ms", round((time.time() - last["started_at"]) * 1000, 3))
     state["runtime_metrics"] = {
         "worker_wall_seconds": round(monotonic() - started, 6),
         "inference": meter.summary() if meter is not None else {"calls":[],"call_count":0,"reported_token_usage":{},"billing_usd":None},

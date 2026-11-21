@@ -1,7 +1,7 @@
 import type {Job} from './types';
 export type ModuleState='idle'|'running'|'passed'|'rejected'|'failed'|'unknown'|'skipped';
 export const workflowNodes=[
- {label:'Owner Policy',description:['Quyền và giới hạn','Authority and limits'],events:['OWNER_AUTHORITY'],active:[],phase:0,explanation:['Đọc policy, quyền của phiên và giới hạn tài sản. Đây là phạm vi mà AI không được tự ý mở rộng.','Reads policy, session authority and asset limits that the AI cannot expand.']},
+ {label:'Owner Policy',description:['Quyền và giới hạn','Authority and limits'],events:['OWNER_AUTHORITY'],active:['OWNER_AUTHORITY'],phase:0,explanation:['Đọc policy, quyền của phiên và giới hạn tài sản. Đây là phạm vi mà AI không được tự ý mở rộng.','Reads policy, session authority and asset limits that the AI cannot expand.']},
  {label:'Agent & Intent',description:['Yêu cầu thành intent','Request to intent'],events:['AGENT_PROPOSAL'],active:['PLANNING'],phase:0,explanation:['Nhận yêu cầu demo cố định cùng các điều khoản được cho phép. AI đề xuất intent có cấu trúc; token, số lượng và người nhận vẫn phải khớp yêu cầu gốc.','Receives a fixed demo request and authorized terms. The AI proposes a structured intent while preserving the requested assets, amount and recipient.']},
  {label:'Trusted Builder',description:['Dựng giao dịch · LFJ','Build transaction · LFJ'],events:['BUILD'],active:['BUILD'],phase:0,explanation:['Chuyển intent thành giao dịch chính xác, lấy báo giá LFJ khi cần và xác định đầu ra tối thiểu. Dữ liệu Chainlink được đọc trong context để kiểm tra giá độc lập.','Builds an exact transaction, obtains an LFJ quote when required and sets minimum output. Chainlink context provides an independent price reference.']},
  {label:'EVM Simulation',description:['Đo tác động trước khi ký','Measure effects before signing'],events:['SIMULATION'],active:['SIMULATION'],phase:1,explanation:['Mô phỏng giao dịch trên EVM, đo số dư trước/sau, lượng token nhận và gas. Đây là tác động mô phỏng, chưa phải giao dịch được xác nhận.','Simulates the transaction in the EVM and measures balances, receipts and gas. Simulation effects are not a confirmed transaction.']},
@@ -12,11 +12,13 @@ export const workflowNodes=[
  {label:'Attestor',description:['Kiểm tra lại & ký EIP-712','Revalidate and sign EIP-712'],events:['ATTESTATION'],active:['ATTESTATION'],phase:2,explanation:['Kiểm tra lại quyền hạn, trạng thái và risk, sau đó ký thông điệp EIP-712 gắn với giao dịch, policy, nonce, thời hạn và Phi. Chữ ký không tự chứng minh đã thực thi.','Revalidates authority, state and risk, then signs EIP-712 data bound to the transaction, policy, nonce, deadline and Phi. A signature is not execution confirmation.']},
  {label:'Exact Preflight',description:['Kiểm tra đúng giao dịch đã ký','Check exact signed transaction'],events:['EXACT_SIGNED_PREFLIGHT'],active:['EXACT_SIGNED_PREFLIGHT'],phase:2,explanation:['Chạy lại đúng giao dịch đã ký với Phi cuối cùng, không thay điều kiện để ép thành công. Sau đó coordinator kiểm tra lại trạng thái trước khi gọi Relayer.','Rechecks the exact signed transaction with final Phi, without relaxing conditions. The coordinator revalidates state again before relay.']},
  {label:'Relayer & PolicyVault',description:['Gửi & thực thi có kiểm soát','Submit and enforce'],events:['OUTCOME'],active:['RELAY'],phase:2,explanation:['Relayer kiểm tra gas, lưu journal rồi gửi giao dịch. PolicyVault kiểm tra chữ ký, nonce, policy, ngân sách và tác động thực tế một cách atomic.','The Relayer checks gas, journals and submits. PolicyVault atomically enforces signature, nonce, policy, budget and actual effects.']},
- {label:'Receipt',description:['Đối soát tài sản & gas','Reconcile assets and gas'],events:['OUTCOME','RECONCILIATION'],active:[],phase:2,explanation:['Đọc Receipt, kiểm tra kết quả thực thi và đối soát số dư, lượng nhận, gas. Chỉ kết quả được xác minh mới được hiển thị là đã xác nhận.','Reads the Receipt, verifies execution and reconciles balances, amounts received and gas. Only verified outcomes are shown as confirmed.']},
+ {label:'Receipt',description:['Đối soát tài sản & gas','Reconcile assets and gas'],events:['OUTCOME','RECONCILIATION'],active:['RECONCILIATION'],phase:2,explanation:['Đọc Receipt, kiểm tra kết quả thực thi và đối soát số dư, lượng nhận, gas. Chỉ kết quả được xác minh mới được hiển thị là đã xác nhận.','Reads the Receipt, verifies execution and reconciles balances, amounts received and gas. Only verified outcomes are shown as confirmed.']},
 ];
 export function workflowNodeState(job:Job|undefined,index:number):ModuleState{
  const node=workflowNodes[index];
- if(!job?.workflow)return job?.terminal?'skipped':'idle';
+ if(!job?.workflow)return job?.terminal?'skipped':job&&index===0?'running':'idle';
+ const lifecycle=job.workflow.activity?.filter(e=>e.kind!=='check'&&(node.active.includes(e.stage)||node.events.includes(e.stage))).at(-1);
+ if(!job.terminal&&lifecycle?.kind==='started')return 'running';
  const event=(name:string)=>job.workflow?.timeline.slice().reverse().find(e=>e.stage===name)?.evidence;
  const outcome=job.workflow.outcome??event('RECONCILIATION')??event('OUTCOME');
  if(index>=10&&outcome){const status=outcome.status;return status==='CONFIRMED'?'passed':status==='REVERTED'?(index===10?'rejected':'passed'):'unknown';}
@@ -43,3 +45,6 @@ export const workflowNodeChecks:Record<string,[string,string][]>={
  OUTCOME:[['Lưu journal và kiểm tra ngân sách gas trước khi gửi.','Journal the submission and check gas budget before sending.'],['PolicyVault thực thi điều kiện bảo vệ và chống dùng lại nonce.','PolicyVault enforces protections and nonce replay prevention.']],
  RECONCILIATION:[['Đọc trạng thái Receipt, block và lượng gas thực tế.','Read Receipt status, block and actual gas.'],['Đối soát thay đổi tài sản; giữ kết quả chưa rõ ở trạng thái chưa xác định.','Reconcile asset changes; preserve uncertainty when unresolved.']],
 };
+
+// Module names are product identifiers and stay English in every locale.
+export function nodeTitle(index:number,_language:'vi'|'en'){return workflowNodes[index]?.label??'Step';}

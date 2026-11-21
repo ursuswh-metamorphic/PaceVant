@@ -43,7 +43,7 @@ class Attestor:
                 raise ControlError("ATTESTATION_RATE_LIMITED", 429, retryable=True)
             self.attempts.append(now)
 
-    def attest_operation(self, intent, built, effects, context, proof, decision, revalidate):
+    def attest_operation(self, intent, built, effects, context, proof, decision, revalidate, *, on_check=None):
         """Called only inside the durable V3 signing reservation, after all persisted gates."""
         from treasury_contracts.crypto import content_hash
         from treasury_contracts.proof_v3 import prove_operation
@@ -53,10 +53,16 @@ class Attestor:
                 or decision["intent_hash"] != intent.hash or decision["build_hash"] != content_hash(built)
                 or decision["evidence_root"] != content_hash(effects) or decision["proof_hash"] != proof["proof_hash"]):
             raise ControlError("DECISION_NOT_APPROVED", 403)
+        if on_check:
+            on_check("ATTESTOR_BINDINGS", "PASS", observed={k: decision[k] for k in ("intent_hash", "build_hash", "evidence_root", "proof_hash", "expires_at")})
         revalidate()
+        if on_check:
+            on_check("PROOF_REVALIDATION", "RUNNING", expected=proof["proof_hash"])
         verified = prove_operation(intent, built, effects, context)
         if verified != proof:
             raise ControlError("PROOF_INVALID", 409)
+        if on_check:
+            on_check("PROOF_REVALIDATION", "PASS", expected=proof["proof_hash"], observed=verified["proof_hash"])
         phi = Constraints.model_validate(proof["phi"])
         operation = Operation.model_validate(built["operation"] | {
             "evidenceRoot": proof["evidence_root"], "proofContextHash": proof["proof_hash"],

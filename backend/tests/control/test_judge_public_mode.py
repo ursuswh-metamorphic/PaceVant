@@ -98,7 +98,13 @@ def test_public_waits_on_stale_feed_instead_of_approving_or_stopping_early(enabl
     monkeypatch.setattr(module.time,'sleep',lambda _:None)
     with module.prepared_public(tmp_path/'runs'/'job',None,lambda **v:progress.append(v)) as prepared:
         assert prepared.intent_context['oracle_valid_until']==1300
-    assert len(calls)==3 and progress==[{'phase':'WAITING_FOR_ORACLE'}]*2
+    assert len(calls)==3
+    assert [entry['phase'] for entry in progress]==['WAITING_FOR_ORACLE']*2
+    assert progress[0]['oracle_observation']['required_remaining_seconds']==180
+    assert progress[1]['oracle_observation']=={
+        'observed_at':1000,'required_remaining_seconds':180,'source':'CHAINLINK_FUJI',
+        'source_block':123,'oracle_valid_until':1150,'remaining_seconds':150,
+    }
 
 
 def test_shared_reconciliation_never_publishes_another_workflow_to_current_job():

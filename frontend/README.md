@@ -11,6 +11,12 @@ npm run --prefix frontend build
 
 Development proxies `/judge` to the local backend at port 18040. Start it separately with `uv run --locked python -m treasury_backend.operations.judge_serve --port 18040`, using a model-only environment as described in the deployment guide. It does not load the private root `.env`. Without model configuration, verified recordings remain available. Local HTTP testing requires `PACEVANT_JUDGE_SECURE_COOKIE=0`; production HTTPS keeps secure cookies enabled.
 
+For explicit local development with existing model credentials, run `uv run --locked python -m treasury_backend.operations.judge_local`. This command reads **only model settings** from `.env`, strips wallet keys from the serving environment, binds localhost:18040, and runs isolated Fuji forks. It never activates public execution. It keeps history in `data/judge-local`. Fresh Chainlink data, real model availability and installed Anvil/contracts are still required; an unavailable dependency remains unavailable.
+
+The twelve workflow steps now expose independent input, measured process and latest output sections in Vietnamese. Operational events live in `workflow.activity`, separate from signed `timeline` evidence. Shield checks, ITAG provenance, Z3 queries, state/proof revalidation, sign-once, journal/fee reservations and receipt verification have real timestamps and measured durations. Older recordings remain readable and explicitly lack detailed process logs. The real security-check button invokes the fixed server-selected `guard` case; six educational attack descriptions do not represent six executed tests.
+
+For a second development backend, set `PACEVANT_API_TARGET=http://127.0.0.1:18041` in the Vite process environment and start Vite on an unused port. This setting is development proxy configuration and is not embedded as a client credential. Preserve `changeOrigin:false` so same-origin POST verification sees the browser-facing host.
+
 Production output is **`dist`**, served through native Nginx. Node is build tooling only. See [judge guide](../JUDGE_DEMO_GUIDE.md) and [VPS deployment](../VPS_DEPLOYMENT.md).
 
 | Path | Responsibility |

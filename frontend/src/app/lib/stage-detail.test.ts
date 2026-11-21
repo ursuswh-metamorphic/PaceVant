@@ -10,9 +10,11 @@ import type {Job} from './types';
 const workflow=JSON.parse(readFileSync(new URL('../../../../fixtures/judge/payment.json',import.meta.url),'utf-8'));
 const job:Job={job_id:'recorded-test',scenario:'payment',status:'CONFIRMED',created_at:workflow.created_at,environment:'VERIFIED_REPLAY',workflow,terminal:true,public_chain_broadcast:false};
 describe('readable real stage evidence',()=>{
- it('shows no data before a stage has evidence',()=>{
+ it('shows no execution data without a job and keeps actual inputs before output',()=>{
    expect(renderToStaticMarkup(createElement(StageDetail,{index:0,events:['AGENT_PROPOSAL'],language:'vi'}))).toBe('');
-   expect(renderToStaticMarkup(createElement(StageDetail,{job:{...job,workflow:{...workflow,timeline:[]}},index:0,events:['AGENT_PROPOSAL'],language:'vi'}))).toBe('');
+   const html=renderToStaticMarkup(createElement(StageDetail,{job:{...job,workflow:{...workflow,timeline:[]}},index:0,events:['AGENT_PROPOSAL'],language:'vi'}));
+   expect(html).toContain('Đầu vào và nguồn dữ liệu');
+   expect(html).not.toContain('Chưa có dữ liệu đầu vào');
  });
  it('shows the recorded objective and structured intent without JSON',()=>{
    const html=renderToStaticMarkup(createElement(StageDetail,{job,index:0,events:['AGENT_PROPOSAL'],language:'vi'}));

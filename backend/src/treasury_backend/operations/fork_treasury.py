@@ -52,17 +52,20 @@ def prepared_fork(rpc_url, data, shield, *, provider=None, wait_seconds=0, progr
     until = time.monotonic() + wait_seconds
     while True:
         height = public.eth.block_number
+        observation = {"observed_at": int(time.time()), "source_block": height, "required_remaining_seconds": 90}
         try:
             prices = ChainlinkPriceProvider(rpc_url, old["vault_address"]).read(height)
             avax = next(f for f in prices.oracle_feeds if f.asset == old["token_out"].lower())
             remaining = avax.updated_at + 300 - int(time.time())
+            observation.update(updated_at=avax.updated_at, oracle_valid_until=avax.updated_at + 300,
+                               remaining_seconds=remaining, source="CHAINLINK_FUJI")
         except Exception:
             remaining = 0
         if remaining >= 90:
             break
         if time.monotonic() >= until:
             raise ValueError("FRESH_CHAINLINK_SIGNING_WINDOW_UNAVAILABLE")
-        progress(phase="WAITING_FOR_ORACLE", source_block=height)
+        progress(phase="WAITING_FOR_ORACLE", source_block=height, oracle_observation=observation)
         time.sleep(5)
     source_hash = Web3.to_hex(public.eth.get_block(height).hash)
     progress(phase="PREPARING_FORK", source_block=height, source_block_hash=source_hash)

@@ -14,24 +14,14 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
-  Activity,
-  BadgeCheck,
   Bot,
-  Box,
-  Boxes,
   ChevronLeft,
   ChevronRight,
   CircleDashed,
   Crosshair,
-  GitBranch,
-  Layers,
   Maximize2,
   Minus,
   Plus,
-  ReceiptText,
-  ScanLine,
-  ShieldCheck,
-  Sigma,
   Workflow,
 } from 'lucide-react';
 import {useReducedMotion} from 'motion/react';
@@ -40,6 +30,7 @@ import {Dialog, DialogContent, DialogTitle, DialogDescription} from '@/component
 import {Button} from '@/components/ui/button';
 import {
   workflowNodes as nodes,
+  nodeTitle,
   workflowNodeChecks,
   workflowNodeState,
   type ModuleState,
@@ -48,11 +39,11 @@ import {PHASES, summarizePhase, phaseMembers} from '@/lib/phases';
 import {dictionary, type Language} from '@/lib/i18n';
 import type {Job} from '@/lib/types';
 import {cn} from '@/lib/utils';
-import {stateIcons} from './pipeline-icons';
+import {moduleIcons, stateIcons} from './pipeline-icons';
 
 export const nodeState = workflowNodeState;
 
-const icons = [ShieldCheck, Bot, Boxes, Box, Activity, GitBranch, Sigma, ShieldCheck, BadgeCheck, ScanLine, Layers, ReceiptText];
+const icons = moduleIcons;
 
 /* ---------------------------------------------------------------------------
  * Phase-aware layout
@@ -66,12 +57,12 @@ const L = {
   pad: 8,
   gutter: 36,
   padRight: 14,
-  headerH: 42,
-  nodeH: 128,
+  headerH: 40,
+  nodeH: 92,
   padBottom: 12,
-  groupGap: 22,
+  groupGap: 26,
   colGap: 26,
-  lineGap: 32,
+  lineGap: 28,
   minNodeW: 118,
   maxNodeW: 248,
 };
@@ -113,9 +104,9 @@ function computeLayout(width: number): GraphLayout {
   return {height: y - L.groupGap + L.pad, nodes: placements, groups, gutterX: L.pad + L.gutter / 2};
 }
 
-/** Rough width check (13px semibold Inter ≈ 7.2px per glyph) so only nodes whose title wraps give up a subtitle line. */
+/** Rough width check (13px semibold Be Vietnam Pro ≈ 7.9px per glyph) so only nodes whose title wraps give up a subtitle line. */
 function titleWraps(label: string, width: number) {
-  return label.length * 7.2 > width - 22;
+  return label.length * 7.9 > width - 22;
 }
 
 /* --------------------------------------------------------------------------- */
@@ -137,7 +128,7 @@ function SecurityGraphNode({data}: NodeProps<Node<SecurityNodeData, 'security'>>
       className={cn('security-node', 'state-' + state, compact && 'is-compact')}
       tabIndex={0}
       role="button"
-      aria-label={`${number} ${node.label}: ${t[state]}`}
+      aria-label={`${number} ${nodeTitle(index, language)}: ${t[state]}`}
       data-testid={'node-' + index}
       onKeyDown={(event: KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -152,11 +143,10 @@ function SecurityGraphNode({data}: NodeProps<Node<SecurityNodeData, 'security'>>
       <span className="security-node-icon" aria-hidden="true">
         <Icon size={16} strokeWidth={1.9} />
       </span>
-      <strong>{node.label}</strong>
+      <strong>{nodeTitle(index, language)}</strong>
       <p>{node.description[language === 'vi' ? 0 : 1]}</p>
-      <span className={'chip tone-' + state}>
-        <StatusIcon size={11} strokeWidth={2.6} className={state === 'running' ? 'animate-spin' : ''} aria-hidden="true" />
-        {t[state]}
+      <span className={'node-badge tone-' + state} title={t[state]} aria-hidden="true">
+        <StatusIcon size={11} strokeWidth={3} className={state === 'running' ? 'animate-spin' : ''} />
       </span>
       <Handle type="source" position={Position.Right} id="source-right" className="node-handle" isConnectable={false} />
       <Handle type="source" position={Position.Bottom} id="source-bottom" className="node-handle" isConnectable={false} />
@@ -173,7 +163,7 @@ function PhaseRowNode({data}: NodeProps<Node<PhaseRowData, 'phaseRow'>>) {
   const label =
     state === 'passed' ? (vi ? 'Hoàn thành' : 'Complete') : state === 'idle' ? t.idle : t[state];
   return (
-    <div className="phase-row" data-state={state}>
+    <div className="phase-row" data-state={state} data-phase={phase}>
       <div className="phase-row-head">
         <span className="phase-index">{String(phase + 1).padStart(2, '0')}</span>
         <strong>{copy.title[vi ? 0 : 1]}</strong>
@@ -209,18 +199,21 @@ function ReturnEdge({id, sourceX, sourceY, targetX, targetY, markerEnd, style, d
 const nodeTypes = {security: SecurityGraphNode, phaseRow: PhaseRowNode};
 const edgeTypes = {return: ReturnEdge};
 
-const EDGE = {idle: '#c3ccdc', passed: '#5cb48f', running: '#3d5ce8', rejected: '#d9646f'};
+// Edge colours: idle is a readable slate; completed steps light up in brand green; the active hop is azure.
+const EDGE = {idle: '#94a6c4', passed: '#0ea47e', running: '#0a5cf0', rejected: '#d43246'};
 
 function GraphTools({
   job,
   layout,
   language,
   zoomed,
+  fitZoom,
 }: {
   job?: Job;
   layout: GraphLayout;
   language: Language;
   zoomed: boolean;
+  fitZoom: number;
 }) {
   const {setViewport, setCenter, getZoom, zoomIn, zoomOut} = useReactFlow();
   const reduced = useReducedMotion();
@@ -269,7 +262,7 @@ function GraphTools({
         type="button"
         className="tool-btn"
         aria-label={vi ? 'Hiển thị toàn bộ ba giai đoạn' : 'Show all three phases'}
-        onClick={() => void setViewport({x: 0, y: 0, zoom: 1}, {duration: reduced ? 0 : 280})}
+        onClick={() => void setViewport({x: 0, y: 0, zoom: fitZoom}, {duration: reduced ? 0 : 280})}
       >
         <Maximize2 size={13} aria-hidden="true" />
         {vi ? 'Vừa khung' : 'Fit'}
@@ -301,20 +294,41 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
   const reduced = useReducedMotion();
   const [selected, setSelected] = useState<number | null>(null);
   const [width, setWidth] = useState(0);
+  const [maxHeight, setMaxHeight] = useState(Infinity);
   const [zoomed, setZoomed] = useState(false);
   const viewportRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     const element = viewportRef.current;
     if (!element) return;
-    const measure = () => setWidth(Math.round(element.getBoundingClientRect().width));
+    // On desktop the whole Live Demo fits one screen: the graph may use the height left
+    // between its top edge and the bottom of the viewport (minus legend and padding).
+    const desktop = window.matchMedia('(min-width: 1181px)');
+    const measure = () => {
+      const rect = element.getBoundingClientRect();
+      setWidth(Math.round(rect.width));
+      const top = rect.top + window.scrollY;
+      setMaxHeight(desktop.matches ? Math.max(340, window.innerHeight - top - 66) : Infinity);
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(element);
-    return () => observer.disconnect();
+    window.addEventListener('resize', measure);
+    desktop.addEventListener('change', measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+      desktop.removeEventListener('change', measure);
+    };
   }, []);
 
-  const layout = useMemo(() => computeLayout(width || 800), [width]);
+  // If the graph is taller than the space available, lay it out wider and scale it
+  // down uniformly, so it still fills the panel width and never needs a scrollbar.
+  const fitZoom = useMemo(() => {
+    const natural = computeLayout(width || 800).height;
+    return Math.min(1.25, maxHeight / natural);
+  }, [width, maxHeight]);
+  const layout = useMemo(() => computeLayout((width || 800) / fitZoom), [width, fitZoom]);
   const states = useMemo(() => nodes.map((_, index) => nodeState(job, index)), [job]);
 
   const graphNodes = useMemo<Node[]>(() => {
@@ -340,8 +354,8 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
       position: {x: layout.nodes[index].x, y: layout.nodes[index].y},
       width: layout.nodes[index].w,
       height: L.nodeH,
-      data: {index, state: states[index], language, compact: titleWraps(node.label, layout.nodes[index].w), onOpen: setSelected},
-      ariaLabel: node.label,
+      data: {index, state: states[index], language, compact: titleWraps(nodeTitle(index, language), layout.nodes[index].w), onOpen: setSelected},
+      ariaLabel: nodeTitle(index, language),
       draggable: false,
       selectable: false,
       focusable: false,
@@ -359,14 +373,15 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
       const source = states[i];
       const target = states[i + 1];
       const running = target === 'running';
-      const color =
+      const kind: keyof typeof EDGE =
         target === 'rejected' || target === 'failed'
-          ? EDGE.rejected
+          ? 'rejected'
           : running
-            ? EDGE.running
+            ? 'running'
             : source === 'passed'
-              ? EDGE.passed
-              : EDGE.idle;
+              ? 'passed'
+              : 'idle';
+      const color = EDGE[kind];
       const midY =
         from.phase === to.phase
           ? from.y + L.nodeH + L.lineGap / 2
@@ -382,8 +397,9 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
         animated: running && !reduced,
         selectable: false,
         focusable: false,
-        markerEnd: {type: MarkerType.ArrowClosed, width: 14, height: 14, color},
-        style: {stroke: color, strokeWidth: sameLine ? 1.75 : 1.6},
+        className: 'edge-' + kind,
+        markerEnd: {type: MarkerType.ArrowClosed, width: 18, height: 18, color},
+        style: {stroke: color, strokeWidth: kind === 'idle' ? 2 : 2.75},
       });
     }
     return list;
@@ -403,11 +419,6 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
           </span>
           <div>
             <h2>{t.graph}</h2>
-            <p>
-              {vi
-                ? 'Chọn một module để xem đầu vào, kết quả và bằng chứng.'
-                : 'Select a module to inspect its input, result and evidence.'}
-            </p>
           </div>
         </div>
         <div className="canvas-tools">
@@ -415,19 +426,19 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
             {tone.state === 'running' ? <span className="live-dot" aria-hidden="true" /> : <ToneIcon size={11} strokeWidth={2.6} aria-hidden="true" />}
             {tone.label[vi ? 0 : 1]}
           </span>
-          <GraphTools job={job} layout={layout} language={language} zoomed={zoomed} />
+          <GraphTools job={job} layout={layout} language={language} zoomed={zoomed} fitZoom={fitZoom} />
         </div>
       </div>
 
-      <div className="flow-viewport" ref={viewportRef} style={{height: layout.height}}>
+      <div className="flow-viewport" ref={viewportRef} style={{height: Math.round(layout.height * fitZoom)}}>
         {width > 0 && (
           <ReactFlow
             nodes={graphNodes}
             edges={edges}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
-            defaultViewport={{x: 0, y: 0, zoom: 1}}
-            minZoom={0.6}
+            defaultViewport={{x: 0, y: 0, zoom: fitZoom}}
+            minZoom={0.5}
             maxZoom={2}
             nodesConnectable={false}
             nodesDraggable={false}
@@ -436,11 +447,11 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
             elementsSelectable={false}
             panOnDrag={zoomed}
             panOnScroll={false}
-            zoomOnScroll={false}
+            zoomOnScroll
             zoomOnDoubleClick={false}
-            preventScrolling={false}
+            preventScrolling
             onMoveEnd={(_, viewport) =>
-              setZoomed(Math.abs(viewport.zoom - 1) > 0.01 || Math.abs(viewport.x) > 1 || Math.abs(viewport.y) > 1)
+              setZoomed(Math.abs(viewport.zoom - fitZoom) > 0.01 || Math.abs(viewport.x) > 1 || Math.abs(viewport.y) > 1)
             }
             onNodeClick={(_, node) => {
               if (node.type === 'security') setSelected(Number(node.id));
@@ -448,7 +459,7 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
             proOptions={{hideAttribution: true}}
             aria-label={vi ? 'Sơ đồ ba giai đoạn kiểm tra giao dịch' : 'Three-phase transaction verification graph'}
           >
-            <ViewportSync width={width} />
+            <ViewportSync width={width} zoom={fitZoom} />
           </ReactFlow>
         )}
       </div>
@@ -463,7 +474,7 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
       </div>
 
       <Dialog open={selected !== null} onOpenChange={open => !open && setSelected(null)}>
-        <DialogContent className="module-sheet">
+        <DialogContent className="module-sheet" closeLabel={vi?'Đóng chi tiết':'Close details'}>
           {selectedNode && selected !== null && (
             <>
               <div className="module-sheet-heading">
@@ -471,7 +482,7 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
                   <SelectedIcon size={24} />
                 </span>
                 <div>
-                  <DialogTitle>{selectedNode.label}</DialogTitle>
+                  <DialogTitle>{nodeTitle(selected, language)}</DialogTitle>
                   <span className={'chip tone-' + nodeState(job, selected)}>
                     {t[nodeState(job, selected)]}
                   </span>
@@ -501,20 +512,16 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
                 </Button>
               </div>
 
-              <section className="module-guide">
-                <h3>{vi ? 'Module này làm gì?' : 'What does this module do?'}</h3>
+              {!job && <section className="module-guide">
+                <h3>{vi ? 'Bước này kiểm tra điều gì?' : 'What does this step check?'}</h3>
                 <ul>
                   {(workflowNodeChecks[selected === 11 ? 'RECONCILIATION' : selectedNode.events[0]] ?? []).map(check => (
                     <li key={check[1]}>{check[vi ? 0 : 1]}</li>
                   ))}
                 </ul>
-              </section>
+              </section>}
 
-              {!job?.workflow?.timeline.some(
-                event =>
-                  selectedNode.events.includes(event.stage) ||
-                  (selectedNode.events.includes('PROOF') && event.stage === 'PROOF_REJECTION'),
-              ) && (
+              {!job && (
                 <div className="module-empty">
                   {nodeState(job, selected) === 'running' ? (
                     <CircleDashed size={15} className="animate-spin" aria-hidden="true" />
@@ -526,11 +533,6 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
                     : vi
                       ? 'Chưa có kết quả xử lý tại bước này.'
                       : 'No processing result has been recorded for this step.'}
-                  {job?.terminal && selectedNode.active.includes(job.active_stage ?? '') && (
-                    <span className="module-stop">
-                      {job.reason_code ?? job.workflow?.reason_code ?? t[nodeState(job, selected)]}
-                    </span>
-                  )}
                 </div>
               )}
 
@@ -544,10 +546,10 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
 }
 
 /** Keeps the graph at 1:1 whenever the measured width (and therefore the layout) changes. */
-function ViewportSync({width}: {width: number}) {
+function ViewportSync({width, zoom}: {width: number; zoom: number}) {
   const {setViewport} = useReactFlow();
   useEffect(() => {
-    void setViewport({x: 0, y: 0, zoom: 1});
-  }, [width, setViewport]);
+    void setViewport({x: 0, y: 0, zoom});
+  }, [width, zoom, setViewport]);
   return null;
 }

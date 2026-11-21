@@ -2,6 +2,11 @@ export type ScenarioId = 'payment' | 'swap' | 'guard';
 export type Json = null | boolean | number | string | Json[] | {[key: string]: Json};
 export type Evidence = Record<string, Json>;
 export interface StageEvent {stage: string; created_at: number; evidence: Evidence}
+export interface ActivityEvent {
+ sequence: number; stage: string; created_at: number; kind: 'started'|'check'|'completed';
+ status: string; check_id?: string; check_ref?: string|null; duration_ms?: number; expected?: Json; observed?: Json;
+ inputs?: Evidence; input_refs?: string[]; output_refs?: string[]; reason_code?: string;
+}
 export interface Intent {operation: string; amount: string; token_in: string; token_out: string; recipient: string; treasury: string; objective: string; deadline: number; session_id: string; chain_id: number}
 export interface Outcome {
   status: string; environment: string; public_chain_receipt: boolean;
@@ -11,6 +16,7 @@ export interface Outcome {
 export interface Workflow {
   workflow_id: string; status: string; intent: Intent; created_at: number;
   reason_code?: string; environment?: string; timeline: StageEvent[]; outcome?: Outcome;
+  activity?: ActivityEvent[];
 }
 export type JobStatus = 'QUEUED' | 'RUNNING' | 'CONFIRMED' | 'REJECTED' | 'FAILED' | 'UNKNOWN' | 'INTERRUPTED' | 'UNAVAILABLE';
 export interface Job {
@@ -19,6 +25,7 @@ export interface Job {
   active_stage?: string; phase?: string; reason_code?: string; workflow?: Workflow;
   semantic_scope?: string; source_block?: number; recorded_at?: number;
   public_chain_broadcast: boolean; terminal: boolean; scope?: string;
+  request?: Evidence; preparation?: Evidence[]; oracle_observation?: Evidence; runtime_metrics?: Evidence;
 }
 export interface Scenario {
   id: ScenarioId; title: string; description: string; operation: string; amount: string;

@@ -213,7 +213,7 @@ export function EvidenceDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="module-sheet evidence-sheet">
+      <DialogContent className="module-sheet evidence-sheet" closeLabel={vi?'Đóng chi tiết':'Close details'}>
         <div className="p-6 pb-2">
           <span className="chip tone-running" style={{marginBottom: 10}}>
             <LockKeyhole size={12} aria-hidden="true" />

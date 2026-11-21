@@ -1,119 +1,156 @@
+/*
+ * Overview copy. Every factual claim here maps to something verifiable in the
+ * product: the 12 workflowNodes, the recorded runs in fixtures/judge (Fuji fork,
+ * public_chain_broadcast: false) or the contracts. No invented statistics.
+ */
+
+export type ShowcaseId = 'payment' | 'swap' | 'guard';
+
+/** Facts taken from fixtures/judge/*.json (timeline length, created_at → last event). */
+export const recordedRuns: Record<ShowcaseId, {stages: number; seconds: number; rejectAt?: number; reason?: string}> = {
+  payment: {stages: 11, seconds: 18},
+  swap: {stages: 11, seconds: 26},
+  guard: {stages: 3, seconds: 7, rejectAt: 2, reason: 'LFJ_UNSUPPORTED_ROUTE'},
+};
+
 export const overviewCopy = {
   vi: {
-    tagline: 'AI Agent Security · Avalanche',
-    headline: ['AI đề xuất giao dịch.', 'PaceVant', 'kiểm tra bảo mật và ràng buộc on‑chain.', 'Avalanche', 'thực thi trong giới hạn đó.'],
+    eyebrow: 'AI Agent Security trên Avalanche',
+    headline: ['AI đề xuất giao dịch.', 'PaceVant xác minh trước khi Avalanche thực thi.'],
     description:
-      'Lớp bảo mật giao dịch cho AI Agent: mỗi giao dịch được đối chiếu ý định, mô phỏng, đánh giá rủi ro và chỉ được thực thi khi PolicyVault áp dụng đúng các điều kiện đã xác minh.',
+      'Lớp bảo mật giao dịch cho AI Agent: mô phỏng, đánh giá rủi ro, đối chiếu ý định và kiểm chứng on‑chain. Giao dịch chỉ được thực thi khi PolicyVault áp dụng đúng các điều kiện đã xác minh.',
     cta: 'Bắt đầu Demo',
     secondary: 'Xem cách hoạt động',
-    helper: 'Không cần ví, tài khoản hay token. Chọn kịch bản và chạy thử.',
-    preview: {
-      window: 'Luồng kiểm tra giao dịch',
-      badge: 'Minh hoạ',
-      agent: ['AI Agent', 'Đề xuất giao dịch'],
-      core: ['PaceVant', 'Kiểm tra & xác minh'],
-      chain: ['Avalanche', 'Thực thi có ràng buộc'],
-      facts: [
-        ['Giao dịch mẫu', 'Thanh toán 0,01 USDC'],
-        ['Lớp kiểm tra', '12 module'],
-        ['Ràng buộc', 'PolicyVault'],
-        ['Mạng', 'Fuji Testnet'],
-      ],
-      caption: 'Sơ đồ minh hoạ. Kết quả thật chỉ xuất hiện khi chạy Live Demo.',
+    showcase: {
+      label: 'Xem lại các lần chạy đã ghi',
+      window: 'Demo kiểm tra giao dịch',
+      badge: 'Phát lại bản ghi',
+      tabs: {
+        payment: 'Thanh toán 0,01 USDC',
+        swap: 'Hoán đổi USDC → WAVAX',
+        guard: 'Tuyến swap không hỗ trợ',
+      },
+      scenario: {
+        payment: ['Thanh toán USDC', '0,01 USDC → người nhận trong allowlist'],
+        swap: ['Hoán đổi token', 'USDC → WAVAX qua pool LFJ được duyệt'],
+        guard: ['Kiểm tra bảo mật', 'WAVAX → USDC qua tuyến LFJ không hỗ trợ'],
+      },
+      verdict: {
+        running: ['Đang xác minh', 'Từng bước ghi bằng chứng trước khi bước sau bắt đầu.'],
+        payment: ['Đã xác nhận', 'Đúng 0,01 USDC đến người nhận được duyệt; số dư đã đối soát.'],
+        swap: ['Đã xác nhận', 'Hoán đổi trong giới hạn giá Chainlink, đầu ra tối thiểu được bảo vệ.'],
+        guard: ['Bị chặn trước khi ký', 'Trusted Builder từ chối tuyến không được hỗ trợ. Không có gì được ký.'],
+      },
+      facts: ['Số bước kiểm tra', 'Thời gian xử lý', 'Mạng'],
+      env: 'Fuji fork',
+      modules: 'bước',
     },
-    aboutTitle: 'PaceVant là gì?',
-    aboutBody:
-      'Lớp kiểm soát nằm giữa AI Agent và blockchain. AI chỉ được đề xuất; PaceVant xác minh đề xuất đó, ký điều kiện bảo vệ và để hợp đồng trên Avalanche thực thi chúng.',
-    features: [
-      ['Xác minh ý định', 'Đúng yêu cầu, đúng người nhận'],
-      ['Đánh giá rủi ro', 'Mô phỏng và giới hạn tổn thất'],
-      ['Ràng buộc on‑chain', 'Điều kiện Phi ký bằng EIP‑712'],
-      ['Thực thi có kiểm soát', 'PolicyVault kiểm tra atomic'],
+    facts: [
+      ['12', 'Bước bảo vệ giao dịch'],
+      ['3', 'Giai đoạn xác minh'],
+      ['43113', 'Chain ID Avalanche Fuji'],
+      ['EIP‑712', 'Chữ ký ràng buộc giao dịch'],
+      ['Z3', 'Kiểm chứng hình thức'],
     ],
-    story: [
-      {
-        title: 'Vì sao giao dịch của AI Agent cần guardrails?',
-        body: 'AI có thể đề xuất sai ý định, dựa trên giá không còn hiệu lực hoặc vượt quyền được cấp. Khi nắm tài sản thật, một đề xuất sai là một khoản mất thật.',
-      },
-      {
-        title: 'PaceVant xác minh như thế nào?',
-        body: 'Mô phỏng EVM đo tác động thực tế, Risk Engine giới hạn tổn thất, Shield + ITAG đối chiếu ý định và Z3 chứng minh điều kiện an toàn trước khi ký.',
-      },
-      {
-        title: 'Ràng buộc được thực thi trên Avalanche',
-        body: 'Chữ ký EIP-712 gắn với giao dịch, nonce, thời hạn và Phi. PolicyVault từ chối mọi tác động nằm ngoài điều kiện đã xác minh.',
-      },
+    coreEyebrow: 'Công nghệ cốt lõi',
+    coreTitle: '4 lớp bảo mật cho giao dịch của AI Agent',
+    coreBody:
+      'AI chỉ được đề xuất. Mỗi đề xuất đi qua mô phỏng, phân tích rủi ro, chứng minh hình thức rồi mới được ký và thực thi có kiểm soát trên Avalanche.',
+    coreLink: 'Xem 12 bước',
+    layers: [
+      ['Xác minh ý định', 'Đối chiếu intent, policy và quyền giới hạn của AI Agent.'],
+      ['Đánh giá rủi ro', 'Mô phỏng EVM, đo tác động tài sản và giới hạn tổn thất.'],
+      ['Chứng minh hình thức', 'Z3 kiểm tra nghĩa vụ an toàn và biên dịch điều kiện Phi.'],
+      ['Thực thi có ràng buộc', 'Ký EIP‑712, thực thi qua PolicyVault và đối soát Receipt.'],
     ],
-    phasesTitle: 'Ba giai đoạn, mười hai module',
-    phasesBody:
-      'Đây cũng là bố cục của sơ đồ trong Live Demo. Mỗi module chỉ đổi trạng thái khi backend ghi nhận bằng chứng của nó.',
+    stack: [
+      ['AI Agent', 'Chỉ đề xuất'],
+      ['PaceVant Security', '12 bước xác minh'],
+      ['PolicyVault', 'Thực thi atomic'],
+      ['Avalanche', 'Fuji Testnet'],
+    ],
+    phasesEyebrow: 'Cách hoạt động',
+    phasesTitle: 'Ba giai đoạn, mười hai bước',
+    proofEyebrow: 'Kiểm chứng được',
     proofTitle: 'Bạn có thể kiểm chứng gì trên Fuji',
     proof: [
       ['Thanh toán USDC', 'Thanh toán đúng 0,01 USDC đến người nhận nằm trong allowlist, đối soát đến số tiền người nhận thực nhận.'],
       ['Hoán đổi USDC → WAVAX', 'Hoán đổi qua pool LFJ được duyệt, có giá Chainlink tham chiếu và đầu ra tối thiểu được bảo vệ.'],
-      ['Bằng chứng cho từng bước', 'Mở từng module để xem intent, mô phỏng, kết quả solver, attestation và receipt đã được ghi lại.'],
+      ['Bằng chứng từng bước', 'Mở từng bước để xem intent, mô phỏng, kết quả solver, attestation và receipt đã được ghi lại.'],
     ],
+    proofCta: 'Mở trang Bằng chứng',
     ctaTitle: 'Chạy thử một giao dịch được bảo vệ',
-    ctaBody: 'Chọn kịch bản, theo dõi từng lớp kiểm tra và xem bằng chứng thực thi trên Avalanche Fuji.',
+    ctaBody: 'Chọn kịch bản, theo dõi từng lớp kiểm tra ra quyết định và xem bằng chứng thực thi trên Avalanche Fuji.',
     ctaSecondary: 'Xem bằng chứng',
     footerDescription: 'Bảo mật giao dịch AI Agent trên Avalanche.',
     footerProject: 'Built for UniHack · Avalanche Fuji Testnet',
     rights: 'PaceVant.',
   },
   en: {
-    tagline: 'AI Agent Security · Avalanche',
-    headline: ['AI proposes transactions.', 'PaceVant', 'verifies them and enforces on‑chain guardrails.', 'Avalanche', 'executes within those limits.'],
+    eyebrow: 'AI Agent Security on Avalanche',
+    headline: ['AI proposes the transaction.', 'PaceVant verifies it before Avalanche executes.'],
     description:
-      'A transaction-security layer for AI agents: every transaction is checked against intent, simulated and risk-bounded, and executes only when PolicyVault enforces the verified conditions.',
+      'A transaction-security layer for AI agents: simulation, risk bounds, intent checks and on‑chain enforcement. A transaction executes only when PolicyVault enforces the verified conditions.',
     cta: 'Start Demo',
     secondary: 'See how it works',
-    helper: 'No wallet, account or tokens needed. Pick a scenario and run it.',
-    preview: {
-      window: 'Transaction verification flow',
-      badge: 'Illustration',
-      agent: ['AI Agent', 'Proposes a transaction'],
-      core: ['PaceVant', 'Checks & verifies'],
-      chain: ['Avalanche', 'Executes under guardrails'],
-      facts: [
-        ['Sample transaction', 'Pay 0.01 USDC'],
-        ['Security layers', '12 modules'],
-        ['Enforcement', 'PolicyVault'],
-        ['Network', 'Fuji Testnet'],
-      ],
-      caption: 'Illustrative diagram. Real results appear only when you run the Live Demo.',
+    showcase: {
+      label: 'Replay recorded runs',
+      window: 'Transaction verification demo',
+      badge: 'Recorded replay',
+      tabs: {
+        payment: 'Pay 0.01 USDC',
+        swap: 'Swap USDC → WAVAX',
+        guard: 'Unsupported swap route',
+      },
+      scenario: {
+        payment: ['USDC payment', '0.01 USDC → allowlisted recipient'],
+        swap: ['Token swap', 'USDC → WAVAX through the approved LFJ pool'],
+        guard: ['Security check', 'WAVAX → USDC through an unsupported LFJ route'],
+      },
+      verdict: {
+        running: ['Verifying', 'Each step records evidence before the next one starts.'],
+        payment: ['Confirmed', 'Exactly 0.01 USDC to the approved recipient; balances reconciled.'],
+        swap: ['Confirmed', 'Swapped within Chainlink price bounds with protected minimum output.'],
+        guard: ['Blocked before signing', 'Trusted Builder rejected the unsupported route. Nothing was signed.'],
+      },
+      facts: ['Checked stages', 'Processing time', 'Network'],
+      env: 'Fuji fork',
+      modules: 'steps',
     },
-    aboutTitle: 'What is PaceVant?',
-    aboutBody:
-      'A control layer between AI agents and the blockchain. The AI may only propose; PaceVant verifies the proposal, signs protective conditions and lets a contract on Avalanche enforce them.',
-    features: [
-      ['Intent verification', 'Right request, right recipient'],
-      ['Risk assessment', 'Simulation and loss bounds'],
-      ['On-chain guardrails', 'Phi conditions signed via EIP-712'],
-      ['Guarded execution', 'Atomic PolicyVault checks'],
+    facts: [
+      ['12', 'Transaction security steps'],
+      ['3', 'Verification phases'],
+      ['43113', 'Avalanche Fuji chain ID'],
+      ['EIP‑712', 'Transaction-bound signatures'],
+      ['Z3', 'Formal verification'],
     ],
-    story: [
-      {
-        title: 'Why do AI agent transactions need guardrails?',
-        body: 'An agent can misread intent, act on stale prices or exceed the authority it was given. With real assets, a wrong proposal is a real loss.',
-      },
-      {
-        title: 'How does PaceVant verify?',
-        body: 'EVM simulation measures actual effects, the Risk Engine bounds loss, Shield + ITAG check intent, and Z3 proves safety conditions before anything is signed.',
-      },
-      {
-        title: 'Guardrails enforced on Avalanche',
-        body: 'The EIP-712 signature binds the transaction, nonce, deadline and Phi. PolicyVault rejects any effect outside the verified conditions.',
-      },
+    coreEyebrow: 'Core technology',
+    coreTitle: 'Four security layers for AI agent transactions',
+    coreBody:
+      'The AI may only propose. Every proposal is simulated, risk-checked and formally verified before it is signed and executed under guardrails on Avalanche.',
+    coreLink: 'See the 12 steps',
+    layers: [
+      ['Intent verification', 'Check intent, policy and the agent’s limited authority.'],
+      ['Risk assessment', 'Simulate in the EVM, measure asset effects and bound loss.'],
+      ['Formal proof', 'Z3 checks safety obligations and compiles Phi conditions.'],
+      ['Guarded execution', 'Sign EIP‑712, execute via PolicyVault and reconcile the receipt.'],
     ],
-    phasesTitle: 'Three phases, twelve modules',
-    phasesBody:
-      'This is also the layout of the Live Demo graph. A module changes state only when the backend records evidence for it.',
+    stack: [
+      ['AI Agent', 'Proposes only'],
+      ['PaceVant Security', '12 verifying steps'],
+      ['PolicyVault', 'Atomic enforcement'],
+      ['Avalanche', 'Fuji Testnet'],
+    ],
+    phasesEyebrow: 'How it works',
+    phasesTitle: 'Three phases, twelve steps',
+    proofEyebrow: 'Verifiable',
     proofTitle: 'What you can verify on Fuji',
     proof: [
-      ['USDC payment', 'Pay exactly 0.01 USDC to an allowlisted recipient, reconciled down to the amount the recipient actually received.'],
-      ['USDC → WAVAX swap', 'Swap through the approved LFJ pool with a Chainlink reference price and a protected minimum output.'],
-      ['Evidence for every step', 'Open any module to inspect the recorded intent, simulation, solver results, attestation and receipt.'],
+      ['USDC payment', 'Pay exactly 0.01 USDC to an allowlisted recipient, reconciled down to the amount actually received.'],
+      ['USDC → WAVAX swap', 'Swap through the approved LFJ pool with a Chainlink reference price and protected minimum output.'],
+      ['Evidence for every step', 'Open any step to inspect the recorded intent, simulation, solver results, attestation and receipt.'],
     ],
+    proofCta: 'Open the Evidence page',
     ctaTitle: 'Run a protected transaction',
     ctaBody: 'Pick a scenario, watch each security layer decide, and review the execution evidence on Avalanche Fuji.',
     ctaSecondary: 'View evidence',

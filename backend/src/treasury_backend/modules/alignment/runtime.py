@@ -18,12 +18,29 @@ class ShieldBlocked(ControlError):
 
 
 class ShieldRuntime:
-    def __init__(self, shield, session_id):
+    def __init__(self, shield, session_id, on_check=None):
         self.shield, self.session_id = shield, session_id
         self.last_feedback = None
         self.reports = []
         self.attempt_checks = []
         self.pending_outputs = []
+        self.on_check = on_check
+
+    def _check(self, message, tool=None):
+        check_id = "SHIELD_" + ("TOOL_CALL" if tool is not None else message.role)
+        if self.on_check:
+            self.on_check({"check_id": check_id, "check_ref": message.message_id, "status": "RUNNING", "tool_name": message.tool_name})
+        report = self.shield.check(self.session_id, message, **({"tool": tool} if tool is not None else {}))
+        if self.on_check:
+            self.on_check({"check_id": check_id, "check_ref": message.message_id,
+                "status": {"ALIGNED": "PASS", "MISALIGNED": "FAIL"}.get(report.status, report.status),
+                "verdict": report.status, "evidence_ref": report.check_id,
+                "tool_name": message.tool_name, "source": report.source,
+                "model": report.model, "provider": report.provider,
+                "latency_ms": report.latency_ms, "token_usage": report.token_usage,
+                "constraints": [c.model_dump(mode="json") for c in report.constraints],
+                "reason_code": report.feedback.code if report.feedback else None})
+        return report
 
     def defer_data(self, name, arguments, value):
         # Inspect the returned data, not a replay of our already-authorized call.
@@ -70,7 +87,7 @@ class ShieldRuntime:
 
     def assistant(self, content):
         message = Message(message_id="assistant_" + uuid4().hex, role="ASSISTANT", content=content)
-        report = self.shield.check(self.session_id, message)
+        report = self._check(message)
         self._require(report)
         self.shield.state.context(
             self.session_id,
@@ -92,7 +109,7 @@ class ShieldRuntime:
             "arguments": semantic_value(arguments),
             "related_content": related_content,
         }
-        report = self.shield.check(self.session_id, message, tool=tool)
+        report = self._check(message, tool=tool)
         self._require(report)
         return call_id, tool, report
 
@@ -115,7 +132,7 @@ class ShieldRuntime:
             tool_name=name,
             tool_call_id=call_id,
         )
-        report = self.shield.check(self.session_id, message)
+        report = self._check(message)
         self.shield.state.context(
             self.session_id,
             {

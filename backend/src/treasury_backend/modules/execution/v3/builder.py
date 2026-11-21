@@ -9,7 +9,7 @@ from treasury_contracts.crypto import content_hash
 from treasury_contracts.v3 import KINDS, ZERO, ZERO_HASH, Operation, call_hash
 
 
-def build_operation(chain, store, intent, context):
+def build_operation(chain, store, intent, context, *, on_check=None):
     m, c = chain.manifest, context
     if c.get("mvp"):
         if intent.operation not in {"TOKEN_SWAP", "TOKEN_PAYMENT"}:
@@ -28,6 +28,9 @@ def build_operation(chain, store, intent, context):
     mask = c["authority"]["operation_mask"]
     if not mask & (1 << (KINDS[intent.operation] - 1)) or intent.rebalance and not mask & 16:
         raise ValueError("OPERATION_NOT_AUTHORIZED")
+    if on_check:
+        on_check("BUILDER_SCOPE", "PASS", expected={"chain_id": m.chain_id, "treasury": m.treasury, "session_id": c["session_id"], "max_slippage_bps": c["max_slippage_bps"]},
+                 observed={"chain_id": intent.chain_id, "treasury": intent.treasury, "session_id": intent.session_id, "operation_mask": mask, "slippage_bps": intent.slippage_bps, "deadline": intent.deadline})
     n, amount = c["block_number"], int(intent.amount)
     def read(name, *args):
         return getattr(chain.vault.functions, name)(*args).call(block_identifier=n)
@@ -65,6 +68,9 @@ def build_operation(chain, store, intent, context):
                 raise ValueError("LFJ_QUOTE_MISMATCH")
             if amount * 997 * 10000 > m.max_price_impact_bps * (ri * 1000 + amount * 997):
                 raise ValueError("PRICE_IMPACT_LIMIT")
+            if on_check:
+                on_check("LFJ_QUOTE", "PASS", expected={"quote": str(independent), "max_price_impact_bps": m.max_price_impact_bps},
+                         observed={"quote": str(quote), "price_impact_bps": round(amount*997*10000/(ri*1000+amount*997), 6), "pair": route["pair"], "source_block": n})
         units = [10**6, 10**18]
         i, j = registry.index(intent.token_in), registry.index(intent.token_out)
         fair = Fraction(amount * int(c["nominal_prices"][i]) * units[j], units[i] * int(c["nominal_prices"][j]))
@@ -72,6 +78,10 @@ def build_operation(chain, store, intent, context):
         max_loss = c["proof_policy"]["max_relative_loss_bps"]
         if quote * 10000 < fair * (10000 - max_loss):
             raise ValueError("ORACLE_PRICE_DEVIATION")
+        if on_check:
+            protected = fair * (10000 - max_loss) / 10000
+            on_check("INDEPENDENT_ORACLE_QUOTE", "PASS", expected={"min_output": str((protected.numerator+protected.denominator-1)//protected.denominator), "max_relative_loss_bps": max_loss},
+                     observed={"quote": str(quote), "oracle_valid_until": c.get("oracle_valid_until"), "source_block": n})
     elif intent.operation == "TOKEN_PAYMENT":
         if intent.token_in not in {m.usdc, m.wavax, ZERO} or intent.token_out != intent.token_in:
             raise ValueError("TOKEN_NOT_ALLOWED")
@@ -83,8 +93,12 @@ def build_operation(chain, store, intent, context):
             raise ValueError("PAYEE_NOT_ALLOWED")
         from eth_abi import encode
         key = Web3.keccak(encode(["uint256", "address", "address"], [c["timestamp"] // 86400, intent.token_in, intent.recipient]))
-        if read("payeeDailySpent", key) + amount > per_day:
+        payee_daily_spent = read("payeeDailySpent", key)
+        if payee_daily_spent + amount > per_day:
             raise ValueError("PAYEE_DAILY_LIMIT")
+        if on_check:
+            on_check("PAYMENT_ALLOWLIST", "PASS", expected={"per_payment": str(per_tx), "per_day": str(per_day)},
+                     observed={"recipient": intent.recipient, "amount": str(amount), "daily_spent": str(payee_daily_spent)})
         quote, target = amount, intent.recipient if intent.token_in == ZERO else intent.token_in
     else:
         deposit = intent.operation == "VAULT_DEPOSIT"

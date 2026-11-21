@@ -231,7 +231,7 @@ export function AttackPreview({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="module-sheet attack-preview-sheet">
+      <DialogContent className="module-sheet attack-preview-sheet" closeLabel={vi?'Đóng chi tiết':'Close details'}>
         <div className="module-sheet-heading">
           <span className="module-sheet-icon attack-preview-icon">
             <ShieldAlert size={26} />
@@ -264,7 +264,7 @@ export function AttackPreview({
             </section>
 
             <section>
-              <h3>{vi ? 'Thao tác thao túng sẽ bị chặn' : 'Manipulation intercepted'}</h3>
+              <h3>{vi ? 'Hành vi cần được kiểm tra' : 'Manipulation to evaluate'}</h3>
               <p className="attack-mutation">{preset.change[index]}</p>
             </section>
 
@@ -289,8 +289,8 @@ export function AttackPreview({
               <ScanEye size={18} className="text-primary flex-shrink-0 mt-0.5" />
               <p>
                 {vi
-                  ? 'Đây là bản mô tả kịch bản bảo mật. Hệ thống PaceVant sẽ chặn đứng các hành vi vi phạm này thông qua 12 lớp kiểm tra.'
-                  : 'This is a security scenario specification. The PaceVant pipeline enforces safety conditions across all 12 modules.'}
+                  ? 'Đây là mô tả để tìm hiểu, chưa chạy kiểm tra và chưa tạo giao dịch. Kết luận chặn hay cho phép chỉ xuất hiện sau một lượt kiểm tra thực tế có bằng chứng từ backend.'
+                  : 'This is an educational scenario description, not a completed security test or transaction. A verdict requires a real backend run with evidence.'}
               </p>
             </div>
           </div>

@@ -55,7 +55,7 @@ with sync_playwright() as play:
         page.locator('.react-flow__node[data-id="0"]').click()
         expect(page.get_by_role('dialog')).to_be_visible()
         assert page.get_by_role('dialog').locator('.stage-detail-content').count() == 0
-        page.get_by_role('button', name='Close details').click()
+        page.locator('.dialog-close').click()
         report['checks'].append('No execution data before a real run')
         print('Empty module panel passed', flush=True)
 
@@ -76,7 +76,7 @@ with sync_playwright() as play:
                 expect(dialog).to_be_visible()
                 assert dialog.locator('.preview-disclosure').count() == 1
                 assert dialog.locator('.stage-detail-content').count() == 0
-                page.get_by_role('button', name='Close details').click()
+                page.locator('.dialog-close').click()
                 assert len(posts) == before
             report['checks'].append(scenario + ': three protocol-specific attack previews; no backend job created')
             print('Starting real '+scenario+' workflow', flush=True)
@@ -129,7 +129,7 @@ with sync_playwright() as play:
                     expect(dialog.locator('.stage-input blockquote')).to_have_text(value['workflow']['intent']['objective'])
                     expect(dialog.locator('.stage-output')).to_be_visible()
                     assert dialog.locator('pre').count() == 0
-                    page.get_by_role('button', name='Close details').click()
+                    page.locator('.dialog-close').click()
                     inspected_ai = True
                 if value.get('terminal'):
                     break
@@ -172,7 +172,7 @@ with sync_playwright() as play:
                     run['modules'].append({'index': index, 'data_visible': True, 'source': source})
                     if index < 11:
                         dialog.get_by_role('button', name='Tiếp theo', exact=True).click()
-                page.get_by_role('button', name='Close details').click()
+                page.locator('.dialog-close').click()
                 assert page.locator('.security-node.state-passed').count() == 12
             else:
                 expect(page.get_by_test_id('run-block-reason')).to_be_visible()

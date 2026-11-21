@@ -27,7 +27,24 @@ class V3Execution:
         return self.store.lock
 
     def build(self, intent, context):
-        return build_operation(self.chain, self.store, intent, context)
+        callback = getattr(self, "on_activity", None)
+        built = build_operation(self.chain, self.store, intent, context,
+            on_check=(lambda check_id, status, **values: callback("BUILD", check_id, status, **values)) if callback else None)
+        if callback:
+            try:
+                target = self.chain.adapter if intent.operation == "TOKEN_SWAP" else (
+                    self.chain.usdc if intent.token_in == self.manifest.usdc else self.chain.wavax)
+                method, arguments = target.decode_function_input(built["call"]["data"])
+                values = {k: str(v) if isinstance(v, int) and not isinstance(v, bool) else v for k,v in arguments.items()}
+                if method.fn_name == "transfer":
+                    ordered = [arguments[field["name"]] for field in method.abi["inputs"]]
+                    values = {"recipient": ordered[0], "amount": str(ordered[1])}
+                decoded = {"method": method.fn_name, "arguments": values,
+                           "target": built["call"]["target"], "value": built["call"]["value"]}
+            except Exception:
+                decoded = {"function_selector": built["call"]["data"][:10], "reason_code": "CALL_DECODE_UNAVAILABLE"}
+            callback("BUILD", "CALL_DECODED", "PASS" if "method" in decoded else "UNKNOWN", observed=decoded)
+        return built
 
     def simulate(self, build, context):
         evidence = fork_simulate(self.chain, build, context)

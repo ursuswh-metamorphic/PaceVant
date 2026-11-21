@@ -55,3 +55,28 @@ def assess_operation(intent, built, effects, context, now):
         "balance_semantics": "measured on isolated EVM",
         "gas_economics": gas_economics,
     }
+
+
+def risk_observations(intent, built, effects, context, risk, now):
+    """Explain the assessor's own reason codes without changing its signed result."""
+    reasons = set(risk["reason_codes"])
+    rows = [
+        ("STALE_EVIDENCE", {"deadline": intent.deadline, "max_oracle_age": context["proof_policy"]["max_oracle_age"]},
+         {"timestamp": now, "context_age_seconds": now - context["timestamp"]}),
+        ("UNVERIFIED_EFFECTS", {"build_hash": content_hash(built), "source_block_hash": context["block_hash"], "execution_status": "SUCCESS"},
+         {k: effects[k] for k in ("build_hash", "source_block_hash", "execution_status")}),
+        ("UNAUTHORIZED_APPROVAL", {"allowances": ["0"] * len(effects["allowances"])}, {"allowances": effects["allowances"]}),
+        ("UNEXPECTED_TRANSFER", {"input_amount": intent.amount, "other_asset_outflow": "0"}, {"deltas": effects["deltas"]}),
+    ]
+    if intent.operation == "TOKEN_PAYMENT":
+        rows.append(("PAYEE_RECEIPT_SHORTFALL", {"minimum_usdc": built["min_output"]}, {"received": effects["received"]}))
+    else:
+        registry = [context["usdc"], context["wavax"], context["shares"], ZERO]
+        rows.append(("MIN_OUTPUT_NOT_MET", {"min_output": built["min_output"]}, {"output_amount": effects["deltas"][registry.index(intent.token_out)]}))
+    if context.get("mvp"):
+        rows.extend([
+            ("SYSTEM_GAS_REFERENCE_BUDGET", {"max_daily_execution_cost_usd_e8": context["max_daily_execution_cost_usd_e8"]}, risk["gas_economics"]),
+            ("ORACLE_WINDOW_UNAVAILABLE", {"oracle_valid_until": context["oracle_valid_until"]}, {"timestamp": now, "deadline": intent.deadline}),
+        ])
+    return [{"check_id": code, "status": "FAIL" if code in reasons else "PASS", "expected": expected, "observed": observed}
+            for code, expected, observed in rows]

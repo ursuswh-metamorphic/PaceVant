@@ -7,7 +7,7 @@ from treasury_backend.modules.alignment.provider import json_object_response, sa
 from treasury_backend.modules.temporal.evidence_catalog import Judgment, catalog, ground
 from treasury_backend.modules.temporal.models import SemanticAssessment, SemanticFinding
 
-VERSION = "itag-catalog-v3.4"
+VERSION = "itag-catalog-v3.5-vi"
 PROMPT = """Judge candidate contribution to the active operator-authenticated IntentSpec objective.
 Use evidence_catalog and return exactly its Judgment schema. Select candidate_alias and task_alias
 from the supplied catalog. Extracted tasks are model interpretations, subordinate to the IntentSpec.
@@ -31,7 +31,9 @@ budget constraint. Deterministic temporal policies independently enforce exact s
 Reserve uncertainty for missing evidence that prevents judging contribution; omit generic caveats.
 Return JSON only. Never reproduce evidence refs or graph IDs. Use the catalog aliases exactly.
 Legacy citation_repair metadata, if present, permits only reference linkage corrections with
-the supplied semantic core preserved."""
+the supplied semantic core preserved.
+Write human-readable explanations in Vietnamese. Keep schema keys, aliases, enum values,
+original quoted objectives and machine-readable facts unchanged."""
 
 
 

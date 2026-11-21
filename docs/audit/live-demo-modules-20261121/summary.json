@@ -1,0 +1,485 @@
+{
+  "date": "2026-11-21",
+  "timezone": "Asia/Saigon",
+  "baseline": "9174ffd with existing user frontend changes",
+  "scope": "Local working tree; new real model/fork runs; saved-response display inspection; synthetic state reproductions explicitly separate",
+  "application_source_modified": false,
+  "public_transactions_sent": false,
+  "runs": [
+    {
+      "job_id": "judge_32f1907ddf55416faab15e6807246aa7",
+      "scenario": "payment",
+      "status": "CONFIRMED",
+      "reason_code": null,
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "timeline_stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ],
+      "worker_wall_seconds": 52.828,
+      "model_call_count": 11,
+      "outcome": {
+        "tx_hash": "0x524637ad7b8b9099adb1c8e7eed38c75261e4fd25c9e95a86f3a244ff021a3eb",
+        "block_number": 61417294,
+        "block_hash": "0xa003b44941f51ae3925598dafb30849e5f69acbef260bc40623f559a6de9b5f9",
+        "gas_used": "356312",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "356312",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "356312002850496",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-10000",
+          "0",
+          "0",
+          "0"
+        ],
+        "payee_received": "10000"
+      },
+      "panels": [
+        {
+          "index": 0,
+          "label": "Owner Policy",
+          "state": "Đã xác minh",
+          "inputs": 0,
+          "outputs": 1
+        },
+        {
+          "index": 1,
+          "label": "Agent & Intent",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 2,
+          "label": "Trusted Builder",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 3,
+          "label": "EVM Simulation",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 4,
+          "label": "Economic Risk",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 5,
+          "label": "Shield + ITAG",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 6,
+          "label": "Z3 & Phi",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 7,
+          "label": "Security Decision",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 8,
+          "label": "Attestor",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 9,
+          "label": "Exact Preflight",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 10,
+          "label": "Relayer & PolicyVault",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 11,
+          "label": "Receipt",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        }
+      ],
+      "running_panels": [
+        {
+          "index": 1,
+          "label": "Agent & Intent",
+          "state": "Chờ xử lý",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 1,
+          "label": "Agent & Intent",
+          "state": "Đang chạy",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 2,
+          "label": "Trusted Builder",
+          "state": "Đang chạy",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 3,
+          "label": "EVM Simulation",
+          "state": "Đang chạy",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 5,
+          "label": "Shield + ITAG",
+          "state": "Đang chạy",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 6,
+          "label": "Z3 & Phi",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 7,
+          "label": "Security Decision",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 8,
+          "label": "Attestor",
+          "state": "Đang chạy",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 9,
+          "label": "Exact Preflight",
+          "state": "Đang chạy",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 9,
+          "label": "Exact Preflight",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        },
+        {
+          "index": 10,
+          "label": "Relayer & PolicyVault",
+          "state": "Đã xác minh",
+          "inputs": 1,
+          "outputs": 1
+        }
+      ],
+      "observations": [
+        {
+          "phase": "PREPARING_FORK",
+          "active_stage": null,
+          "status": "RUNNING",
+          "timeline_length": 0
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "PLANNING",
+          "status": "RUNNING",
+          "timeline_length": 0
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "PLANNING",
+          "status": "RUNNING",
+          "timeline_length": 1
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "BUILD",
+          "status": "RUNNING",
+          "timeline_length": 2
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "SIMULATION",
+          "status": "RUNNING",
+          "timeline_length": 3
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "ITAG",
+          "status": "RUNNING",
+          "timeline_length": 5
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "PROOF",
+          "status": "RUNNING",
+          "timeline_length": 7
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "SDE",
+          "status": "RUNNING",
+          "timeline_length": 8
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "ATTESTATION",
+          "status": "RUNNING",
+          "timeline_length": 8
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "EXACT_SIGNED_PREFLIGHT",
+          "status": "RUNNING",
+          "timeline_length": 9
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "EXACT_SIGNED_PREFLIGHT",
+          "status": "RUNNING",
+          "timeline_length": 10
+        },
+        {
+          "phase": "WORKFLOW_RUNNING",
+          "active_stage": "RELAY",
+          "status": "RUNNING",
+          "timeline_length": 11
+        },
+        {
+          "phase": "FINISHED",
+          "active_stage": "RELAY",
+          "status": "CONFIRMED",
+          "timeline_length": 11
+        }
+      ],
+      "completed_panel_source": "Genuine response captured from this audit's confirmed payment; GET served from saved response for display inspection only."
+    },
+    {
+      "job_id": "judge_15fde1c0381e43c2bc0b2273027d87d9",
+      "scenario": "swap",
+      "status": "UNAVAILABLE",
+      "reason_code": "FRESH_CHAINLINK_SIGNING_WINDOW_UNAVAILABLE",
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "timeline_stages": [],
+      "worker_wall_seconds": 91.703,
+      "model_call_count": 0,
+      "outcome": null,
+      "panels": [
+        {
+          "index": 0,
+          "label": "Owner Policy",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 1,
+          "label": "Agent & Intent",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 2,
+          "label": "Trusted Builder",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 3,
+          "label": "EVM Simulation",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 4,
+          "label": "Economic Risk",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 5,
+          "label": "Shield + ITAG",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 6,
+          "label": "Z3 & Phi",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 7,
+          "label": "Security Decision",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 8,
+          "label": "Attestor",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 9,
+          "label": "Exact Preflight",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 10,
+          "label": "Relayer & PolicyVault",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        },
+        {
+          "index": 11,
+          "label": "Receipt",
+          "state": "Chưa thực hiện",
+          "inputs": 0,
+          "outputs": 0
+        }
+      ],
+      "running_panels": [],
+      "observations": [
+        {
+          "phase": "PREPARING_FORK",
+          "active_stage": null,
+          "status": "RUNNING",
+          "timeline_length": 0
+        },
+        {
+          "phase": "WAITING_FOR_ORACLE",
+          "active_stage": null,
+          "status": "RUNNING",
+          "timeline_length": 0
+        },
+        {
+          "phase": "WAITING_FOR_ORACLE",
+          "active_stage": null,
+          "status": "UNAVAILABLE",
+          "timeline_length": 0
+        }
+      ],
+      "completed_panel_source": "Real backend response in the active browser session"
+    }
+  ],
+  "browser_errors": [],
+  "initial_panels_checked": 12,
+  "display_panels_checked": 36,
+  "display_viewports": [
+    {
+      "language": "vi",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "language": "vi",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "display_overflow_cases": 0,
+  "attack_previews_checked": 6,
+  "attack_preview_jobs_created": 0,
+  "regressions": [
+    {
+      "command": "npm run --prefix frontend test",
+      "tests_passed": 21,
+      "files_passed": 3
+    },
+    {
+      "command": ".venv/Scripts/python.exe -m pytest backend/tests/control/test_judge_api.py backend/tests/control/test_judge_metrics.py -q",
+      "tests_passed": 10,
+      "dependency_deprecation_warnings": 2
+    }
+  ],
+  "synthetic_state_reproductions": [
+    {
+      "name": "synthetic running Attestor with preceding SDE+PROOF evidence",
+      "node_state": "running",
+      "preceding_evidence": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE"
+      ],
+      "detail_html_empty": true
+    },
+    {
+      "name": "synthetic reorg after earlier confirmed OUTCOME",
+      "node_state": "unknown",
+      "old_confirmed_text": true,
+      "new_reorg_text": true,
+      "earlier_outcome_position": 2311,
+      "later_reconciliation_position": 5913
+    }
+  ],
+  "harness_note": "First inspection paused after payment confirmation because the test accordion locator changed during expansion; resumed using the genuine captured payment response for display inspection, then ran swap against the real backend. No payment was resubmitted."
+}
