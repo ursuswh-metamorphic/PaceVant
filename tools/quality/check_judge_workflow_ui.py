@@ -9,6 +9,7 @@ from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 PUBLIC='--public' in sys.argv
+BASE=next((arg.split('=',1)[1].rstrip('/') for arg in sys.argv if arg.startswith('--url=')),'http://127.0.0.1:5173')
 OUT = ROOT / ("data/judge-public-acceptance" if PUBLIC else "data/judge-mvp-final" if '--final' in sys.argv else "data/judge-ui-acceptance")
 OUT.mkdir(parents=True, exist_ok=True)
 EXPECTED = ['OWNER_AUTHORITY', 'AGENT_PROPOSAL', 'BUILD', 'SIMULATION', 'RISK', 'ITAG', 'PROOF', 'SDE', 'ATTESTATION', 'EXACT_SIGNED_PREFLIGHT', 'OUTCOME']
@@ -48,7 +49,7 @@ with sync_playwright() as play:
     page.on('response', response_received)
     try:
         print('Opening Live Demo', flush=True)
-        page.goto('http://127.0.0.1:5173/', wait_until='networkidle', timeout=45000)
+        page.goto(BASE+'/', wait_until='networkidle', timeout=45000)
         page.get_by_test_id('tab-live').click()
         expect(page.get_by_test_id('run-scenario')).to_be_visible()
         page.locator('.react-flow__node[data-id="0"]').click()
@@ -58,7 +59,7 @@ with sync_playwright() as play:
         report['checks'].append('No execution data before a real run')
         print('Empty module panel passed', flush=True)
 
-        for scenario in (['swap'] if '--swap-only' in sys.argv else ['payment', 'swap']):
+        for scenario in (['payment'] if '--payment-only' in sys.argv else ['swap'] if '--swap-only' in sys.argv else ['payment', 'swap']):
             print('Checking scenario '+scenario, flush=True)
             page.get_by_test_id('scenario-' + scenario).click()
             page.get_by_role('combobox').click()
@@ -86,7 +87,7 @@ with sync_playwright() as play:
                 # still reread and verify their own context inside the worker.
                 until = time.monotonic()+720
                 while True:
-                    source = page.request.get('http://127.0.0.1:5173/judge/source',timeout=30000).json()
+                    source = page.request.get(BASE+'/judge/source',timeout=30000).json()
                     updated = source.get('oracle',{}).get('updated_at',0)
                     age = time.time()-updated
                     if source.get('status')=='VERIFIED_READ' and 0<=age<=120:
@@ -190,7 +191,7 @@ with sync_playwright() as play:
             # Submit its exact supported API contract; then view it through the
             # same recovery path with the actual returned job identity.
             print('Starting backend-only security guard (not one of the six previews)',flush=True)
-            response=page.request.post('http://127.0.0.1:5173/judge/jobs',
+            response=page.request.post(BASE+'/judge/jobs',
                 data={'scenario':'guard'},headers={'Idempotency-Key':'final-guard-'+str(time.time_ns())})
             assert response.status==202,response.text()
             guard=response.json()

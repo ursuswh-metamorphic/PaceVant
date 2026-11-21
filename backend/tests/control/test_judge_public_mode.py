@@ -60,3 +60,22 @@ def test_unsigned_manifest_cannot_configure_live_service(enabled_public):
     value['owner_signature']='0x'
     path.write_text(json.dumps(value),encoding='utf-8')
     assert not settings.configured()
+
+
+def test_shared_reconciliation_never_publishes_another_workflow_to_current_job():
+    from types import SimpleNamespace
+
+    from treasury_backend.operations.judge_worker import job_event_writer
+
+    persisted,published=[],[]
+    claimed=[None]
+    store=SimpleNamespace(event=lambda *args:persisted.append(args),
+        by_key=lambda key:claimed[0],get=lambda id_:{'workflow_id':id_})
+    writer=job_event_writer(store,'job-current',lambda **value:published.append(value))
+    writer('prior','RECONCILIATION',{'status':'CONFIRMED'},1)
+    assert len(persisted)==1 and published==[]
+    claimed[0]={'workflow_id':'current'}
+    writer('prior','RECONCILIATION',{'status':'CONFIRMED'},2)
+    assert published==[]
+    writer('current','OWNER_AUTHORITY',{},3)
+    assert published==[{'workflow':{'workflow_id':'current'}}]

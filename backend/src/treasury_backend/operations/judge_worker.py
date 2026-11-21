@@ -19,6 +19,17 @@ def atomic(path, value):
     os.replace(temporary, path)
 
 
+def job_event_writer(store,request_key,publish):
+    original_event=store.event
+
+    def event(id_,stage,value,now):
+        original_event(id_,stage,value,now)
+        current=store.by_key(request_key)
+        if current is not None and current['workflow_id']==id_:
+            publish(workflow=store.get(id_))
+    return event
+
+
 def run(scenario, directory, recipient_index=None):
     from treasury_backend.modules.workflows.judge import code
 
@@ -76,16 +87,12 @@ def run(scenario, directory, recipient_index=None):
                 treasury=manifest.treasury, session_id=manifest.default_session_id, token_in=token_in, token_out=token_out,
                 recipient=recipient, amount=amount, slippage_bps=0 if payment else 40,
                 deadline=min(context["timestamp"] + 180, context["oracle_valid_until"]), objective=objective)
-            original_event = workflows.store.event
-
-            def event(id_, stage, value, now):
-                original_event(id_, stage, value, now)
-                progress(workflow=workflows.store.get(id_))
-
-            workflows.store.event = event
+            request_key='judge-fixed-'+directory.name
+            # Shared state reconciles old transactions; publish only this job.
+            workflows.store.event=job_event_writer(workflows.store,request_key,progress)
             workflows.on_progress = lambda stage:progress(active_stage=stage, phase="WORKFLOW_RUNNING")
             progress(phase="WORKFLOW_RUNNING", active_stage="PLANNING", source_block=prepared.source_block)
-            record = workflows.run(intent, "judge-fixed-"+directory.name)
+            record = workflows.run(intent, request_key)
             record = workflows.reconcile(record["workflow_id"])
             if public:
                 until=time.monotonic()+20
