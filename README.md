@@ -6,14 +6,14 @@
   </picture>
 
   <p><strong>Intent-Aware Security for Autonomous On-Chain Treasury Agents</strong></p>
-  <p><a href="https://pacevant.live"><strong>Live Demo</strong></a> · <a href="docs/audit/public-fuji-live-acceptance-20261121.json"><strong>Security Evidence</strong></a> · <a href="#kiến-trúc-mỗi-lớp-tồn-tại-để-làm-gì"><strong>Architecture & Research</strong></a></p>
+  <p><a href="https://pacevant.live"><strong>Live Demo</strong></a> · <a href="https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json"><strong>Security Evidence</strong></a> · <a href="#kiến-trúc-mỗi-lớp-tồn-tại-để-làm-gì"><strong>Architecture & Research</strong></a></p>
 </div>
 
 **Một giao dịch có thể hợp lệ. Cả chuỗi hành động vẫn có thể sai mục đích.**
 
 PaceVant là **lớp kiểm soát bảo mật dành cho AI Agent quản lý treasury on-chain**. AI được phép đề xuất swap hoặc thanh toán, nhưng không tự có quyền tiêu tài sản. PaceVant đối chiếu hành động với nhiệm vụ được xác thực, lịch sử giao dịch, mục đích sử dụng và những giới hạn kinh tế; chỉ sau đó thành phần ký độc lập mới cấp quyền thực thi, còn smart contract tiếp tục kiểm các điều kiện bắt buộc ngay tại thời điểm chạy giao dịch.
 
-**Trạng thái:** public MVP trên **Avalanche Fuji (chain ID 43113)** đã có payment/swap được đối soát; single-tenant, hai nghiệp vụ giới hạn; **chưa audit độc lập, chưa phải production custody/mainnet**. Website public sử dụng nhánh triển khai `develop` theo [runbook](docs/PUBLIC_FUJI_RUNBOOK.md). Nhánh README này là bản viết tài liệu, **không phải bản deploy**; evidence public đã xác nhận theo release/tx riêng, không mặc nhiên chứng nhận mọi commit mới trên `main`.
+**Trạng thái:** public MVP trên **Avalanche Fuji (chain ID 43113)** đã có payment/swap được đối soát; single-tenant, hai nghiệp vụ giới hạn; **chưa audit độc lập, chưa phải production custody/mainnet**. Website public sử dụng nhánh triển khai `develop` theo [runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md). Nhánh README này là bản viết tài liệu, **không phải bản deploy**; evidence public đã xác nhận theo release/tx riêng, không mặc nhiên chứng nhận mọi commit mới trên `main`.
 
 ---
 
@@ -51,7 +51,7 @@ Trong kiểm thử semantic reliability phiên bản v3.2, **7/8 quan sát purpo
 
 ## PaceVant đã chạy thật được gì?
 
-<p align="center"><a href="docs/audit/public-fuji-live-acceptance-20261121.json"><img src="docs/assets/readme/metrics.svg" alt="Tổng quan bằng chứng: public Fuji payment và swap; ITAG scripted benchmark; TaskShield component regression" width="100%"></a></p>
+<p align="center"><a href="https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json"><img src="docs/assets/readme/metrics.svg" alt="Tổng quan bằng chứng: public Fuji payment và swap; ITAG scripted benchmark; TaskShield component regression" width="100%"></a></p>
 
 Website **<https://pacevant.live>** dùng frontend React và backend Python; public mode chỉ mở **USDC_PAYMENT** và **SWAP_EXACT_IN** với số tiền, router, recipient được giới hạn. Đây là testnet treasury do Owner kiểm soát, không phải ví khách hàng tự kết nối và giao dịch bất kỳ tài sản nào.
 
@@ -59,18 +59,18 @@ Website **<https://pacevant.live>** dùng frontend React và backend Python; pub
 
 | Bằng chứng | Đã xác minh | Đường kiểm chứng |
 | --- | --- | --- |
-| **PolicyVaultMVP** | Contract `0x70e1395F959dba530cF4A53B060c809b715bB6d5` đã deploy; [deployment journal](docs/audit/mvp-public-deployment-20261121.json) | [Snowtrace contract](https://testnet.snowtrace.io/address/0x70e1395F959dba530cF4A53B060c809b715bB6d5) |
+| **PolicyVaultMVP** | Contract `0x70e1395F959dba530cF4A53B060c809b715bB6d5` đã deploy; [deployment journal](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/mvp-public-deployment-20261121.json) | [Snowtrace contract](https://testnet.snowtrace.io/address/0x70e1395F959dba530cF4A53B060c809b715bB6d5) |
 | **Payment từ web** | **0,01 Circle test USDC** Vault → allowlisted EOA; receipt `status=1`, payee delta 10.000 base units | [Transaction](https://testnet.snowtrace.io/tx/0x10f6a04e22179f4186459e3738c61597048e9b2aac724c01347ba306f4470b8c) |
 | **Swap từ web** | **0,000001 Circle test USDC → WAVAX**, output về Vault; receipt `status=1` và token deltas đã đối soát | [Transaction](https://testnet.snowtrace.io/tx/0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d) |
-| **Bằng chứng tổng hợp** | Public RPC receipts, historical balances, code hashes, EIP-712 attestation, gas relayer, browser acceptance | [Public Fuji acceptance 21/11](docs/audit/public-fuji-live-acceptance-20261121.json) · [Current system review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) |
+| **Bằng chứng tổng hợp** | Public RPC receipts, historical balances, code hashes, EIP-712 attestation, gas relayer, browser acceptance | [Public Fuji acceptance 21/11](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json) · [Current system review](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) |
 
 **Checkpoint rõ ràng:** báo cáo public Fuji ghi lại hai bản browser acceptance release SHA riêng, không chứng minh `main` HEAD đã được deploy nguyên trạng. Các receipts cũ của V2/Demo User vẫn tồn tại trong [research archive](docs/research/EXPERIMENT_CATALOG.md), nhưng không được gộp với contract MVP mới.
 
 ### Does it prevent unsafe execution? — Không có transaction cũng là kết quả đúng
 
-- Public guard với policy thật từ chối `PAYEE_NOT_ALLOWED` **trước khi ký và không broadcast**, vì vậy **không thể có Snowtrace transaction cho lượt bị chặn**. Evidence nằm trong [public acceptance report](docs/audit/public-fuji-live-acceptance-20261121.json).
+- Public guard với policy thật từ chối `PAYEE_NOT_ALLOWED` **trước khi ký và không broadcast**, vì vậy **không thể có Snowtrace transaction cho lượt bị chặn**. Evidence nằm trong [public acceptance report](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json).
 - **LOCAL Anvil:** ITAG budget isolation chặn lần chi thứ ba; không phát sinh attestation, nonce relayer giữ nguyên. [Raw artifact](docs/evaluation/itag-final/ANVIL_BUDGET_ISOLATION.json).
-- Solidity/Forge và API tests kiểm anti-replay, signed fields, caps, negative cases. [Contracts tests](contracts/test/README.md) · [Merge test notes](docs/audit/MAIN_MERGE_20261121.md).
+- Solidity/Forge và API tests kiểm anti-replay, signed fields, caps, negative cases. [Contracts tests](contracts/test/README.md) · [Merge test notes](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/MAIN_MERGE_20261121.md).
 - **Sáu tùy chọn tấn công trên website hiện là UI preview**, không chèn adversarial payload vào backend. Không được gọi chúng là sáu cuộc tấn công live đã bị chặn.
 
 ### Does long-horizon analysis add value?
@@ -251,8 +251,8 @@ Ví dụ xuyên suốt là **AI được phép swap USDC → WAVAX cho một nhi
 ### 4. LOCAL Anvil, formal guards và public Fuji
 
 - **LOCAL Anvil:** 2 giao dịch 10 USDC đã xác nhận; candidate thứ ba bị budget veto trước ký, relayer nonce không tăng. Paired counterfactual giữ risk PASS và Z3 VERIFIED để quy nguyên nhân từ chối về ITAG. [Raw evidence](docs/evaluation/itag-final/ANVIL_BUDGET_ISOLATION.json).
-- **Proof/economic:** Z3 SAT/UNSAT và Φ trên bounded assumptions; risk/policy regressions và hợp đồng Solidity có unit/fuzz/integration checks. **Không** bịa “Z3 accuracy” hay “MEV prevention rate” khi không có số đo cùng chuẩn. [Proof source](packages/contracts-api/treasury_contracts/proof_v3.py) · [Economic audit](MVP_ECONOMIC_RISK_AUDIT.md).
-- **Public Fuji:** payment, swap và public guard refusal được báo cáo với receipt/codehash/historical balance evidence; testnet và release-specific, không phải independent mainnet audit. [Acceptance](docs/audit/public-fuji-live-acceptance-20261121.json).
+- **Proof/economic:** Z3 SAT/UNSAT và Φ trên bounded assumptions; risk/policy regressions và hợp đồng Solidity có unit/fuzz/integration checks. **Không** bịa “Z3 accuracy” hay “MEV prevention rate” khi không có số đo cùng chuẩn. [Proof source](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/packages/contracts-api/treasury_contracts/proof_v3.py) · [Economic audit](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/MVP_ECONOMIC_RISK_AUDIT.md).
+- **Public Fuji:** payment, swap và public guard refusal được báo cáo với receipt/codehash/historical balance evidence; testnet và release-specific, không phải independent mainnet audit. [Acceptance](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json).
 
 **Kiểm thử và provenance:** [Experiment Catalog](docs/research/EXPERIMENT_CATALOG.md) giữ baseline, attempts, negative results, môi trường, raw logs và cách tái hiện; không ghi scripted model như inference thực.
 
@@ -263,8 +263,8 @@ PaceVant không tuyên bố phát minh ra mô phỏng transaction, EIP-712, allo
 | Hướng / nghiên cứu tham khảo | Trọng tâm chính | PaceVant bổ sung / khác biệt ở mức thiết kế |
 | --- | --- | --- |
 | Wallet allowlist / per-tx policy | Chặn call/token/amount ngoài phạm vi từng lần | Kiểm task binding, history, purpose và economic effect, không chỉ call hợp lệ |
-| [PACE — Policy-Attested Contract Execution](docs/paper/PACE_Policy_Attested_Contract_Execution.md) | Typed intents, policy verification, signed PDR và binding on-chain | Áp dụng nền bảo vệ transaction, bổ sung TaskShield + ITAG xuyên hành động và semantic evidence |
-| [Proof-Gated Signing](docs/paper/Proof_Gated_Signing_Solver_Checked_Transaction_Guards.md) | Simulation, SMT proof, compiled postconditions chống state drift | Áp dụng/điều chỉnh bounded economic guard cho fixed swap/payment, kết hợp với long-horizon intent checks |
+| [PACE — Policy-Attested Contract Execution](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/paper/PACE_Policy_Attested_Contract_Execution.md) | Typed intents, policy verification, signed PDR và binding on-chain | Áp dụng nền bảo vệ transaction, bổ sung TaskShield + ITAG xuyên hành động và semantic evidence |
+| [Proof-Gated Signing](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/paper/Proof_Gated_Signing_Solver_Checked_Transaction_Guards.md) | Simulation, SMT proof, compiled postconditions chống state drift | Áp dụng/điều chỉnh bounded economic guard cho fixed swap/payment, kết hợp với long-horizon intent checks |
 | LLM semantic reviewer độc lập | Đánh giá ngôn ngữ, dễ gặp schema và provenance errors | Evidence-bound catalog, deterministic veto và explicit uncertainty |
 
 **Chưa có benchmark đối đầu trên cùng attack set/protocol** chứng minh PaceVant vượt PACE hoặc PGS về attack-prevention rate. Đóng góp ITAG hiện là **research differentiator có bằng chứng bước đầu**, không phải novelty đã được đánh giá peer review.
@@ -281,11 +281,11 @@ PaceVant không tuyên bố phát minh ra mô phỏng transaction, EIP-712, allo
 | **Frontend** | **React, TypeScript, Vite, React Flow, Tailwind CSS v4, Radix UI, TanStack Query, Motion, Lucide** | Web dashboard, evidence panels, bilingual UI, graph, job/history |
 | **Tests & tooling** | pytest, Foundry/Forge, Anvil, Ruff, Vitest, Docker cho các nhánh cũ | Research regressions, contract tests; public VPS dùng Nginx + systemd (không Docker/Node production server) |
 
-Các công cụ có code trong repo **không nhất thiết thuộc mọi public run**. Ví dụ ERC-20 transfer LOCAL, optional rebalance/autonomy, legacy Demo User gas-credit và V2/V3 research paths không tự động được expose từ Judge website. [Technology Inventory](docs/research/TECHNOLOGY_INVENTORY.md) · [Module map](backend/MODULES.md) · [Current review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md).
+Các công cụ có code trong repo **không nhất thiết thuộc mọi public run**. Ví dụ ERC-20 transfer LOCAL, optional rebalance/autonomy, legacy Demo User gas-credit và V2/V3 research paths không tự động được expose từ Judge website. [Technology Inventory](docs/research/TECHNOLOGY_INVENTORY.md) · [Module map](backend/MODULES.md) · [Current review](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md).
 
 ## Bắt đầu nhanh & tái hiện an toàn
 
-**Xem demo public:** [pacevant.live](https://pacevant.live) → chọn **Swap** hoặc **Payment**, đọc giải thích từng stage và mở tx hash sau khi CONFIRMED. Public judge có giới hạn quota, ngân sách testnet và có thể đợi Chainlink round mới. **Sáu attack options trong UI chỉ là preview**, không tự gửi adversarial transactions. [Hướng dẫn](docs/PUBLIC_FUJI_RUNBOOK.md).
+**Xem demo public:** [pacevant.live](https://pacevant.live) → chọn **Swap** hoặc **Payment**, đọc giải thích từng stage và mở tx hash sau khi CONFIRMED. Public judge có giới hạn quota, ngân sách testnet và có thể đợi Chainlink round mới. **Sáu attack options trong UI chỉ là preview**, không tự gửi adversarial transactions. [Hướng dẫn](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md).
 
 **Chạy mã nguồn cho phát triển / kiểm thử (không tự bật public Fuji):**
 
@@ -297,7 +297,7 @@ uv run --locked python tools/contracts/bootstrap.py
 uv run --locked python -m treasury_backend.operations.judge_serve --port 8000
 ```
 
-Lệnh judge local mặc định phục vụ chế độ isolated/model-only fork theo cấu hình; **không tự động activate public treasury**. Public mode cần Owner-signed manifest, effective configuration, roles và explicit activation theo [Public Fuji Runbook](docs/PUBLIC_FUJI_RUNBOOK.md). Không chạy deploy, fund, renew policy/session hoặc submit giao dịch thật như health-check. Không commit `.env`, owner/attestor/relayer secrets, raw signed tx/journal hay visitor credentials.
+Lệnh judge local mặc định phục vụ chế độ isolated/model-only fork theo cấu hình; **không tự động activate public treasury**. Public mode cần Owner-signed manifest, effective configuration, roles và explicit activation theo [Public Fuji Runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md). Không chạy deploy, fund, renew policy/session hoặc submit giao dịch thật như health-check. Không commit `.env`, owner/attestor/relayer secrets, raw signed tx/journal hay visitor credentials.
 
 **Kiểm thử có thể tái hiện:** `uv run --locked python -m pytest -q`, `uv run --locked python tools/contracts/foundry.py forge test -vv`, `npm test --prefix frontend`, `uv run --locked ruff check backend/src backend/tests tools`. Đây là **lệnh hướng dẫn**, không phải tuyên bố đã chạy lại trong lần sửa README. Các benchmark real-model cần cấu hình provider credential riêng và đọc provenance trong từng báo cáo.
 
@@ -310,7 +310,7 @@ Lệnh judge local mặc định phục vụ chế độ isolated/model-only for
 | [Technology Inventory](docs/research/TECHNOLOGY_INVENTORY.md) | Runtime stack, research-only components, code paths |
 | [Security Coverage Matrix](docs/research/SECURITY_COVERAGE_MATRIX.md) | Threat → detection → enforcement → evidence → limitations |
 | [README Repositioning Review](docs/research/README_REPOSITIONING_REVIEW.md) | Điểm mạnh/yếu trước sửa, technical corrections, before/after |
-| [MVP Current System Review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) | Trạng thái nghiệm thu Fuji mới nhất và vận hành public |
+| [MVP Current System Review](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) | Trạng thái nghiệm thu Fuji mới nhất và vận hành public |
 | [System Design V2.1](docs/AI_Treasury_Security_System_Design_v2.1.md) | **Tài liệu của kiến trúc checkpoint cũ**; vẫn hữu ích cho nghiên cứu/legacy nhưng không thay thế source V3/MVP mới |
 | [Reviewer Guide](docs/REVIEWER_GUIDE.md) | Hướng đọc source/evidence; kiểm tra checkpoint trước khi áp dụng |
 
