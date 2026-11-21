@@ -11,8 +11,20 @@ from treasury_backend.paths import ROOT
 from treasury_contracts.rpc import evm_web3
 
 
-def observe(rpc_url):
+def observe(rpc_url, manifest_file=None):
     old = json.loads((ROOT / "deployments/treasury-fuji-v2.json").read_text())
+    contract_name='PolicyVault'
+    if manifest_file:
+        from treasury_contracts.mvp import MvpManifest
+
+        manifest=MvpManifest.model_validate(json.loads(manifest_file.read_text(encoding='utf-8')))
+        manifest.verify_owner()
+        if manifest.environment!='REAL_FUJI_EXECUTION':
+            raise ValueError('PUBLIC_MANIFEST_REQUIRED')
+        old={'vault_address':manifest.treasury,'token_in':manifest.usdc,'token_out':manifest.wavax,
+            'owner':manifest.owner,'attestor':manifest.attestor,'relayer':manifest.relayer,
+            'bytecode_hashes':{'PolicyVault':manifest.code_hashes['treasury']}}
+        contract_name='PolicyVaultMVP'
     w3 = evm_web3(Web3.HTTPProvider(rpc_url, request_kwargs={"timeout":5}))
     if w3.eth.chain_id != 43113:
         raise ValueError("CHAIN_MISMATCH")
@@ -20,7 +32,7 @@ def observe(rpc_url):
     n = h.number
     if Web3.to_hex(Web3.keccak(w3.eth.get_code(old["vault_address"], n))) != old["bytecode_hashes"]["PolicyVault"]:
         raise ValueError("SOURCE_CODE_IDENTITY_CHANGED")
-    vault = contract(w3, "PolicyVault", old["vault_address"])
+    vault = contract(w3, contract_name, old["vault_address"])
     usdc, wavax = contract(w3,"MockUSDC",old["token_in"]), contract(w3,"MockWAVAX",old["token_out"])
     proof = vault.functions.proofPolicy().call(block_identifier=n)
     oracle = {"status":"UNAVAILABLE", "source":"CHAINLINK_FUJI"}

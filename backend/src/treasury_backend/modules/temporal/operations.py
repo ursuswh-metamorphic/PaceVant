@@ -5,7 +5,7 @@ from treasury_contracts.crypto import content_hash
 from treasury_contracts.v3 import KINDS
 
 
-def evaluate_operation(temporal, intent, built, context, history, runtime):
+def evaluate_operation(temporal, intent, built, context, history, runtime, plan):
     violations = []
     auth = context["authority"]
     if (
@@ -39,6 +39,8 @@ def evaluate_operation(temporal, intent, built, context, history, runtime):
             data={
                 "source": "USER",
                 "authorization_source": "OPERATOR_API",
+                "status": "AUTHENTICATED",
+                "terms": intent.model_dump(mode="json"),
                 "objective": intent.objective,
                 "typed_intent": intent.model_dump(mode="json"),
                 "owner_session": context["session_id"],
@@ -49,7 +51,16 @@ def evaluate_operation(temporal, intent, built, context, history, runtime):
             kind="AGENT_ACTION",
             trust="UNTRUSTED",
             evidence_refs=[candidate],
-            data=built,
+            # Catalog grounding reads the actual model rationale from this path.
+            # It must not be synthesized from the objective or builder output.
+            data={
+                **built,
+                "proposal": {
+                    **plan.model_dump(mode="json"),
+                    "amount_in_base_units": plan.amount,
+                    "user_goal_reason": plan.explanation,
+                },
+            },
         ),
         GraphNode(
             node_id="owner_scope",

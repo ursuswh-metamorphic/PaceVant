@@ -10,7 +10,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
-    for name in ("B_FUJI_OWNER_PRIVATE_KEY", "DEPLOYER_PRIVATE_KEY", "PACEVANT_ATTESTOR_KEY", "B_FUJI_RELAYER_PRIVATE_KEY", "B_RELAYER_PRIVATE_KEY"):
+    public=os.environ.get('PACEVANT_JUDGE_EXECUTION_MODE')=='REAL_FUJI_EXECUTION'
+    forbidden=("B_FUJI_OWNER_PRIVATE_KEY","B_OWNER_PRIVATE_KEY","DEPLOYER_PRIVATE_KEY") if public else ("B_FUJI_OWNER_PRIVATE_KEY", "DEPLOYER_PRIVATE_KEY", "PACEVANT_ATTESTOR_KEY", "B_FUJI_RELAYER_PRIVATE_KEY", "B_RELAYER_PRIVATE_KEY")
+    for name in forbidden:
         if os.environ.get(name):
             raise SystemExit("Judge-only service must not receive public wallet signing keys")
     uvicorn.run("treasury_backend.api.judge:create_app", factory=True, host="127.0.0.1", port=args.port,

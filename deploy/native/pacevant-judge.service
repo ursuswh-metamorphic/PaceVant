@@ -1,5 +1,5 @@
 [Unit]
-Description=PaceVant isolated Fuji judge demo
+Description=PaceVant Fuji treasury judge demo
 After=network-online.target
 Wants=network-online.target
 StartLimitIntervalSec=300

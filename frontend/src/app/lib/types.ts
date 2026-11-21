@@ -15,17 +15,17 @@ export interface Workflow {
 export type JobStatus = 'QUEUED' | 'RUNNING' | 'CONFIRMED' | 'REJECTED' | 'FAILED' | 'UNKNOWN' | 'INTERRUPTED' | 'UNAVAILABLE';
 export interface Job {
   job_id: string; scenario: ScenarioId; status: JobStatus; created_at: number;
-  environment: 'ANVIL_FORK' | 'LOCAL_TEST' | 'VERIFIED_REPLAY';
+  environment: 'ANVIL_FORK' | 'LOCAL_TEST' | 'VERIFIED_REPLAY' | 'REAL_FUJI_EXECUTION';
   active_stage?: string; phase?: string; reason_code?: string; workflow?: Workflow;
   semantic_scope?: string; source_block?: number; recorded_at?: number;
-  public_chain_broadcast: false; terminal: boolean; scope?: string;
+  public_chain_broadcast: boolean; terminal: boolean; scope?: string;
 }
 export interface Scenario {
   id: ScenarioId; title: string; description: string; operation: string; amount: string;
   input_decimals: number; token_in: string; token_out: string; recipient_label: string;
 }
 export interface JudgeConfig {
-  enabled: boolean; mode: 'ANVIL_FORK'; configured: boolean; busy: boolean;
+  enabled: boolean; mode: 'ANVIL_FORK' | 'REAL_FUJI_EXECUTION'; configured: boolean; busy: boolean;
   reason_code?: string; scenarios: Scenario[];
   quota: {remaining_today: number; daily_limit: number; global_daily_limit: number};
   limits: {timeout_seconds: number; max_concurrent: number};

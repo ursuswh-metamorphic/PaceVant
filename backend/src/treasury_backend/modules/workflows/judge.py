@@ -61,6 +61,11 @@ def worker_environment(settings):
     allowed = {k:v for k, v in os.environ.items() if k.startswith(("PACEVANT_SHIELD_", "GROQ_", "GEMINI_", "XINGCHI_", "DEEPSEEK_"))}
     allowed.update(PYTHONPATH=os.pathsep.join((str(ROOT / "backend/src"), str(ROOT / "packages/contracts-api"))),
         PACEVANT_JUDGE_RPC_URL=settings.rpc_url, PACEVANT_JUDGE_ORACLE_WAIT_SECONDS=str(settings.wait_oracle_seconds))
+    if settings.execution_mode=='REAL_FUJI_EXECUTION':
+        allowed.update(PACEVANT_JUDGE_EXECUTION_MODE='REAL_FUJI_EXECUTION',PACEVANT_MVP_LIVE_ENABLED='1',
+            PACEVANT_MVP_MANIFEST_FILE=str(settings.manifest_file),
+            PACEVANT_ATTESTOR_KEY=os.environ['PACEVANT_ATTESTOR_KEY'],
+            B_FUJI_RELAYER_PRIVATE_KEY=os.environ['B_FUJI_RELAYER_PRIVATE_KEY'])
     return native_tool_environment() | allowed
 
 
@@ -165,8 +170,10 @@ class JudgeController:
             if shutil.disk_usage(self.settings.data_dir).free < 512 * 1024**2:
                 raise ControlError("DEMO_STORAGE_LOW", 503)
             id_ = "judge_" + uuid4().hex
-            value = {"job_id":id_, "scenario":scenario, "status":"QUEUED", "created_at":now, "environment":"ANVIL_FORK",
+            value = {"job_id":id_, "scenario":scenario, "status":"QUEUED", "created_at":now, "environment":self.settings.execution_mode,
                 "phase":"QUEUED", "public_chain_broadcast":False, "terminal":False, "semantic_scope":"REAL_CONFIGURED_PROVIDER"}
+            if self.settings.execution_mode=='REAL_FUJI_EXECUTION' and scenario=='payment':
+                value['recipient_index']=db.execute("SELECT COUNT(*) FROM judge_jobs WHERE scenario='payment'").fetchone()[0]%3
             db.execute("INSERT INTO judge_jobs VALUES(?,?,?,?,?,?,?,?)", (id_, visitor, ip_hash, key, scenario, "QUEUED", now, json.dumps(value)))
         self.pool.submit(self.execute, id_, scenario)
         return value
@@ -184,7 +191,18 @@ class JudgeController:
             result = self.runner(id_, scenario)
             self.update(id_, **(result | {"terminal":True}))
         except Exception as error:
-            self.update(id_, status="UNAVAILABLE", reason_code=code(error), terminal=True)
+            if self.settings.execution_mode=='REAL_FUJI_EXECUTION':
+                with self.db() as db:
+                    row=db.execute('SELECT * FROM judge_jobs WHERE id=?',(id_,)).fetchone()
+                observed=self.read(row)
+                workflow=observed.get('workflow') or {}
+                signed=any(event['stage']=='ATTESTATION' for event in workflow.get('timeline',[]))
+                uncertain=signed or observed.get('active_stage') in {'ATTESTATION','EXACT_SIGNED_PREFLIGHT','RELAY'}
+                self.update(id_,status='UNKNOWN' if uncertain else 'UNAVAILABLE',reason_code=code(error),terminal=True,
+                    workflow=workflow or None,active_stage=observed.get('active_stage'),
+                    public_chain_broadcast=bool((workflow.get('outcome') or {}).get('tx_hash')))
+            else:
+                self.update(id_, status="UNAVAILABLE", reason_code=code(error), terminal=True)
 
     def run_worker(self, id_, scenario):
         if self.closing:
@@ -192,6 +210,10 @@ class JudgeController:
         directory = self.settings.data_dir / "runs" / id_
         directory.mkdir(parents=True, exist_ok=True)
         command = [sys.executable, "-m", "treasury_backend.operations.judge_worker", "--scenario", scenario, "--directory", str(directory)]
+        if self.settings.execution_mode=='REAL_FUJI_EXECUTION' and scenario=='payment':
+            with self.db() as db:
+                body=json.loads(db.execute('SELECT body FROM judge_jobs WHERE id=?',(id_,)).fetchone()[0])
+            command.extend(['--recipient-index',str(body['recipient_index'])])
         options = {"creationflags":subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {"start_new_session":True}
         proc = subprocess.Popen(command, cwd=ROOT, env=worker_environment(self.settings), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **options)
         self.process = proc
@@ -207,7 +229,7 @@ class JudgeController:
             if not result_path.exists():
                 raise ValueError("FORK_RUN_INTERRUPTED")
             result = json.loads(result_path.read_text())
-            if result.get("environment") != "ANVIL_FORK" or result.get("public_chain_broadcast") is not False:
+            if result.get("environment") != self.settings.execution_mode or (self.settings.execution_mode=='ANVIL_FORK' and result.get("public_chain_broadcast") is not False):
                 raise ValueError("ISOLATION_EVIDENCE_INVALID")
             return result
         finally:

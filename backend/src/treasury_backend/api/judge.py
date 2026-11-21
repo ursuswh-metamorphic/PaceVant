@@ -69,12 +69,12 @@ def create_app(settings=None, *, controller=None):
 
     @app.get("/healthz")
     async def health():
-        return {"status":"ok", "service":"judge", "public_chain_spending":False}
+        return {"status":"ok", "service":"judge", "public_chain_spending":settings.execution_mode=='REAL_FUJI_EXECUTION'}
 
     @app.get("/readyz")
     def ready():
         configured = controller.configured()
-        return JSONResponse({"ready":configured, "mode":"ANVIL_FORK", "busy":controller.busy(),
+        return JSONResponse({"ready":configured, "mode":settings.execution_mode, "busy":controller.busy(),
             "reason_code":None if configured else "DEMO_NOT_CONFIGURED"}, status_code=200 if configured else 503)
 
     def replays():
@@ -84,8 +84,12 @@ def create_app(settings=None, *, controller=None):
     @app.get("/judge/config")
     def config(request: Request):
         configured = controller.configured()
-        return {"enabled":settings.enabled, "mode":"ANVIL_FORK", "configured":configured, "busy":controller.busy(),
-            "reason_code":None if configured else "DEMO_NOT_CONFIGURED", "scenarios":SCENARIOS,
+        scenarios=[dict(value) for value in SCENARIOS]
+        if settings.execution_mode=='REAL_FUJI_EXECUTION':
+            scenarios[0]['recipient_label']='One of the three owner-approved system EOAs'
+            scenarios[1]['recipient_label']='Public Fuji PolicyVaultMVP'
+        return {"enabled":settings.enabled, "mode":settings.execution_mode, "configured":configured, "busy":controller.busy(),
+            "reason_code":None if configured else "DEMO_NOT_CONFIGURED", "scenarios":scenarios,
             "quota":{"remaining_today":controller.remaining(request.state.visitor), "daily_limit":settings.daily_limit,
                      "global_daily_limit":settings.global_daily_limit},
             "limits":{"timeout_seconds":settings.timeout_seconds, "max_concurrent":1},
@@ -107,11 +111,12 @@ def create_app(settings=None, *, controller=None):
             try:
                 from treasury_backend.operations.judge_source import observe
 
-                value = observe(settings.rpc_url)
+                value = observe(settings.rpc_url,settings.manifest_file) if settings.execution_mode=='REAL_FUJI_EXECUTION' else observe(settings.rpc_url)
                 source_cache.update(value=value, until=time.monotonic()+60)
                 return value
             except Exception:
-                pass
+                if settings.execution_mode=='REAL_FUJI_EXECUTION':
+                    return {'status':'UNAVAILABLE','reason_code':'PUBLIC_SOURCE_READ_UNAVAILABLE'}
             path = ROOT / "docs/audit/mvp-readiness-public-state.json"
             if not path.exists():
                 return {"status":"UNAVAILABLE", "reason_code":"SOURCE_SNAPSHOT_UNAVAILABLE"}

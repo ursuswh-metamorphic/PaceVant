@@ -1,0 +1,153 @@
+{
+  "environment": "REAL_FUJI_EXECUTION",
+  "chain_id": 43113,
+  "roles": {
+    "owner": "0x607bd883bd3621378812CF5B4B8dDcCFAeBbab1b",
+    "attestor": "0x5704fA0FF7CBEd213F622c99aC6F9d6E5cbF2989",
+    "relayer": "0x761B1FFB7AA70C7A946D3970A25F5a3859dA328C"
+  },
+  "transactions": [
+    {
+      "label": "01-deploy-vault",
+      "tx_hash": "0x728d1ddaf3499b2c1433d6fe28fddebe768e0d74faec97be69a9bbfdd02df339",
+      "block_number": 61405737,
+      "gas_used": 4919954,
+      "fee_wei": "787192640",
+      "contract_address": "0x70e1395F959dba530cF4A53B060c809b715bB6d5",
+      "status": 1
+    },
+    {
+      "label": "02-deploy-adapter",
+      "tx_hash": "0x30ef07b337f48b48d93636394d9fa06190f7d2e9f50aeaf002126405aebb9b92",
+      "block_number": 61405739,
+      "gas_used": 1180689,
+      "fee_wei": "188910240",
+      "contract_address": "0x05522FFAfe20CAb88Ce223E0E84031d98381DeaF",
+      "status": 1
+    },
+    {
+      "label": "03-allow-adapter",
+      "tx_hash": "0x72281ab2187101a21861cbbaed37069f32028af9db229ab6250b01c26daf335f",
+      "block_number": 61405743,
+      "gas_used": 79512,
+      "fee_wei": "12721920",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "04-proof-policy",
+      "tx_hash": "0xed8922209f1b3c4c25df9ec90a5a310dfa162c64a704e6174c1f69b3c21ffcdd",
+      "block_number": 61405744,
+      "gas_used": 308201,
+      "fee_wei": "49312160",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "05-approval-ttl",
+      "tx_hash": "0x9585863f9cc21b173b9d5be553943e7160976e79119b9698883d50ba03d04d04",
+      "block_number": 61405747,
+      "gas_used": 41338,
+      "fee_wei": "6614080",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "06-mvp-limits",
+      "tx_hash": "0x7dc357501442beec15cfce38421cdbb9b08869902f8eadf889757cfc5a03f7e3",
+      "block_number": 61405748,
+      "gas_used": 246281,
+      "fee_wei": "39404960",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "07-payee-owner",
+      "tx_hash": "0xab2950c246d0e4808cfebefea3c5c441b6771c96d6a22384d80ec283b17e846a",
+      "block_number": 61405751,
+      "gas_used": 107878,
+      "fee_wei": "17260480",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "08-payee-attestor",
+      "tx_hash": "0x5b6be96137fa08790dccfa98e87c04a5fcbcf997ce925f05e66476760815679c",
+      "block_number": 61405755,
+      "gas_used": 110378,
+      "fee_wei": "17660480",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "09-payee-relayer",
+      "tx_hash": "0xdfb0b0bb238d8d3cde099a455b98de88d575ddfa184dfc74089ab00b19f55d97",
+      "block_number": 61405756,
+      "gas_used": 110378,
+      "fee_wei": "17660480",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "10-activate-policy",
+      "tx_hash": "0x146f47b0670f01e83fcaa26c6209d66dcece9c24518633d37a363e577b3a26b3",
+      "block_number": 61405758,
+      "gas_used": 176421,
+      "fee_wei": "28227360",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "11-create-session",
+      "tx_hash": "0xc61ca57721eab2e3cc3782fcc40df1b684f61c56cbe100ee1c6d085a85b469a2",
+      "block_number": 61405761,
+      "gas_used": 153039,
+      "fee_wei": "24486240",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "12-authorize-two-operations",
+      "tx_hash": "0xce02e890f0fcd73531275d311ea11125faa6736f3ef1d196328390b344fcada4",
+      "block_number": 61405765,
+      "gas_used": 161114,
+      "fee_wei": "25778240",
+      "contract_address": null,
+      "status": 1
+    },
+    {
+      "label": "13-fund-one-test-usdc",
+      "tx_hash": "0x1be74080c72ab9183e8ac093864d5eddb64d7f6714d0889f2a29ed4d66ca16df",
+      "block_number": 61405766,
+      "gas_used": 62159,
+      "fee_wei": "9945440",
+      "contract_address": null,
+      "status": 1
+    }
+  ],
+  "treasury": "0x70e1395F959dba530cF4A53B060c809b715bB6d5",
+  "adapter": "0x05522FFAfe20CAb88Ce223E0E84031d98381DeaF",
+  "session_id": "0x3243c11db6d938825acb390c272348c665ca959e6c2482261c5d5ca458f4aa88",
+  "policy_expires_at": 1795832966,
+  "manifest_file": "deployments\\mvp-fuji.json",
+  "total_gas_fee_wei": "1225174720",
+  "funded_usdc_base_units": "1000000",
+  "balances_after": {
+    "owner": {
+      "avax_wei": "47873063657501040",
+      "usdc_base_units": "39000004"
+    },
+    "attestor": {
+      "avax_wei": "499999924946240",
+      "usdc_base_units": "20000000"
+    },
+    "relayer": {
+      "avax_wei": "31999999692398823",
+      "usdc_base_units": "20000000"
+    },
+    "treasury": {
+      "avax_wei": "0",
+      "usdc_base_units": "1000000"
+    }
+  }
+}

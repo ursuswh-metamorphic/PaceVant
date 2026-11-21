@@ -7,6 +7,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {alias: {'@': path.resolve(import.meta.dirname, './src/app')}},
   publicDir: 'public',
-  server: {proxy: {'/judge': 'http://127.0.0.1:18040', '/mvp': 'http://127.0.0.1:18040', '/healthz': 'http://127.0.0.1:18040'}},
+  // Preserve the browser-facing Host so the backend's same-origin check sees
+  // the same authority as the Origin header. Vite's string shorthand rewrites it.
+  server: {proxy: Object.fromEntries(['/judge', '/mvp', '/healthz'].map(prefix => [prefix, {
+    target:'http://127.0.0.1:18040', changeOrigin:false,
+  }]))},
   build: {outDir: 'dist', sourcemap: false},
 });

@@ -1,0 +1,255 @@
+{
+  "status": "PASS",
+  "scope": "Local browser -> real configured model -> isolated Fuji EVM fork; no public broadcasts",
+  "post_count": 2,
+  "browser_errors": [],
+  "checks": [
+    "No execution data before a real run",
+    "payment: three protocol-specific attack previews; no backend job created",
+    "swap: three protocol-specific attack previews; no backend job created",
+    "Each real run submitted once; F5 recovered its identity without duplicate POST"
+  ],
+  "targeted_tests": {
+    "frontend": 4,
+    "catalog_backend": 26,
+    "local_evm_workflow": 1
+  },
+  "runs": [
+    {
+      "scenario": "payment",
+      "job_id": "judge_75bb800d642d4088be6aca6281569384",
+      "status": "CONFIRMED",
+      "reason_code": null,
+      "reload_recovered": true,
+      "ai_panel_data_matched": true,
+      "post_count": 1,
+      "modules": [
+        {
+          "index": 0,
+          "data_visible": true,
+          "source": "OWNER_AUTHORITY"
+        },
+        {
+          "index": 1,
+          "data_visible": true,
+          "source": "AGENT_PROPOSAL"
+        },
+        {
+          "index": 2,
+          "data_visible": true,
+          "source": "BUILD"
+        },
+        {
+          "index": 3,
+          "data_visible": true,
+          "source": "SIMULATION"
+        },
+        {
+          "index": 4,
+          "data_visible": true,
+          "source": "RISK"
+        },
+        {
+          "index": 5,
+          "data_visible": true,
+          "source": "ITAG"
+        },
+        {
+          "index": 6,
+          "data_visible": true,
+          "source": "PROOF"
+        },
+        {
+          "index": 7,
+          "data_visible": true,
+          "source": "SDE"
+        },
+        {
+          "index": 8,
+          "data_visible": true,
+          "source": "ATTESTATION"
+        },
+        {
+          "index": 9,
+          "data_visible": true,
+          "source": "EXACT_SIGNED_PREFLIGHT"
+        },
+        {
+          "index": 10,
+          "data_visible": true,
+          "source": "OUTCOME"
+        },
+        {
+          "index": 11,
+          "data_visible": true,
+          "source": "OUTCOME"
+        }
+      ],
+      "stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ],
+      "source_block": 61403696,
+      "outcome": {
+        "tx_hash": "0x89a2b4b91c223318ecd93187ced28638b2afc24d3d6a7bf72062951023e3601b",
+        "block_number": 61403708,
+        "block_hash": "0xd5c3604265e1a82a9783481c38088ec2f32f2b0b4bccf360d33620d2fcf96ed6",
+        "gas_used": "356264",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "356264",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "356264002850112",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-10000",
+          "0",
+          "0",
+          "0"
+        ],
+        "payee_received": "10000"
+      },
+      "risk": "PASS",
+      "itag": "PASS",
+      "proof": "VERIFIED",
+      "semantic_model": "deepseek-flash",
+      "exact_signed_preflight": true,
+      "final_simulation_overrides": [],
+      "duration_seconds": 53.13,
+      "median_poll_seconds": 1.026
+    },
+    {
+      "scenario": "swap",
+      "job_id": "judge_c088790158a847fd80f41c1e6aa04f10",
+      "status": "CONFIRMED",
+      "reason_code": null,
+      "reload_recovered": true,
+      "ai_panel_data_matched": true,
+      "post_count": 1,
+      "modules": [
+        {
+          "index": 0,
+          "data_visible": true,
+          "source": "OWNER_AUTHORITY"
+        },
+        {
+          "index": 1,
+          "data_visible": true,
+          "source": "AGENT_PROPOSAL"
+        },
+        {
+          "index": 2,
+          "data_visible": true,
+          "source": "BUILD"
+        },
+        {
+          "index": 3,
+          "data_visible": true,
+          "source": "SIMULATION"
+        },
+        {
+          "index": 4,
+          "data_visible": true,
+          "source": "RISK"
+        },
+        {
+          "index": 5,
+          "data_visible": true,
+          "source": "ITAG"
+        },
+        {
+          "index": 6,
+          "data_visible": true,
+          "source": "PROOF"
+        },
+        {
+          "index": 7,
+          "data_visible": true,
+          "source": "SDE"
+        },
+        {
+          "index": 8,
+          "data_visible": true,
+          "source": "ATTESTATION"
+        },
+        {
+          "index": 9,
+          "data_visible": true,
+          "source": "EXACT_SIGNED_PREFLIGHT"
+        },
+        {
+          "index": 10,
+          "data_visible": true,
+          "source": "OUTCOME"
+        },
+        {
+          "index": 11,
+          "data_visible": true,
+          "source": "OUTCOME"
+        }
+      ],
+      "stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ],
+      "source_block": 61403720,
+      "outcome": {
+        "tx_hash": "0x8e8703b9315c5a19c1baabc8332a5698ccf4ed0f4858641b2616b768440bd2d8",
+        "block_number": 61403732,
+        "block_hash": "0xa033dd7f87b4e260a327ce1c34df2c9de65dcfc22647cc49bff435f361b37709",
+        "gas_used": "453082",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "453082",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "453082003624656",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-1",
+          "13266545691051",
+          "0",
+          "0"
+        ],
+        "payee_received": "0"
+      },
+      "risk": "PASS",
+      "itag": "PASS",
+      "proof": "VERIFIED",
+      "semantic_model": "deepseek-flash",
+      "exact_signed_preflight": true,
+      "final_simulation_overrides": [],
+      "duration_seconds": 52.1,
+      "median_poll_seconds": 1.023
+    }
+  ]
+}

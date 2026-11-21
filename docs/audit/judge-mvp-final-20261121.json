@@ -1,0 +1,439 @@
+{
+  "generated_at": "2026-11-21T01:46:29.137823+00:00",
+  "acceptance_status": "PASS",
+  "public_chain_writes": false,
+  "browser_errors": [],
+  "ui_checks": [
+    "No execution data before a real run",
+    "payment: three protocol-specific attack previews; no backend job created",
+    "swap: three protocol-specific attack previews; no backend job created",
+    "Each real run submitted once; F5 recovered its identity without duplicate POST",
+    "Real backend guard rejected before signing; UI explained reason in VI/EN and retained it after F5"
+  ],
+  "cost_basis": {
+    "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "verified_on": "2026-11-21",
+    "model": "deepseek-flash",
+    "off_peak_usd_per_million": {
+      "cached_input": 0.003,
+      "uncached_input": 0.15,
+      "output": 0.6
+    },
+    "peak_multiplier": 2,
+    "note": "Range for successful reported tokens only; cache split is not recorded. Not an invoice. VPS and RPC subscription costs are excluded."
+  },
+  "measurement_limits": [
+    "Browser timing starts with the accepted job response; waiting for a fresh source before clicking is excluded.",
+    "Guard is submitted through the existing backend API, not a visible attack-preview option.",
+    "Fork setup contains ten tracked deployment/configuration transactions; funding, RPC reads and nested simulation fees are not included.",
+    "Successful reported token usage is metered across planning and security calls. Provider invoice and unreported/failed-attempt charges are unknown.",
+    "Test sample is not a 24/7 availability, statistical reliability or production VPS acceptance guarantee."
+  ],
+  "runs": [
+    {
+      "scenario": "payment",
+      "job_id": "judge_c7d229821ce848deab0afdc5876598f9",
+      "surface": "Live Demo button",
+      "status": "CONFIRMED",
+      "reason_code": null,
+      "active_stage": "RELAY",
+      "source_block": 61404314,
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "worker_wall_seconds": 43.906,
+      "browser_observed_seconds": 48.102,
+      "median_poll_seconds": 1.016,
+      "ui_verification": {
+        "reload_recovered": true,
+        "completed_refresh_restored": true,
+        "ai_panel_data_matched": true,
+        "post_count": 1,
+        "modules": [
+          {
+            "index": 0,
+            "data_visible": true,
+            "source": "OWNER_AUTHORITY"
+          },
+          {
+            "index": 1,
+            "data_visible": true,
+            "source": "AGENT_PROPOSAL"
+          },
+          {
+            "index": 2,
+            "data_visible": true,
+            "source": "BUILD"
+          },
+          {
+            "index": 3,
+            "data_visible": true,
+            "source": "SIMULATION"
+          },
+          {
+            "index": 4,
+            "data_visible": true,
+            "source": "RISK"
+          },
+          {
+            "index": 5,
+            "data_visible": true,
+            "source": "ITAG"
+          },
+          {
+            "index": 6,
+            "data_visible": true,
+            "source": "PROOF"
+          },
+          {
+            "index": 7,
+            "data_visible": true,
+            "source": "SDE"
+          },
+          {
+            "index": 8,
+            "data_visible": true,
+            "source": "ATTESTATION"
+          },
+          {
+            "index": 9,
+            "data_visible": true,
+            "source": "EXACT_SIGNED_PREFLIGHT"
+          },
+          {
+            "index": 10,
+            "data_visible": true,
+            "source": "OUTCOME"
+          },
+          {
+            "index": 11,
+            "data_visible": true,
+            "source": "OUTCOME"
+          }
+        ]
+      },
+      "stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ],
+      "inference_calls": 11,
+      "reported_token_usage": {
+        "prompt_tokens": 33892,
+        "completion_tokens": 2821,
+        "total_tokens": 36713
+      },
+      "inference_stage_measurements": {
+        "PLANNING": {
+          "calls": 4,
+          "wall_ms": 6062.0,
+          "reported_tokens": 7609
+        },
+        "BUILD": {
+          "calls": 2,
+          "wall_ms": 3562.0,
+          "reported_tokens": 7858
+        },
+        "SIMULATION": {
+          "calls": 2,
+          "wall_ms": 4516.0,
+          "reported_tokens": 6792
+        },
+        "ITAG": {
+          "calls": 1,
+          "wall_ms": 1813.0,
+          "reported_tokens": 4130
+        },
+        "PROOF": {
+          "calls": 1,
+          "wall_ms": 2047.0,
+          "reported_tokens": 4121
+        },
+        "SDE": {
+          "calls": 1,
+          "wall_ms": 1766.0,
+          "reported_tokens": 6203
+        }
+      },
+      "estimated_model_cost_for_reported_tokens": {
+        "off_peak_min_usd": "0.001794276",
+        "off_peak_max_usd": "0.0067764",
+        "peak_min_usd": "0.003588552",
+        "peak_max_usd": "0.0135528",
+        "test_tariff": "off_peak"
+      },
+      "model_billing_usd": null,
+      "fork_execution_gas_used": "356276",
+      "fork_execution_fee_avax": "0.000356276002850208",
+      "fork_setup": {
+        "transaction_count": 10,
+        "gas_used": "7374415",
+        "actual_fee_wei": "7374415065095951"
+      },
+      "public_network_fee_avax": "0",
+      "outcome": {
+        "tx_hash": "0x80556ebc517c444ee14715b3f4b9f6cfe7581613043fc65d503112ff71ac4e76",
+        "block_number": 61404326,
+        "block_hash": "0x3603fa5ddea4695e450de76c6e533df65a1a5f565968c9fc857e96f7dcdb11a5",
+        "gas_used": "356276",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "356276",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "356276002850208",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-10000",
+          "0",
+          "0",
+          "0"
+        ],
+        "payee_received": "10000"
+      }
+    },
+    {
+      "scenario": "swap",
+      "job_id": "judge_972d1050213c422e9446bca41b01661d",
+      "surface": "Live Demo button",
+      "status": "CONFIRMED",
+      "reason_code": null,
+      "active_stage": "RELAY",
+      "source_block": 61404336,
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "worker_wall_seconds": 46.828,
+      "browser_observed_seconds": 51.374,
+      "median_poll_seconds": 1.018,
+      "ui_verification": {
+        "reload_recovered": true,
+        "completed_refresh_restored": true,
+        "ai_panel_data_matched": true,
+        "post_count": 1,
+        "modules": [
+          {
+            "index": 0,
+            "data_visible": true,
+            "source": "OWNER_AUTHORITY"
+          },
+          {
+            "index": 1,
+            "data_visible": true,
+            "source": "AGENT_PROPOSAL"
+          },
+          {
+            "index": 2,
+            "data_visible": true,
+            "source": "BUILD"
+          },
+          {
+            "index": 3,
+            "data_visible": true,
+            "source": "SIMULATION"
+          },
+          {
+            "index": 4,
+            "data_visible": true,
+            "source": "RISK"
+          },
+          {
+            "index": 5,
+            "data_visible": true,
+            "source": "ITAG"
+          },
+          {
+            "index": 6,
+            "data_visible": true,
+            "source": "PROOF"
+          },
+          {
+            "index": 7,
+            "data_visible": true,
+            "source": "SDE"
+          },
+          {
+            "index": 8,
+            "data_visible": true,
+            "source": "ATTESTATION"
+          },
+          {
+            "index": 9,
+            "data_visible": true,
+            "source": "EXACT_SIGNED_PREFLIGHT"
+          },
+          {
+            "index": 10,
+            "data_visible": true,
+            "source": "OUTCOME"
+          },
+          {
+            "index": 11,
+            "data_visible": true,
+            "source": "OUTCOME"
+          }
+        ]
+      },
+      "stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "BUILD",
+        "SIMULATION",
+        "RISK",
+        "ITAG",
+        "PROOF",
+        "SDE",
+        "ATTESTATION",
+        "EXACT_SIGNED_PREFLIGHT",
+        "OUTCOME"
+      ],
+      "inference_calls": 11,
+      "reported_token_usage": {
+        "prompt_tokens": 39727,
+        "completion_tokens": 2933,
+        "total_tokens": 42660
+      },
+      "inference_stage_measurements": {
+        "PLANNING": {
+          "calls": 4,
+          "wall_ms": 5686.0,
+          "reported_tokens": 7856
+        },
+        "BUILD": {
+          "calls": 2,
+          "wall_ms": 3093.0,
+          "reported_tokens": 9320
+        },
+        "SIMULATION": {
+          "calls": 2,
+          "wall_ms": 4094.0,
+          "reported_tokens": 8323
+        },
+        "ITAG": {
+          "calls": 1,
+          "wall_ms": 2094.0,
+          "reported_tokens": 5426
+        },
+        "PROOF": {
+          "calls": 1,
+          "wall_ms": 2203.0,
+          "reported_tokens": 4818
+        },
+        "SDE": {
+          "calls": 1,
+          "wall_ms": 1844.0,
+          "reported_tokens": 6917
+        }
+      },
+      "estimated_model_cost_for_reported_tokens": {
+        "off_peak_min_usd": "0.001878981",
+        "off_peak_max_usd": "0.00771885",
+        "peak_min_usd": "0.003757962",
+        "peak_max_usd": "0.0154377",
+        "test_tariff": "off_peak"
+      },
+      "model_billing_usd": null,
+      "fork_execution_gas_used": "453058",
+      "fork_execution_fee_avax": "0.000453058003624464",
+      "fork_setup": {
+        "transaction_count": 10,
+        "gas_used": "7374427",
+        "actual_fee_wei": "7374427065096059"
+      },
+      "public_network_fee_avax": "0",
+      "outcome": {
+        "tx_hash": "0xcfe0ebeee9e7de1e8ac784e7b2b1e1565656f9d1a46eaba9360705ff2e6e638a",
+        "block_number": 61404348,
+        "block_hash": "0x1eddc84258cb0bc9d4f026462fa2fdbf223c0f57d919d20d6352d264121f3938",
+        "gas_used": "453058",
+        "confirmations": 1,
+        "environment": "ANVIL_FORK",
+        "public_chain_receipt": false,
+        "system_gas_expense": {
+          "payer": "SYSTEM_RELAYER",
+          "gas_used": "453058",
+          "effective_gas_price_wei": "1000000008",
+          "actual_cost_wei": "453058003624464",
+          "transaction_status": 1,
+          "billing": false
+        },
+        "status": "CONFIRMED",
+        "actual_deltas": [
+          "-1",
+          "13266545691051",
+          "0",
+          "0"
+        ],
+        "payee_received": "0"
+      }
+    },
+    {
+      "scenario": "guard",
+      "job_id": "judge_af50ce6384ed4492a70ee36bb8f4c8b1",
+      "surface": "backend-only fixed preset, viewed in UI",
+      "status": "REJECTED",
+      "reason_code": "LFJ_UNSUPPORTED_ROUTE",
+      "active_stage": "BUILD",
+      "source_block": 61404363,
+      "environment": "ANVIL_FORK",
+      "public_chain_broadcast": false,
+      "worker_wall_seconds": 33.016,
+      "browser_observed_seconds": 36.661,
+      "median_poll_seconds": 1.02,
+      "ui_verification": {
+        "displayed_reason": "Vì sao lượt chạy dừng?\n\nBước kiểm tra: Trusted Builder\n\nĐường hoán đổi do công cụ trả về nằm ngoài phạm vi LFJ được cho phép.\n\nLượt chạy dừng trước khi ký giao dịch.\n\nMã kiểm tra từ hệ thống"
+      },
+      "stages": [
+        "OWNER_AUTHORITY",
+        "AGENT_PROPOSAL",
+        "REJECTION_OR_RECOVERY"
+      ],
+      "inference_calls": 5,
+      "reported_token_usage": {
+        "prompt_tokens": 10745,
+        "completion_tokens": 1036,
+        "total_tokens": 11781
+      },
+      "inference_stage_measurements": {
+        "PLANNING": {
+          "calls": 4,
+          "wall_ms": 5783.0,
+          "reported_tokens": 7553
+        },
+        "BUILD": {
+          "calls": 1,
+          "wall_ms": 3125.0,
+          "reported_tokens": 4228
+        }
+      },
+      "estimated_model_cost_for_reported_tokens": {
+        "off_peak_min_usd": "0.000653835",
+        "off_peak_max_usd": "0.00223335",
+        "peak_min_usd": "0.00130767",
+        "peak_max_usd": "0.0044667",
+        "test_tariff": "off_peak"
+      },
+      "model_billing_usd": null,
+      "fork_execution_gas_used": null,
+      "fork_execution_fee_avax": null,
+      "fork_setup": {
+        "transaction_count": 10,
+        "gas_used": "7374451",
+        "actual_fee_wei": "7374451065096251"
+      },
+      "public_network_fee_avax": "0",
+      "outcome": null
+    }
+  ]
+}

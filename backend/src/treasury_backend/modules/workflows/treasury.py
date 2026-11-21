@@ -113,7 +113,7 @@ class TreasuryWorkflows:
                 ]
                 self.progress("ITAG")
                 temporal = evaluate_operation(
-                    self.control.temporal, intent, built, context, history, runtime
+                    self.control.temporal, intent, built, context, history, runtime, plan
                 )
                 self.store.event(id_, "ITAG", temporal, self.clock())
                 if temporal["verdict"] != "PASS" or risk["result"] != "PASS":
