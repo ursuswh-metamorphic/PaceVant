@@ -17,10 +17,18 @@
 
 ### PaceVant trong 60 giây — dành cho giám khảo
 
-**PaceVant** là lớp bảo mật cho **AI Agent tự quản lý treasury trên blockchain**: AI có thể đề xuất thanh toán hoặc swap, nhưng **không được tự ký hay tự ý chuyển tài sản**. Một giao dịch đúng cú pháp vẫn có thể **sai nhiệm vụ, vượt ngân sách qua nhiều bước hoặc gây thiệt hại tài chính**. Đổi mới cốt lõi của nhóm là **ITAG (Intent-Aware Temporal Action Graph)**, kết nối ý định đã xác thực, lịch sử hành động, quyền hạn và bằng chứng để phát hiện **chi tiêu tích lũy vượt mức** hoặc **lệch mục đích dù từng giao dịch vẫn hợp lệ**. Song song, **EVM Simulation** chạy thử calldata trên fork, đo token ra/vào, allowance và hậu quả dự kiến; **Chainlink, Portfolio State và Economic Risk** đánh giá trượt giá, tổn thất, ngân sách và mức độ tập trung tài sản. **Z3/Φ** kiểm các ràng buộc đã mô hình hóa; **SDE** quyết định cho phép hay từ chối; chỉ khi đủ điều kiện, **Attestor mới ký EIP-712 PDR** để **PolicyVault cưỡng chế on-chain**. MVP đã có **payment USDC và swap USDC → WAVAX thành công trên Avalanche Fuji**, cùng bằng chứng từ chối, kiểm thử ITAG trên LOCAL Anvil và thực nghiệm real-model về purpose drift. **Đây là prototype testnet, chưa audit độc lập hoặc hỗ trợ mainnet/custody đa người dùng.**
+**Hãy tưởng tượng bạn giao cho AI quản lý quỹ tài sản số:** đổi USDC sang WAVAX để phục vụ một nhiệm vụ, với ngân sách và giới hạn rủi ro rõ ràng. **Giao dịch chạy thành công chưa chắc là giao dịch nên được phép thực hiện:** AI có thể làm sai yêu cầu, chi vượt ngân sách sau nhiều lần hoặc đổi token với kết quả bất lợi.
 
-**Xem trong 1 phút:** [Demo](https://pacevant.live) · [Hai ca ITAG](#itag) · [Economic Risk có số liệu](#economic-case) · [Fuji transaction & bằng chứng](#evidence) · [Kết quả benchmark](#evaluation).  
-**Đọc sâu:** Chọn mục trong mục lục phía dưới. Mỗi kết quả có nhãn **PUBLIC FUJI / LOCAL ANVIL / REAL MODEL / SCRIPTED / READ-ONLY** để tránh nhầm giữa giao dịch thật và nghiên cứu. Website triển khai từ `develop`, còn README ở `main` có thể đi trước bản public; xem [runbook](docs/PUBLIC_FUJI_RUNBOOK.md).
+**PaceVant** là lớp bảo vệ đặt **giữa AI Agent và quyền chuyển tiền**, xử lý lần lượt các rủi ro đó. **TaskShield** kiểm đề xuất hiện tại có đúng yêu cầu người dùng hay không. Nhưng nếu *mỗi giao dịch đều đúng mà cả chuỗi hành động lại sai* thì sao? **ITAG — đổi mới cốt lõi của nhóm —** liên kết nhiệm vụ gốc, lịch sử giao dịch, quyền hạn và bằng chứng để phát hiện **vượt ngân sách tích lũy** hoặc **chuyển sang mục đích khác dù từng giao dịch vẫn hợp lệ**.
+
+Ngay cả khi AI làm đúng nhiệm vụ, **một giao dịch vẫn có thể gây thiệt hại tài chính**. Vì vậy, **EVM Simulation chạy thử chính giao dịch đó trên bản sao trạng thái blockchain** để xem token nào sẽ đi ra/đi vào ví, số dư và quyền sử dụng tài sản thay đổi ra sao. **Economic Risk** kết hợp kết quả mô phỏng với **giá tham chiếu Chainlink và danh mục tài sản** để kiểm trượt giá, tổn thất và tỷ trọng tài sản có vượt giới hạn không.
+
+**Vấn đề cuối cùng:** thị trường có thể thay đổi *sau khi mô phỏng nhưng trước khi giao dịch được ghi lên blockchain*. **Z3** kiểm xem các giới hạn an toàn có thể bị vi phạm **trong dải giá và giả định đã xác định** hay không; các điều kiện **Φ (Phi)** được đưa vào hợp đồng để **kiểm lại khi thực thi**. Chỉ khi các lớp kiểm tra đạt yêu cầu, **SDE** mới cho phép **Attestor ký phê duyệt EIP-712**, và **PolicyVault** mới thực thi theo đúng quyền hạn đã cấp. **AI không giữ khóa ký.**
+
+**Đã có MVP trên Avalanche Fuji Testnet:** thanh toán USDC và hoán đổi USDC → WAVAX có biên nhận công khai; ITAG có kiểm thử ngân sách trên **LOCAL Anvil** và thực nghiệm ngữ nghĩa riêng. Đây là **prototype testnet, chưa audit độc lập**.
+
+**Xem nhanh bằng chứng:** [Live Demo](https://pacevant.live) · [ITAG chặn vượt ngân sách](#itag) · [Rủi ro kinh tế có số liệu](#economic-case) · [Giao dịch Fuji thật](#evidence) · [Các benchmark](#evaluation).  
+**Đọc sâu:** Sử dụng mục lục bên dưới. Kết quả **PUBLIC FUJI / LOCAL ANVIL / REAL MODEL / SCRIPTED / READ-ONLY** được phân biệt theo nguồn; website triển khai từ `develop`, có thể khác README `main`. [Runbook](docs/PUBLIC_FUJI_RUNBOOK.md).
 
 ### Mục lục
 
@@ -55,17 +63,19 @@
 **Nguyên tắc:** AI có thể diễn giải nhiệm vụ, nhưng **không một nhận định “SAFE” từ LLM nào tự động cấp quyền ký**.
 
 <a id="overview"></a>
-## Trong 60 giây: Vì sao PaceVant cần nhiều lớp bảo mật?
+## Từ vấn đề đến giải pháp: Vì sao PaceVant cần nhiều lớp bảo mật?
 
-Ba nhóm kiểm tra đảm nhiệm **ba câu hỏi không thể thay thế nhau**:
+| Nếu không có bước này, chuyện gì có thể xảy ra? | Cơ chế bảo vệ — hiểu đơn giản |
+| --- | --- |
+| **AI hiểu sai yêu cầu** và đề xuất sai tài sản/người nhận | **TaskShield** so sánh *giao dịch sắp làm* với nhiệm vụ đã được người dùng xác thực |
+| **Từng giao dịch hợp lệ nhưng tổng chi vượt ngân sách, hoặc mục đích dần thay đổi** | **ITAG** xem *lịch sử + ý định + bằng chứng*, không chỉ một transaction độc lập |
+| **Giao dịch đúng yêu cầu nhưng nhận quá ít token, cấp quyền ngoài ý muốn hoặc tăng rủi ro danh mục** | **EVM Simulation** *chạy thử giao dịch* để đo thay đổi số dư/allowance; **Economic Risk + Chainlink/Portfolio** định giá tác động và so với giới hạn |
+| **Giá hoặc trạng thái pool đổi từ lúc chạy thử đến lúc được đưa lên chain** | **Z3** kiểm ràng buộc trong các dải giá/giả định đã mô hình hóa; **Φ** chuyển những giới hạn có thể kiểm thành *điều kiện bắt buộc của smart contract* lúc thực thi |
+| **AI hoặc bên gửi cố ý bỏ qua kết quả kiểm duyệt, sửa payload hay phát lại phê duyệt** | **SDE** chặn hoặc duyệt; **Attestor ký EIP-712 PDR** gắn với giao dịch; **PolicyVault** kiểm chữ ký, nonce và điều kiện on-chain. Không đạt thì không chuyển tài sản theo luồng được kiểm soát |
 
-| Kiểm tra | Câu hỏi | Đầu ra |
-| --- | --- | --- |
-| **TaskShield + ITAG** | AI còn làm **đúng việc, đúng mục tiêu dài hạn**? | Alignment, history/budget, semantic verdict |
-| **Simulation + Economic Risk + Z3** | Dòng tiền dự kiến, loss/slippage/exposure **có chấp nhận được**? | State diff, risk assessment, bounded proof |
-| **SDE + Signed PDR + PolicyVault** | Điều kiện đã duyệt **có được cưỡng chế khi thực thi**? | APPROVE/REJECT → chữ ký có điều kiện → receipt/revert |
+**Cần phân biệt:** *Simulation* trả lời **“Nếu chạy bây giờ, trạng thái dự kiến thay đổi gì?”**; *Economic Risk* trả lời **“Hậu quả kinh tế đó có nằm trong mức chấp nhận?”**; *Z3/Φ* giúp bảo vệ **những ràng buộc đã định nghĩa khi trạng thái biến động**, chứ không dự đoán hay ngăn mọi biến động thị trường.
 
-[Kiến trúc chi tiết 16 bước](docs/architecture/ARCHITECTURE_EXPLAINED.md).
+[Ví dụ Economic Risk từ dữ liệu Fuji](#economic-case) · [Sơ đồ workflow mở sẵn](#architecture) · [Giải thích kiến trúc 16 bước](docs/architecture/ARCHITECTURE_EXPLAINED.md).
 
 <a id="itag"></a>
 ## Attack → Defense: Hai vấn đề khác nhau của long-horizon
