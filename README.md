@@ -45,6 +45,7 @@ Các kết quả này đi qua **Z3/Φ**, **Security Decision Engine**, phê duy�
 - [Công nghệ đã triển khai](#technology)
 - [Dùng thử và tái hiện](#getting-started)
 - [Tài liệu nghiên cứu](#research)
+- [References — Cơ sở khoa học và tiêu chuẩn](#references)
 
 ---
 
@@ -360,6 +361,33 @@ Nếu muốn kiểm chứng thuật toán, dữ liệu, cách đo hoặc các ph
 | [MVP Current System Review](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) | Trạng thái nghiệm thu Fuji mới nhất và vận hành public |
 | [System Design V2.1](docs/AI_Treasury_Security_System_Design_v2.1.md) | **Tài liệu của kiến trúc checkpoint cũ**; vẫn hữu ích cho nghiên cứu/legacy nhưng không thay thế source V3/MVP mới |
 | [Reviewer Guide](docs/REVIEWER_GUIDE.md) | Hướng đọc source/evidence; kiểm tra checkpoint trước khi áp dụng |
+
+
+---
+
+<a id="references"></a>
+## References — Cơ sở khoa học và tài liệu tham khảo
+
+PaceVant được phát triển trên cơ sở **nghiên cứu đã công bố, bản thảo học thuật và tiêu chuẩn kỹ thuật** về AI Agent Security, kiểm tra ý định giao dịch, mô phỏng rủi ro kinh tế và thực thi smart contract có điều kiện. Dưới đây là các nguồn **liên quan trực tiếp đến những quyết định thiết kế đã được mô tả trong dự án**, kèm giải thích cụ thể phần nào được tham khảo và phần nào nhóm tự tích hợp, mở rộng hoặc kiểm thử.
+
+### Nghiên cứu học thuật
+
+| Ref. | Nghiên cứu / nguồn gốc | Bài toán và giá trị tham khảo đối với PaceVant |
+| --- | --- | --- |
+| **[1]** | **Jia, F., Wu, T., Qin, X. & Squicciarini, A. (2025).** [*The Task Shield: Enforcing Task Alignment to Defend Against Indirect Prompt Injection in LLM Agents*](https://aclanthology.org/2025.acl-long.1435/). **ACL 2025 (Long Papers)**. [DOI](https://doi.org/10.18653/v1/2025.acl-long.1435) | Đặt vấn đề bảo mật Agent dưới góc nhìn **mọi hành động phải phục vụ nhiệm vụ của người dùng**, thay vì chỉ lọc lệnh nguy hiểm. PaceVant tham khảo hướng *task alignment* cho **Hybrid TaskShield**, bổ sung source-bound constraints và fail-closed checks. |
+| **[2]** | **Yao, D., Jagannath, S., Aroso, B., Krishnan, V. & Zhao, D. (2026).** [*Auditable LLM Arbiter for DeFi Security: A Hybrid Graph-of-Thoughts Approach to Intent–Transaction Alignment*](https://www.ndss-symposium.org/ndss-paper/auto-draft-682/). **LAST-X Workshop / NDSS 2026**. [Dataset INTENT-TX-18K](https://github.com/duanyiyao/intent-tx-18k) | Kết hợp kiểm tra **deterministic** với suy luận **LLM** cho việc giao dịch có khớp ý định hay không. Đây là nguồn tham khảo cho bài toán **single-transaction alignment** và bộ dữ liệu đánh giá TaskShield. **300 mẫu swap của PaceVant là tập đã điều chỉnh**, không phải toàn bộ 18K và không phải benchmark long-horizon của ITAG. |
+| **[3]** | **Karanjai, R. et al. (2026).** [*PACE: Policy-Attested Contract Execution for Safe AI Agents in Decentralized Finance*](https://arxiv.org/abs/2608.17220). **arXiv preprint, 2608.17220**. [Ghi chú phân tích trong dự án](docs/paper/PACE_Policy_Attested_Contract_Execution.md) | Cung cấp nền tảng **typed transaction intent**, chính sách xác minh độc lập, **signed Policy Decision Record (PDR)** và ràng buộc giao dịch đã phê duyệt với dữ liệu thực thi on-chain. PaceVant kế thừa hướng *policy-attested execution* và đặt **TaskShield/ITAG + economic verification** trước bước ký. |
+| **[4]** | **Ghosh, B. (2026).** [*Proof-Gated Signing: Solver-Checked Transaction Guards that Hold Under State Drift for Onchain AI Agents*](https://arxiv.org/abs/2610.00354). **arXiv preprint, 2610.00354**. [Ghi chú phân tích trong dự án](docs/paper/Proof_Gated_Signing_Solver_Checked_Transaction_Guards.md) | Chỉ ra **simulation trước khi ký có thể trở nên lỗi thời** khi trạng thái blockchain thay đổi. Phương pháp kết hợp **EVM effects → SMT/Z3 → postconditions Φ → smart contract enforcement** là cơ sở tham khảo cho nhánh **Economic Risk, bounded proof và PolicyVault**. Không suy diễn kết quả nghiên cứu này thành hiệu suất thực nghiệm của PaceVant. |
+| **[5]** | **Kim, N., Kim, S.-Y., Im, N., Park, S.-H. & Lee, I.-G. (2026).** [*When LLM Agents Act On-Chain: A Systematic Cross-Layer Security Analysis across Reasoning, Identity, and Execution*](https://doi.org/10.1016/j.icte.2026.09.014). **ICT Express, review article**. | Phân tích khoảng trống giữa **xác thực danh tính/quyền hạn** và **hành vi thực thi của Agent**, đồng thời đề xuất cách nhìn bảo mật xuyên các lớp Agent / Trust / Infrastructure. Hỗ trợ việc PaceVant **tách AI Planner, Attestor và PolicyVault thành các trust boundaries**; dự án chưa hiện thực đầy đủ DID/VC. |
+| **[6]** | **de Moura, L. & Bjørner, N. (2008).** [*Z3: An Efficient SMT Solver*](https://doi.org/10.1007/978-3-540-78800-3_24). **TACAS 2008**. | Nền tảng khoa học cho việc dùng **SMT solver Z3** để kiểm chứng các điều kiện số học/logic. PaceVant áp dụng Z3 vào **bounded economic constraints**, không khẳng định solver chứng minh mọi loại rủi ro ngoài các giả định đã mô hình hóa. |
+| **[7]** | **Daian, P. et al. (2020).** [*Flash Boys 2.0: Frontrunning in Decentralized Exchanges, Miner Extractable Value, and Consensus Instability*](https://ieeexplore.ieee.org/abstract/document/9152675). **IEEE Symposium on Security and Privacy 2020**. | Cơ sở học thuật về **front-running, transaction ordering và MEV**, giúp lý giải tại sao một swap có thể chịu giá bất lợi dù không revert. Nguồn tham khảo cho **threat model và các kịch bản MEV/reserve-shift stress LOCAL**, không phải bằng chứng PaceVant đã chặn mọi MEV attack. |
+
+### Tiêu chuẩn và hiện vật kỹ thuật
+
+- **[8] [EIP-712 — Typed Structured Data Hashing and Signing](https://eips.ethereum.org/EIPS/eip-712):** tiêu chuẩn định dạng và ký dữ liệu có cấu trúc, được sử dụng để ràng buộc phê duyệt của **Attestor** với operation, domain, nonce và các commitment liên quan. Đây là **tiêu chuẩn kỹ thuật**, không phải paper nghiên cứu của nhóm.
+- **[9] [INTENT-TX-18K — Dataset for Auditable LLM Arbiter](https://github.com/duanyiyao/intent-tx-18k):** nguồn dữ liệu nghiên cứu về **intent–transaction alignment**. Cách chọn, chuẩn hóa, điều chỉnh và đánh giá **300 swap cases** của PaceVant được giải thích trong [báo cáo benchmark](docs/evaluation/HYBRID_TASK_ALIGNMENT_RESULTS.md) và [data quality report](docs/evaluation/curated-300/benchmark_300_quality_report.md).
+
+**Đối chiếu kết quả của chính PaceVant:** các paper trên giải thích *động lực và cơ sở kỹ thuật*, **không thay thế bằng chứng triển khai hoặc chứng minh chất lượng của hệ thống nhóm**. Kết quả **TaskShield 300 cases**, **ITAG 12 adverse/12 benign**, **semantic purpose observations**, **LOCAL Anvil** và **Public Fuji receipts** phải đọc trong [Experiment Catalog](docs/research/EXPERIMENT_CATALOG.md), [ITAG Final Validation](docs/evaluation/itag-final/FINAL_VALIDATION.md), [Semantic Reliability Report](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md) và [Fuji Workflow Evidence](docs/evidence/FUJI_WORKFLOW_EVIDENCE.md).
 
 
 ---
