@@ -64,7 +64,7 @@ def run(scenario, directory, recipient_index=None):
             setup = prepared.setup
             meter = InferenceMeter(workflows.control.shield.provider, lambda:state.get("active_stage", "PREPARATION"))
             workflows.control.shield.provider = meter
-            context = execution.context(manifest.default_session_id)
+            context = prepared.intent_context if public and scenario!='guard' else execution.context(manifest.default_session_id)
             payment = scenario == "payment"
             token_in, token_out = manifest.usdc, manifest.usdc if payment else manifest.wavax
             # Fixed three-role cycle is owner-approved in the signed manifest.

@@ -90,7 +90,7 @@ with sync_playwright() as play:
                     source = page.request.get(BASE+'/judge/source',timeout=30000).json()
                     updated = source.get('oracle',{}).get('updated_at',0)
                     age = time.time()-updated
-                    if source.get('status')=='VERIFIED_READ' and 0<=age<=120:
+                    if source.get('status')=='VERIFIED_READ' and 0<=age<=(150 if PUBLIC else 120):
                         print('Verified source window ready, age '+str(round(age))+'s',flush=True)
                         break
                     print('Waiting for independently fresh Chainlink window, source age '+str(round(age))+'s',flush=True)

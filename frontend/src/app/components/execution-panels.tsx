@@ -1,6 +1,6 @@
 import {Activity, ArrowUpRight, Clock3, FileCheck2, History, LoaderCircle, RotateCcw, ShieldCheck, ShieldX, CircleHelp} from 'lucide-react';
 import {Button} from './ui/button';
-import {date, publicExplorer} from '@/lib/format';
+import {date, publicExplorer, units} from '@/lib/format';
 import {BlockReason} from './run-session';
 import type {Job, ScenarioId} from '@/lib/types';
 import type {Language} from '@/lib/i18n';
@@ -19,7 +19,7 @@ export function ExecutionStatus({job,language,onEvidence}:{job?:Job;language:Lan
  return <aside className="workspace-card status-panel refined-status"><div className="panel-title"><Activity size={17}/><h2>{t.status}</h2></div>
  {!job?<div className="status-empty"><span className="empty-symbol"><ShieldCheck size={27} strokeWidth={1.4}/></span><h3>{t.empty}</h3><p>{t.emptyHint}</p></div>:<>
  <div className={'decision-box decision-'+job.status.toLowerCase()} role="status"><ToneIcon job={job}/><div><strong>{t[job.status]}</strong><span>{job.environment==='VERIFIED_REPLAY'?t.recorded:t.check}</span></div></div>
- <dl className="execution-facts"><div><dt>{t.scenario}</dt><dd>{t[job.scenario]}</dd></div><div><dt>{t.stage}</dt><dd>{job.active_stage?stageLabel(job.active_stage,language):phases[job.phase??'']?.[language==='vi'?0:1]??t.awaiting}</dd></div></dl>
+ <dl className="execution-facts"><div><dt>{t.scenario}</dt><dd>{t[job.scenario]}</dd></div><div><dt>{t.stage}</dt><dd>{job.terminal&&job.status==='CONFIRMED'?stageLabel('OUTCOME',language):job.active_stage?stageLabel(job.active_stage,language):phases[job.phase??'']?.[language==='vi'?0:1]??t.awaiting}</dd></div>{job.workflow?.outcome&&['CONFIRMED','REVERTED'].includes(job.workflow.outcome.status)&&job.workflow.outcome.system_gas_expense?.actual_cost_wei&&<div><dt>{job.environment==='REAL_FUJI_EXECUTION'?(language==='vi'?'Phí gas đã trả':'Gas paid'):'Gas EVM'}</dt><dd>{units(job.workflow.outcome.system_gas_expense.actual_cost_wei,18,18)} AVAX</dd></div>}</dl>
  <BlockReason job={job} language={language}/>
  {explorer&&<Button variant="outline" asChild className="evidence-open"><a href={explorer} target="_blank" rel="noreferrer">{language==='vi'?'Xem giao dịch trên Fuji':'View transaction on Fuji'}<ArrowUpRight size={14}/></a></Button>}
  <Button variant="outline" className="evidence-open" onClick={onEvidence}><FileCheck2 size={16}/>{t.details}<ArrowUpRight size={14}/></Button>

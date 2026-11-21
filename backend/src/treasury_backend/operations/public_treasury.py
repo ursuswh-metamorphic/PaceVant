@@ -36,8 +36,10 @@ def prepared_public(directory,shield,progress):
     until=time.monotonic()+int(os.environ.get('PACEVANT_JUDGE_ORACLE_WAIT_SECONDS','45'))
     while True:
         try:
-            context=execution.context(manifest.default_session_id)
-            if context['oracle_valid_until']-int(time.time())>=90:
+            header=execution.chain.w3.eth.get_block('latest')
+            policy=execution.chain.vault.functions.proofPolicy().call(block_identifier=header.number)
+            _,_,_,valid_until=execution.chain.reference(header.number,{'max_oracle_age':policy[5]},int(time.time()))
+            if valid_until-int(time.time())>=120:
                 break
         except ValueError as error:
             if str(error)!='ORACLE_WINDOW_UNAVAILABLE':
@@ -52,6 +54,9 @@ def prepared_public(directory,shield,progress):
     control=ControlPlane(control_settings,client_factory=lambda *_:None)
     try:
         yield SimpleNamespace(workflows=TreasuryWorkflows(control,execution),execution=execution,manifest=manifest,
-            source_block=context['block_number'],setup=[])
+            # Used only to bound the initial request. TreasuryWorkflows still
+            # reads and verifies the full current context before any build/gate.
+            intent_context={'timestamp':header.timestamp,'oracle_valid_until':valid_until},
+            source_block=header.number,setup=[])
     finally:
         control.close()
