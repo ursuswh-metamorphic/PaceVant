@@ -15,23 +15,25 @@
   <a href="docs/research/SECURITY_COVERAGE_MATRIX.md"><img alt="Not independently audited" src="https://img.shields.io/badge/Independent%20Audit-Not%20Audited-64748B?style=flat-square"></a>
 </p>
 
+<a id="quick-summary"></a>
 ### PaceVant trong 60 giây — dành cho giám khảo
 
-**PaceVant** bảo vệ quỹ tài sản số khi **AI Agent đề xuất thanh toán hoặc hoán đổi token**. **Vấn đề:** một giao dịch có thể chạy thành công nhưng vẫn sai nhiệm vụ, vượt tổng ngân sách hoặc gây thiệt hại tài chính. **TaskShield** kiểm từng đề xuất có đúng yêu cầu người dùng không. Nhưng nếu AI chia nhỏ chi tiêu hoặc dần chuyển sang mục đích khác, kiểm từng giao dịch là chưa đủ. **ITAG — đổi mới cốt lõi —** kết nối nhiệm vụ đã xác thực, lịch sử, quyền hạn và bằng chứng để phát hiện **vi phạm tích lũy và sai lệch mục tiêu qua nhiều bước**.
+**PaceVant** bảo vệ quỹ tài sản số khi **AI Agent** giao dịch on-chain. **Vấn đề:** giao dịch hợp lệ vẫn có thể sai yêu cầu, vượt ngân sách hoặc gây lỗ. **TaskShield** kiểm đề xuất hiện tại. Nhưng nhiều giao dịch hợp lệ vẫn có thể cộng thành hành động sai: **ITAG — đổi mới cốt lõi —** kết nối ý định người dùng, lịch sử và bằng chứng để phát hiện **vượt ngân sách tích lũy** hoặc **lệch mục tiêu dài hạn**.
 
-**Ngay cả giao dịch đúng mục tiêu vẫn có thể gây lỗ.** **EVM Simulation** chạy thử chính lệnh đó trên **bản sao trạng thái blockchain** để xem token nào ra/vào ví, số dư và quyền sử dụng tài sản thay đổi thế nào. **Economic Risk** đối chiếu kết quả với **giá Chainlink, danh mục tài sản và các giới hạn rủi ro**, giúp phát hiện swap bất lợi hoặc tài sản bị tập trung quá mức.
+**Đúng mục tiêu vẫn có thể lỗ.** **EVM Simulation** chạy thử giao dịch trên bản sao blockchain, đo số dư, token ra/vào và quyền cấp phép. **Economic Risk** so kết quả với **giá Chainlink, danh mục tài sản và giới hạn** để phát hiện trượt giá, tổn thất và tỷ trọng vượt mức.
 
-**Mô phỏng chỉ phản ánh trạng thái lúc kiểm tra; giá hoặc pool có thể đổi trước khi thực thi.** **Z3** kiểm các giới hạn an toàn trong **dải giá và giả định được xác định**; các điều kiện **Φ (Phi)** được smart contract kiểm lại **ngay lúc chạy giao dịch**. **SDE** chỉ phê duyệt khi các bước bắt buộc đạt, **Attestor** mới ký **EIP-712 PDR** ràng buộc với giao dịch và **PolicyVault** kiểm chữ ký, nonce, điều kiện trước khi chuyển tiền. **AI không giữ khóa ký.**
+**Mô phỏng không bảo đảm giá/pool giữ nguyên đến lúc thực thi.** **Z3** kiểm điều kiện an toàn trong dải giá/giả định đã xác định; **Φ (Phi)** đưa các giới hạn có thể kiểm vào smart contract **ngay lúc giao dịch chạy**. **SDE** quyết định duyệt/từ chối; khi đủ điều kiện, **Attestor** ký **EIP-712 PDR** và **PolicyVault** kiểm chữ ký, nonce, điều kiện trước khi chuyển tiền. **AI không giữ khóa ký**.
 
-**Đã có MVP trên Avalanche Fuji Testnet** với USDC payment/swap có receipt; ITAG có thử nghiệm LOCAL Anvil và real-model riêng. **Đây là prototype chưa audit độc lập**, không phải ví mainnet.
+**Bằng chứng:** USDC payment/swap đã được xác nhận trên **Avalanche Fuji Testnet**; ITAG đánh giá riêng trên LOCAL Anvil và real-model. **Prototype chưa audit độc lập, không phải mainnet.**
 
-**Xem nhanh:** [Live Demo](https://pacevant.live) · [ITAG](#itag) · [Economic Risk có số liệu](#economic-case) · [Fuji receipts](#evidence) · [Benchmark](#evaluation).  
-**Đọc sâu:** Mục lục bên dưới. Các kết quả **PUBLIC FUJI / LOCAL ANVIL / REAL MODEL / SCRIPTED / READ-ONLY** được phân biệt; website triển khai từ `develop` và có thể khác README `main`. [Runbook](docs/PUBLIC_FUJI_RUNBOOK.md).
+**Xem nhanh:** [Demo](https://pacevant.live) · [ITAG](#itag) · [Economic Risk (quote chỉ đọc)](#economic-case) · [Fuji receipts](#evidence) · [Benchmark](#evaluation).  
+**Đọc sâu:** Mục lục bên dưới; phân biệt PUBLIC FUJI, LOCAL ANVIL, REAL MODEL, SCRIPTED và READ-ONLY. Website dùng `develop`, có thể khác README `main`. [Runbook](docs/PUBLIC_FUJI_RUNBOOK.md).
 
 ### Mục lục
 
 - [Vấn đề và động lực](#problem)
-- [PaceVant trong 60 giây](#overview)
+- [PaceVant trong 60 giây](#quick-summary)
+- [Từ vấn đề đến giải pháp](#overview)
 - [ITAG: Attack → Defense](#itag)
 - [Những gì đã chạy thật](#evidence)
 - [Kiến trúc & sơ đồ Mermaid](#architecture)
@@ -115,16 +117,16 @@ Thí nghiệm v3.2 với real model: **7/8 purpose-conflict observations** tạo
 | **Bằng chứng audit trail** | Code hash, receipt, balance snapshots, EIP-712, phí gas và browser acceptance | [Public Fuji acceptance](docs/audit/public-fuji-live-acceptance-20261121.json) · [Current Review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) |
 
 <a id="economic-case"></a>
-### Economic Risk thực tế: Khi giao dịch chạy được nhưng không nên chạy
+### Economic Risk trên Fuji — phân tích quote chỉ đọc (chưa phải giao dịch bị chặn)
 
-**Một ví dụ có số liệu từ Fuji — không phải giả định marketing:** Trong một lần kiểm tra **read-only** tại block **61.376.641**, treasury đang có tỷ trọng WAVAX **24,90%**. Nếu đổi thêm **1 base unit USDC** theo **LFJ quote** ở block đó, tỷ trọng WAVAX dự kiến tăng lên **28,49%**, vượt trần **25%**. Vì vậy **đề xuất này không đạt điều kiện exposure**, dù quote có thể tồn tại và calldata swap có thể hợp lệ.
+**Dữ liệu từ Fuji, chưa phải kiểm thử từ chối end-to-end:** Trong một lần kiểm tra **quote chỉ đọc (read-only)** tại block **61.376.641**, treasury đang có tỷ trọng WAVAX **24,90%**. Nếu đổi thêm **1 base unit USDC** theo **LFJ quote** ở block đó, tỷ trọng WAVAX dự kiến tăng lên **28,49%**, vượt trần **25%**. Vì vậy **đề xuất này không đạt điều kiện exposure**, dù quote có thể tồn tại và calldata swap có thể hợp lệ.
 
 | Bước | Giá trị trong evidence | Ý nghĩa |
 | --- | --- | --- |
 | **Portfolio trước giao dịch** | WAVAX exposure **2.490 bps = 24,90%** | Đang dưới trần |
 | **Dự báo với Chainlink + LFJ quote** | WAVAX exposure **2.849 bps = 28,49%** | Vượt trần **2.500 bps = 25%** |
-| **Economic Risk gate (đánh giá theo quote)** | **Không đạt exposure gate** | Không đủ điều kiện phê duyệt với snapshot và quote này |
-| **Quyết định thực thi** | **Không có ký/gửi giao dịch từ phép kiểm này** | Đây là **quote-only/read-only diagnostic**, **chưa** phải full EVM simulation → SDE REJECT trên Fuji |
+| **Đối chiếu ngưỡng Economic Risk từ quote** | **Vượt giới hạn exposure** | Chỉ là kết quả đối chiếu snapshot/quote, chưa có verdict của toàn pipeline |
+| **Phạm vi thử nghiệm** | **Không ký/gửi giao dịch từ phép kiểm này** | Đây là **quote-only/read-only diagnostic**, chưa phải full EVM simulation → SDE REJECT trên Fuji |
 
 **Đối chứng có thực thi:** Một swap **PUBLIC FUJI** khác đi qua các stage `SIMULATION → RISK PASS → PROOF VERIFIED → SDE APPROVE`, được ký và có [receipt thành công](https://testnet.snowtrace.io/tx/0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d): Vault **−1 USDC base unit, +13.266.545.691.051 wei WAVAX**. Receipt xác minh *kết quả thực thi*; acceptance report chỉ ghi **stage summaries**, không phát hành đầy đủ raw simulation state diff để tái tính mọi risk decision độc lập.
 
