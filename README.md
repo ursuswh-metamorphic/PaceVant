@@ -88,7 +88,7 @@ Website **<https://pacevant.live>** dùng frontend React và backend Python; pub
 
 ### Một workflow, một đường truy vết từ AI đến blockchain
 
-**Chuỗi bằng chứng:** cùng job `judge_05e0231adab44474a7fff9fcacd7c48e` được ghi trong public acceptance với Risk `PASS` → ITAG `PASS` / semantic `ALIGNED` → Z3 `VERIFIED` → SDE `APPROVE` → EIP-712 attestation (nonce 1003) → Fuji swap `CONFIRMED`. Report còn lưu `proof_hash`, `typed_data_hash`, `constraints_hash`, actual balance deltas và AVAX gas debit.
+**Đây là bằng chứng** thực thi đáng kể nhất: cùng job `judge_05e0231adab44474a7fff9fcacd7c48e` được ghi trong public acceptance với Risk `PASS` → ITAG `PASS` / semantic `ALIGNED` → Z3 `VERIFIED` → SDE `APPROVE` → EIP-712 attestation (nonce 1003) → Fuji swap `CONFIRMED`. Report còn lưu `proof_hash`, `typed_data_hash`, `constraints_hash`, actual balance deltas và AVAX gas debit.
 
 [**Đi theo từng mắt xích bằng chứng (có job ID, hash và mức độ kiểm chứng)**](docs/evidence/FUJI_WORKFLOW_EVIDENCE.md) · [Raw acceptance JSON](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json).
 
