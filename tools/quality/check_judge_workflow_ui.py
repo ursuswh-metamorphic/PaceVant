@@ -10,7 +10,7 @@ from playwright.sync_api import expect, sync_playwright
 ROOT = Path(__file__).resolve().parents[2]
 PUBLIC='--public' in sys.argv
 BASE=next((arg.split('=',1)[1].rstrip('/') for arg in sys.argv if arg.startswith('--url=')),'http://127.0.0.1:5173')
-OUT = ROOT / ("data/judge-public-acceptance" if PUBLIC else "data/judge-mvp-final" if '--final' in sys.argv else "data/judge-ui-acceptance")
+OUT = ROOT / ("data/vps-public-acceptance" if PUBLIC and BASE.startswith('https://') else "data/judge-public-acceptance" if PUBLIC else "data/judge-mvp-final" if '--final' in sys.argv else "data/judge-ui-acceptance")
 OUT.mkdir(parents=True, exist_ok=True)
 EXPECTED = ['OWNER_AUTHORITY', 'AGENT_PROPOSAL', 'BUILD', 'SIMULATION', 'RISK', 'ITAG', 'PROOF', 'SDE', 'ATTESTATION', 'EXACT_SIGNED_PREFLIGHT', 'OUTCOME']
 MODULES = EXPECTED + ['OUTCOME']

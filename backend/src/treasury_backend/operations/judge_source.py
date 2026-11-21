@@ -30,7 +30,7 @@ def observe(rpc_url, manifest_file=None):
         raise ValueError("CHAIN_MISMATCH")
     h = w3.eth.get_block("latest")
     n = h.number
-    if Web3.to_hex(Web3.keccak(w3.eth.get_code(old["vault_address"], n))) != old["bytecode_hashes"]["PolicyVault"]:
+    if Web3.to_hex(Web3.keccak(w3.eth.get_code(Web3.to_checksum_address(old["vault_address"]), n))) != old["bytecode_hashes"]["PolicyVault"]:
         raise ValueError("SOURCE_CODE_IDENTITY_CHANGED")
     vault = contract(w3, contract_name, old["vault_address"])
     usdc, wavax = contract(w3,"MockUSDC",old["token_in"]), contract(w3,"MockWAVAX",old["token_out"])
