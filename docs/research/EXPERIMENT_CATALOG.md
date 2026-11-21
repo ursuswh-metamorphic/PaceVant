@@ -1,5 +1,30 @@
 # Catalog thí nghiệm PaceVant — Benchmark, ablation và negative results
 
+## E08 — Current Public MVP: payment/swap Fuji (21/11/2026)
+
+**Môi trường:** `PUBLIC FUJI`, chain ID 43113, PolicyVaultMVP mới tại [`0x70e1…5b6d5`](https://testnet.snowtrace.io/address/0x70e1395F959dba530cF4A53B060c809b715bB6d5). **Public acceptance report:** [manifest/receipt/effect verification](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json).
+
+| Scenario | Kết quả | Transaction / source |
+| --- | --- | --- |
+| Browser **USDC_PAYMENT** | `CONFIRMED`, recipient nhận **10.000 base units = 0,01 test USDC**, relayer trả gas | [0x10f6…4470b8c](https://testnet.snowtrace.io/tx/0x10f6a04e22179f4186459e3738c61597048e9b2aac724c01347ba306f4470b8c) |
+| Browser **SWAP_EXACT_IN** | `CONFIRMED`, Vault giảm **1 base unit Circle test USDC**, tăng **13.266.545.691.051 wei WAVAX** | [0xa708…e4b2d](https://testnet.snowtrace.io/tx/0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d) |
+| Public policy guard | `PAYEE_NOT_ALLOWED`, **không ký / không broadcast** | [Guard record trong acceptance JSON](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json) |
+| Browser acceptance | Payment/swap pages PASS với release SHA riêng; F5 resume không tạo duplicate POST | Acceptance JSON, `browser_acceptance` |
+
+**Cảnh báo:** hai release browser SHA trong acceptance không mặc nhiên bằng `main` HEAD; nhánh phục vụ website là `develop` theo [Public Runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md). Sáu lựa chọn attack trên UI là preview, **không** phải sáu backend attacks đã chạy live. Lỗi semantic schema có một case fail-closed và một job `FORK_RUN_INTERRUPTED` trước broadcast cũng được giữ trong report.
+
+## E09 — Merge Hybrid TaskShield vào fixed public operation pipeline
+
+[Merge report](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/MAIN_MERGE_20261121.md) xác nhận nối TaskShield authenticated source/operation adapter vào V3/MVP. Kiểm các trường operation/token/amount/recipient/chain/deadline/minOut/slippage/sender và giữ semantic uncertainty fail-closed. 59 workflow/hybrid tests và 45 focused final integration/security/API tests pass (1 skip), cùng MVP Foundry suite và React build + 10 tests trong checkpoint merge.
+
+**Không chạy lại paid-model 300-case evaluation, không tạo public transaction và không deploy VPS trong riêng task merge.** Kết quả 300-case A/B/C/D vẫn là benchmark component gốc, không tự suy thành đo lại adapter mới.
+
+---
+
+### Catalog thí nghiệm trước checkpoint public mới (giữ nguyên provenance)
+
+
+
 > **Lưu ý:** đây là bản catalog tiếng Việt cho reviewer tại checkpoint 21/11/2026. Các tỷ lệ là số đo **trong tập xác định**, không tự động chuyển thành ước lượng production. Nhiều báo cáo là kết quả checkpoint trước HEAD; đọc nguồn gốc đi kèm.
 
 ## Quy ước đọc kết quả
