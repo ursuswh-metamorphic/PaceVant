@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1060" role="img" aria-label="Minh họa: một đề xuất đúng token và ngân sách nhưng trái mục tiêu user; deterministic check PASS, semantic ITAG MISALIGNED, không ký. Ví dụ nghiên cứu, không phải cuộc tấn công trên Fuji.">
+<defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#0A1727"/><stop offset="1" stop-color="#17303B"/></linearGradient></defs>
+<rect width="600" height="1060" fill="url(#bg)" rx="20"/>
+<rect x="24" y="22" width="552" height="1008" rx="20" fill="#112338" stroke="#426272" stroke-width="2"/>
+<text x="50" y="76" fill="#72E1C5" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700">ITAG · PURPOSE DRIFT</text>
+<text x="50" y="120" fill="#F7FAFC" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">Đúng giao dịch,</text>
+<text x="50" y="157" fill="#F7FAFC" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">nhưng sai mục tiêu?</text>
+<rect x="46" y="192" width="508" height="153" rx="17" fill="#163C3D" stroke="#5AC7B4" stroke-width="2"/>
+<text x="70" y="239" fill="#79DDC5" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="700">01 · MỤC TIÊU GỐC</text>
+<text x="70" y="286" fill="#F5F9FA" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700">Giữ WAVAX cho</text>
+<text x="70" y="321" fill="#F5F9FA" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700">thanh khoản treasury</text>
+<path d="M300 349V390" stroke="#6FC5D3" stroke-width="3"/>
+<path d="M290 382L300 393L310 382" fill="none" stroke="#6FC5D3" stroke-width="3"/>
+<rect x="46" y="406" width="508" height="172" rx="17" fill="#252E42" stroke="#92A3BC" stroke-width="2"/>
+<text x="70" y="453" fill="#C8D5ED" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="700">02 · AI ĐỀ XUẤT</text>
+<text x="70" y="500" fill="#F5F9FA" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700">Dùng WAVAX cho</text>
+<text x="70" y="535" fill="#F5F9FA" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700">mục tiêu khác</text>
+<text x="70" y="565" fill="#C5D1D6" font-family="Arial,Helvetica,sans-serif" font-size="22">Vẫn đúng token / budget</text>
+<path d="M300 584V624" stroke="#6FC5D3" stroke-width="3"/>
+<path d="M290 614L300 625L310 614" fill="none" stroke="#6FC5D3" stroke-width="3"/>
+<rect x="46" y="639" width="508" height="106" rx="17" fill="#123E34" stroke="#4CBC8A" stroke-width="2"/>
+<text x="70" y="683" fill="#DAF7E7" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700">Deterministic constraints</text>
+<text x="70" y="722" fill="#77E3B3" font-family="Arial,Helvetica,sans-serif" font-size="33" font-weight="700">PASS</text>
+<rect x="46" y="764" width="508" height="118" rx="17" fill="#412B37" stroke="#EFA1A1" stroke-width="2"/>
+<text x="70" y="808" fill="#FFE5E6" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700">Graph-aware semantic</text>
+<text x="70" y="851" fill="#FFB9B5" font-family="Arial,Helvetica,sans-serif" font-size="33" font-weight="700">MISALIGNED</text>
+<rect x="46" y="898" width="508" height="71" rx="15" fill="#51303A" stroke="#F4B0AC" stroke-width="2"/>
+<text x="71" y="944" fill="#FFE6E2" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700">SDE REJECT · KHÔNG KÝ</text>
+<text x="47" y="1002" fill="#CFDDE1" font-family="Arial,Helvetica,sans-serif" font-size="23">Minh họa loại case đã nghiên cứu.</text>
+<text x="47" y="1027" fill="#CFDDE1" font-family="Arial,Helvetica,sans-serif" font-size="23">Không phải Fuji live attack.</text>
+</svg>
