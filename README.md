@@ -22,7 +22,7 @@
 
 **Đúng mục tiêu vẫn có thể lỗ.** **EVM Simulation** chạy thử giao dịch trên bản sao blockchain, đo số dư, token ra/vào và quyền cấp phép. **Economic Risk** so kết quả với **giá Chainlink, danh mục tài sản và giới hạn** để phát hiện trượt giá, tổn thất và tỷ trọng vượt mức.
 
-**Mô phỏng không bảo đảm giá/pool giữ nguyên đến lúc thực thi.** **Z3** kiểm điều kiện an toàn trong dải giá/giả định đã xác định; **Φ (Phi)** đưa các giới hạn có thể kiểm vào smart contract **ngay lúc giao dịch chạy**. **SDE** quyết định duyệt/từ chối; khi đủ điều kiện, **Attestor** ký **EIP-712 PDR** và **PolicyVault** kiểm chữ ký, nonce, điều kiện trước khi chuyển tiền. **AI không giữ khóa ký**.
+**Mô phỏng không bảo đảm giá/pool giữ nguyên đến lúc thực thi.** **Z3** kiểm điều kiện an toàn trong dải giá/giả định đã xác định; **Φ (Phi)** đưa các giới hạn có thể kiểm vào smart contract **ngay lúc giao dịch chạy**. **Nhưng mọi kiểm tra sẽ vô nghĩa nếu AI bị thao túng vẫn có thể tự chuyển tiền.** Vì vậy, **AI không giữ khóa ký**: **SDE** chỉ phê duyệt giao dịch vượt qua các bước bảo mật; **Attestor** độc lập ký **EIP-712 PDR** gắn với đúng nội dung và điều kiện được duyệt. Khi giao dịch lên blockchain, **PolicyVault** kiểm chữ ký, nonce và các ràng buộc on-chain để **chặn việc sửa lệnh sau phê duyệt, phát lại giao dịch đã ký hoặc bỏ qua quyền hạn được cấp**.
 
 **Bằng chứng:** USDC payment/swap đã được xác nhận trên **Avalanche Fuji Testnet**; ITAG đánh giá riêng trên LOCAL Anvil và real-model. **Prototype chưa audit độc lập, không phải mainnet.**
 
