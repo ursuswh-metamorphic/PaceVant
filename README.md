@@ -53,7 +53,9 @@ Ngân sách task là **20 USDC**. Hai swap **10 USDC** được xác nhận vớ
 
 ### B. Vi phạm mục đích — Graph-aware semantic evaluation, thí nghiệm real-model
 
-<p align="center"><a href="docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md"><img src="docs/assets/readme/purpose-drift.svg" alt="Ví dụ purpose drift: numeric constraints vẫn PASS nhưng graph-aware semantic evaluation có thể trả MISALIGNED theo objective được xác thực; đây là minh họa, không phải Fuji live attack" width="82%"></a></p>
+<p align="center"><a href="docs/assets/readme/purpose-drift.svg"><picture><source media="(max-width: 640px)" srcset="docs/assets/readme/purpose-drift-mobile.svg"><img src="docs/assets/readme/purpose-drift.svg" alt="Ví dụ nghiên cứu: numeric constraints PASS nhưng candidate rationale mâu thuẫn authenticated objective; semantic ITAG MISALIGNED, SDE không ký. Minh họa, không phải live Fuji attack." width="100%"></picture></a></p>
+
+<sub>Minh họa để giải thích logic của các cặp semantic-evaluation; [mở hình kích thước gốc](docs/assets/readme/purpose-drift.svg) hoặc [xem báo cáo thực nghiệm](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md). Hình không thay thế actual attack trace.</sub>
 
 **Ví dụ minh họa:** IntentSpec đã xác thực yêu cầu giữ WAVAX nhận từ swap cho nhiệm vụ thanh khoản. Một candidate sau đó vẫn nằm trong ngân sách và dùng token/địa chỉ hợp lệ nhưng phần *rationale* đề xuất sử dụng WAVAX vì một mục tiêu khác, không được người dùng cấp phép. Bộ kiểm số học có thể PASS; semantic verifier phải đối chiếu **mục tiêu gốc, candidate rationale và evidence anchors** để xác định purpose conflict. Không có authority mới nào được tạo ra chỉ từ lời nói của Agent hoặc tool.
 
