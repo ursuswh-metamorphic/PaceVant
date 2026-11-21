@@ -17,9 +17,13 @@
 
 **Một giao dịch có thể hợp lệ. Cả chuỗi hành động vẫn có thể sai mục đích.**
 
-PaceVant là **lớp kiểm soát bảo mật dành cho AI Agent quản lý treasury on-chain**. AI được phép đề xuất swap hoặc thanh toán, nhưng không tự có quyền tiêu tài sản. PaceVant đối chiếu hành động với nhiệm vụ được xác thực, lịch sử giao dịch, mục đích sử dụng và những giới hạn kinh tế; chỉ sau đó thành phần ký độc lập mới cấp quyền thực thi, còn smart contract tiếp tục kiểm các điều kiện bắt buộc ngay tại thời điểm chạy giao dịch.
+PaceVant là **lớp kiểm soát bảo mật dành cho AI Agent quản lý treasury on-chain**. AI được phép đề xuất swap hoặc thanh toán, nhưng không tự có quyền tiêu tài sản.
 
-**Trạng thái:** public MVP trên Avalanche Fuji (chain ID 43113) đã có payment/swap được đối soát; single-tenant, hai nghiệp vụ giới hạn; **chưa audit độc lập, chưa phải production custody/mainnet**. Website public sử dụng nhánh triển khai `develop` theo [runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md). Nhánh README này là bản viết tài liệu, **không phải bản deploy**; evidence public đã xác nhận theo release/tx riêng, không mặc nhiên chứng nhận mọi commit mới trên `main`.
+PaceVant đối chiếu hành động với nhiệm vụ được xác thực, lịch sử giao dịch, mục đích sử dụng và những giới hạn kinh tế; chỉ sau đó thành phần ký độc lập mới cấp quyền thực thi, còn smart contract tiếp tục kiểm các điều kiện bắt buộc ngay tại thời điểm chạy giao dịch.
+
+**Trạng thái:** public MVP trên Avalanche Fuji (chain ID 43113) đã có payment/swap được đối soát; single-tenant, hai nghiệp vụ giới hạn; **chưa audit độc lập, chưa phải production custody/mainnet**.
+
+Website public sử dụng nhánh triển khai `develop` theo [runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md). Nhánh README này là bản viết tài liệu, **không phải bản deploy**; evidence public đã xác nhận theo release/tx riêng, không mặc nhiên chứng nhận mọi commit mới trên `main`.
 
 ---
 
@@ -63,11 +67,15 @@ Ngân sách task là **20 USDC**. Hai swap **10 USDC** được xác nhận vớ
 
 <sub>Minh họa để giải thích logic của các cặp semantic-evaluation; [mở hình kích thước gốc](docs/assets/readme/approved/purpose-drift-glass.png) hoặc [xem báo cáo thực nghiệm](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md). Hình không thay thế actual attack trace.</sub>
 
-**Ví dụ minh họa:** IntentSpec đã xác thực yêu cầu giữ WAVAX nhận từ swap cho nhiệm vụ thanh khoản. Một candidate sau đó vẫn nằm trong ngân sách và dùng token/địa chỉ hợp lệ nhưng phần *rationale* đề xuất sử dụng WAVAX vì một mục tiêu khác, không được người dùng cấp phép. Bộ kiểm số học có thể PASS; semantic verifier phải đối chiếu mục tiêu gốc, candidate rationale và evidence anchors để xác định purpose conflict. Không có authority mới nào được tạo ra chỉ từ lời nói của Agent hoặc tool.
+**Ví dụ minh họa:** IntentSpec đã xác thực yêu cầu giữ WAVAX nhận từ swap cho nhiệm vụ thanh khoản. Một candidate sau đó vẫn nằm trong ngân sách và dùng token/địa chỉ hợp lệ nhưng phần *rationale* đề xuất sử dụng WAVAX vì một mục tiêu khác, không được người dùng cấp phép.
+
+Bộ kiểm số học có thể PASS; semantic verifier phải đối chiếu mục tiêu gốc, candidate rationale và evidence anchors để xác định purpose conflict. Không có authority mới nào được tạo ra chỉ từ lời nói của Agent hoặc tool.
 
 Trong kiểm thử semantic reliability phiên bản v3.2, **7/8 quan sát purpose-conflict** tạo validated semantic lift, **9/10 quan sát benign** được duyệt; **16/19 graph-model responses thực tế** vượt qua catalog validation. Đây là tập nhỏ có lặp lại template, nhãn chưa được review độc lập, không phải tám họ tấn công độc lập hay bằng chứng phát hiện mọi hidden-purpose attack.
 
-[Thí nghiệm và lỗi schema/evidence đã được sửa](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md) · [Source ITAG](backend/src/treasury_backend/modules/temporal/README.md). *Scenario B không được tuyên bố đã thực thi như một cuộc tấn công public Fuji.* Kết quả hiện tại chứng minh *semantic validation có thể tạo quyết định khác deterministic baseline trên những cặp đã cung cấp*. *Chưa có ablation độc lập tách hiệu quả cấu trúc graph khỏi cách đưa lịch sử dạng văn bản cho LLM*; không dùng 7/8 để chứng minh graph representation đã vượt plain-history LLM.
+[Thí nghiệm và lỗi schema/evidence đã được sửa](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md) · [Source ITAG](backend/src/treasury_backend/modules/temporal/README.md).
+
+*Scenario B không được tuyên bố đã thực thi như một cuộc tấn công public Fuji.* Kết quả hiện tại chứng minh *semantic validation có thể tạo quyết định khác deterministic baseline trên những cặp đã cung cấp*. *Chưa có ablation độc lập tách hiệu quả cấu trúc graph khỏi cách đưa lịch sử dạng văn bản cho LLM*; không dùng 7/8 để chứng minh graph representation đã vượt plain-history LLM.
 
 ---
 
@@ -119,7 +127,9 @@ Cùng benchmark, 12/12 benign được giữ lại ở các cấu hình scripted
 
 ## Kiến trúc: Mỗi lớp tồn tại để làm gì?
 
-**Tổng quan trong một phút:** AI chỉ đưa ra một candidate swap/payment trong phạm vi Owner và task đã xác thực. PaceVant xây exact call, chạy thử trên EVM fork để đo hậu quả, kiểm rủi ro kinh tế và graph history, rồi dùng Z3 chứng minh các giới hạn hữu hạn đã mô hình hóa. Nếu tất cả gate bắt buộc PASS, Attestor ký approval gắn với đúng operation; Relayer gửi và PolicyVault kiểm lại các điều kiện on-chain. Cuối cùng hệ thống đối chiếu receipt, token deltas và gas, không dựa vào câu trả lời của AI để tuyên bố thành công.
+**Tổng quan trong một phút:** AI chỉ đưa ra một candidate swap/payment trong phạm vi Owner và task đã xác thực. PaceVant xây exact call, chạy thử trên EVM fork để đo hậu quả, kiểm rủi ro kinh tế và graph history, rồi dùng Z3 chứng minh các giới hạn hữu hạn đã mô hình hóa.
+
+Nếu tất cả gate bắt buộc PASS, Attestor ký approval gắn với đúng operation; Relayer gửi và PolicyVault kiểm lại các điều kiện on-chain. Cuối cùng hệ thống đối chiếu receipt, token deltas và gas, không dựa vào câu trả lời của AI để tuyên bố thành công.
 
 <p align="center"><img src="docs/assets/readme/approved/architecture-glass.png" alt="Kiến trúc PaceVant phân ba ranh giới: intent security, transaction/economic verification, signed on-chain enforcement" width="100%"></p>
 
@@ -212,7 +222,9 @@ flowchart TD
 
 ### Một hành trình end-to-end: được duyệt và bị chặn
 
-**Nhánh hợp lệ có bằng chứng public:** user chọn fixed `SWAP_EXACT_IN` USDC → WAVAX; planner đề xuất, builder tạo call, simulation tạo effects, risk + ITAG PASS, Z3 proof VERIFIED, SDE APPROVE, Attestor ký EIP-712, contract thực thi trên Fuji. Public receipt cho thấy Vault giảm đúng **1 base unit USDC** và tăng **13.266.545.691.051 wei WAVAX** trong giao dịch [`0xa708…e4b2d`](https://testnet.snowtrace.io/tx/0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d).
+**Nhánh hợp lệ có bằng chứng public:** user chọn fixed `SWAP_EXACT_IN` USDC → WAVAX; planner đề xuất, builder tạo call, simulation tạo effects, risk + ITAG PASS, Z3 proof VERIFIED, SDE APPROVE, Attestor ký EIP-712, contract thực thi trên Fuji.
+
+Public receipt cho thấy Vault giảm đúng **1 base unit USDC** và tăng **13.266.545.691.051 wei WAVAX** trong giao dịch [`0xa708…e4b2d`](https://testnet.snowtrace.io/tx/0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d).
 
 **Nhánh sai bị chặn có bằng chứng LOCAL:** task budget 20 USDC đã tiêu đủ 20; candidate thêm 10 bị deterministic ITAG veto trước ký. **Nhánh public policy guard:** payment tới payee không nằm trong allowlist trả `PAYEE_NOT_ALLOWED` trước broadcast; do không gửi giao dịch nên không có tx hash. **Không đánh đồng** ba kịch bản thành cùng một loại attack, cùng một deploy hoặc cùng một dataset.
 
@@ -253,7 +265,11 @@ flowchart TD
 
 ### 3. Graph-aware AI semantic — khi số học không phát hiện purpose drift
 
-**Dữ liệu:** tập nhỏ real-model với bốn purpose-conflict tasks, mỗi task lặp hai lần, cùng benign controls. **Kết quả v3.2:** 7/8 validated lift observations; 9/10 benign approvals; 16/19 valid model-catalog responses; 1 benign false intervention. **Negative result được giữ:** v2.3 có 0 valid findings vì lỗi source binding/schema; các bản v3.x giải quyết bằng evidence catalog và grounding. Không suy ra performance trên unseen attacker/protocol. [Báo cáo phương pháp & phiên bản](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md).
+**Dữ liệu:** tập nhỏ real-model với bốn purpose-conflict tasks, mỗi task lặp hai lần, cùng benign controls.
+
+**Kết quả v3.2:** 7/8 validated lift observations; 9/10 benign approvals; 16/19 valid model-catalog responses; 1 benign false intervention.
+
+**Negative result được giữ:** v2.3 có 0 valid findings vì lỗi source binding/schema; các bản v3.x giải quyết bằng evidence catalog và grounding. Không suy ra performance trên unseen attacker/protocol. [Báo cáo phương pháp & phiên bản](docs/evaluation/itag-semantic-reliability/FINAL_REPORT.md).
 
 ### 4. LOCAL Anvil, formal guards và public Fuji
 
@@ -308,7 +324,9 @@ uv run --locked python tools/contracts/bootstrap.py
 uv run --locked python -m treasury_backend.operations.judge_serve --port 8000
 ```
 
-Lệnh judge local mặc định phục vụ chế độ isolated/model-only fork theo cấu hình; **không tự động activate public treasury**. Public mode cần Owner-signed manifest, effective configuration, roles và explicit activation theo [Public Fuji Runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md). Không chạy deploy, fund, renew policy/session hoặc submit giao dịch thật như health-check. Không commit `.env`, owner/attestor/relayer secrets, raw signed tx/journal hay visitor credentials.
+Lệnh judge local mặc định phục vụ chế độ isolated/model-only fork theo cấu hình; **không tự động activate public treasury**.
+
+Public mode cần Owner-signed manifest, effective configuration, roles và explicit activation theo [Public Fuji Runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md). Không chạy deploy, fund, renew policy/session hoặc submit giao dịch thật như health-check. Không commit `.env`, owner/attestor/relayer secrets, raw signed tx/journal hay visitor credentials.
 
 **Kiểm thử có thể tái hiện:** `uv run --locked python -m pytest -q`, `uv run --locked python tools/contracts/foundry.py forge test -vv`, `npm test --prefix frontend`, `uv run --locked ruff check backend/src backend/tests tools`. Đây là **lệnh hướng dẫn**, không phải tuyên bố đã chạy lại trong lần sửa README. Các benchmark real-model cần cấu hình provider credential riêng và đọc provenance trong từng báo cáo.
 
@@ -337,7 +355,9 @@ Lệnh judge local mặc định phục vụ chế độ isolated/model-only for
 > [!WARNING]
 > **Chưa chứng minh / chưa hỗ trợ:** independent audit; ERC-4337/7579 bundler hoặc modular smart account; arbitrary DeFi, lending/bridge/LP; custody đa người dùng; mainnet; mọi kiểu MEV/prompt injection; large held-out AI generalization; semantic reasoning đọc được hidden motivations; autonomous experience replanning trên public. Người dùng đang dùng public testnet với amount cố định, **không** được nhập calldata, recipient hay contract tùy ý.
 
-**Ranh giới tin cậy:** Owner cấp policy và sessions; Attestor được tin cậy để ký kết quả đã kiểm; Relayer trả gas; oracle/price band, tracked assets, EVM token semantics, RPC/provider availability vẫn là assumptions. Phi chỉ enforce **những điều kiện được biên dịch**, không bảo đảm mọi tài sản/protocol ngoài phạm vi. Model/schema fail có thể dẫn đến UNCERTAIN/ESCALATE, khiến một tác vụ hợp lệ bị tạm dừng — đó là chi phí availability của fail-closed security.
+**Ranh giới tin cậy:** Owner cấp policy và sessions; Attestor được tin cậy để ký kết quả đã kiểm; Relayer trả gas; oracle/price band, tracked assets, EVM token semantics, RPC/provider availability vẫn là assumptions.
+
+Phi chỉ enforce **những điều kiện được biên dịch**, không bảo đảm mọi tài sản/protocol ngoài phạm vi. Model/schema fail có thể dẫn đến UNCERTAIN/ESCALATE, khiến một tác vụ hợp lệ bị tạm dừng — đó là chi phí availability của fail-closed security.
 
 **Đọc kết quả đúng môi trường:** `PUBLIC FUJI` (receipt thực), `LOCAL ANVIL` (EVM local thật), `REAL MODEL` (provider responses), `SCRIPTED` (fixture/wiring), `HISTORICAL` (checkpoint cũ), `NOT VERIFIED` (chưa kiểm chứng). Không gộp chúng thành một tỷ lệ an toàn duy nhất.
 
