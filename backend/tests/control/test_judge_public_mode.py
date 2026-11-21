@@ -84,6 +84,8 @@ def test_public_waits_on_stale_feed_instead_of_approving_or_stopping_early(enabl
         calls.append(args)
         if len(calls)==1:
             raise ControlError('STALE_OR_UNVERIFIED_CHAINLINK_PRICE')
+        if len(calls)==2:
+            return (100,200,{},1150)
         return (100,200,{},1300)
     chain=SimpleNamespace(w3=SimpleNamespace(eth=SimpleNamespace(get_block=lambda _:header)),
         vault=SimpleNamespace(functions=SimpleNamespace(proofPolicy=lambda:SimpleNamespace(call=lambda **_: (0,0,0,0,0,300)))),
@@ -96,7 +98,7 @@ def test_public_waits_on_stale_feed_instead_of_approving_or_stopping_early(enabl
     monkeypatch.setattr(module.time,'sleep',lambda _:None)
     with module.prepared_public(tmp_path/'runs'/'job',None,lambda **v:progress.append(v)) as prepared:
         assert prepared.intent_context['oracle_valid_until']==1300
-    assert len(calls)==2 and progress==[{'phase':'WAITING_FOR_ORACLE'}]
+    assert len(calls)==3 and progress==[{'phase':'WAITING_FOR_ORACLE'}]*2
 
 
 def test_shared_reconciliation_never_publishes_another_workflow_to_current_job():

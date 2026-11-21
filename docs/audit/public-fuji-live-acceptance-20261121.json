@@ -1,0 +1,484 @@
+{
+  "verified_at": "2026-11-21T03:16:30.399992+00:00",
+  "chain_id": 43113,
+  "manifest_sha256": "ed2342937732de0a72737ca72f46cf30aa6b716db8ae2ebf72fee9d500ca0e6a",
+  "verification": "Independent public RPC receipts and historical balances; no state overrides",
+  "code_hashes": {
+    "treasury": "0x7adaf924bd5f3987ed945f721ad568da4425581ca8a90c9bd4faf159ba7eaa6f",
+    "adapter": "0xaffcaf9c38232584334088a717636f3ba5b3e0e00fed0069d9195d3f00686651",
+    "usdc": "0x7140a935aa3bb55d334d6d325fea277e47674770b10823feefa6f8b2c58af5fc",
+    "wavax": "0xbe0979d9ff9e744b48d32e81fd67db0d32dfc74120989df9b7b1588e2aff8597"
+  },
+  "runs": [
+    {
+      "job_id": "judge_629e24508c1a45a59f2c188d8bf6f521",
+      "scenario": "payment",
+      "tx_hash": "0x8f3c1b8f045bc80eeb49df2a85f45feb2fea07957402220ab60cd011a5b02642",
+      "block_number": 61405956,
+      "status": 1,
+      "confirmations": 1268,
+      "recipient": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+      "amount_in_base_units": "10000",
+      "vault_delta_base_units": {
+        "usdc": "-10000",
+        "wavax": "0"
+      },
+      "payee_usdc_received_base_units": "10000",
+      "gas_used": 342000,
+      "effective_gas_price_wei": "160",
+      "fee_wei": "54720000",
+      "fee_avax": "0.00000000005472",
+      "relayer_balance_debit_wei": "54720000",
+      "worker_wall_seconds": 135.547,
+      "inference_calls": 11,
+      "reported_token_usage": {
+        "prompt_tokens": 35549,
+        "completion_tokens": 2914,
+        "total_tokens": 38463
+      },
+      "model_invoice_usd": null,
+      "gate_summary": {
+        "risk": "PASS",
+        "itag": "PASS",
+        "semantic": "ALIGNED",
+        "proof": "VERIFIED",
+        "sde": "APPROVE",
+        "proof_hash": "0x24cfd06ef08e1b48fb1c13a9ac77e06c0c9074db45b5dddda5de6aed34651c84",
+        "attestation": {
+          "domain_version": "3",
+          "chain_id": 43113,
+          "verifying_contract": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+          "signer": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+          "nonce": "1001",
+          "deadline": "1795228649",
+          "typed_data_hash": "0x5d0a549ccf42c4fdf4d02eb07b596e51fdd80f15f53c3cd4a79cf56b44562b74",
+          "constraints_hash": "0xa6ef4c29a6c12d1c878ebe5aa08c02f43bfdd7e6389c8620af964512eca9acfc"
+        },
+        "stages": [
+          "OWNER_AUTHORITY",
+          "AGENT_PROPOSAL",
+          "BUILD",
+          "SIMULATION",
+          "RISK",
+          "ITAG",
+          "PROOF",
+          "SDE",
+          "ATTESTATION",
+          "EXACT_SIGNED_PREFLIGHT",
+          "OUTCOME",
+          "RECONCILIATION"
+        ]
+      }
+    },
+    {
+      "job_id": "judge_05e0231adab44474a7fff9fcacd7c48e",
+      "scenario": "swap",
+      "tx_hash": "0xa708f44e355b6926c02693282f8ca6514fd043199ae8d23d3a031d64f82e4b2d",
+      "block_number": 61406870,
+      "status": 1,
+      "confirmations": 354,
+      "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+      "amount_in_base_units": "1",
+      "vault_delta_base_units": {
+        "usdc": "-1",
+        "wavax": "13266545691051"
+      },
+      "payee_usdc_received_base_units": null,
+      "gas_used": 486946,
+      "effective_gas_price_wei": "160",
+      "fee_wei": "77911360",
+      "fee_avax": "0.00000000007791136",
+      "relayer_balance_debit_wei": "77911360",
+      "worker_wall_seconds": 123.322466,
+      "inference_calls": 12,
+      "reported_token_usage": {
+        "prompt_tokens": 44559,
+        "completion_tokens": 3312,
+        "total_tokens": 47871
+      },
+      "model_invoice_usd": null,
+      "gate_summary": {
+        "risk": "PASS",
+        "itag": "PASS",
+        "semantic": "ALIGNED",
+        "proof": "VERIFIED",
+        "sde": "APPROVE",
+        "proof_hash": "0x2fbae3eb85abb9a9e32c127028641dac67fafbd2c154481bc8c70c9277d1244a",
+        "attestation": {
+          "domain_version": "3",
+          "chain_id": 43113,
+          "verifying_contract": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+          "signer": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+          "nonce": "1003",
+          "deadline": "1795230448",
+          "typed_data_hash": "0xbb0ecb42f4bf3d6268c9a10ca6fd8687fd2faedc473f94b96f06d8f21c258661",
+          "constraints_hash": "0xbe365f07bbe2c71488182774c6cb8d29fa71258658c3748b2e3a3954a1cda638"
+        },
+        "stages": [
+          "OWNER_AUTHORITY",
+          "AGENT_PROPOSAL",
+          "BUILD",
+          "SIMULATION",
+          "RISK",
+          "ITAG",
+          "PROOF",
+          "SDE",
+          "ATTESTATION",
+          "EXACT_SIGNED_PREFLIGHT",
+          "OUTCOME",
+          "RECONCILIATION"
+        ]
+      }
+    },
+    {
+      "job_id": "judge_c893f30b7ce74a77a2c0f40c40bd6c3f",
+      "scenario": "payment",
+      "tx_hash": "0x10f6a04e22179f4186459e3738c61597048e9b2aac724c01347ba306f4470b8c",
+      "block_number": 61407202,
+      "status": 1,
+      "confirmations": 26,
+      "recipient": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+      "amount_in_base_units": "10000",
+      "vault_delta_base_units": {
+        "usdc": "-10000",
+        "wavax": "0"
+      },
+      "payee_usdc_received_base_units": "10000",
+      "gas_used": 273648,
+      "effective_gas_price_wei": "160",
+      "fee_wei": "43783680",
+      "fee_avax": "0.00000000004378368",
+      "relayer_balance_debit_wei": "43783680",
+      "worker_wall_seconds": 519.941612,
+      "inference_calls": 11,
+      "reported_token_usage": {
+        "prompt_tokens": 37439,
+        "completion_tokens": 2806,
+        "total_tokens": 40245
+      },
+      "model_invoice_usd": null,
+      "gate_summary": {
+        "risk": "PASS",
+        "itag": "PASS",
+        "semantic": "ALIGNED",
+        "proof": "VERIFIED",
+        "sde": "APPROVE",
+        "proof_hash": "0x601c75f83c83b71523c2f07f56a46561c2e07f7629d86a68158f577b0754d15b",
+        "attestation": {
+          "domain_version": "3",
+          "chain_id": 43113,
+          "verifying_contract": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+          "signer": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+          "nonce": "1004",
+          "deadline": "1795231024",
+          "typed_data_hash": "0xd6481d7fc622accadbab8a4a8c6bca5970460b4482c0860abbde27625cd889b6",
+          "constraints_hash": "0xb1027a6f573ca07bda49e6857480822aa3963731070d0b0e4d1f60d40a554a71"
+        },
+        "stages": [
+          "OWNER_AUTHORITY",
+          "AGENT_PROPOSAL",
+          "BUILD",
+          "SIMULATION",
+          "RISK",
+          "ITAG",
+          "PROOF",
+          "SDE",
+          "ATTESTATION",
+          "EXACT_SIGNED_PREFLIGHT",
+          "OUTCOME"
+        ]
+      }
+    }
+  ],
+  "current_block": 61407227,
+  "balances": {
+    "owner": {
+      "address": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+      "avax_wei": "47873063657501040",
+      "usdc": "39010004",
+      "wavax": "0"
+    },
+    "attestor": {
+      "address": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+      "avax_wei": "499999924946240",
+      "usdc": "20010000",
+      "wavax": "0"
+    },
+    "relayer": {
+      "address": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c",
+      "avax_wei": "31999999515983783",
+      "usdc": "20000000",
+      "wavax": "0"
+    },
+    "treasury": {
+      "address": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+      "avax_wei": "0",
+      "usdc": "979999",
+      "wavax": "13266545691051"
+    }
+  },
+  "deployment_evidence": "mvp-public-deployment-20261121.json",
+  "website": "https://pacevant.live",
+  "guard": {
+    "job_id": "judge_f1d45f6cc8414f62b22a9f86a1923daf",
+    "scenario": "guard",
+    "environment": "REAL_FUJI_EXECUTION",
+    "status": "REJECTED",
+    "reason_code": "PAYEE_NOT_ALLOWED",
+    "public_chain_broadcast": false,
+    "stages": [
+      "OWNER_AUTHORITY",
+      "AGENT_PROPOSAL",
+      "REJECTION_OR_RECOVERY"
+    ]
+  },
+  "observed_failures": [
+    {
+      "job_id": "judge_3b99e5b407904a7db457e5534663dbb4",
+      "scenario": "swap",
+      "status": "REJECTED",
+      "reason": "ITAG_INVALID_SEMANTIC_REFERENCES_OR_OUTPUT",
+      "signed": false,
+      "public_chain_broadcast": false,
+      "remedy": "Explicit JSON object output for ITAG DeepSeek requests; strict schema/citation validation preserved"
+    },
+    {
+      "job_id": "judge_467e61a260ba417fb71158314342d5f1",
+      "scenario": "payment",
+      "status": "UNAVAILABLE",
+      "reason": "FORK_RUN_INTERRUPTED",
+      "public_chain_broadcast": false,
+      "remedy": "Do not restart or deploy while a judge job is active; no automatic resubmission"
+    }
+  ],
+  "limits": {
+    "oracle_age_seconds": 300,
+    "approval_ttl_seconds": 180,
+    "oracle_wait_seconds": 720,
+    "job_timeout_seconds": 900,
+    "policy_expires_at": 1795832966,
+    "visitor_daily": 6,
+    "ip_hourly": 6,
+    "global_daily": 30,
+    "initial_vault_funding_usdc_base_units": "1000000",
+    "payment_amount_usdc_base_units": "10000",
+    "attack_options": "Six UI previews; no backend attack injection"
+  },
+  "focused_tests": {
+    "passed": 40,
+    "modules": [
+      "test_judge_public_mode",
+      "test_judge_api",
+      "test_shield_native_rotation",
+      "test_itag_catalog"
+    ]
+  },
+  "browser_acceptance": [
+    {
+      "scenario": "swap",
+      "release": "fa3cb0ed947d1a1a6facfc97668ab31760032d09",
+      "status": "PASS",
+      "checks": [
+        "No execution data before a real run",
+        "swap: three protocol-specific attack previews; no backend job created",
+        "Each real run submitted once; F5 recovered its identity without duplicate POST"
+      ],
+      "runs": [
+        {
+          "scenario": "swap",
+          "job_id": "judge_05e0231adab44474a7fff9fcacd7c48e",
+          "status": "CONFIRMED",
+          "reason_code": null,
+          "reload_recovered": true,
+          "ai_panel_data_matched": true,
+          "post_count": 1,
+          "modules": [
+            {
+              "index": 0,
+              "data_visible": true,
+              "source": "OWNER_AUTHORITY"
+            },
+            {
+              "index": 1,
+              "data_visible": true,
+              "source": "AGENT_PROPOSAL"
+            },
+            {
+              "index": 2,
+              "data_visible": true,
+              "source": "BUILD"
+            },
+            {
+              "index": 3,
+              "data_visible": true,
+              "source": "SIMULATION"
+            },
+            {
+              "index": 4,
+              "data_visible": true,
+              "source": "RISK"
+            },
+            {
+              "index": 5,
+              "data_visible": true,
+              "source": "ITAG"
+            },
+            {
+              "index": 6,
+              "data_visible": true,
+              "source": "PROOF"
+            },
+            {
+              "index": 7,
+              "data_visible": true,
+              "source": "SDE"
+            },
+            {
+              "index": 8,
+              "data_visible": true,
+              "source": "ATTESTATION"
+            },
+            {
+              "index": 9,
+              "data_visible": true,
+              "source": "EXACT_SIGNED_PREFLIGHT"
+            },
+            {
+              "index": 10,
+              "data_visible": true,
+              "source": "OUTCOME"
+            },
+            {
+              "index": 11,
+              "data_visible": true,
+              "source": "OUTCOME"
+            }
+          ],
+          "stages": [
+            "OWNER_AUTHORITY",
+            "AGENT_PROPOSAL",
+            "BUILD",
+            "SIMULATION",
+            "RISK",
+            "ITAG",
+            "PROOF",
+            "SDE",
+            "ATTESTATION",
+            "EXACT_SIGNED_PREFLIGHT",
+            "OUTCOME",
+            "RECONCILIATION"
+          ],
+          "completed_refresh_restored": true
+        }
+      ],
+      "browser_errors": [],
+      "browser_observed_seconds": 128.06,
+      "observed_oracle_wait_seconds": 0,
+      "screenshots_taken": false
+    },
+    {
+      "scenario": "payment",
+      "release": "c09234d565d517460a4c47411fcd9f4cd91c84ab",
+      "status": "PASS",
+      "checks": [
+        "No execution data before a real run",
+        "payment: three protocol-specific attack previews; no backend job created",
+        "Each real run submitted once; F5 recovered its identity without duplicate POST"
+      ],
+      "runs": [
+        {
+          "scenario": "payment",
+          "job_id": "judge_c893f30b7ce74a77a2c0f40c40bd6c3f",
+          "status": "CONFIRMED",
+          "reason_code": null,
+          "reload_recovered": true,
+          "ai_panel_data_matched": true,
+          "post_count": 1,
+          "modules": [
+            {
+              "index": 0,
+              "data_visible": true,
+              "source": "OWNER_AUTHORITY"
+            },
+            {
+              "index": 1,
+              "data_visible": true,
+              "source": "AGENT_PROPOSAL"
+            },
+            {
+              "index": 2,
+              "data_visible": true,
+              "source": "BUILD"
+            },
+            {
+              "index": 3,
+              "data_visible": true,
+              "source": "SIMULATION"
+            },
+            {
+              "index": 4,
+              "data_visible": true,
+              "source": "RISK"
+            },
+            {
+              "index": 5,
+              "data_visible": true,
+              "source": "ITAG"
+            },
+            {
+              "index": 6,
+              "data_visible": true,
+              "source": "PROOF"
+            },
+            {
+              "index": 7,
+              "data_visible": true,
+              "source": "SDE"
+            },
+            {
+              "index": 8,
+              "data_visible": true,
+              "source": "ATTESTATION"
+            },
+            {
+              "index": 9,
+              "data_visible": true,
+              "source": "EXACT_SIGNED_PREFLIGHT"
+            },
+            {
+              "index": 10,
+              "data_visible": true,
+              "source": "OUTCOME"
+            },
+            {
+              "index": 11,
+              "data_visible": true,
+              "source": "OUTCOME"
+            }
+          ],
+          "stages": [
+            "OWNER_AUTHORITY",
+            "AGENT_PROPOSAL",
+            "BUILD",
+            "SIMULATION",
+            "RISK",
+            "ITAG",
+            "PROOF",
+            "SDE",
+            "ATTESTATION",
+            "EXACT_SIGNED_PREFLIGHT",
+            "OUTCOME"
+          ],
+          "completed_refresh_restored": true
+        }
+      ],
+      "browser_errors": [],
+      "browser_observed_seconds": 526.372,
+      "observed_oracle_wait_seconds": 402.475,
+      "screenshots_taken": false
+    }
+  ],
+  "acceptance_status": "PASS_PUBLIC_PAYMENT_AND_SWAP",
+  "availability_scope": "Two public-domain positive browser runs, one local-browser public payment and one real public-policy guard. Not a multi-day availability or statistical reliability certification.",
+  "oracle_scheduling": "Wait for 180 seconds of the existing 300-second oracle window before starting. Full context and all gates are reverified by the engine."
+}

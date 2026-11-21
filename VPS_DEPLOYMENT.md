@@ -1,5 +1,7 @@
 # PaceVant — native Ubuntu deployment, không Docker
 
+> **Public Fuji hiện đã bật trên VPS.** Dùng [Public Fuji runbook](docs/PUBLIC_FUJI_RUNBOOK.md) và [system review hiện hành](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md). Các đoạn cài mới/model-only/fork và acceptance chưa confirmed bên dưới mô tả cấu hình mặc định trước migration; không áp dụng chúng đè lên service public đang chạy. Public data là `/var/lib/pacevant/judge-public`, service chỉ có Attestor/Relayer keys, Owner key bị cấm. Public timeout 900 giây, oracle wait 720 giây; các security window giữ nguyên.
+
 Target: Ubuntu 22.04 x86_64, 2 vCPU/4 GB RAM/50 GB SSD. Runtime: Python 3.12/uv + FastAPI/Uvicorn + native Anvil/Z3 + SQLite, Nginx static frontend/reverse proxy, systemd. React được build bởi Vite, không có Node server/SSR. Node chỉ cần lúc build release.
 
 Đã triển khai trên **Ubuntu 22.04, 2 vCPU/4 GB** tại **https://pacevant.live**, Nginx/systemd native. HTTPS và simulated certificate renewal đã pass. Xem `docs/audit/vps-live-acceptance.json` cho kiểm tra thật; báo cáo WSL cũ giữ nguyên phạm vi lịch sử. Live transactions vẫn phụ thuộc oracle/model/gates; public MVP chưa được kích hoạt.

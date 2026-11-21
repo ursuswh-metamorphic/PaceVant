@@ -40,7 +40,8 @@ def prepared_public(directory,shield,progress):
             header=execution.chain.w3.eth.get_block('latest')
             policy=execution.chain.vault.functions.proofPolicy().call(block_identifier=header.number)
             _,_,_,valid_until=execution.chain.reference(header.number,{'max_oracle_age':policy[5]},int(time.time()))
-            if valid_until-int(time.time())>=120:
+            # Reserve the full existing approval TTL before starting expensive gates.
+            if valid_until-int(time.time())>=180:
                 break
         except (ValueError,ControlError) as error:
             if getattr(error,'code',str(error)) not in {'ORACLE_WINDOW_UNAVAILABLE','STALE_OR_UNVERIFIED_CHAINLINK_PRICE'}:

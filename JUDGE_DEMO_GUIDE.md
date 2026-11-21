@@ -1,5 +1,7 @@
 # PaceVant — hướng dẫn giám khảo và video 3 phút
 
+> **Đã chuyển website sang public Fuji.** Hướng dẫn hiện hành nằm tại [Public Fuji runbook](docs/PUBLIC_FUJI_RUNBOOK.md), bằng chứng trong [system review](docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md). Nội dung fork/ba nút guard/Operator chưa nghiệm thu bên dưới là hướng dẫn trước migration. Hiện UI chạy hai giao dịch public; các tùy chọn tấn công vẫn là preview. Có thể phải chờ round Chainlink mới nên không bảo đảm hoàn tất mỗi phiên trong ba phút.
+
 Giao diện mặc định có ba tab: **Live Demo**, **Security & Policies**, **History**. Không cần wallet, tài khoản, credential, AVAX hay USDC. Bản build React/TypeScript dùng static assets; backend giữ nguyên pipeline PACE/PGS.
 
 ## Hai chế độ phải phân biệt

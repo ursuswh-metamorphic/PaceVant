@@ -104,7 +104,7 @@ with sync_playwright() as play:
             page.get_by_test_id('run-scenario').click()
             expect(page.get_by_test_id('run-session')).to_be_visible()
             print('Run clicked: '+page.locator('.notice').all_inner_texts().__repr__().encode('ascii','backslashreplace').decode(), flush=True)
-            deadline = time.monotonic() + 310
+            deadline = time.monotonic() + (950 if PUBLIC else 310)
             submission_deadline = time.monotonic() + 40
             while len(posts) == before and time.monotonic() < submission_deadline:
                 page.wait_for_timeout(250)
