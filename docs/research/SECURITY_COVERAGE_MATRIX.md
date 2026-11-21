@@ -1,5 +1,26 @@
 # Ma trận bao phủ bảo mật PaceVant
 
+## Current Public MVP — Coverage và bằng chứng mới (21/11/2026)
+
+Bảng threat bên dưới giữ research coverage xuyên nhiều checkpoint. **Các claim public mới nhất chỉ áp dụng cho hai operation `USDC_PAYMENT` và `SWAP_EXACT_IN`** trên Fuji, dựa trên [acceptance JSON](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json) và [MVP code](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/contracts/src/PolicyVaultMVP.sol).
+
+| Threat/claim | Public MVP evidence | Không suy ra |
+| --- | --- | --- |
+| Payment tới payee được phép | 0,01 Circle test USDC received trong confirmed browser payment | Không phải general-purpose customer payments |
+| Swap route allowlisted | 0,000001 Circle test USDC → WAVAX confirmed, deltas reconciled | Không hỗ trợ mọi DEX/tokens |
+| Payee không được phép | `PAYEE_NOT_ALLOWED`, no signature/broadcast | Không phải một on-chain revert tx |
+| Replay/session/Φ | Solidity source + test, signed EIP-712 v3 accepted receipts | Không tự xác minh task semantics trên chain |
+| Prompt injection/purpose drift | TaskShield/ITAG nghiên cứu + local/real-model small samples | **Sáu UI previews không inject backend** |
+| MEV stress | Hypothetical reserve perturbation nghiên cứu LOCAL; public baseline + slippage/revalidation | Không tuyên bố full MEV stress mặc định trong public |
+| State drift | Bounded Phi postcondition enforced khi execution | Không đảm bảo chặn mọi state drift hoặc mọi tài sản |
+| Current deployment | `develop` theo runbook và release SHA trong browser acceptance | Không mặc định mọi `main` HEAD đã deploy |
+
+**Lưu ý:** Owner/Attestor/Relayer và signed deployment manifest là trust boundaries khác nhau. Kết quả testnet không chứng nhận mainnet security; token test và Chainlink reference không chứng minh redeemable market price. Bằng chứng prior checkpoint tiếp tục ở phần bên dưới.
+
+---
+
+
+
 > **Nguyên tắc:** bảng này phân biệt **có defense trong code**, **có regression**, **có local evidence**, và **có public Fuji evidence**. Một defense hiện diện không đồng nghĩa đã ngăn được mọi trường hợp tấn công trong thực tế.
 
 ## 1. Ranh giới tin cậy và tài sản
