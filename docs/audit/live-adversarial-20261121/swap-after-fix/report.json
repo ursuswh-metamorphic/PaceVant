@@ -1,0 +1,3495 @@
+{
+  "url": "http://localhost:18089",
+  "source": "CHROMIUM_LIVE_UI",
+  "cases": [],
+  "normal": [
+    {
+      "scenario": "swap",
+      "passed": true,
+      "job": {
+        "job_id": "judge_6bee8e0817814483bb743fa303d529aa",
+        "scenario": "swap",
+        "status": "CONFIRMED",
+        "created_at": 1795258027,
+        "environment": "REAL_FUJI_EXECUTION",
+        "phase": "FINISHED",
+        "public_chain_broadcast": true,
+        "terminal": true,
+        "semantic_scope": "REAL_CONFIGURED_PROVIDER",
+        "request": {
+          "id": "swap",
+          "title": "Secure Token Swap",
+          "description": "Oracle-protected USDC to WAVAX through the approved LFJ V1 pool.",
+          "operation": "SWAP_EXACT_IN",
+          "amount": "1",
+          "input_decimals": 6,
+          "token_in": "USDC",
+          "token_out": "WAVAX",
+          "recipient_label": "Isolated PolicyVault"
+        },
+        "preparation": [
+          {
+            "phase": "WAITING_FOR_ORACLE",
+            "started_at": 1795258034.988956,
+            "updated_at": 1795258238.567093,
+            "oracle_observation": {
+              "observed_at": 1795258234,
+              "required_remaining_seconds": 180,
+              "source": "CHAINLINK_FUJI"
+            },
+            "duration_ms": 212624.31
+          }
+        ],
+        "oracle_observation": {
+          "observed_at": 1795258234,
+          "required_remaining_seconds": 180,
+          "source": "CHAINLINK_FUJI"
+        },
+        "active_stage": "RECONCILIATION",
+        "source_block": 61421645,
+        "workflow": {
+          "workflow_id": "treasury_2a5105d446214bc18214a709ee4f0c16",
+          "intent": {
+            "operation": "TOKEN_SWAP",
+            "chain_id": 43113,
+            "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+            "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+            "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+            "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+            "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+            "amount": "1",
+            "min_output": "0",
+            "slippage_bps": 40,
+            "deadline": 1795258422,
+            "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+            "rebalance": false
+          },
+          "status": "CONFIRMED",
+          "created_at": 1795258252,
+          "build_id": "v3_c165531fe319e26a209bcd8609e2f8afbc581ad91e42d12bdb06da288ac51621",
+          "decision": {
+            "verdict": "APPROVE",
+            "reason_codes": [],
+            "intent_hash": "0x28cb11f0a87a9aaa599bc871b80c7a6f2c179a74dc0b46fd66efef4bbb20a296",
+            "build_hash": "0xd90e44919375f7963a04c623d950c6b511f621beeb0e997149836d4a4e232772",
+            "evidence_root": "0x18a16c05915971c7403e2216d67c9974ba810f1b6a5df3d4cc74a409ef9e7c7e",
+            "proof_hash": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935",
+            "policy_hash": "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134",
+            "temporal_hash": "0xcac242c044af1d2d6d3917431670f60242a7a07a5c433be6ceca90386a598e37",
+            "risk_hash": "0xf0c105d4fc2d68090e67b018a99d581f9833a6868861d1b8e39e1ce207cbf359",
+            "expires_at": 1795258422,
+            "source": "SDE_V3"
+          },
+          "outcome": {
+            "tx_hash": "0xa8ad8ff73e419e2bdbc9e20d06e8a4e1b36330ccc5be5e9ca2956b7c38fc4086",
+            "block_number": 61421714,
+            "block_hash": "0x0488f4ae510e29d19682489e350903e4713cd198e8192310fe1297d804284e06",
+            "gas_used": "435766",
+            "confirmations": 2,
+            "environment": "REAL_FUJI_EXECUTION",
+            "public_chain_receipt": true,
+            "system_gas_expense": {
+              "payer": "SYSTEM_RELAYER",
+              "gas_used": "435766",
+              "effective_gas_price_wei": "160",
+              "actual_cost_wei": "69722560",
+              "transaction_status": 1,
+              "billing": false
+            },
+            "status": "CONFIRMED",
+            "actual_deltas": [
+              "-1",
+              "13266451069110",
+              "0",
+              "0"
+            ],
+            "payee_received": "0"
+          },
+          "environment": "REAL_FUJI_EXECUTION",
+          "timeline": [
+            {
+              "stage": "OWNER_AUTHORITY",
+              "created_at": 1795258273,
+              "evidence": {
+                "mvp": true,
+                "chain_id": 43113,
+                "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "usdc": "0x5425890298aed601595a70ab815c96711a31bc65",
+                "wavax": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                "shares": "0x0000000000000000000000000000000000000000",
+                "adapter": "0x05522ffafe20cab88ce223e0e84031d98381deaf",
+                "owner": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+                "attestor": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+                "relayer": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c",
+                "policy_hash": "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134",
+                "policy_version": 9,
+                "paused": false,
+                "policy_active": true,
+                "session_active": true,
+                "session_starts_at": 1795256861,
+                "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                "session_expires_at": 1795861661,
+                "policy_expires_at": 1795861661,
+                "block_number": 61421650,
+                "block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                "timestamp": 1795258249,
+                "server_time": 1795258252,
+                "environment": "REAL_FUJI_EXECUTION",
+                "balances": [
+                  "5000000",
+                  "13266545691051",
+                  "0",
+                  "0"
+                ],
+                "authority": {
+                  "operation_mask": 3,
+                  "spend_limit_usd_e8": 300000000,
+                  "spend_used_usd_e8": 0,
+                  "max_actions": 500,
+                  "actions": 1,
+                  "cooldown": 0,
+                  "last_rebalance": 0
+                },
+                "proof_policy": {
+                  "max_wavax_per_swap": "10000000000000000",
+                  "max_relative_loss_bps": 300,
+                  "fixed_loss_usd_e8": 0,
+                  "oracle_band_bps": 100,
+                  "tolerance_bps": 40,
+                  "max_oracle_age": 300,
+                  "max_session_risk_usd_e8": 1000000000,
+                  "global_daily_risk_usd_e8": 2000000000,
+                  "oracle_source_hash": "0x49f4d3f0460b604b751ed50083ccc7d297570ca2c3a8ac1cc1a028e463ec3fdc",
+                  "owner_approved": true
+                },
+                "share_unit": "1",
+                "share_rate": "1000000",
+                "share_rate_low": "1000000",
+                "share_rate_high": "1000000",
+                "oracle": {
+                  "chain_id": 43113,
+                  "vault_address": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "price_usdc_usd_e8": "99989948",
+                  "price_wavax_usd_e8": "639151510",
+                  "price_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+                  "price_timestamp": 1795207731,
+                  "oracle_observed_at": 1795258249,
+                  "oracle_block_number": 61421650,
+                  "oracle_block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                  "oracle_feeds": [
+                    {
+                      "asset": "0x5425890298aed601595a70ab815c96711a31bc65",
+                      "feed": "0x97fe42a7e96640d932bbc0e1580c73e705a8eb73",
+                      "description": "USDC/USD",
+                      "decimals": 8,
+                      "answer_raw": "99989948",
+                      "round_id": "18446744073709552590",
+                      "answered_in_round": "18446744073709552590",
+                      "started_at": 1795207731,
+                      "updated_at": 1795207731,
+                      "max_age_seconds": 86400,
+                      "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+                    },
+                    {
+                      "asset": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                      "feed": "0x5498bb86bc934c8d34fda08e81d444153d0d06ad",
+                      "description": "AVAX/USD",
+                      "decimals": 8,
+                      "answer_raw": "639151510",
+                      "round_id": "55340232221128821188",
+                      "answered_in_round": "55340232221128821188",
+                      "started_at": 1795258235,
+                      "updated_at": 1795258235,
+                      "max_age_seconds": 600,
+                      "bytecode_hash": "0xbd6f524cdc4268b6bd1bb6f77a8821faeea9c52ee9e0afa0b6d948ce82c966c2"
+                    }
+                  ]
+                },
+                "oracle_valid_until": 1795258535,
+                "nominal_prices": [
+                  "99989948",
+                  "639151510"
+                ],
+                "price_intervals": [
+                  [
+                    "98990048",
+                    "100989848"
+                  ],
+                  [
+                    "632759994",
+                    "645543026"
+                  ],
+                  [
+                    "98990048",
+                    "100989848"
+                  ],
+                  [
+                    "632759994",
+                    "645543026"
+                  ]
+                ],
+                "max_slippage_bps": 100,
+                "max_ttl": 180,
+                "max_operation_usd_e8": "100000000",
+                "max_wavax_exposure_bps": 2500,
+                "spend_remaining": "300000000",
+                "daily_spend_remaining": "499999899",
+                "swap_spend_remaining": "300000000",
+                "payment_spend_remaining_usdc": "4990000",
+                "daily_swap_remaining": "499999899",
+                "daily_payment_remaining_usdc": "960000",
+                "max_payment_usdc": "10000",
+                "risk_remaining": "1000000000",
+                "global_risk_remaining": "2000000000",
+                "recipient_allowlist": [
+                  {
+                    "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+                    "recipient": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+                    "per_payment": "10000",
+                    "per_day": "1000000",
+                    "per_session": "1000000",
+                    "session_spent": "10000",
+                    "daily_spent": "20000"
+                  },
+                  {
+                    "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+                    "recipient": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+                    "per_payment": "10000",
+                    "per_day": "1000000",
+                    "per_session": "1000000",
+                    "session_spent": "0",
+                    "daily_spent": "10000"
+                  },
+                  {
+                    "token": "0x5425890298aed601595a70ab815c96711a31bc65",
+                    "recipient": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c",
+                    "per_payment": "10000",
+                    "per_day": "1000000",
+                    "per_session": "1000000",
+                    "session_spent": "0",
+                    "daily_spent": "10000"
+                  }
+                ],
+                "adapter_allowed": true,
+                "token_allowlist": {
+                  "0x5425890298aed601595a70ab815c96711a31bc65": true,
+                  "0xd00ae08403b9bbb9124bb305c09058e32c39a48c": true
+                },
+                "relayer_avax_wei": "31999999418863303",
+                "manifest_hash": "0xf0bd7d32718fd2ea387fc463e7831850572f2cebd2cc8a5008ea45cb6e527417",
+                "gas_spent_or_reserved_wei": "211608000",
+                "max_tx_fee_wei": "1000000000000000",
+                "max_gas_price_wei": "5000000000",
+                "max_daily_execution_cost_usd_e8": "100000000"
+              }
+            },
+            {
+              "stage": "AGENT_PROPOSAL",
+              "created_at": 1795258281,
+              "evidence": {
+                "typed_intent": {
+                  "operation": "TOKEN_SWAP",
+                  "chain_id": 43113,
+                  "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                  "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "amount": "1",
+                  "min_output": "0",
+                  "slippage_bps": 40,
+                  "deadline": 1795258422,
+                  "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                  "rebalance": false
+                },
+                "explanation": "K\u1ebf ho\u1ea1ch n\u00e0y th\u1ef1c hi\u1ec7n ho\u00e1n \u0111\u1ed5i \u0111\u00fang 1 \u0111\u01a1n v\u1ecb nh\u1ecf nh\u1ea5t c\u1ee7a USDC (t\u01b0\u01a1ng \u0111\u01b0\u01a1ng 0.000001 USDC) sang WAVAX tr\u00ean chu\u1ed7i Fuji (chain 43113), v\u1edbi token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra v\u00e0 ng\u01b0\u1eddi nh\u1eadn kh\u1edbp ch\u00ednh x\u00e1c v\u1edbi c\u00e1c \u0111i\u1ec1u kho\u1ea3n \u0111\u00e3 \u0111\u01b0\u1ee3c x\u00e1c th\u1ef1c. S\u1ed1 ti\u1ec1n l\u00e0 1 theo \u0111\u01a1n v\u1ecb nguy\u00ean c\u1ee7a token, kh\u00f4ng v\u01b0\u1ee3t qu\u00e1 h\u1ea1n m\u1ee9c v\u00e0 kh\u00f4ng thay \u0111\u1ed5i ng\u00e2n s\u00e1ch hay ch\u00ednh s\u00e1ch n\u00e0o. Vi\u1ec7c ho\u00e1n \u0111\u1ed5i tr\u1ef1c ti\u1ebfp v\u00e0o \u0111\u1ecba ch\u1ec9 treasury gi\u00fap chuy\u1ec3n m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX \u0111\u00fang theo m\u1ee5c ti\u00eau \u0111\u1ec1 ra, \u0111\u1ed3ng th\u1eddi gi\u1eef nguy\u00ean c\u1ea5u h\u00ecnh slippage v\u00e0 deadline \u0111\u00e3 c\u00f3, qua \u0111\u00f3 g\u00f3p ph\u1ea7n ho\u00e0n th\u00e0nh m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng token quy \u0111\u1ecbnh m\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi ho\u1ea1t \u0111\u1ed9ng.",
+                "candidate_plan": {
+                  "operation": "TOKEN_SWAP",
+                  "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "amount": "1",
+                  "explanation": "K\u1ebf ho\u1ea1ch n\u00e0y th\u1ef1c hi\u1ec7n ho\u00e1n \u0111\u1ed5i \u0111\u00fang 1 \u0111\u01a1n v\u1ecb nh\u1ecf nh\u1ea5t c\u1ee7a USDC (t\u01b0\u01a1ng \u0111\u01b0\u01a1ng 0.000001 USDC) sang WAVAX tr\u00ean chu\u1ed7i Fuji (chain 43113), v\u1edbi token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra v\u00e0 ng\u01b0\u1eddi nh\u1eadn kh\u1edbp ch\u00ednh x\u00e1c v\u1edbi c\u00e1c \u0111i\u1ec1u kho\u1ea3n \u0111\u00e3 \u0111\u01b0\u1ee3c x\u00e1c th\u1ef1c. S\u1ed1 ti\u1ec1n l\u00e0 1 theo \u0111\u01a1n v\u1ecb nguy\u00ean c\u1ee7a token, kh\u00f4ng v\u01b0\u1ee3t qu\u00e1 h\u1ea1n m\u1ee9c v\u00e0 kh\u00f4ng thay \u0111\u1ed5i ng\u00e2n s\u00e1ch hay ch\u00ednh s\u00e1ch n\u00e0o. Vi\u1ec7c ho\u00e1n \u0111\u1ed5i tr\u1ef1c ti\u1ebfp v\u00e0o \u0111\u1ecba ch\u1ec9 treasury gi\u00fap chuy\u1ec3n m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX \u0111\u00fang theo m\u1ee5c ti\u00eau \u0111\u1ec1 ra, \u0111\u1ed3ng th\u1eddi gi\u1eef nguy\u00ean c\u1ea5u h\u00ecnh slippage v\u00e0 deadline \u0111\u00e3 c\u00f3, qua \u0111\u00f3 g\u00f3p ph\u1ea7n ho\u00e0n th\u00e0nh m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng token quy \u0111\u1ecbnh m\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi ho\u1ea1t \u0111\u1ed9ng."
+                },
+                "authority": "OWNER_SESSION_ONLY"
+              }
+            },
+            {
+              "stage": "BUILD",
+              "created_at": 1795258293,
+              "evidence": {
+                "intent": {
+                  "operation": "TOKEN_SWAP",
+                  "chain_id": 43113,
+                  "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                  "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "amount": "1",
+                  "min_output": "0",
+                  "slippage_bps": 40,
+                  "deadline": 1795258422,
+                  "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                  "rebalance": false
+                },
+                "operation": {
+                  "kind": 1,
+                  "rebalance": false,
+                  "policyHash": "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134",
+                  "sessionId": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                  "intentHash": "0x28cb11f0a87a9aaa599bc871b80c7a6f2c179a74dc0b46fd66efef4bbb20a296",
+                  "evidenceRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "proofContextHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "constraintsHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "calldataHash": "0x05ca5a6482222306aa56f6f18a8f90b64bcfc751730679d3d16bdbbc14781e40",
+                  "target": "0x05522ffafe20cab88ce223e0e84031d98381deaf",
+                  "tokenIn": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "tokenOut": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "amount": "1",
+                  "minOutput": "13213385264833",
+                  "spendDebitUsdE8": "1",
+                  "riskDebitUsdE8": "0",
+                  "nonce": "1009",
+                  "deadline": "1795258422"
+                },
+                "call": {
+                  "target": "0x05522ffafe20cab88ce223e0e84031d98381deaf",
+                  "value": "0",
+                  "data": "0x651781f30000000000000000000000005425890298aed601595a70ab815c96711a31bc65000000000000000000000000d00ae08403b9bbb9124bb305c09058e32c39a48c000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000c047b228ec100000000000000000000000070e1395f959dba530cf4a53b060c809b715bb6d5"
+                },
+                "min_output": "13213385264833",
+                "quote": "13266451069110",
+                "route": {
+                  "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+                  "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+                  "pair": "0x8436B8c75ed2F015a80b8472526dd1A79BF54E38",
+                  "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+                  "version": 0,
+                  "version_name": "V1",
+                  "bin_step": 0,
+                  "token_path": [
+                    "0x5425890298aed601595a70AB815c96711a31Bc65",
+                    "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+                  ],
+                  "token0": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "reserves": [
+                    "279990",
+                    "3725663853051013676"
+                  ],
+                  "bytecode_hashes": {
+                    "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+                    "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+                    "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+                    "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+                  },
+                  "verified_quoter": {
+                    "source": "LFJ_LBQUOTER_V2_2",
+                    "router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+                    "quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+                    "token_path": [
+                      "0x5425890298aed601595a70ab815c96711a31bc65",
+                      "0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+                    ],
+                    "pairs": [
+                      "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38"
+                    ],
+                    "bin_steps": [
+                      0
+                    ],
+                    "versions": [
+                      0
+                    ],
+                    "version_names": [
+                      "V1"
+                    ],
+                    "amounts": [
+                      "1",
+                      "13266451069110"
+                    ],
+                    "virtual_amounts_without_slippage": [
+                      "1",
+                      "13266498308839"
+                    ],
+                    "fees_e18": [
+                      "3000000000000000"
+                    ],
+                    "amount_in_base_units": "1",
+                    "amount_out_base_units": "13266451069110",
+                    "block_number": 61421650,
+                    "block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                    "independent_usd_oracle": false
+                  }
+                },
+                "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4",
+                "build_id": "v3_c165531fe319e26a209bcd8609e2f8afbc581ad91e42d12bdb06da288ac51621"
+              }
+            },
+            {
+              "stage": "SIMULATION",
+              "created_at": 1795258317,
+              "evidence": {
+                "source": "LOCAL_FORK_EVM",
+                "environment": "REAL_FUJI_EXECUTION",
+                "execution_status": "SUCCESS",
+                "build_hash": "0xd90e44919375f7963a04c623d950c6b511f621beeb0e997149836d4a4e232772",
+                "source_block": 61421650,
+                "source_block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                "before": [
+                  "5000000",
+                  "13266545691051",
+                  "0",
+                  "0"
+                ],
+                "after": [
+                  "4999999",
+                  "26532996760161",
+                  "0",
+                  "0"
+                ],
+                "deltas": [
+                  "-1",
+                  "13266451069110",
+                  "0",
+                  "0"
+                ],
+                "operation_kind": 1,
+                "balance_asset_order": [
+                  "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "0x0000000000000000000000000000000000000000",
+                  "0x0000000000000000000000000000000000000000"
+                ],
+                "output_token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                "output_amount": "13266451069110",
+                "output_recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "received_scope": "EXTERNAL_PAYMENT_RECIPIENT_ONLY; swap output is output_amount and the vault output-token delta",
+                "received": "0",
+                "allowances": [
+                  "0",
+                  "0"
+                ],
+                "gas_used": 367906,
+                "simulation_overrides": [
+                  {
+                    "kind": "ATTESTOR_STORAGE_ONLY",
+                    "slot": "3",
+                    "offset": 0,
+                    "previous_storage": "0x0000000000000000000000005704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+                    "simulation_attestor": "0xfFefc20D2B70e2422193Ae78a3037c41c4F7F3CF"
+                  }
+                ],
+                "exact_signed_preflight": false,
+                "fork_tx_hash": "0x15985dde175d399ad60e76f687df57196940a8cac7461e81630967ba5d3a63ee",
+                "public_chain_receipt": false
+              }
+            },
+            {
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "evidence": {
+                "result": "PASS",
+                "reason_codes": [],
+                "operation": "TOKEN_SWAP",
+                "oracle_source": "CHAINLINK_FUJI_CIRCLE_USDC_AVAX_V1",
+                "effects_hash": "0x18a16c05915971c7403e2216d67c9974ba810f1b6a5df3d4cc74a409ef9e7c7e",
+                "balance_semantics": "measured on isolated EVM",
+                "gas_economics": {
+                  "separate_from_trading_loss": true,
+                  "maximum_next_fee_wei": "1000000000000000",
+                  "daily_spent_reserved_plus_next_reference_usd_e8": "645544"
+                }
+              }
+            },
+            {
+              "stage": "ITAG",
+              "created_at": 1795258319,
+              "evidence": {
+                "verdict": "PASS",
+                "reason_codes": [],
+                "semantic": {
+                  "verdict": "ALIGNED",
+                  "finding": {
+                    "candidate_action_id": "candidate_28cb11f0a87a9aaa",
+                    "referenced_task_ids": [
+                      "task_28cb11f0a87a9aaa"
+                    ],
+                    "referenced_graph_node_ids": [
+                      "candidate_28cb11f0a87a9aaa",
+                      "task_28cb11f0a87a9aaa"
+                    ],
+                    "semantic_verdict": "ALIGNED",
+                    "contribution_assessments": [
+                      {
+                        "task_id": "task_28cb11f0a87a9aaa",
+                        "relationship": "DIRECT",
+                        "explanation": "L\u00fd do c\u1ee7a \u1ee9ng vi\u00ean m\u00f4 t\u1ea3 \u0111\u00fang ho\u1ea1t \u0111\u1ed9ng ho\u00e1n \u0111\u1ed5i m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX v\u00e0 g\u1eedi v\u00e0o treasury, kh\u1edbp v\u1edbi m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng Circle USDC quy \u0111\u1ecbnh sang WAVAX v\u00e0o treasury. \u1ee8ng vi\u00ean gi\u1eef nguy\u00ean token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra, ng\u01b0\u1eddi nh\u1eadn v\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi, n\u00ean \u0111\u00f3ng g\u00f3p tr\u1ef1c ti\u1ebfp v\u00e0o m\u1ee5c ti\u00eau."
+                      }
+                    ],
+                    "detected_goal_drift": false,
+                    "claimed_instruction_source": "ASSISTANT",
+                    "reasoning_summary": "L\u00fd do c\u1ee7a \u1ee9ng vi\u00ean m\u00f4 t\u1ea3 \u0111\u00fang ho\u1ea1t \u0111\u1ed9ng ho\u00e1n \u0111\u1ed5i m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX v\u00e0 g\u1eedi v\u00e0o treasury, kh\u1edbp v\u1edbi m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng Circle USDC quy \u0111\u1ecbnh sang WAVAX v\u00e0o treasury. \u1ee8ng vi\u00ean gi\u1eef nguy\u00ean token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra, ng\u01b0\u1eddi nh\u1eadn v\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi, n\u00ean \u0111\u00f3ng g\u00f3p tr\u1ef1c ti\u1ebfp v\u00e0o m\u1ee5c ti\u00eau.",
+                    "supporting_evidence_refs": [
+                      "candidate_28cb11f0a87a9aaa",
+                      "task_28cb11f0a87a9aaa"
+                    ],
+                    "uncertainty_reasons": []
+                  },
+                  "reason_codes": [],
+                  "provider_metadata": {
+                    "model": "deepseek-flash",
+                    "provider": "deepseek",
+                    "config_hash": "0x2fa2a354ad9593aa8d86c053fd988e817876ab79e12decbc9ddc5fcb1ecb42f6",
+                    "prompt_version": "itag-catalog-v3.5-vi",
+                    "scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION",
+                    "catalog_hash": "0xbd95247cc9fc28cbc8be1355d5d1e18916f01d7fbae48f70f9d5221a2d02eb70",
+                    "schema_version": "itag-judgment-1",
+                    "input_chars": 19308,
+                    "prevalidation_verdict": "ALIGNED",
+                    "semantic_anchors": [
+                      {
+                        "task": "task_28cb11f0a87a9aaa",
+                        "objective_quote": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                        "candidate_quote": "K\u1ebf ho\u1ea1ch n\u00e0y th\u1ef1c hi\u1ec7n ho\u00e1n \u0111\u1ed5i \u0111\u00fang 1 \u0111\u01a1n v\u1ecb nh\u1ecf nh\u1ea5t c\u1ee7a USDC (t\u01b0\u01a1ng \u0111\u01b0\u01a1ng 0.000001 USDC) sang WAVAX tr\u00ean chu\u1ed7i Fuji (chain 43113), v\u1edbi token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra v\u00e0 ng\u01b0\u1eddi nh\u1eadn kh\u1edbp ch\u00ednh x\u00e1c v\u1edbi c\u00e1c \u0111i\u1ec1u kho\u1ea3n \u0111\u00e3 \u0111\u01b0\u1ee3c x\u00e1c th\u1ef1c. S\u1ed1 ti\u1ec1n l\u00e0 1 theo \u0111\u01a1n v\u1ecb nguy\u00ean c\u1ee7a token, kh\u00f4ng v\u01b0\u1ee3t qu\u00e1 h\u1ea1n m\u1ee9c v\u00e0 kh\u00f4ng thay \u0111\u1ed5i ng\u00e2n s\u00e1ch hay ch\u00ednh s\u00e1ch n\u00e0o. Vi\u1ec7c ho\u00e1n \u0111\u1ed5i tr\u1ef1c ti\u1ebfp v\u00e0o \u0111\u1ecba ch\u1ec9 treasury gi\u00fap chuy\u1ec3n m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX \u0111\u00fang theo m\u1ee5c ti\u00eau \u0111\u1ec1 ra, \u0111\u1ed3ng th\u1eddi gi\u1eef nguy\u00ean c\u1ea5u h\u00ecnh slippage v\u00e0 deadline \u0111\u00e3 c\u00f3, qua \u0111\u00f3 g\u00f3p ph\u1ea7n ho\u00e0n th\u00e0nh m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng token quy \u0111\u1ecbnh m\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi ho\u1ea1t \u0111\u1ed9ng."
+                      }
+                    ],
+                    "response_protocol": "CATALOG",
+                    "verified_factual_claims": [],
+                    "provider_trace": [
+                      {
+                        "provider": "deepseek",
+                        "model": "deepseek-flash",
+                        "endpoint": "https://api.deepseek.com",
+                        "status": "SUCCESS",
+                        "latency_ms": 1645
+                      }
+                    ]
+                  },
+                  "latency_ms": 1650,
+                  "token_usage": {
+                    "prompt_tokens": 7093,
+                    "completion_tokens": 284,
+                    "total_tokens": 7377
+                  }
+                },
+                "graph": {
+                  "schema_version": "1.0",
+                  "nodes": [
+                    {
+                      "node_id": "task_28cb11f0a87a9aaa",
+                      "kind": "AUTHENTICATED_USER_INTENT",
+                      "trust": "AUTHENTICATED",
+                      "evidence_refs": [
+                        "task_28cb11f0a87a9aaa"
+                      ],
+                      "data": {
+                        "source": "USER",
+                        "authorization_source": "OPERATOR_API",
+                        "status": "AUTHENTICATED",
+                        "terms": {
+                          "operation": "TOKEN_SWAP",
+                          "chain_id": 43113,
+                          "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                          "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                          "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                          "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "amount": "1",
+                          "min_output": "0",
+                          "slippage_bps": 40,
+                          "deadline": 1795258422,
+                          "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                          "rebalance": false
+                        },
+                        "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                        "typed_intent": {
+                          "operation": "TOKEN_SWAP",
+                          "chain_id": 43113,
+                          "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                          "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                          "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                          "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "amount": "1",
+                          "min_output": "0",
+                          "slippage_bps": 40,
+                          "deadline": 1795258422,
+                          "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                          "rebalance": false
+                        },
+                        "owner_session": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e"
+                      }
+                    },
+                    {
+                      "node_id": "candidate_28cb11f0a87a9aaa",
+                      "kind": "AGENT_ACTION",
+                      "trust": "UNTRUSTED",
+                      "evidence_refs": [
+                        "candidate_28cb11f0a87a9aaa"
+                      ],
+                      "data": {
+                        "intent": {
+                          "operation": "TOKEN_SWAP",
+                          "chain_id": 43113,
+                          "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                          "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                          "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                          "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "amount": "1",
+                          "min_output": "0",
+                          "slippage_bps": 40,
+                          "deadline": 1795258422,
+                          "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                          "rebalance": false
+                        },
+                        "operation": {
+                          "kind": 1,
+                          "rebalance": false,
+                          "policyHash": "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134",
+                          "sessionId": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                          "intentHash": "0x28cb11f0a87a9aaa599bc871b80c7a6f2c179a74dc0b46fd66efef4bbb20a296",
+                          "evidenceRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                          "proofContextHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                          "constraintsHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                          "calldataHash": "0x05ca5a6482222306aa56f6f18a8f90b64bcfc751730679d3d16bdbbc14781e40",
+                          "target": "0x05522ffafe20cab88ce223e0e84031d98381deaf",
+                          "tokenIn": "0x5425890298aed601595a70ab815c96711a31bc65",
+                          "tokenOut": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                          "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "amount": "1",
+                          "minOutput": "13213385264833",
+                          "spendDebitUsdE8": "1",
+                          "riskDebitUsdE8": "0",
+                          "nonce": "1009",
+                          "deadline": "1795258422"
+                        },
+                        "call": {
+                          "target": "0x05522ffafe20cab88ce223e0e84031d98381deaf",
+                          "value": "0",
+                          "data": "0x651781f30000000000000000000000005425890298aed601595a70ab815c96711a31bc65000000000000000000000000d00ae08403b9bbb9124bb305c09058e32c39a48c000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000c047b228ec100000000000000000000000070e1395f959dba530cf4a53b060c809b715bb6d5"
+                        },
+                        "min_output": "13213385264833",
+                        "quote": "13266451069110",
+                        "route": {
+                          "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+                          "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+                          "pair": "0x8436B8c75ed2F015a80b8472526dd1A79BF54E38",
+                          "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+                          "version": 0,
+                          "version_name": "V1",
+                          "bin_step": 0,
+                          "token_path": [
+                            "0x5425890298aed601595a70AB815c96711a31Bc65",
+                            "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+                          ],
+                          "token0": "0x5425890298aed601595a70ab815c96711a31bc65",
+                          "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                          "reserves": [
+                            "279990",
+                            "3725663853051013676"
+                          ],
+                          "bytecode_hashes": {
+                            "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+                            "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+                            "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+                            "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+                          },
+                          "verified_quoter": {
+                            "source": "LFJ_LBQUOTER_V2_2",
+                            "router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+                            "quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+                            "token_path": [
+                              "0x5425890298aed601595a70ab815c96711a31bc65",
+                              "0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+                            ],
+                            "pairs": [
+                              "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38"
+                            ],
+                            "bin_steps": [
+                              0
+                            ],
+                            "versions": [
+                              0
+                            ],
+                            "version_names": [
+                              "V1"
+                            ],
+                            "amounts": [
+                              "1",
+                              "13266451069110"
+                            ],
+                            "virtual_amounts_without_slippage": [
+                              "1",
+                              "13266498308839"
+                            ],
+                            "fees_e18": [
+                              "3000000000000000"
+                            ],
+                            "amount_in_base_units": "1",
+                            "amount_out_base_units": "13266451069110",
+                            "block_number": 61421650,
+                            "block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                            "independent_usd_oracle": false
+                          }
+                        },
+                        "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4",
+                        "build_id": "v3_c165531fe319e26a209bcd8609e2f8afbc581ad91e42d12bdb06da288ac51621",
+                        "proposal": {
+                          "operation": "TOKEN_SWAP",
+                          "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                          "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                          "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "amount": "1",
+                          "explanation": "K\u1ebf ho\u1ea1ch n\u00e0y th\u1ef1c hi\u1ec7n ho\u00e1n \u0111\u1ed5i \u0111\u00fang 1 \u0111\u01a1n v\u1ecb nh\u1ecf nh\u1ea5t c\u1ee7a USDC (t\u01b0\u01a1ng \u0111\u01b0\u01a1ng 0.000001 USDC) sang WAVAX tr\u00ean chu\u1ed7i Fuji (chain 43113), v\u1edbi token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra v\u00e0 ng\u01b0\u1eddi nh\u1eadn kh\u1edbp ch\u00ednh x\u00e1c v\u1edbi c\u00e1c \u0111i\u1ec1u kho\u1ea3n \u0111\u00e3 \u0111\u01b0\u1ee3c x\u00e1c th\u1ef1c. S\u1ed1 ti\u1ec1n l\u00e0 1 theo \u0111\u01a1n v\u1ecb nguy\u00ean c\u1ee7a token, kh\u00f4ng v\u01b0\u1ee3t qu\u00e1 h\u1ea1n m\u1ee9c v\u00e0 kh\u00f4ng thay \u0111\u1ed5i ng\u00e2n s\u00e1ch hay ch\u00ednh s\u00e1ch n\u00e0o. Vi\u1ec7c ho\u00e1n \u0111\u1ed5i tr\u1ef1c ti\u1ebfp v\u00e0o \u0111\u1ecba ch\u1ec9 treasury gi\u00fap chuy\u1ec3n m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX \u0111\u00fang theo m\u1ee5c ti\u00eau \u0111\u1ec1 ra, \u0111\u1ed3ng th\u1eddi gi\u1eef nguy\u00ean c\u1ea5u h\u00ecnh slippage v\u00e0 deadline \u0111\u00e3 c\u00f3, qua \u0111\u00f3 g\u00f3p ph\u1ea7n ho\u00e0n th\u00e0nh m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng token quy \u0111\u1ecbnh m\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi ho\u1ea1t \u0111\u1ed9ng.",
+                          "amount_in_base_units": "1",
+                          "user_goal_reason": "K\u1ebf ho\u1ea1ch n\u00e0y th\u1ef1c hi\u1ec7n ho\u00e1n \u0111\u1ed5i \u0111\u00fang 1 \u0111\u01a1n v\u1ecb nh\u1ecf nh\u1ea5t c\u1ee7a USDC (t\u01b0\u01a1ng \u0111\u01b0\u01a1ng 0.000001 USDC) sang WAVAX tr\u00ean chu\u1ed7i Fuji (chain 43113), v\u1edbi token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra v\u00e0 ng\u01b0\u1eddi nh\u1eadn kh\u1edbp ch\u00ednh x\u00e1c v\u1edbi c\u00e1c \u0111i\u1ec1u kho\u1ea3n \u0111\u00e3 \u0111\u01b0\u1ee3c x\u00e1c th\u1ef1c. S\u1ed1 ti\u1ec1n l\u00e0 1 theo \u0111\u01a1n v\u1ecb nguy\u00ean c\u1ee7a token, kh\u00f4ng v\u01b0\u1ee3t qu\u00e1 h\u1ea1n m\u1ee9c v\u00e0 kh\u00f4ng thay \u0111\u1ed5i ng\u00e2n s\u00e1ch hay ch\u00ednh s\u00e1ch n\u00e0o. Vi\u1ec7c ho\u00e1n \u0111\u1ed5i tr\u1ef1c ti\u1ebfp v\u00e0o \u0111\u1ecba ch\u1ec9 treasury gi\u00fap chuy\u1ec3n m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX \u0111\u00fang theo m\u1ee5c ti\u00eau \u0111\u1ec1 ra, \u0111\u1ed3ng th\u1eddi gi\u1eef nguy\u00ean c\u1ea5u h\u00ecnh slippage v\u00e0 deadline \u0111\u00e3 c\u00f3, qua \u0111\u00f3 g\u00f3p ph\u1ea7n ho\u00e0n th\u00e0nh m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng token quy \u0111\u1ecbnh m\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi ho\u1ea1t \u0111\u1ed9ng."
+                        }
+                      }
+                    },
+                    {
+                      "node_id": "owner_scope",
+                      "kind": "MANDATE",
+                      "trust": "VERIFIED_RECORD",
+                      "evidence_refs": [
+                        "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134"
+                      ],
+                      "data": {
+                        "policy_hash": "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134",
+                        "authority": {
+                          "operation_mask": 3,
+                          "spend_limit_usd_e8": 300000000,
+                          "spend_used_usd_e8": 0,
+                          "max_actions": 500,
+                          "actions": 1,
+                          "cooldown": 0,
+                          "last_rebalance": 0
+                        },
+                        "chain_id": 43113,
+                        "policy_version": 9
+                      }
+                    },
+                    {
+                      "node_id": "prior_0",
+                      "kind": "TRANSACTION_OUTCOME",
+                      "trust": "VERIFIED_RECORD",
+                      "evidence_refs": [
+                        "treasury_6db05dcd49c3489c846d910ed31205b9"
+                      ],
+                      "data": {
+                        "workflow_id": "treasury_6db05dcd49c3489c846d910ed31205b9",
+                        "intent": {
+                          "operation": "TOKEN_SWAP",
+                          "chain_id": 43113,
+                          "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                          "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                          "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                          "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "amount": "1",
+                          "min_output": "0",
+                          "slippage_bps": 40,
+                          "deadline": 1795257791,
+                          "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                          "rebalance": false
+                        },
+                        "status": "REJECTED",
+                        "created_at": 1795257623,
+                        "build_id": "v3_be9b1cfb8bb6b1f647735eeb02701ee12d24fbf0283ad322921d15440fef3db5",
+                        "reason_code": "TASK_SHIELD_UNAVAILABLE"
+                      }
+                    },
+                    {
+                      "node_id": "prior_1",
+                      "kind": "TRANSACTION_OUTCOME",
+                      "trust": "VERIFIED_RECORD",
+                      "evidence_refs": [
+                        "treasury_00eb6cd734b0490cacba77118c2b261c"
+                      ],
+                      "data": {
+                        "workflow_id": "treasury_00eb6cd734b0490cacba77118c2b261c",
+                        "intent": {
+                          "operation": "TOKEN_PAYMENT",
+                          "chain_id": 43113,
+                          "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                          "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                          "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                          "token_out": "0x5425890298aed601595a70ab815c96711a31bc65",
+                          "recipient": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+                          "amount": "10000",
+                          "min_output": "0",
+                          "slippage_bps": 0,
+                          "deadline": 1795257242,
+                          "objective": "Pay exactly 0.01 Circle USDC to the owner-approved EOA 0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+                          "rebalance": false
+                        },
+                        "status": "CONFIRMED",
+                        "created_at": 1795257072,
+                        "build_id": "v3_c08852de784e29f6d2f2705a2ea602033bcecd6d18431168d58ccd28c53ddbe5",
+                        "decision": {
+                          "verdict": "APPROVE",
+                          "reason_codes": [],
+                          "intent_hash": "0x3dd80837728c6dbbdb3faeec5b317950dec67be714ef4379bf87b0d4947ecf1b",
+                          "build_hash": "0x7c8584263b68fd83a3fba55272dd8c2ec7147b27ab48982f8d2420c02f6cecd1",
+                          "evidence_root": "0x4d82d61c6ddcabee94195a1b0a9f2c789069661a0ae664fb92e2e6027f04861a",
+                          "proof_hash": "0xddb88dab6d8496b4c6c4fa5fea7432df7744edbcbd533d82de0e483c7ca38589",
+                          "policy_hash": "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134",
+                          "temporal_hash": "0x8d0389a6cdb608cd20ce4dbfab01595cbfb8662e45136e9b95e2fc1e32a590d4",
+                          "risk_hash": "0x056924db32fe6fc101ae05077b82e8bf58f10e9ef7f37c0321afa9fb8ac3be40",
+                          "expires_at": 1795257242,
+                          "source": "SDE_V3"
+                        },
+                        "outcome": {
+                          "tx_hash": "0x95887c39c345f4ebb3a611d85bf9b6222d348b434bf2486d471ae063fa309483",
+                          "block_number": 61421075,
+                          "block_hash": "0xc1f3b107130a5b1e0ecbb7c5a740e08f10f60a8270ce9fafb702782843fe85dd",
+                          "gas_used": "290784",
+                          "confirmations": 572,
+                          "environment": "REAL_FUJI_EXECUTION",
+                          "public_chain_receipt": true,
+                          "system_gas_expense": {
+                            "payer": "SYSTEM_RELAYER",
+                            "gas_used": "290784",
+                            "effective_gas_price_wei": "160",
+                            "actual_cost_wei": "46525440",
+                            "transaction_status": 1,
+                            "billing": false
+                          },
+                          "status": "CONFIRMED",
+                          "actual_deltas": [
+                            "-10000",
+                            "0",
+                            "0",
+                            "0"
+                          ],
+                          "payee_received": "10000"
+                        },
+                        "environment": "REAL_FUJI_EXECUTION"
+                      }
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "edge_id": "authorized",
+                      "source": "task_28cb11f0a87a9aaa",
+                      "target": "candidate_28cb11f0a87a9aaa",
+                      "kind": "AUTHORIZES",
+                      "provenance": "AUTHORIZATION_RECORD",
+                      "evidence_refs": [
+                        "task_28cb11f0a87a9aaa"
+                      ]
+                    }
+                  ]
+                },
+                "graph_hash": "0xf8c8d85cc57c400b6d7f78a8cd5da4ce3d2ab8b2ad02bfa89c391d480c0bc66e",
+                "intent_hash": "0x28cb11f0a87a9aaa599bc871b80c7a6f2c179a74dc0b46fd66efef4bbb20a296",
+                "history_hash": "0x0ebc226ee8f175045896ee6766cc962002d15e7ceadb590a3c2a7f83a0021134",
+                "shield": {
+                  "session_id": "shield_v3_98c4fd2bc3c0478795082fec0df44761",
+                  "revision": 1,
+                  "config_hash": "0x2fa2a354ad9593aa8d86c053fd988e817876ab79e12decbc9ddc5fcb1ecb42f6",
+                  "check_ids": [
+                    "shield_d9848f86873d440ba4496558d50286ca",
+                    "shield_a7c570cba2de448a91b6700aadbe7a65",
+                    "shield_7adc21c90b9b46b790efba50cb95e515",
+                    "shield_6e3633b9eb514be28f43f84afb3393bd",
+                    "shield_844e280a64b143ba8bddb1ab6797eed2",
+                    "shield_addddab5cc9d4c3c96ec8c462f685752"
+                  ],
+                  "proposal": {
+                    "operation": "TOKEN_SWAP",
+                    "chain_id": 43113,
+                    "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                    "session_id": "[REDACTED_256BIT_OR_CREDENTIAL]",
+                    "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                    "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                    "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                    "amount": "1",
+                    "min_output": "0",
+                    "slippage_bps": 40,
+                    "deadline": 1795258422,
+                    "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                    "rebalance": false
+                  },
+                  "unresolved_feedback": null
+                }
+              }
+            },
+            {
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "evidence": {
+                "version": 3,
+                "status": "VERIFIED",
+                "kind": 1,
+                "intent_hash": "0x28cb11f0a87a9aaa599bc871b80c7a6f2c179a74dc0b46fd66efef4bbb20a296",
+                "build_hash": "0xd90e44919375f7963a04c623d950c6b511f621beeb0e997149836d4a4e232772",
+                "evidence_root": "0x18a16c05915971c7403e2216d67c9974ba810f1b6a5df3d4cc74a409ef9e7c7e",
+                "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4",
+                "phi": {
+                  "before_balances": [
+                    "5000000",
+                    "13266545691051",
+                    "0",
+                    "0"
+                  ],
+                  "min_deltas": [
+                    "-1",
+                    "13213385264833",
+                    "0",
+                    "0"
+                  ],
+                  "receipt_credit": "0",
+                  "max_wavax_balance": "255573019445261060"
+                },
+                "phi_hash": "0x3bcd93cd47b42de4cc61db26675639bc834f4e64552646c2ea07987043260852",
+                "risk_debit_usd_e8": "0",
+                "spend_debit_usd_e8": "101",
+                "solver_version": "4.15.4",
+                "queries": [
+                  {
+                    "name": "feasible_prices",
+                    "result": "SAT",
+                    "smt2": "(declare-fun price_0_usdE8 () Real)\n(declare-fun price_1_usdE8 () Real)\n(declare-fun price_2_usdE8 () Real)\n(declare-fun price_3_usdE8 () Real)\n(assert (>= price_0_usdE8 98990048.0))\n(assert (<= price_0_usdE8 100989848.0))\n(assert (>= price_1_usdE8 632759994.0))\n(assert (<= price_1_usdE8 645543026.0))\n(assert (>= price_2_usdE8 98990048.0))\n(assert (<= price_2_usdE8 100989848.0))\n(assert (>= price_3_usdE8 632759994.0))\n(assert (<= price_3_usdE8 645543026.0))\n(assert (>= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (<= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (= price_3_usdE8 price_1_usdE8))\n\n(check-sat)\n",
+                    "hash": "0xce38aba803c1a4cdce63628f1e7359f66c96e17861145f065f3e5adc67da7e8a"
+                  },
+                  {
+                    "name": "check_mode",
+                    "result": "UNSAT",
+                    "smt2": "(declare-fun price_0_usdE8 () Real)\n(declare-fun price_1_usdE8 () Real)\n(declare-fun price_2_usdE8 () Real)\n(declare-fun price_3_usdE8 () Real)\n(assert (>= price_0_usdE8 98990048.0))\n(assert (<= price_0_usdE8 100989848.0))\n(assert (>= price_1_usdE8 632759994.0))\n(assert (<= price_1_usdE8 645543026.0))\n(assert (>= price_2_usdE8 98990048.0))\n(assert (<= price_2_usdE8 100989848.0))\n(assert (>= price_3_usdE8 632759994.0))\n(assert (<= price_3_usdE8 645543026.0))\n(assert (>= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (<= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (= price_3_usdE8 price_1_usdE8))\n(assert (let ((a!1 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* (/ 1326645106911.0 100000000000000000.0) price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8)))\n      (a!2 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* 0.0 price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8))))\n  (or (> a!1 (+ (* (/ 3.0 100.0) a!2) 0.0)) (> a!1 1000000000.0))))\n\n(check-sat)\n",
+                    "hash": "0x2212c3d256168ea46359f600cbba0a4071f4db9e7f81fa65ec42efd682683902"
+                  },
+                  {
+                    "name": "compile_mode",
+                    "result": "UNSAT",
+                    "smt2": "(declare-fun price_0_usdE8 () Real)\n(declare-fun price_1_usdE8 () Real)\n(declare-fun price_2_usdE8 () Real)\n(declare-fun price_3_usdE8 () Real)\n(assert (>= price_0_usdE8 98990048.0))\n(assert (<= price_0_usdE8 100989848.0))\n(assert (>= price_1_usdE8 632759994.0))\n(assert (<= price_1_usdE8 645543026.0))\n(assert (>= price_2_usdE8 98990048.0))\n(assert (<= price_2_usdE8 100989848.0))\n(assert (>= price_3_usdE8 632759994.0))\n(assert (<= price_3_usdE8 645543026.0))\n(assert (>= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (<= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (= price_3_usdE8 price_1_usdE8))\n(assert (let ((a!1 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* (/ 13213385264833.0 1000000000000000000.0) price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8)))\n      (a!2 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* 0.0 price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8))))\n  (> a!1 (+ (* (/ 3.0 100.0) a!2) 0.0))))\n\n(check-sat)\n",
+                    "hash": "0x82b2d18bff99d661416bd3122a55d87e5050e142bd6b95d7cbc8f8b6ac9e4f5b"
+                  },
+                  {
+                    "name": "risk_bound",
+                    "result": "UNSAT",
+                    "smt2": "(declare-fun price_0_usdE8 () Real)\n(declare-fun price_1_usdE8 () Real)\n(declare-fun price_2_usdE8 () Real)\n(declare-fun price_3_usdE8 () Real)\n(assert (>= price_0_usdE8 98990048.0))\n(assert (<= price_0_usdE8 100989848.0))\n(assert (>= price_1_usdE8 632759994.0))\n(assert (<= price_1_usdE8 645543026.0))\n(assert (>= price_2_usdE8 98990048.0))\n(assert (<= price_2_usdE8 100989848.0))\n(assert (>= price_3_usdE8 632759994.0))\n(assert (<= price_3_usdE8 645543026.0))\n(assert (>= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (<= price_2_usdE8 (* price_0_usdE8 1.0)))\n(assert (= price_3_usdE8 price_1_usdE8))\n(assert (let ((a!1 (- (- (+ (* (- (/ 1.0 1000000.0)) price_0_usdE8)\n                    (* (/ 13213385264833.0 1000000000000000000.0) price_1_usdE8)\n                    (* 0.0 price_2_usdE8)\n                    (* 0.0 price_3_usdE8)))\n              (* 0.0 price_0_usdE8))))\n  (> a!1 0.0)))\n\n(check-sat)\n",
+                    "hash": "0x6d23aeee747799b81041e6ae320030abefef0c0cb9122a4aaca2c041645f5a3a"
+                  }
+                ],
+                "source_hash": "0x94cf715fb1b2da75b7224c2463fe1e19279d7b3b461ced441678fa862f2036d6",
+                "assumptions": [
+                  "trusted balanceOf semantics",
+                  "complete fixed registry",
+                  "owner share-rate interval",
+                  "prices inside independently validated bands",
+                  "attestor integrity"
+                ],
+                "proof_hash": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935"
+              }
+            },
+            {
+              "stage": "SDE",
+              "created_at": 1795258322,
+              "evidence": {
+                "verdict": "APPROVE",
+                "reason_codes": [],
+                "intent_hash": "0x28cb11f0a87a9aaa599bc871b80c7a6f2c179a74dc0b46fd66efef4bbb20a296",
+                "build_hash": "0xd90e44919375f7963a04c623d950c6b511f621beeb0e997149836d4a4e232772",
+                "evidence_root": "0x18a16c05915971c7403e2216d67c9974ba810f1b6a5df3d4cc74a409ef9e7c7e",
+                "proof_hash": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935",
+                "policy_hash": "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134",
+                "temporal_hash": "0xcac242c044af1d2d6d3917431670f60242a7a07a5c433be6ceca90386a598e37",
+                "risk_hash": "0xf0c105d4fc2d68090e67b018a99d581f9833a6868861d1b8e39e1ce207cbf359",
+                "expires_at": 1795258422,
+                "source": "SDE_V3"
+              }
+            },
+            {
+              "stage": "ATTESTATION",
+              "created_at": 1795258346,
+              "evidence": {
+                "domain_version": "3",
+                "chain_id": 43113,
+                "verifying_contract": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "signer": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+                "nonce": "1009",
+                "deadline": "1795258422",
+                "typed_data_hash": "0xb3890025a565376d3e0d4744384f13d05057e712ec5653782cab868bb47dd605",
+                "constraints_hash": "0x3bcd93cd47b42de4cc61db26675639bc834f4e64552646c2ea07987043260852",
+                "signed_fields": {
+                  "kind": 1,
+                  "rebalance": false,
+                  "policyHash": "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134",
+                  "sessionId": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                  "intentHash": "0x28cb11f0a87a9aaa599bc871b80c7a6f2c179a74dc0b46fd66efef4bbb20a296",
+                  "evidenceRoot": "0x18a16c05915971c7403e2216d67c9974ba810f1b6a5df3d4cc74a409ef9e7c7e",
+                  "proofContextHash": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935",
+                  "constraintsHash": "0x3bcd93cd47b42de4cc61db26675639bc834f4e64552646c2ea07987043260852",
+                  "calldataHash": "0x05ca5a6482222306aa56f6f18a8f90b64bcfc751730679d3d16bdbbc14781e40",
+                  "target": "0x05522ffafe20cab88ce223e0e84031d98381deaf",
+                  "tokenIn": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "tokenOut": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "amount": "1",
+                  "minOutput": "13213385264833",
+                  "spendDebitUsdE8": "101",
+                  "riskDebitUsdE8": "0",
+                  "nonce": "1009",
+                  "deadline": "1795258422"
+                }
+              }
+            },
+            {
+              "stage": "EXACT_SIGNED_PREFLIGHT",
+              "created_at": 1795258346,
+              "evidence": {
+                "source": "LOCAL_FORK_EVM",
+                "environment": "REAL_FUJI_EXECUTION",
+                "execution_status": "SUCCESS",
+                "build_hash": "0xd90e44919375f7963a04c623d950c6b511f621beeb0e997149836d4a4e232772",
+                "source_block": 61421650,
+                "source_block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                "before": [
+                  "5000000",
+                  "13266545691051",
+                  "0",
+                  "0"
+                ],
+                "after": [
+                  "4999999",
+                  "26532996760161",
+                  "0",
+                  "0"
+                ],
+                "deltas": [
+                  "-1",
+                  "13266451069110",
+                  "0",
+                  "0"
+                ],
+                "operation_kind": 1,
+                "balance_asset_order": [
+                  "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "0x0000000000000000000000000000000000000000",
+                  "0x0000000000000000000000000000000000000000"
+                ],
+                "output_token": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                "output_amount": "13266451069110",
+                "output_recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "received_scope": "EXTERNAL_PAYMENT_RECIPIENT_ONLY; swap output is output_amount and the vault output-token delta",
+                "received": "0",
+                "allowances": [
+                  "0",
+                  "0"
+                ],
+                "gas_used": 367666,
+                "simulation_overrides": [],
+                "exact_signed_preflight": true,
+                "fork_tx_hash": "0xc61a992b4a631efbca043b3ee2e014b383de3addf3aee4914b2a93c6b29e11db",
+                "public_chain_receipt": false
+              }
+            },
+            {
+              "stage": "OUTCOME",
+              "created_at": 1795258374,
+              "evidence": {
+                "tx_hash": "0xa8ad8ff73e419e2bdbc9e20d06e8a4e1b36330ccc5be5e9ca2956b7c38fc4086",
+                "block_number": 61421714,
+                "block_hash": "0x0488f4ae510e29d19682489e350903e4713cd198e8192310fe1297d804284e06",
+                "gas_used": "435766",
+                "confirmations": 1,
+                "environment": "REAL_FUJI_EXECUTION",
+                "public_chain_receipt": true,
+                "system_gas_expense": null,
+                "status": "PENDING_CONFIRMATIONS",
+                "actual_deltas": [
+                  "-1",
+                  "13266451069110",
+                  "0",
+                  "0"
+                ],
+                "payee_received": "0"
+              }
+            },
+            {
+              "stage": "RECONCILIATION",
+              "created_at": 1795258377,
+              "evidence": {
+                "tx_hash": "0xa8ad8ff73e419e2bdbc9e20d06e8a4e1b36330ccc5be5e9ca2956b7c38fc4086",
+                "block_number": 61421714,
+                "block_hash": "0x0488f4ae510e29d19682489e350903e4713cd198e8192310fe1297d804284e06",
+                "gas_used": "435766",
+                "confirmations": 2,
+                "environment": "REAL_FUJI_EXECUTION",
+                "public_chain_receipt": true,
+                "system_gas_expense": {
+                  "payer": "SYSTEM_RELAYER",
+                  "gas_used": "435766",
+                  "effective_gas_price_wei": "160",
+                  "actual_cost_wei": "69722560",
+                  "transaction_status": 1,
+                  "billing": false
+                },
+                "status": "CONFIRMED",
+                "actual_deltas": [
+                  "-1",
+                  "13266451069110",
+                  "0",
+                  "0"
+                ],
+                "payee_received": "0"
+              }
+            }
+          ],
+          "activity": [
+            {
+              "sequence": 123,
+              "stage": "OWNER_AUTHORITY",
+              "created_at": 1795258252,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {
+                "chain_id": 43113,
+                "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                "manifest": {
+                  "schema_version": 1,
+                  "protocol": "PACEVANT_MVP",
+                  "environment": "REAL_FUJI_EXECUTION",
+                  "chain_id": 43113,
+                  "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "usdc": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "wavax": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "adapter": "0x05522ffafe20cab88ce223e0e84031d98381deaf",
+                  "owner": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+                  "attestor": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+                  "relayer": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c",
+                  "default_session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                  "payee_candidates": [
+                    "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+                    "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+                    "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c"
+                  ],
+                  "code_hashes": {
+                    "treasury": "0x7adaf924bd5f3987ed945f721ad568da4425581ca8a90c9bd4faf159ba7eaa6f",
+                    "adapter": "0xaffcaf9c38232584334088a717636f3ba5b3e0e00fed0069d9195d3f00686651",
+                    "usdc": "0x7140a935aa3bb55d334d6d325fea277e47674770b10823feefa6f8b2c58af5fc",
+                    "wavax": "0xbe0979d9ff9e744b48d32e81fd67db0d32dfc74120989df9b7b1588e2aff8597"
+                  },
+                  "local_usdc_price_e8": "100000000",
+                  "local_wavax_price_e8": "2000000000",
+                  "max_daily_execution_cost_usd_e8": "100000000",
+                  "max_price_impact_bps": 100,
+                  "rebalance_policy": {
+                    "target_usdc_bps": 8000,
+                    "target_wavax_bps": 2000,
+                    "minimum_deviation_bps": 300,
+                    "minimum_trade_usd_e8": "100000000",
+                    "max_trade_usd_e8": "10000000000"
+                  }
+                }
+              },
+              "input_refs": []
+            },
+            {
+              "sequence": 124,
+              "stage": "OWNER_AUTHORITY",
+              "created_at": 1795258273,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "OWNER_CONTEXT",
+              "expected": {
+                "policy_active": true,
+                "session_active": true,
+                "paused": false
+              },
+              "observed": {
+                "policy_active": true,
+                "session_active": true,
+                "paused": false,
+                "block_number": 61421650,
+                "policy_version": 9,
+                "policy_expires_at": 1795861661,
+                "session_expires_at": 1795861661,
+                "manifest_hash": "0xf0bd7d32718fd2ea387fc463e7831850572f2cebd2cc8a5008ea45cb6e527417"
+              }
+            },
+            {
+              "sequence": 125,
+              "stage": "OWNER_AUTHORITY",
+              "created_at": 1795258273,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 21504.37
+            },
+            {
+              "sequence": 126,
+              "stage": "PLANNING",
+              "created_at": 1795258273,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {
+                "typed_intent": {
+                  "operation": "TOKEN_SWAP",
+                  "chain_id": 43113,
+                  "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                  "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                  "amount": "1",
+                  "min_output": "0",
+                  "slippage_bps": 40,
+                  "deadline": 1795258422,
+                  "objective": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                  "rebalance": false
+                }
+              },
+              "input_refs": [
+                "OWNER_AUTHORITY"
+              ]
+            },
+            {
+              "sequence": 127,
+              "stage": "PLANNING",
+              "created_at": 1795258274,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "SHIELD_TOOL_CALL",
+              "expected": "ALIGNED",
+              "observed": {
+                "tool_name": "propose_fixed_operation"
+              },
+              "check_ref": "call_b8377ca256b54834a3fda726bb4bbf77"
+            },
+            {
+              "sequence": 128,
+              "stage": "PLANNING",
+              "created_at": 1795258276,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SHIELD_TOOL_CALL",
+              "expected": "ALIGNED",
+              "observed": {
+                "verdict": "ALIGNED",
+                "evidence_ref": "shield_d9848f86873d440ba4496558d50286ca",
+                "tool_name": "propose_fixed_operation",
+                "source": "ASSISTANT",
+                "model": "deepseek-flash",
+                "provider": "deepseek",
+                "latency_ms": 1618,
+                "token_usage": {
+                  "prompt_tokens": 3839,
+                  "completion_tokens": 302,
+                  "total_tokens": 4141
+                },
+                "constraints": [
+                  {
+                    "constraint_id": "fixed:OPERATION",
+                    "constraint_type": "OPERATION",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ SWAP",
+                    "observed": "SWAP",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "OPERATION: PASS; source span: Authenticated exact OperationIntent: OPERATION"
+                  },
+                  {
+                    "constraint_id": "fixed:TOKEN_IN",
+                    "constraint_type": "TOKEN_IN",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 0x5425890298aed601595a70ab815c96711a31bc65 ADDRESS",
+                    "observed": "0x5425890298aed601595a70ab815c96711a31bc65",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "TOKEN_IN: PASS; source span: Authenticated exact OperationIntent: TOKEN_IN"
+                  },
+                  {
+                    "constraint_id": "fixed:TOKEN_OUT",
+                    "constraint_type": "TOKEN_OUT",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 0xd00ae08403b9bbb9124bb305c09058e32c39a48c ADDRESS",
+                    "observed": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "TOKEN_OUT: PASS; source span: Authenticated exact OperationIntent: TOKEN_OUT"
+                  },
+                  {
+                    "constraint_id": "fixed:RECIPIENT",
+                    "constraint_type": "RECIPIENT",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 0x70e1395f959dba530cf4a53b060c809b715bb6d5 ADDRESS",
+                    "observed": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "RECIPIENT: PASS; source span: Authenticated exact OperationIntent: RECIPIENT"
+                  },
+                  {
+                    "constraint_id": "fixed:CHAIN",
+                    "constraint_type": "CHAIN",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 43113 CHAIN_ID",
+                    "observed": "43113",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "CHAIN: PASS; source span: Authenticated exact OperationIntent: CHAIN"
+                  },
+                  {
+                    "constraint_id": "fixed:AMOUNT_BASE_UNITS",
+                    "constraint_type": "AMOUNT_BASE_UNITS",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 1 BASE_UNITS",
+                    "observed": "1",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "AMOUNT_BASE_UNITS: PASS; source span: Authenticated exact OperationIntent: AMOUNT_BASE_UNITS"
+                  },
+                  {
+                    "constraint_id": "fixed:deadline",
+                    "constraint_type": "DEADLINE",
+                    "boundary": "USER_INTENT",
+                    "expected": "LE 1795258422 UNIX_SECONDS",
+                    "observed": "1795258422",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "DEADLINE: PASS; source span: Authenticated OperationIntent deadline"
+                  },
+                  {
+                    "constraint_id": "fixed:MIN_OUTPUT_BASE_UNITS",
+                    "constraint_type": "MIN_OUTPUT_BASE_UNITS",
+                    "boundary": "USER_INTENT",
+                    "expected": "GE 0",
+                    "observed": "0",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "MIN_OUTPUT_BASE_UNITS: PASS; source span: Authenticated OperationIntent MIN_OUTPUT_BASE_UNITS"
+                  },
+                  {
+                    "constraint_id": "fixed:SLIPPAGE_BPS",
+                    "constraint_type": "SLIPPAGE_BPS",
+                    "boundary": "USER_INTENT",
+                    "expected": "LE 40",
+                    "observed": "40",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "SLIPPAGE_BPS: PASS; source span: Authenticated OperationIntent SLIPPAGE_BPS"
+                  },
+                  {
+                    "constraint_id": "technical",
+                    "constraint_type": "ABI",
+                    "boundary": "TECHNICAL",
+                    "expected": "EQ VALID",
+                    "observed": "1795258422",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "ABI: PASS; source span: Canonical transaction fields"
+                  },
+                  {
+                    "constraint_id": "metadata",
+                    "constraint_type": "SCOPE",
+                    "boundary": "METADATA",
+                    "expected": "EQ VALID",
+                    "observed": "43113",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_59e9ed18be706e420b24e50b73a6276886fda946a95b18f5548cb206a587a7bf",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "SCOPE: PASS; source span: Canonical transaction fields"
+                  }
+                ],
+                "reason_code": null
+              },
+              "check_ref": "call_b8377ca256b54834a3fda726bb4bbf77",
+              "duration_ms": 1650.027
+            },
+            {
+              "sequence": 129,
+              "stage": "PLANNING",
+              "created_at": 1795258276,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "AI_MODEL",
+              "expected": null,
+              "observed": null
+            },
+            {
+              "sequence": 130,
+              "stage": "PLANNING",
+              "created_at": 1795258278,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "AI_MODEL",
+              "expected": null,
+              "observed": {
+                "latency_ms": 2439,
+                "token_usage": {
+                  "prompt_tokens": 570,
+                  "completion_tokens": 333,
+                  "total_tokens": 903
+                },
+                "provider_trace": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 2439
+                  }
+                ]
+              },
+              "duration_ms": 2446.959
+            },
+            {
+              "sequence": 131,
+              "stage": "PLANNING",
+              "created_at": 1795258278,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "EXACT_INTENT",
+              "expected": {
+                "operation": "TOKEN_SWAP",
+                "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "amount": "1"
+              },
+              "observed": {
+                "operation": "TOKEN_SWAP",
+                "token_in": "0x5425890298aed601595a70ab815c96711a31bc65",
+                "token_out": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                "recipient": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "amount": "1"
+              }
+            },
+            {
+              "sequence": 132,
+              "stage": "PLANNING",
+              "created_at": 1795258278,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "SHIELD_ASSISTANT",
+              "expected": "ALIGNED",
+              "observed": {
+                "tool_name": null
+              },
+              "check_ref": "assistant_10bf027ca90a438da066a112033fde00"
+            },
+            {
+              "sequence": 133,
+              "stage": "PLANNING",
+              "created_at": 1795258281,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SHIELD_ASSISTANT",
+              "expected": "ALIGNED",
+              "observed": {
+                "verdict": "ALIGNED",
+                "evidence_ref": "shield_a7c570cba2de448a91b6700aadbe7a65",
+                "tool_name": null,
+                "source": "ASSISTANT",
+                "model": "deepseek-flash",
+                "provider": "deepseek",
+                "latency_ms": 2329,
+                "token_usage": {
+                  "prompt_tokens": 2291,
+                  "completion_tokens": 310,
+                  "total_tokens": 2601
+                },
+                "constraints": [],
+                "reason_code": null
+              },
+              "check_ref": "assistant_10bf027ca90a438da066a112033fde00",
+              "duration_ms": 2348.439
+            },
+            {
+              "sequence": 134,
+              "stage": "PLANNING",
+              "created_at": 1795258281,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 7342.183
+            },
+            {
+              "sequence": 135,
+              "stage": "BUILD",
+              "created_at": 1795258281,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {},
+              "input_refs": [
+                "AGENT_PROPOSAL",
+                "OWNER_AUTHORITY"
+              ]
+            },
+            {
+              "sequence": 136,
+              "stage": "BUILD",
+              "created_at": 1795258281,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "SHIELD_TOOL_CALL",
+              "expected": "ALIGNED",
+              "observed": {
+                "tool_name": "build_fixed_operation"
+              },
+              "check_ref": "call_d20133b13d084d89b39869f539048e42"
+            },
+            {
+              "sequence": 137,
+              "stage": "BUILD",
+              "created_at": 1795258283,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SHIELD_TOOL_CALL",
+              "expected": "ALIGNED",
+              "observed": {
+                "verdict": "ALIGNED",
+                "evidence_ref": "shield_7adc21c90b9b46b790efba50cb95e515",
+                "tool_name": "build_fixed_operation",
+                "source": "ASSISTANT",
+                "model": "deepseek-flash",
+                "provider": "deepseek",
+                "latency_ms": 1854,
+                "token_usage": {
+                  "prompt_tokens": 4227,
+                  "completion_tokens": 304,
+                  "total_tokens": 4531
+                },
+                "constraints": [
+                  {
+                    "constraint_id": "fixed:OPERATION",
+                    "constraint_type": "OPERATION",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ SWAP",
+                    "observed": "SWAP",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "OPERATION: PASS; source span: Authenticated exact OperationIntent: OPERATION"
+                  },
+                  {
+                    "constraint_id": "fixed:TOKEN_IN",
+                    "constraint_type": "TOKEN_IN",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 0x5425890298aed601595a70ab815c96711a31bc65 ADDRESS",
+                    "observed": "0x5425890298aed601595a70ab815c96711a31bc65",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "TOKEN_IN: PASS; source span: Authenticated exact OperationIntent: TOKEN_IN"
+                  },
+                  {
+                    "constraint_id": "fixed:TOKEN_OUT",
+                    "constraint_type": "TOKEN_OUT",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 0xd00ae08403b9bbb9124bb305c09058e32c39a48c ADDRESS",
+                    "observed": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "TOKEN_OUT: PASS; source span: Authenticated exact OperationIntent: TOKEN_OUT"
+                  },
+                  {
+                    "constraint_id": "fixed:RECIPIENT",
+                    "constraint_type": "RECIPIENT",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 0x70e1395f959dba530cf4a53b060c809b715bb6d5 ADDRESS",
+                    "observed": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "RECIPIENT: PASS; source span: Authenticated exact OperationIntent: RECIPIENT"
+                  },
+                  {
+                    "constraint_id": "fixed:CHAIN",
+                    "constraint_type": "CHAIN",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 43113 CHAIN_ID",
+                    "observed": "43113",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "CHAIN: PASS; source span: Authenticated exact OperationIntent: CHAIN"
+                  },
+                  {
+                    "constraint_id": "fixed:AMOUNT_BASE_UNITS",
+                    "constraint_type": "AMOUNT_BASE_UNITS",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 1 BASE_UNITS",
+                    "observed": "1",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "AMOUNT_BASE_UNITS: PASS; source span: Authenticated exact OperationIntent: AMOUNT_BASE_UNITS"
+                  },
+                  {
+                    "constraint_id": "fixed:deadline",
+                    "constraint_type": "DEADLINE",
+                    "boundary": "USER_INTENT",
+                    "expected": "LE 1795258422 UNIX_SECONDS",
+                    "observed": "1795258422",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "DEADLINE: PASS; source span: Authenticated OperationIntent deadline"
+                  },
+                  {
+                    "constraint_id": "fixed:MIN_OUTPUT_BASE_UNITS",
+                    "constraint_type": "MIN_OUTPUT_BASE_UNITS",
+                    "boundary": "USER_INTENT",
+                    "expected": "GE 0",
+                    "observed": "0",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "MIN_OUTPUT_BASE_UNITS: PASS; source span: Authenticated OperationIntent MIN_OUTPUT_BASE_UNITS"
+                  },
+                  {
+                    "constraint_id": "fixed:SLIPPAGE_BPS",
+                    "constraint_type": "SLIPPAGE_BPS",
+                    "boundary": "USER_INTENT",
+                    "expected": "LE 40",
+                    "observed": "40",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "SLIPPAGE_BPS: PASS; source span: Authenticated OperationIntent SLIPPAGE_BPS"
+                  },
+                  {
+                    "constraint_id": "technical",
+                    "constraint_type": "ABI",
+                    "boundary": "TECHNICAL",
+                    "expected": "EQ VALID",
+                    "observed": "1795258422",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "ABI: PASS; source span: Canonical transaction fields"
+                  },
+                  {
+                    "constraint_id": "metadata",
+                    "constraint_type": "SCOPE",
+                    "boundary": "METADATA",
+                    "expected": "EQ VALID",
+                    "observed": "43113",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_272b989023443615fce413ab3d6248817f29a7a7defe1e11958e93fef81d7142",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "SCOPE: PASS; source span: Canonical transaction fields"
+                  }
+                ],
+                "reason_code": null
+              },
+              "check_ref": "call_d20133b13d084d89b39869f539048e42",
+              "duration_ms": 1884.938
+            },
+            {
+              "sequence": 138,
+              "stage": "BUILD",
+              "created_at": 1795258283,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "BUILDER_SCOPE",
+              "expected": {
+                "chain_id": 43113,
+                "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                "max_slippage_bps": 100
+              },
+              "observed": {
+                "chain_id": 43113,
+                "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+                "operation_mask": 3,
+                "slippage_bps": 40,
+                "deadline": 1795258422
+              }
+            },
+            {
+              "sequence": 139,
+              "stage": "BUILD",
+              "created_at": 1795258289,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "LFJ_QUOTE",
+              "expected": {
+                "quote": "13266451069110",
+                "max_price_impact_bps": 100
+              },
+              "observed": {
+                "quote": "13266451069110",
+                "price_impact_bps": 0.035608,
+                "pair": "0x8436B8c75ed2F015a80b8472526dd1A79BF54E38",
+                "source_block": 61421650
+              }
+            },
+            {
+              "sequence": 140,
+              "stage": "BUILD",
+              "created_at": 1795258289,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "INDEPENDENT_ORACLE_QUOTE",
+              "expected": {
+                "min_output": "151748447814",
+                "max_relative_loss_bps": 300
+              },
+              "observed": {
+                "quote": "13266451069110",
+                "oracle_valid_until": 1795258535,
+                "source_block": 61421650
+              }
+            },
+            {
+              "sequence": 141,
+              "stage": "BUILD",
+              "created_at": 1795258290,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "CALL_DECODED",
+              "expected": null,
+              "observed": {
+                "method": "exactInput",
+                "arguments": {
+                  "input": "0x5425890298aed601595a70AB815c96711a31Bc65",
+                  "output": "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
+                  "amount": "1",
+                  "minOut": "13213385264833",
+                  "recipient": "0x70e1395F959dba530cF4A53B060c809b715bB6d5"
+                },
+                "target": "0x05522ffafe20cab88ce223e0e84031d98381deaf",
+                "value": "0"
+              }
+            },
+            {
+              "sequence": 142,
+              "stage": "BUILD",
+              "created_at": 1795258290,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "SHIELD_TOOL",
+              "expected": "ALIGNED",
+              "observed": {
+                "tool_name": "build_fixed_operation"
+              },
+              "check_ref": "output_58787c5d6997427a8e637068bc91be69"
+            },
+            {
+              "sequence": 143,
+              "stage": "BUILD",
+              "created_at": 1795258293,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SHIELD_TOOL",
+              "expected": "ALIGNED",
+              "observed": {
+                "verdict": "ALIGNED",
+                "evidence_ref": "shield_6e3633b9eb514be28f43f84afb3393bd",
+                "tool_name": "build_fixed_operation",
+                "source": "TOOL",
+                "model": "deepseek-flash",
+                "provider": "deepseek",
+                "latency_ms": 3049,
+                "token_usage": {
+                  "prompt_tokens": 4947,
+                  "completion_tokens": 415,
+                  "total_tokens": 5362
+                },
+                "constraints": [],
+                "reason_code": null
+              },
+              "check_ref": "output_58787c5d6997427a8e637068bc91be69",
+              "duration_ms": 3068.596
+            },
+            {
+              "sequence": 144,
+              "stage": "BUILD",
+              "created_at": 1795258293,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "FIXED_CALL",
+              "expected": null,
+              "observed": {
+                "build_id": "v3_c165531fe319e26a209bcd8609e2f8afbc581ad91e42d12bdb06da288ac51621",
+                "target": "0x05522ffafe20cab88ce223e0e84031d98381deaf",
+                "function_selector": "0x651781f3",
+                "min_output": "13213385264833",
+                "quote": "13266451069110",
+                "route": {
+                  "lfj_router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+                  "lfj_quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+                  "pair": "0x8436B8c75ed2F015a80b8472526dd1A79BF54E38",
+                  "factory": "0xF5c7d9733e5f53abCC1695820c4818C59B457C2C",
+                  "version": 0,
+                  "version_name": "V1",
+                  "bin_step": 0,
+                  "token_path": [
+                    "0x5425890298aed601595a70AB815c96711a31Bc65",
+                    "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"
+                  ],
+                  "token0": "0x5425890298aed601595a70ab815c96711a31bc65",
+                  "token1": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                  "reserves": [
+                    "279990",
+                    "3725663853051013676"
+                  ],
+                  "bytecode_hashes": {
+                    "LFJRouter": "0x9843aff33e2e3c5faf3fe5250810ed4318a95f9359c3bdde35d07912888efcff",
+                    "LFJQuoter": "0x47992a8657b563eacb284069217a6485c752ffa92787b450a05667cf7f91a3db",
+                    "LFJPair": "0x606c50bf2d1d805846d79e393e4640f985fdce3ff7883e4a7e5bff22d3494e52",
+                    "LFJFactory": "0x5f1df0351cbd7d2db91360cbdf3b42164df76b40d0fa20617c1e99de140636b3"
+                  },
+                  "verified_quoter": {
+                    "source": "LFJ_LBQUOTER_V2_2",
+                    "router": "0x18556DA13313f3532c54711497A8FedAC273220E",
+                    "quoter": "0x9A550a522BBaDFB69019b0432800Ed17855A51C3",
+                    "token_path": [
+                      "0x5425890298aed601595a70ab815c96711a31bc65",
+                      "0xd00ae08403b9bbb9124bb305c09058e32c39a48c"
+                    ],
+                    "pairs": [
+                      "0x8436b8c75ed2f015a80b8472526dd1a79bf54e38"
+                    ],
+                    "bin_steps": [
+                      0
+                    ],
+                    "versions": [
+                      0
+                    ],
+                    "version_names": [
+                      "V1"
+                    ],
+                    "amounts": [
+                      "1",
+                      "13266451069110"
+                    ],
+                    "virtual_amounts_without_slippage": [
+                      "1",
+                      "13266498308839"
+                    ],
+                    "fees_e18": [
+                      "3000000000000000"
+                    ],
+                    "amount_in_base_units": "1",
+                    "amount_out_base_units": "13266451069110",
+                    "block_number": 61421650,
+                    "block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                    "independent_usd_oracle": false
+                  }
+                },
+                "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4"
+              }
+            },
+            {
+              "sequence": 145,
+              "stage": "BUILD",
+              "created_at": 1795258293,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 12311.22
+            },
+            {
+              "sequence": 146,
+              "stage": "SIMULATION",
+              "created_at": 1795258293,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {},
+              "input_refs": [
+                "BUILD",
+                "OWNER_AUTHORITY"
+              ]
+            },
+            {
+              "sequence": 147,
+              "stage": "SIMULATION",
+              "created_at": 1795258293,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "SHIELD_TOOL_CALL",
+              "expected": "ALIGNED",
+              "observed": {
+                "tool_name": "simulate_fixed_operation"
+              },
+              "check_ref": "call_5137eb850e4a4c2bab84f1ca4cea37db"
+            },
+            {
+              "sequence": 148,
+              "stage": "SIMULATION",
+              "created_at": 1795258296,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SHIELD_TOOL_CALL",
+              "expected": "ALIGNED",
+              "observed": {
+                "verdict": "ALIGNED",
+                "evidence_ref": "shield_844e280a64b143ba8bddb1ab6797eed2",
+                "tool_name": "simulate_fixed_operation",
+                "source": "ASSISTANT",
+                "model": "deepseek-flash",
+                "provider": "deepseek",
+                "latency_ms": 2621,
+                "token_usage": {
+                  "prompt_tokens": 3777,
+                  "completion_tokens": 421,
+                  "total_tokens": 4198
+                },
+                "constraints": [],
+                "reason_code": null
+              },
+              "check_ref": "call_5137eb850e4a4c2bab84f1ca4cea37db",
+              "duration_ms": 2640.501
+            },
+            {
+              "sequence": 149,
+              "stage": "SIMULATION",
+              "created_at": 1795258314,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "SHIELD_TOOL",
+              "expected": "ALIGNED",
+              "observed": {
+                "tool_name": "simulate_fixed_operation"
+              },
+              "check_ref": "output_dc71f80066674c9f9110fd48090c540c"
+            },
+            {
+              "sequence": 150,
+              "stage": "SIMULATION",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SHIELD_TOOL",
+              "expected": "ALIGNED",
+              "observed": {
+                "verdict": "ALIGNED",
+                "evidence_ref": "shield_addddab5cc9d4c3c96ec8c462f685752",
+                "tool_name": "simulate_fixed_operation",
+                "source": "TOOL",
+                "model": "deepseek-flash",
+                "provider": "deepseek",
+                "latency_ms": 2727,
+                "token_usage": {
+                  "prompt_tokens": 4673,
+                  "completion_tokens": 365,
+                  "total_tokens": 5038
+                },
+                "constraints": [],
+                "reason_code": null
+              },
+              "check_ref": "output_dc71f80066674c9f9110fd48090c540c",
+              "duration_ms": 2754.507
+            },
+            {
+              "sequence": 151,
+              "stage": "SIMULATION",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SIMULATED_EFFECTS",
+              "expected": "SUCCESS",
+              "observed": {
+                "execution_status": "SUCCESS",
+                "source_block": 61421650,
+                "source_block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                "deltas": [
+                  "-1",
+                  "13266451069110",
+                  "0",
+                  "0"
+                ],
+                "received": "0",
+                "allowances": [
+                  "0",
+                  "0"
+                ],
+                "gas_used": 367906
+              }
+            },
+            {
+              "sequence": 152,
+              "stage": "SIMULATION",
+              "created_at": 1795258317,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 24174.461
+            },
+            {
+              "sequence": 153,
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {},
+              "input_refs": [
+                "SIMULATION",
+                "BUILD",
+                "OWNER_AUTHORITY"
+              ]
+            },
+            {
+              "sequence": 154,
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "STALE_EVIDENCE",
+              "expected": {
+                "deadline": 1795258422,
+                "max_oracle_age": 300
+              },
+              "observed": {
+                "timestamp": 1795258317,
+                "context_age_seconds": 68
+              }
+            },
+            {
+              "sequence": 155,
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "UNVERIFIED_EFFECTS",
+              "expected": {
+                "build_hash": "0xd90e44919375f7963a04c623d950c6b511f621beeb0e997149836d4a4e232772",
+                "source_block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                "execution_status": "SUCCESS"
+              },
+              "observed": {
+                "build_hash": "0xd90e44919375f7963a04c623d950c6b511f621beeb0e997149836d4a4e232772",
+                "source_block_hash": "0x3eacd0eb6d97104be329837d68ef17a8fd541db5ae73a7ae964eab74020b03e9",
+                "execution_status": "SUCCESS"
+              }
+            },
+            {
+              "sequence": 156,
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "UNAUTHORIZED_APPROVAL",
+              "expected": {
+                "allowances": [
+                  "0",
+                  "0"
+                ]
+              },
+              "observed": {
+                "allowances": [
+                  "0",
+                  "0"
+                ]
+              }
+            },
+            {
+              "sequence": 157,
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "UNEXPECTED_TRANSFER",
+              "expected": {
+                "input_amount": "1",
+                "other_asset_outflow": "0"
+              },
+              "observed": {
+                "deltas": [
+                  "-1",
+                  "13266451069110",
+                  "0",
+                  "0"
+                ]
+              }
+            },
+            {
+              "sequence": 158,
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "MIN_OUTPUT_NOT_MET",
+              "expected": {
+                "min_output": "13213385264833"
+              },
+              "observed": {
+                "output_amount": "13266451069110"
+              }
+            },
+            {
+              "sequence": 159,
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SYSTEM_GAS_REFERENCE_BUDGET",
+              "expected": {
+                "max_daily_execution_cost_usd_e8": "100000000"
+              },
+              "observed": {
+                "separate_from_trading_loss": true,
+                "maximum_next_fee_wei": "1000000000000000",
+                "daily_spent_reserved_plus_next_reference_usd_e8": "645544"
+              }
+            },
+            {
+              "sequence": 160,
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "ORACLE_WINDOW_UNAVAILABLE",
+              "expected": {
+                "oracle_valid_until": 1795258535
+              },
+              "observed": {
+                "timestamp": 1795258317,
+                "deadline": 1795258422
+              }
+            },
+            {
+              "sequence": 161,
+              "stage": "RISK",
+              "created_at": 1795258317,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 82.551
+            },
+            {
+              "sequence": 162,
+              "stage": "ITAG",
+              "created_at": 1795258317,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {
+                "history_count": 2,
+                "history_refs": [
+                  "treasury_6db05dcd49c3489c846d910ed31205b9",
+                  "treasury_00eb6cd734b0490cacba77118c2b261c"
+                ]
+              },
+              "input_refs": [
+                "AGENT_PROPOSAL",
+                "BUILD",
+                "OWNER_AUTHORITY"
+              ]
+            },
+            {
+              "sequence": 163,
+              "stage": "ITAG",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "ITAG_AUTHORITY_HISTORY",
+              "expected": {
+                "reason_codes": []
+              },
+              "observed": {
+                "reason_codes": [],
+                "history_count": 2,
+                "actions": 1,
+                "max_actions": 500
+              }
+            },
+            {
+              "sequence": 164,
+              "stage": "ITAG",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "ITAG_GRAPH",
+              "expected": null,
+              "observed": {
+                "nodes": [
+                  {
+                    "node_id": "task_28cb11f0a87a9aaa",
+                    "kind": "AUTHENTICATED_USER_INTENT",
+                    "trust": "AUTHENTICATED",
+                    "evidence_refs": [
+                      "task_28cb11f0a87a9aaa"
+                    ]
+                  },
+                  {
+                    "node_id": "candidate_28cb11f0a87a9aaa",
+                    "kind": "AGENT_ACTION",
+                    "trust": "UNTRUSTED",
+                    "evidence_refs": [
+                      "candidate_28cb11f0a87a9aaa"
+                    ]
+                  },
+                  {
+                    "node_id": "owner_scope",
+                    "kind": "MANDATE",
+                    "trust": "VERIFIED_RECORD",
+                    "evidence_refs": [
+                      "0x643d3b9fb340271d68abe8796ffbf7211b089d53f598aa2e791460a4e8ecb134"
+                    ]
+                  },
+                  {
+                    "node_id": "prior_0",
+                    "kind": "TRANSACTION_OUTCOME",
+                    "trust": "VERIFIED_RECORD",
+                    "evidence_refs": [
+                      "treasury_6db05dcd49c3489c846d910ed31205b9"
+                    ]
+                  },
+                  {
+                    "node_id": "prior_1",
+                    "kind": "TRANSACTION_OUTCOME",
+                    "trust": "VERIFIED_RECORD",
+                    "evidence_refs": [
+                      "treasury_00eb6cd734b0490cacba77118c2b261c"
+                    ]
+                  }
+                ],
+                "edges": [
+                  {
+                    "edge_id": "authorized",
+                    "source": "task_28cb11f0a87a9aaa",
+                    "target": "candidate_28cb11f0a87a9aaa",
+                    "kind": "AUTHORIZES",
+                    "provenance": "AUTHORIZATION_RECORD",
+                    "evidence_refs": [
+                      "task_28cb11f0a87a9aaa"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "sequence": 165,
+              "stage": "ITAG",
+              "created_at": 1795258317,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "ITAG_SEMANTIC",
+              "expected": "ALIGNED",
+              "observed": null
+            },
+            {
+              "sequence": 166,
+              "stage": "ITAG",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "ITAG_SEMANTIC",
+              "expected": "ALIGNED",
+              "observed": {
+                "verdict": "ALIGNED",
+                "finding": {
+                  "candidate_action_id": "candidate_28cb11f0a87a9aaa",
+                  "referenced_task_ids": [
+                    "task_28cb11f0a87a9aaa"
+                  ],
+                  "referenced_graph_node_ids": [
+                    "candidate_28cb11f0a87a9aaa",
+                    "task_28cb11f0a87a9aaa"
+                  ],
+                  "semantic_verdict": "ALIGNED",
+                  "contribution_assessments": [
+                    {
+                      "task_id": "task_28cb11f0a87a9aaa",
+                      "relationship": "DIRECT",
+                      "explanation": "L\u00fd do c\u1ee7a \u1ee9ng vi\u00ean m\u00f4 t\u1ea3 \u0111\u00fang ho\u1ea1t \u0111\u1ed9ng ho\u00e1n \u0111\u1ed5i m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX v\u00e0 g\u1eedi v\u00e0o treasury, kh\u1edbp v\u1edbi m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng Circle USDC quy \u0111\u1ecbnh sang WAVAX v\u00e0o treasury. \u1ee8ng vi\u00ean gi\u1eef nguy\u00ean token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra, ng\u01b0\u1eddi nh\u1eadn v\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi, n\u00ean \u0111\u00f3ng g\u00f3p tr\u1ef1c ti\u1ebfp v\u00e0o m\u1ee5c ti\u00eau."
+                    }
+                  ],
+                  "detected_goal_drift": false,
+                  "claimed_instruction_source": "ASSISTANT",
+                  "reasoning_summary": "L\u00fd do c\u1ee7a \u1ee9ng vi\u00ean m\u00f4 t\u1ea3 \u0111\u00fang ho\u1ea1t \u0111\u1ed9ng ho\u00e1n \u0111\u1ed5i m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX v\u00e0 g\u1eedi v\u00e0o treasury, kh\u1edbp v\u1edbi m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng Circle USDC quy \u0111\u1ecbnh sang WAVAX v\u00e0o treasury. \u1ee8ng vi\u00ean gi\u1eef nguy\u00ean token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra, ng\u01b0\u1eddi nh\u1eadn v\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi, n\u00ean \u0111\u00f3ng g\u00f3p tr\u1ef1c ti\u1ebfp v\u00e0o m\u1ee5c ti\u00eau.",
+                  "supporting_evidence_refs": [
+                    "candidate_28cb11f0a87a9aaa",
+                    "task_28cb11f0a87a9aaa"
+                  ],
+                  "uncertainty_reasons": []
+                },
+                "reason_codes": [],
+                "provider_metadata": {
+                  "model": "deepseek-flash",
+                  "provider": "deepseek",
+                  "config_hash": "0x2fa2a354ad9593aa8d86c053fd988e817876ab79e12decbc9ddc5fcb1ecb42f6",
+                  "prompt_version": "itag-catalog-v3.5-vi",
+                  "scope": "CONFIGURED_LLM_NOT_BENCHMARK_REPRODUCTION",
+                  "catalog_hash": "0xbd95247cc9fc28cbc8be1355d5d1e18916f01d7fbae48f70f9d5221a2d02eb70",
+                  "schema_version": "itag-judgment-1",
+                  "input_chars": 19308,
+                  "prevalidation_verdict": "ALIGNED",
+                  "semantic_anchors": [
+                    {
+                      "task": "task_28cb11f0a87a9aaa",
+                      "objective_quote": "Swap exactly 0.000001 Circle USDC for WAVAX into the treasury",
+                      "candidate_quote": "K\u1ebf ho\u1ea1ch n\u00e0y th\u1ef1c hi\u1ec7n ho\u00e1n \u0111\u1ed5i \u0111\u00fang 1 \u0111\u01a1n v\u1ecb nh\u1ecf nh\u1ea5t c\u1ee7a USDC (t\u01b0\u01a1ng \u0111\u01b0\u01a1ng 0.000001 USDC) sang WAVAX tr\u00ean chu\u1ed7i Fuji (chain 43113), v\u1edbi token \u0111\u1ea7u v\u00e0o, token \u0111\u1ea7u ra v\u00e0 ng\u01b0\u1eddi nh\u1eadn kh\u1edbp ch\u00ednh x\u00e1c v\u1edbi c\u00e1c \u0111i\u1ec1u kho\u1ea3n \u0111\u00e3 \u0111\u01b0\u1ee3c x\u00e1c th\u1ef1c. S\u1ed1 ti\u1ec1n l\u00e0 1 theo \u0111\u01a1n v\u1ecb nguy\u00ean c\u1ee7a token, kh\u00f4ng v\u01b0\u1ee3t qu\u00e1 h\u1ea1n m\u1ee9c v\u00e0 kh\u00f4ng thay \u0111\u1ed5i ng\u00e2n s\u00e1ch hay ch\u00ednh s\u00e1ch n\u00e0o. Vi\u1ec7c ho\u00e1n \u0111\u1ed5i tr\u1ef1c ti\u1ebfp v\u00e0o \u0111\u1ecba ch\u1ec9 treasury gi\u00fap chuy\u1ec3n m\u1ed9t l\u01b0\u1ee3ng nh\u1ecf USDC sang WAVAX \u0111\u00fang theo m\u1ee5c ti\u00eau \u0111\u1ec1 ra, \u0111\u1ed3ng th\u1eddi gi\u1eef nguy\u00ean c\u1ea5u h\u00ecnh slippage v\u00e0 deadline \u0111\u00e3 c\u00f3, qua \u0111\u00f3 g\u00f3p ph\u1ea7n ho\u00e0n th\u00e0nh m\u1ee5c ti\u00eau ho\u00e1n \u0111\u1ed5i ch\u00ednh x\u00e1c l\u01b0\u1ee3ng token quy \u0111\u1ecbnh m\u00e0 kh\u00f4ng m\u1edf r\u1ed9ng ph\u1ea1m vi ho\u1ea1t \u0111\u1ed9ng."
+                    }
+                  ],
+                  "response_protocol": "CATALOG",
+                  "verified_factual_claims": [],
+                  "provider_trace": [
+                    {
+                      "provider": "deepseek",
+                      "model": "deepseek-flash",
+                      "status": "SUCCESS",
+                      "latency_ms": 1645
+                    }
+                  ]
+                },
+                "latency_ms": 1650,
+                "token_usage": {
+                  "prompt_tokens": 7093,
+                  "completion_tokens": 284,
+                  "total_tokens": 7377
+                }
+              },
+              "duration_ms": 1658.679
+            },
+            {
+              "sequence": 167,
+              "stage": "ITAG",
+              "created_at": 1795258319,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 1728.254
+            },
+            {
+              "sequence": 168,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {},
+              "input_refs": [
+                "BUILD",
+                "SIMULATION",
+                "OWNER_AUTHORITY",
+                "RISK",
+                "ITAG"
+              ]
+            },
+            {
+              "sequence": 169,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "Z3_FEASIBLE_PRICES",
+              "expected": "SAT",
+              "observed": null
+            },
+            {
+              "sequence": 170,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "Z3_FEASIBLE_PRICES",
+              "expected": "SAT",
+              "observed": "SAT",
+              "duration_ms": 14.271
+            },
+            {
+              "sequence": 171,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "Z3_CHECK_MODE",
+              "expected": "UNSAT",
+              "observed": null
+            },
+            {
+              "sequence": 172,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "Z3_CHECK_MODE",
+              "expected": "UNSAT",
+              "observed": "UNSAT",
+              "duration_ms": 12.518
+            },
+            {
+              "sequence": 173,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "Z3_COMPILE_MODE",
+              "expected": "UNSAT",
+              "observed": null
+            },
+            {
+              "sequence": 174,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "Z3_COMPILE_MODE",
+              "expected": "UNSAT",
+              "observed": "UNSAT",
+              "duration_ms": 12.863
+            },
+            {
+              "sequence": 175,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "Z3_RISK_BOUND",
+              "expected": "UNSAT",
+              "observed": null
+            },
+            {
+              "sequence": 176,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "Z3_RISK_BOUND",
+              "expected": "UNSAT",
+              "observed": "UNSAT",
+              "duration_ms": 15.121
+            },
+            {
+              "sequence": 177,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "PROOF_BUDGETS",
+              "expected": {
+                "risk_remaining_usd_e8": "1000000000",
+                "global_risk_remaining_usd_e8": "2000000000",
+                "payment_spend_remaining_usdc": "4990000",
+                "daily_payment_remaining_usdc": "960000",
+                "max_wavax_balance": "255573019445261060"
+              },
+              "observed": {
+                "risk_debit_usd_e8": "0",
+                "spend_debit_usd_e8": "101",
+                "receipt_credit": "0",
+                "next_wavax_balance": "26532996760161"
+              }
+            },
+            {
+              "sequence": 178,
+              "stage": "PROOF",
+              "created_at": 1795258319,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "SHIELD_TOOL",
+              "expected": "ALIGNED",
+              "observed": {
+                "tool_name": "verified_execution_evidence"
+              },
+              "check_ref": "output_ea9da9a68f8244608ac10a1f1ac84f48"
+            },
+            {
+              "sequence": 179,
+              "stage": "PROOF",
+              "created_at": 1795258322,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SHIELD_TOOL",
+              "expected": "ALIGNED",
+              "observed": {
+                "verdict": "ALIGNED",
+                "evidence_ref": "shield_2e721f3ff72d4729b39dd43892a0c8df",
+                "tool_name": "verified_execution_evidence",
+                "source": "TOOL",
+                "model": "deepseek-flash",
+                "provider": "deepseek",
+                "latency_ms": 2493,
+                "token_usage": {
+                  "prompt_tokens": 4935,
+                  "completion_tokens": 370,
+                  "total_tokens": 5305
+                },
+                "constraints": [],
+                "reason_code": null
+              },
+              "check_ref": "output_ea9da9a68f8244608ac10a1f1ac84f48",
+              "duration_ms": 2513.076
+            },
+            {
+              "sequence": 180,
+              "stage": "PROOF",
+              "created_at": 1795258322,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 2673.305
+            },
+            {
+              "sequence": 181,
+              "stage": "SDE",
+              "created_at": 1795258322,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {},
+              "input_refs": [
+                "RISK",
+                "ITAG",
+                "PROOF",
+                "BUILD",
+                "SIMULATION"
+              ]
+            },
+            {
+              "sequence": 182,
+              "stage": "SDE",
+              "created_at": 1795258322,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "CONJUNCTIVE_DECISION",
+              "expected": {
+                "risk": "PASS",
+                "itag": "PASS",
+                "proof": "VERIFIED"
+              },
+              "observed": {
+                "risk": "PASS",
+                "itag": "PASS",
+                "proof": "VERIFIED",
+                "verdict": "APPROVE",
+                "reason_codes": []
+              }
+            },
+            {
+              "sequence": 183,
+              "stage": "SDE",
+              "created_at": 1795258322,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 40.076
+            },
+            {
+              "sequence": 184,
+              "stage": "ATTESTATION",
+              "created_at": 1795258322,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {},
+              "input_refs": [
+                "SDE",
+                "PROOF",
+                "BUILD",
+                "OWNER_AUTHORITY",
+                "ITAG"
+              ]
+            },
+            {
+              "sequence": 185,
+              "stage": "ATTESTATION",
+              "created_at": 1795258322,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "SHIELD_TOOL_CALL",
+              "expected": "ALIGNED",
+              "observed": {
+                "tool_name": "execute_fixed_operation"
+              },
+              "check_ref": "call_ce4453f3823c437794ddcdb2d4c03ecb"
+            },
+            {
+              "sequence": 186,
+              "stage": "ATTESTATION",
+              "created_at": 1795258324,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SHIELD_TOOL_CALL",
+              "expected": "ALIGNED",
+              "observed": {
+                "verdict": "ALIGNED",
+                "evidence_ref": "shield_346835f0871d4dd3bc9005a5603d15e3",
+                "tool_name": "execute_fixed_operation",
+                "source": "ASSISTANT",
+                "model": "deepseek-flash",
+                "provider": "deepseek",
+                "latency_ms": 2056,
+                "token_usage": {
+                  "prompt_tokens": 6644,
+                  "completion_tokens": 384,
+                  "total_tokens": 7028
+                },
+                "constraints": [
+                  {
+                    "constraint_id": "fixed:OPERATION",
+                    "constraint_type": "OPERATION",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ SWAP",
+                    "observed": "SWAP",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "OPERATION: PASS; source span: Authenticated exact OperationIntent: OPERATION"
+                  },
+                  {
+                    "constraint_id": "fixed:TOKEN_IN",
+                    "constraint_type": "TOKEN_IN",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 0x5425890298aed601595a70ab815c96711a31bc65 ADDRESS",
+                    "observed": "0x5425890298aed601595a70ab815c96711a31bc65",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "TOKEN_IN: PASS; source span: Authenticated exact OperationIntent: TOKEN_IN"
+                  },
+                  {
+                    "constraint_id": "fixed:TOKEN_OUT",
+                    "constraint_type": "TOKEN_OUT",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 0xd00ae08403b9bbb9124bb305c09058e32c39a48c ADDRESS",
+                    "observed": "0xd00ae08403b9bbb9124bb305c09058e32c39a48c",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "TOKEN_OUT: PASS; source span: Authenticated exact OperationIntent: TOKEN_OUT"
+                  },
+                  {
+                    "constraint_id": "fixed:RECIPIENT",
+                    "constraint_type": "RECIPIENT",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 0x70e1395f959dba530cf4a53b060c809b715bb6d5 ADDRESS",
+                    "observed": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "RECIPIENT: PASS; source span: Authenticated exact OperationIntent: RECIPIENT"
+                  },
+                  {
+                    "constraint_id": "fixed:CHAIN",
+                    "constraint_type": "CHAIN",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 43113 CHAIN_ID",
+                    "observed": "43113",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "CHAIN: PASS; source span: Authenticated exact OperationIntent: CHAIN"
+                  },
+                  {
+                    "constraint_id": "fixed:AMOUNT_BASE_UNITS",
+                    "constraint_type": "AMOUNT_BASE_UNITS",
+                    "boundary": "USER_INTENT",
+                    "expected": "EQ 1 BASE_UNITS",
+                    "observed": "1",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "AMOUNT_BASE_UNITS: PASS; source span: Authenticated exact OperationIntent: AMOUNT_BASE_UNITS"
+                  },
+                  {
+                    "constraint_id": "fixed:deadline",
+                    "constraint_type": "DEADLINE",
+                    "boundary": "USER_INTENT",
+                    "expected": "LE 1795258422 UNIX_SECONDS",
+                    "observed": "1795258422",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "DEADLINE: PASS; source span: Authenticated OperationIntent deadline"
+                  },
+                  {
+                    "constraint_id": "fixed:MIN_OUTPUT_BASE_UNITS",
+                    "constraint_type": "MIN_OUTPUT_BASE_UNITS",
+                    "boundary": "USER_INTENT",
+                    "expected": "GE 0",
+                    "observed": "0",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "MIN_OUTPUT_BASE_UNITS: PASS; source span: Authenticated OperationIntent MIN_OUTPUT_BASE_UNITS"
+                  },
+                  {
+                    "constraint_id": "fixed:SLIPPAGE_BPS",
+                    "constraint_type": "SLIPPAGE_BPS",
+                    "boundary": "USER_INTENT",
+                    "expected": "LE 40",
+                    "observed": "40",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "SLIPPAGE_BPS: PASS; source span: Authenticated OperationIntent SLIPPAGE_BPS"
+                  },
+                  {
+                    "constraint_id": "technical",
+                    "constraint_type": "ABI",
+                    "boundary": "TECHNICAL",
+                    "expected": "EQ VALID",
+                    "observed": "1795258422",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "ABI: PASS; source span: Canonical transaction fields"
+                  },
+                  {
+                    "constraint_id": "metadata",
+                    "constraint_type": "SCOPE",
+                    "boundary": "METADATA",
+                    "expected": "EQ VALID",
+                    "observed": "43113",
+                    "status": "PASS",
+                    "violation_code": "CONSTRAINT_SATISFIED",
+                    "evidence_refs": [
+                      "action_6d5350c92b69c23242f834fa8976320f40b59bb7b708703df2d71761b8ac988e",
+                      "request_e412d6a8538a41a08ab7f6514f53a91b"
+                    ],
+                    "explanation": "SCOPE: PASS; source span: Canonical transaction fields"
+                  }
+                ],
+                "reason_code": null
+              },
+              "check_ref": "call_ce4453f3823c437794ddcdb2d4c03ecb",
+              "duration_ms": 2082.019
+            },
+            {
+              "sequence": 187,
+              "stage": "ATTESTATION",
+              "created_at": 1795258324,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "SIGN_ONCE",
+              "expected": null,
+              "observed": {
+                "workflow_id": "treasury_2a5105d446214bc18214a709ee4f0c16",
+                "nonce": "1009"
+              }
+            },
+            {
+              "sequence": 188,
+              "stage": "ATTESTATION",
+              "created_at": 1795258324,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "ATTESTOR_BINDINGS",
+              "expected": null,
+              "observed": {
+                "intent_hash": "0x28cb11f0a87a9aaa599bc871b80c7a6f2c179a74dc0b46fd66efef4bbb20a296",
+                "build_hash": "0xd90e44919375f7963a04c623d950c6b511f621beeb0e997149836d4a4e232772",
+                "evidence_root": "0x18a16c05915971c7403e2216d67c9974ba810f1b6a5df3d4cc74a409ef9e7c7e",
+                "proof_hash": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935",
+                "expires_at": 1795258422
+              }
+            },
+            {
+              "sequence": 189,
+              "stage": "ATTESTATION",
+              "created_at": 1795258324,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "STATE_REVALIDATION",
+              "expected": {
+                "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4"
+              },
+              "observed": null
+            },
+            {
+              "sequence": 190,
+              "stage": "ATTESTATION",
+              "created_at": 1795258345,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "STATE_REVALIDATION",
+              "expected": {
+                "risk_hash": "0xf0c105d4fc2d68090e67b018a99d581f9833a6868861d1b8e39e1ce207cbf359",
+                "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4"
+              },
+              "observed": {
+                "risk_hash": "0xf0c105d4fc2d68090e67b018a99d581f9833a6868861d1b8e39e1ce207cbf359",
+                "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4",
+                "block_number": 61421688,
+                "check_ids": [
+                  "shield_d9848f86873d440ba4496558d50286ca",
+                  "shield_a7c570cba2de448a91b6700aadbe7a65",
+                  "shield_7adc21c90b9b46b790efba50cb95e515",
+                  "shield_6e3633b9eb514be28f43f84afb3393bd",
+                  "shield_844e280a64b143ba8bddb1ab6797eed2",
+                  "shield_addddab5cc9d4c3c96ec8c462f685752",
+                  "shield_2e721f3ff72d4729b39dd43892a0c8df",
+                  "shield_346835f0871d4dd3bc9005a5603d15e3"
+                ],
+                "revision": 1
+              },
+              "duration_ms": 21544.794
+            },
+            {
+              "sequence": 191,
+              "stage": "ATTESTATION",
+              "created_at": 1795258345,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "PROOF_REVALIDATION",
+              "expected": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935",
+              "observed": null
+            },
+            {
+              "sequence": 192,
+              "stage": "ATTESTATION",
+              "created_at": 1795258345,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "PROOF_REVALIDATION",
+              "expected": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935",
+              "observed": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935",
+              "duration_ms": 22.423
+            },
+            {
+              "sequence": 193,
+              "stage": "ATTESTATION",
+              "created_at": 1795258346,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "SIGN_ONCE",
+              "expected": null,
+              "observed": {
+                "workflow_id": "treasury_2a5105d446214bc18214a709ee4f0c16",
+                "typed_data_hash": "0xb3890025a565376d3e0d4744384f13d05057e712ec5653782cab868bb47dd605"
+              },
+              "duration_ms": 21653.544
+            },
+            {
+              "sequence": 194,
+              "stage": "ATTESTATION",
+              "created_at": 1795258346,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 23784.022
+            },
+            {
+              "sequence": 195,
+              "stage": "EXACT_SIGNED_PREFLIGHT",
+              "created_at": 1795258346,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {},
+              "input_refs": [
+                "ATTESTATION",
+                "BUILD",
+                "PROOF",
+                "OWNER_AUTHORITY"
+              ]
+            },
+            {
+              "sequence": 196,
+              "stage": "EXACT_SIGNED_PREFLIGHT",
+              "created_at": 1795258346,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "EXACT_SIGNED_TRANSACTION",
+              "expected": {
+                "execution_status": "SUCCESS",
+                "exact_signed_preflight": true,
+                "constraints_hash": "0x3bcd93cd47b42de4cc61db26675639bc834f4e64552646c2ea07987043260852"
+              },
+              "observed": {
+                "execution_status": "SUCCESS",
+                "exact_signed_preflight": true,
+                "constraints_hash": "0x3bcd93cd47b42de4cc61db26675639bc834f4e64552646c2ea07987043260852"
+              }
+            },
+            {
+              "sequence": 197,
+              "stage": "EXACT_SIGNED_PREFLIGHT",
+              "created_at": 1795258346,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "STATE_REVALIDATION",
+              "expected": {
+                "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4"
+              },
+              "observed": null
+            },
+            {
+              "sequence": 198,
+              "stage": "EXACT_SIGNED_PREFLIGHT",
+              "created_at": 1795258368,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "STATE_REVALIDATION",
+              "expected": {
+                "risk_hash": "0xf0c105d4fc2d68090e67b018a99d581f9833a6868861d1b8e39e1ce207cbf359",
+                "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4"
+              },
+              "observed": {
+                "risk_hash": "0xf0c105d4fc2d68090e67b018a99d581f9833a6868861d1b8e39e1ce207cbf359",
+                "context_hash": "0x4bf0d7d520601716afc310dbbba4112ab547610f4fb686dbb4eea9134ec11eb4",
+                "block_number": 61421698,
+                "check_ids": [
+                  "shield_d9848f86873d440ba4496558d50286ca",
+                  "shield_a7c570cba2de448a91b6700aadbe7a65",
+                  "shield_7adc21c90b9b46b790efba50cb95e515",
+                  "shield_6e3633b9eb514be28f43f84afb3393bd",
+                  "shield_844e280a64b143ba8bddb1ab6797eed2",
+                  "shield_addddab5cc9d4c3c96ec8c462f685752",
+                  "shield_2e721f3ff72d4729b39dd43892a0c8df",
+                  "shield_346835f0871d4dd3bc9005a5603d15e3"
+                ],
+                "revision": 1
+              },
+              "duration_ms": 21439.458
+            },
+            {
+              "sequence": 199,
+              "stage": "EXACT_SIGNED_PREFLIGHT",
+              "created_at": 1795258368,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 22275.379
+            },
+            {
+              "sequence": 200,
+              "stage": "RELAY",
+              "created_at": 1795258368,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {},
+              "input_refs": [
+                "EXACT_SIGNED_PREFLIGHT",
+                "ATTESTATION",
+                "PROOF"
+              ]
+            },
+            {
+              "sequence": 201,
+              "stage": "RELAY",
+              "created_at": 1795258368,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "RELAYER_AUTHORITY",
+              "expected": {
+                "attestor": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+                "relayer": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c"
+              },
+              "observed": {
+                "attestor": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+                "relayer": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c",
+                "owner_separate": true
+              }
+            },
+            {
+              "sequence": 202,
+              "stage": "RELAY",
+              "created_at": 1795258368,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "GAS_GUARD",
+              "expected": null,
+              "observed": null
+            },
+            {
+              "sequence": 203,
+              "stage": "RELAY",
+              "created_at": 1795258369,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "GAS_GUARD",
+              "expected": {
+                "max_tx_fee_wei": "1000000000000000",
+                "max_gas_price_wei": "5000000000"
+              },
+              "observed": {
+                "gas_limit": 538800,
+                "gas_price_wei": "160",
+                "maximum_next_fee_wei": "86208000"
+              },
+              "duration_ms": 783.618
+            },
+            {
+              "sequence": 204,
+              "stage": "RELAY",
+              "created_at": 1795258370,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "JOURNAL_RESERVED",
+              "expected": null,
+              "observed": {
+                "tx_hash": "0xa8ad8ff73e419e2bdbc9e20d06e8a4e1b36330ccc5be5e9ca2956b7c38fc4086",
+                "request_hash": "0xfeacdac2878610bdadbab7b6c7abdea45b1c3e8f74c10d548ce168b8e71501fc",
+                "relayer_nonce": 11,
+                "maximum_next_fee_wei": "86208000",
+                "atomic_reservation": true
+              }
+            },
+            {
+              "sequence": 205,
+              "stage": "RELAY",
+              "created_at": 1795258370,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "BROADCAST",
+              "expected": null,
+              "observed": {
+                "tx_hash": "0xa8ad8ff73e419e2bdbc9e20d06e8a4e1b36330ccc5be5e9ca2956b7c38fc4086"
+              }
+            },
+            {
+              "sequence": 206,
+              "stage": "RELAY",
+              "created_at": 1795258370,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "BROADCAST",
+              "expected": null,
+              "observed": {
+                "tx_hash": "0xa8ad8ff73e419e2bdbc9e20d06e8a4e1b36330ccc5be5e9ca2956b7c38fc4086",
+                "submitted": true
+              },
+              "duration_ms": 231.147
+            },
+            {
+              "sequence": 207,
+              "stage": "RELAY",
+              "created_at": 1795258372,
+              "kind": "completed",
+              "status": "PASS",
+              "duration_ms": 4304.373
+            },
+            {
+              "sequence": 208,
+              "stage": "RECONCILIATION",
+              "created_at": 1795258372,
+              "kind": "started",
+              "status": "RUNNING",
+              "inputs": {},
+              "input_refs": [
+                "OUTCOME",
+                "ATTESTATION",
+                "PROOF"
+              ]
+            },
+            {
+              "sequence": 209,
+              "stage": "RECONCILIATION",
+              "created_at": 1795258372,
+              "kind": "check",
+              "status": "RUNNING",
+              "check_id": "RECEIPT_LOOKUP",
+              "expected": null,
+              "observed": {
+                "tx_hash": "0xa8ad8ff73e419e2bdbc9e20d06e8a4e1b36330ccc5be5e9ca2956b7c38fc4086"
+              }
+            },
+            {
+              "sequence": 210,
+              "stage": "RECONCILIATION",
+              "created_at": 1795258373,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "RECEIPT_LOOKUP",
+              "expected": null,
+              "observed": {
+                "tx_hash": "0xa8ad8ff73e419e2bdbc9e20d06e8a4e1b36330ccc5be5e9ca2956b7c38fc4086",
+                "block_number": 61421714,
+                "block_hash": "0x0488f4ae510e29d19682489e350903e4713cd198e8192310fe1297d804284e06",
+                "confirmations": 1
+              },
+              "duration_ms": 1110.272
+            },
+            {
+              "sequence": 211,
+              "stage": "RECONCILIATION",
+              "created_at": 1795258373,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "RECEIPT_BINDINGS",
+              "expected": null,
+              "observed": {
+                "treasury": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+                "relayer": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c",
+                "exact_calldata": true,
+                "value": "0"
+              }
+            },
+            {
+              "sequence": 212,
+              "stage": "RECONCILIATION",
+              "created_at": 1795258373,
+              "kind": "check",
+              "status": "PASS",
+              "check_id": "VAULT_EFFECTS",
+              "expected": {
+                "min_deltas": [
+                  "-1",
+                  "13213385264833",
+                  "0",
+                  "0"
+                ],
+                "receipt_credit": "0",
+                "nonce": "1009",
+                "evidence_root": "0x18a16c05915971c7403e2216d67c9974ba810f1b6a5df3d4cc74a409ef9e7c7e",
+                "proof_hash": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935"
+              },
+              "observed": {
+                "actual_deltas": [
+                  "-1",
+                  "13266451069110",
+                  "0",
+                  "0"
+                ],
+                "payee_received": "0",
+                "nonce": "1009",
+                "evidence_root": "0x18a16c05915971c7403e2216d67c9974ba810f1b6a5df3d4cc74a409ef9e7c7e",
+                "proof_hash": "0xe7d253710c763f0e51ae2989a0afa981752e9a6508ff52e7e69a1fcac9820935"
+              }
+            },
+            {
+              "sequence": 213,
+              "stage": "RECONCILIATION",
+              "created_at": 1795258373,
+              "kind": "check",
+              "status": "UNKNOWN",
+              "check_id": "GAS_SETTLEMENT",
+              "expected": null,
+              "observed": null
+            },
+            {
+              "sequence": 214,
+              "stage": "RECONCILIATION",
+              "created_at": 1795258373,
+              "kind": "check",
+              "status": "UNKNOWN",
+              "check_id": "CONFIRMATIONS",
+              "expected": 2,
+              "observed": 1
+            },
+            {
+              "sequence": 215,
+              "stage": "RECONCILIATION",
+              "created_at": 1795258374,
+              "kind": "completed",
+              "status": "UNKNOWN",
+              "duration_ms": 1301.705,
+              "output_refs": [
+                "OUTCOME"
+              ]
+            }
+          ]
+        },
+        "reason_code": null,
+        "scope": "Public Avalanche Fuji execution using owner-approved test assets and real relayer gas.",
+        "runtime_metrics": {
+          "worker_wall_seconds": 347.168785,
+          "inference": {
+            "calls": [
+              {
+                "stage": "PLANNING",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 654,
+                  "completion_tokens": 20,
+                  "total_tokens": 674
+                },
+                "wall_ms": 804.444,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 804
+                  }
+                ]
+              },
+              {
+                "stage": "PLANNING",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 3839,
+                  "completion_tokens": 302,
+                  "total_tokens": 4141
+                },
+                "wall_ms": 1618.464,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 1618
+                  }
+                ]
+              },
+              {
+                "stage": "PLANNING",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 570,
+                  "completion_tokens": 333,
+                  "total_tokens": 903
+                },
+                "wall_ms": 2439.063,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 2439
+                  }
+                ]
+              },
+              {
+                "stage": "PLANNING",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 2291,
+                  "completion_tokens": 310,
+                  "total_tokens": 2601
+                },
+                "wall_ms": 2329.495,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 2329
+                  }
+                ]
+              },
+              {
+                "stage": "BUILD",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 4227,
+                  "completion_tokens": 304,
+                  "total_tokens": 4531
+                },
+                "wall_ms": 1854.588,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 1854
+                  }
+                ]
+              },
+              {
+                "stage": "BUILD",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 4947,
+                  "completion_tokens": 415,
+                  "total_tokens": 5362
+                },
+                "wall_ms": 3049.302,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 3049
+                  }
+                ]
+              },
+              {
+                "stage": "SIMULATION",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 3777,
+                  "completion_tokens": 421,
+                  "total_tokens": 4198
+                },
+                "wall_ms": 2621.44,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 2621
+                  }
+                ]
+              },
+              {
+                "stage": "SIMULATION",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 4673,
+                  "completion_tokens": 365,
+                  "total_tokens": 5038
+                },
+                "wall_ms": 2727.158,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 2727
+                  }
+                ]
+              },
+              {
+                "stage": "ITAG",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 7093,
+                  "completion_tokens": 284,
+                  "total_tokens": 7377
+                },
+                "wall_ms": 1645.46,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 1645
+                  }
+                ]
+              },
+              {
+                "stage": "PROOF",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 4935,
+                  "completion_tokens": 370,
+                  "total_tokens": 5305
+                },
+                "wall_ms": 2493.254,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 2493
+                  }
+                ]
+              },
+              {
+                "stage": "ATTESTATION",
+                "status": "SUCCESS",
+                "usage": {
+                  "prompt_tokens": 6644,
+                  "completion_tokens": 384,
+                  "total_tokens": 7028
+                },
+                "wall_ms": 2056.691,
+                "attempts": [
+                  {
+                    "provider": "deepseek",
+                    "model": "deepseek-flash",
+                    "status": "SUCCESS",
+                    "latency_ms": 2056
+                  }
+                ]
+              }
+            ],
+            "call_count": 11,
+            "reported_token_usage": {
+              "prompt_tokens": 43650,
+              "completion_tokens": 3508,
+              "total_tokens": 47158
+            },
+            "token_scope": "Successful responses reported by provider; failed-attempt billing is unknown",
+            "billing_usd": null
+          },
+          "fork_setup": {
+            "transaction_count": 0,
+            "gas_used": "0",
+            "actual_fee_wei": "0",
+            "scope": "Tracked deployment/configuration only; funding and nested simulations excluded"
+          },
+          "gas_scope": "Public Fuji execution fee; simulations remain isolated and model invoice is separate"
+        }
+      }
+    }
+  ],
+  "browser_errors": [],
+  "mobile_overflow": false,
+  "status": "PASS"
+}

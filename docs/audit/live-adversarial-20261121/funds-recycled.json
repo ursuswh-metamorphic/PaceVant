@@ -1,0 +1,98 @@
+{
+  "status": "CONFIRMED",
+  "broadcast": true,
+  "chain_id": 43113,
+  "before": {
+    "block": 61421393,
+    "session_expires_at": 1795861661,
+    "authority": [
+      3,
+      300000000,
+      0,
+      500,
+      1,
+      0,
+      0
+    ],
+    "spend_scope": [
+      300000000,
+      0,
+      5000000,
+      10000
+    ],
+    "wallets": {
+      "treasury": {
+        "address": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+        "usdc_base_units": "4990000",
+        "avax_wei": "0"
+      },
+      "owner": {
+        "address": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+        "usdc_base_units": "35010003",
+        "avax_wei": "47873063590007760"
+      },
+      "attestor": {
+        "address": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+        "usdc_base_units": "20000000",
+        "avax_wei": "499999917738720"
+      },
+      "relayer": {
+        "address": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c",
+        "usdc_base_units": "20000000",
+        "avax_wei": "31999999418863303"
+      }
+    }
+  },
+  "after": {
+    "block": 61421451,
+    "session_expires_at": 1795861661,
+    "authority": [
+      3,
+      300000000,
+      0,
+      500,
+      1,
+      0,
+      0
+    ],
+    "spend_scope": [
+      300000000,
+      0,
+      5000000,
+      10000
+    ],
+    "wallets": {
+      "treasury": {
+        "address": "0x70e1395f959dba530cf4a53b060c809b715bb6d5",
+        "usdc_base_units": "5000000",
+        "avax_wei": "0"
+      },
+      "owner": {
+        "address": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
+        "usdc_base_units": "35000003",
+        "avax_wei": "47873063582800240"
+      },
+      "attestor": {
+        "address": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
+        "usdc_base_units": "20000000",
+        "avax_wei": "499999917738720"
+      },
+      "relayer": {
+        "address": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c",
+        "usdc_base_units": "20000000",
+        "avax_wei": "31999999418863303"
+      }
+    }
+  },
+  "transactions": [
+    {
+      "role": "owner",
+      "step": "recycle-owner",
+      "tx_hash": "0xff6078c54d626df49948da54d38a00a8ce1fae22c4753be45a3ec0f02c4ba97a",
+      "block": 61421398
+    }
+  ],
+  "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+  "owner_key_on_server": false,
+  "scope": "Operator demo-fund recycling/top-up and bounded session renewal; no economic thresholds or daily counters changed"
+}

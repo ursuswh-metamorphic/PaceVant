@@ -1,0 +1,28 @@
+{
+  "release": "4f469faa04f794bf11ef8b68d6511d11c27b5724",
+  "service_active": "active",
+  "nginx_active": "active",
+  "service_enabled": "enabled",
+  "health": {
+    "status": "ok",
+    "service": "judge",
+    "public_chain_spending": true
+  },
+  "readiness": {
+    "ready": true,
+    "mode": "REAL_FUJI_EXECUTION",
+    "busy": false,
+    "reason_code": null
+  },
+  "busy": false,
+  "database_integrity": "ok",
+  "job_count": 13,
+  "job_ids_sha256": "4a94705638a91f673ee760e53604c9880b488586434cef106f3019678096c781",
+  "job_states": {
+    "CONFIRMED": 5,
+    "REJECTED": 6,
+    "UNAVAILABLE": 2
+  },
+  "persistent_data_dir": "/var/lib/pacevant/judge-public",
+  "owner_key_in_service_env": false
+}

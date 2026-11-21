@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "source": "INDEPENDENT_PUBLIC_FUJI_RECEIPTS_AND_ERC20_LOGS",
+  "chain_id": 43113,
+  "transactions": [
+    {
+      "scenario": "payment",
+      "job_id": "judge_cf92b185f7a94791a00235931eb24b4e",
+      "tx_hash": "0x95887c39c345f4ebb3a611d85bf9b6222d348b434bf2486d471ae063fa309483",
+      "status": 1,
+      "canonical": true,
+      "confirmations": 653,
+      "block": 61421075,
+      "vault_token_deltas": [
+        "-10000",
+        "0"
+      ],
+      "payee_received_usdc": "10000",
+      "gas_used": 290784,
+      "actual_fee_wei": "46525440",
+      "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e"
+    },
+    {
+      "scenario": "swap",
+      "job_id": "judge_6bee8e0817814483bb743fa303d529aa",
+      "tx_hash": "0xa8ad8ff73e419e2bdbc9e20d06e8a4e1b36330ccc5be5e9ca2956b7c38fc4086",
+      "status": 1,
+      "canonical": true,
+      "confirmations": 14,
+      "block": 61421714,
+      "vault_token_deltas": [
+        "-1",
+        "13266451069110"
+      ],
+      "payee_received_usdc": "0",
+      "gas_used": 435766,
+      "actual_fee_wei": "69722560",
+      "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e"
+    }
+  ]
+}

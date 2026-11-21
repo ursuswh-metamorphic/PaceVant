@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "python": {
+    "tests": 757,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 11,
+    "passed": 746
+  },
+  "frontend": {
+    "passed": 34,
+    "failed": 0,
+    "production_build": "PASS"
+  },
+  "solidity": {
+    "tests": 114,
+    "passed": 114,
+    "failed": 0
+  },
+  "live_adversarial": {
+    "passed": 4,
+    "method": "historical canonical Fuji eth_call with successful controls"
+  },
+  "normal_fuji": {
+    "payment": "CONFIRMED",
+    "swap": "CONFIRMED",
+    "independent_receipt_reconciliation": "PASS"
+  },
+  "source_code_commit": "4f469faa04f794bf11ef8b68d6511d11c27b5724",
+  "colors_desktop_mobile": "PASS on local and VPS frontend using saved real job evidence",
+  "multi_day_soak": false,
+  "python_warnings": [
+    "websockets legacy deprecation",
+    "Starlette anyio BlockingPortal deprecation"
+  ],
+  "public_availability_limits": [
+    "Chainlink freshness and real model verification remain required; unavailable dependencies stop safely",
+    "On-chain policy/session expires 2026-11-28 17:27:41 UTC+7; bounded budgets remain enforced"
+  ]
+}

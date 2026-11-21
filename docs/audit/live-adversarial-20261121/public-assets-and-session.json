@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "https": true,
+  "local_public_asset_identity": true,
+  "assets": [
+    "/assets/index-CHpkMwxk.js",
+    "/assets/index-DhonuEH8.css"
+  ],
+  "local_html_sha256": "2b6e2e446cb34e7606553f0fb13d86d0633674d268f4f84720b6a8d20a742dc1",
+  "public_html_sha256": "093294f8d34d89ce77c5df0828f4aa92070350413e8da03bc6a3c60bec4bab05",
+  "cookie_attributes": [
+    "HttpOnly",
+    "Max-Age=2592000",
+    "Path=/",
+    "SameSite=strict",
+    "Secure"
+  ],
+  "cookie_value_in_report": false,
+  "asset_verification": [
+    {
+      "path": "/assets/index-CHpkMwxk.js",
+      "sha256": "f893421d36a5e4fb123746ad4cc40ed02314d7bd35054564c0cf3ea1bf8a2d6c",
+      "bytes": 658563,
+      "local_equals_public": true
+    },
+    {
+      "path": "/assets/index-DhonuEH8.css",
+      "sha256": "509c813ac4c275fe6366632d197a8c4e446463c708511e4f74205d1e8af9f5c8",
+      "bytes": 120687,
+      "local_equals_public": true
+    }
+  ],
+  "html_hash_normalization": "CRLF normalized to LF; generated JS/CSS compared byte-for-byte"
+}

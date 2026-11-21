@@ -1,0 +1,26 @@
+{
+  "chain_id": 43113,
+  "block": 61421798,
+  "session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
+  "session_expires_at": 1795861661,
+  "session_active": true,
+  "authority": [
+    3,
+    300000000,
+    101,
+    500,
+    2,
+    0,
+    0
+  ],
+  "scope": [
+    300000000,
+    101,
+    5000000,
+    10000
+  ],
+  "vault_usdc_base_units": "4999999",
+  "vault_wavax_base_units": "26532996760161",
+  "relayer_avax_wei": "31999999349140743",
+  "spend_counters_preserved_after_recycling": true
+}

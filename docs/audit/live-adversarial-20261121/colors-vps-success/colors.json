@@ -1,0 +1,56 @@
+{
+  "source": "SAVED_LIVE_EVIDENCE_UI_REGRESSION",
+  "url": "https://pacevant.live",
+  "renders": [
+    {
+      "case": "payment-amount",
+      "job_id": "judge_94e1c9a41d22418e9a61362f168f61dc",
+      "node": 9,
+      "state": "rejected",
+      "badge_background": "rgb(192, 38, 58)",
+      "mobile_overflow": false
+    },
+    {
+      "case": "payment-replay",
+      "job_id": "judge_941cf002178847189c9c41335deda591",
+      "node": 9,
+      "state": "rejected",
+      "badge_background": "rgb(192, 38, 58)",
+      "mobile_overflow": false
+    },
+    {
+      "case": "swap-slippage",
+      "job_id": "judge_7b297f7a32b641bd8b34c08264fb96f1",
+      "node": 9,
+      "state": "rejected",
+      "badge_background": "rgb(192, 38, 58)",
+      "mobile_overflow": false
+    },
+    {
+      "case": "swap-route",
+      "job_id": "judge_5c6b7a44807e4741a0893aa50d56948f",
+      "node": 9,
+      "state": "rejected",
+      "badge_background": "rgb(192, 38, 58)",
+      "mobile_overflow": false
+    },
+    {
+      "case": "payment",
+      "job_id": "judge_cf92b185f7a94791a00235931eb24b4e",
+      "node": 11,
+      "state": "passed",
+      "badge_background": "rgb(14, 164, 126)",
+      "mobile_overflow": false
+    },
+    {
+      "case": "swap",
+      "job_id": "judge_6bee8e0817814483bb743fa303d529aa",
+      "node": 11,
+      "state": "passed",
+      "badge_background": "rgb(14, 164, 126)",
+      "mobile_overflow": false
+    }
+  ],
+  "browser_errors": [],
+  "status": "PASS"
+}
