@@ -1,8 +1,8 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/hero-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/hero-light.svg">
-    <img src="docs/assets/readme/hero-dark.svg" alt="PaceVant — Một giao dịch có thể hợp lệ, cả chuỗi hành động vẫn có thể sai mục đích" width="100%">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/approved/hero-glass.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/readme/approved/hero-glass.png">
+    <img src="docs/assets/readme/approved/hero-glass.png" alt="PaceVant — Một giao dịch có thể hợp lệ, cả chuỗi hành động vẫn có thể sai mục đích" width="100%">
   </picture>
 
   <p><strong>Intent-Aware Security for Autonomous On-Chain Treasury Agents</strong></p>
@@ -65,7 +65,7 @@ Trong kiểm thử semantic reliability phiên bản v3.2, **7/8 quan sát purpo
 
 ## PaceVant đã chạy thật được gì?
 
-<p align="center"><a href="https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json"><img src="docs/assets/readme/metrics.svg" alt="Tổng quan bằng chứng: public Fuji payment và swap; ITAG scripted benchmark; TaskShield component regression" width="100%"></a></p>
+<p align="center"><a href="https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json"><img src="docs/assets/readme/approved/metrics-glass.png" alt="Tổng quan bằng chứng: public Fuji payment và swap; ITAG scripted benchmark; TaskShield component regression" width="100%"></a></p>
 
 Website **<https://pacevant.live>** dùng frontend React và backend Python; public mode chỉ mở **USDC_PAYMENT** và **SWAP_EXACT_IN** với số tiền, router, recipient được giới hạn. Đây là testnet treasury do Owner kiểm soát, không phải ví khách hàng tự kết nối và giao dịch bất kỳ tài sản nào.
 
@@ -110,7 +110,7 @@ Cùng benchmark, 12/12 benign được giữ lại ở các cấu hình scripted
 
 **Tổng quan trong một phút:** AI chỉ đưa ra một candidate swap/payment trong phạm vi Owner và task đã xác thực. PaceVant xây exact call, chạy thử trên EVM fork để đo hậu quả, kiểm rủi ro kinh tế và graph history, rồi dùng Z3 chứng minh các giới hạn hữu hạn đã mô hình hóa. Nếu tất cả gate bắt buộc PASS, Attestor ký approval gắn với đúng operation; Relayer gửi và PolicyVault kiểm lại các điều kiện on-chain. Cuối cùng hệ thống đối chiếu receipt, token deltas và gas, không dựa vào câu trả lời của AI để tuyên bố thành công.
 
-<p align="center"><img src="docs/assets/readme/architecture.svg" alt="Kiến trúc PaceVant phân ba ranh giới: intent security, transaction/economic verification, signed on-chain enforcement" width="100%"></p>
+<p align="center"><img src="docs/assets/readme/approved/architecture-glass.png" alt="Kiến trúc PaceVant phân ba ranh giới: intent security, transaction/economic verification, signed on-chain enforcement" width="100%"></p>
 
 **Ba vùng trách nhiệm:**
 
@@ -186,7 +186,7 @@ flowchart TD
 
 ## Ba lớp năng lực bảo mật
 
-<p align="center"><img src="docs/assets/readme/innovations.svg" alt="Task Integrity, Long-Horizon Intent Security, Proof-Bound Execution" width="100%"></p>
+<p align="center"><img src="docs/assets/readme/approved/capabilities-glass.png" alt="Task Integrity, Long-Horizon Intent Security, Proof-Bound Execution" width="100%"></p>
 
 | Lớp | Đóng góp kỹ thuật | Phần nào là nghiên cứu / phần nào là engineering? |
 | --- | --- | --- |
