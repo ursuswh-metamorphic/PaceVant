@@ -3641,10 +3641,12 @@ html {
 }
 
 .node-badge.tone-unknown {
-  background: #d98a12;
+  background: var(--warn);
   box-shadow: none;
   color: #fff;
 }
+.progress-fill[data-tone="unknown"] { background: var(--warn); }
+.phase-progress li[data-state="unknown"] > span:last-child { color: var(--warn); }
 
 .node-badge.tone-skipped {
   background: transparent;

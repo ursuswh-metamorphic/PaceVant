@@ -75,16 +75,16 @@ async def check(args):
             return passed
 
         try:
-            for scenario, attack, label in (
+            for scenario, attack, label in (() if args.only_normal else (
                 ("payment", "payment-amount", "Nâng số tiền thanh toán"),
                 ("payment", "payment-replay", "Phát lại giao dịch đã ký"),
                 ("swap", "swap-slippage", "Hạ đầu ra tối thiểu"),
                 ("swap", "swap-route", "Thay router ngoài phạm vi"),
-            ):
+            )):
                 if not await run(scenario, label, attack):
                     raise RuntimeError("Security case did not pass: "+attack)
             if args.broadcast:
-                for scenario in ("payment", "swap"):
+                for scenario in ([args.only_normal] if args.only_normal else ("payment", "swap")):
                     await run(scenario, "Không thêm tấn công")
             await page.set_viewport_size({"width": 390, "height": 844})
             await page.screenshot(path=str(args.output.parent/"mobile.png"), full_page=True)
@@ -103,8 +103,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", default="https://pacevant.live")
     parser.add_argument("--broadcast", action="store_true")
+    parser.add_argument("--only-normal", choices=["payment", "swap"], help="Run one authorized normal operation without repeating attack jobs")
     parser.add_argument("--output", type=Path, default=Path("docs/audit/live-adversarial-20261121/report.json"))
     args = parser.parse_args()
+    if args.only_normal and not args.broadcast:
+        parser.error("--only-normal requires --broadcast")
     report = asyncio.run(check(args))
     print(json.dumps({"status": report["status"], "cases": len(report["cases"]), "normal": len(report["normal"])}))
     return 0 if report["status"] == "PASS" else 1

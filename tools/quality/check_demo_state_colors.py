@@ -29,7 +29,7 @@ async def check(args):
             page = await context.new_page()
             page.on("pageerror", lambda error: results["browser_errors"].append(str(error)))
 
-            async def serve(route, observed_job=job):
+            async def serve(route, request, observed_job=job):
                 path = route.request.url.split("/judge/", 1)[-1]
                 if route.request.method != "GET":
                     raise RuntimeError("UI color verification must never create jobs")
@@ -50,7 +50,7 @@ async def check(args):
             classes = await node.get_attribute("class")
             assert "state-"+expected in classes, (name, classes, expected)
             color = await node.locator(".node-badge").evaluate("element => getComputedStyle(element).backgroundColor")
-            expected_color = {"rejected": "rgb(192, 38, 58)", "passed": "rgb(14, 164, 126)", "unknown": "rgb(253, 243, 225)"}[expected]
+            expected_color = {"rejected": "rgb(192, 38, 58)", "passed": "rgb(14, 164, 126)", "unknown": "rgb(143, 85, 7)"}[expected]
             assert color == expected_color, (name, color, expected_color)
             await page.screenshot(path=str(args.output/(name+"-desktop.png")), full_page=True)
             await node.click()

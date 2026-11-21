@@ -256,7 +256,7 @@ export function ExecutionStatus({
   const risk = stage(job?.workflow, 'RISK');
   const outcome = job?.workflow?.outcome;
   const percent = Math.round((progress.passed / progress.total) * 100);
-  const fillTone = verdict.tone === 'rejected' || verdict.tone === 'failed' ? verdict.tone : verdict.tone === 'passed' ? 'passed' : 'running';
+  const fillTone = ['rejected', 'failed', 'unknown', 'passed'].includes(verdict.tone) ? verdict.tone : 'running';
 
   return (
     <aside className="panel status-panel" data-testid="status-panel" aria-label={t.status}>
