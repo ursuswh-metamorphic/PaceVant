@@ -109,6 +109,7 @@ export function EvidenceSections({
 
   return (
     <Accordion type="multiple" defaultValue={['policy']}>
+      {job?.attack && <AccordionItem value="attack" title={vi ? 'Bằng chứng mô phỏng bất lợi trên Fuji' : 'Fuji adversarial probe evidence'}><RawEvidence value={job.attack_evidence} /></AccordionItem>}
       <AccordionItem
         value="policy"
         title={vi ? '01. Policy và quyền do Owner xác định' : '01. Owner-defined policy & permissions'}

@@ -39,7 +39,7 @@ def job_event_writer(store,request_key,publish,method="event"):
     return event
 
 
-def run(scenario, directory, recipient_index=None):
+def run(scenario, directory, recipient_index=None, attack=None):
     from treasury_backend.modules.workflows.judge import code
 
     public=os.environ.get('PACEVANT_JUDGE_EXECUTION_MODE')=='REAL_FUJI_EXECUTION'
@@ -66,6 +66,15 @@ def run(scenario, directory, recipient_index=None):
         atomic(directory / "progress.json", state)
 
     try:
+        if attack is not None:
+            from treasury_backend.operations.judge_attacks import CASES, run_attack
+
+            if not public or attack not in CASES or CASES[attack][0] != scenario:
+                raise ValueError("INVALID_ATTACK_SCENARIO")
+            state.update(run_attack(attack, os.environ["PACEVANT_JUDGE_RPC_URL"],
+                Path(os.environ["PACEVANT_MVP_MANIFEST_FILE"]), directory.name))
+            atomic(directory / "result.json", state)
+            return state
         shield = ShieldConfig.from_env("FUJI")
         if shield.mode not in {"wallet_pipeline", "wallet_hardened"} or not any(c.api_key for c in (shield, *shield.fallbacks)):
             raise ValueError("REAL_SHIELD_CONFIGURATION_REQUIRED")
@@ -157,8 +166,9 @@ def main():
     parser.add_argument("--scenario", choices=["payment", "swap", "guard"], required=True)
     parser.add_argument("--directory", type=Path, required=True)
     parser.add_argument('--recipient-index',type=int,choices=range(3))
+    parser.add_argument('--attack', choices=['payment-amount', 'payment-replay', 'swap-slippage', 'swap-route'])
     args = parser.parse_args()
-    run(args.scenario, args.directory, args.recipient_index)
+    run(args.scenario, args.directory, args.recipient_index, args.attack)
 
 
 if __name__ == "__main__":

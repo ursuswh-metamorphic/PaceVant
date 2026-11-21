@@ -17,6 +17,6 @@ export const api = {
   history: () => request<{jobs: Job[]}>('/judge/history'),
   job: (id: string) => request<Job>('/judge/jobs/' + encodeURIComponent(id)),
   byKey: (key: string) => request<Job>('/judge/requests/' + encodeURIComponent(key)),
-  start: (scenario: string, key: string) => request<Job>('/judge/jobs', {method:'POST', headers:{'Content-Type':'application/json', 'Idempotency-Key':key}, body:JSON.stringify({scenario})}),
+  start: (scenario: string, key: string, attack?: string) => request<Job>('/judge/jobs', {method:'POST', headers:{'Content-Type':'application/json', 'Idempotency-Key':key}, body:JSON.stringify({scenario, ...(attack ? {attack} : {})})}),
   replay: (scenario: string) => request<Job>('/judge/replays/' + encodeURIComponent(scenario)),
 };

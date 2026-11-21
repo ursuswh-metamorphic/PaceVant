@@ -1,6 +1,6 @@
 import type {ScenarioId} from './types';
 
-export interface SavedAttempt {key: string; body: {scenario: ScenarioId}; job_id?: string; created_at: number}
+export interface SavedAttempt {key: string; body: {scenario: ScenarioId; attack?: string}; job_id?: string; created_at: number}
 const KEY = 'pacevant.judge.attempt.v1';
 const VIEW_KEY = 'pacevant.judge.view.v1';
 export interface ViewedRun {job_id:string;scenario:ScenarioId}
@@ -20,11 +20,11 @@ export function loadAttempt(storage: Storage = sessionStorage): SavedAttempt | n
   return value;
 }
 export function saveAttempt(value: SavedAttempt, storage: Storage = sessionStorage) {storage.setItem(KEY, JSON.stringify(value));}
-export function beginAttempt(scenario: ScenarioId, storage: Storage = sessionStorage): SavedAttempt {
+export function beginAttempt(scenario: ScenarioId, storage: Storage = sessionStorage, attack?: string): SavedAttempt {
   const previous = loadAttempt(storage);
   if (previous) return previous;
   if (!globalThis.crypto?.randomUUID) throw new Error('A secure HTTPS connection is required to start a demo.');
-  const value = {key:crypto.randomUUID(), body:{scenario}, created_at:Date.now()};
+  const value = {key:crypto.randomUUID(), body:{scenario, ...(attack ? {attack} : {})}, created_at:Date.now()};
   saveAttempt(value, storage); return value;
 }
 export function clearAttempt(storage: Storage = sessionStorage) {storage.removeItem(KEY);}

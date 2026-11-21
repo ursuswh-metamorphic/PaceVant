@@ -9,9 +9,9 @@ Hai kịch bản thực sự tiêu tài sản testnet:
 
 Mở Demo trực tiếp, chọn kịch bản bình thường và chạy. Panel hiện trạng thái xử lý; bấm từng module để xem dữ liệu thật. F5 trong cùng trình duyệt/tab sẽ khôi phục phiên. Sau CONFIRMED, mở link Fuji để kiểm receipt. Minh chứng/History lưu các lượt chạy của visitor đó; không phải lịch sử mọi visitor.
 
-Các lựa chọn tấn công hiện là preview, chưa chèn tấn công backend. Guard backend riêng kiểm policy thật; lỗi provider/oracle không được coi là phát hiện tấn công.
+Mỗi nghiệp vụ có đúng hai ca bất lợi: payment tăng amount/phát lại nonce, swap hạ minOutput/đổi router. Nút chạy tạo job backend thật, lưu request idempotent và lịch sử như giao dịch thường. Các ca này dùng `eth_call` trên trạng thái Fuji lịch sử: chạy lại giao dịch đối chứng thành công trước, rồi kiểm đúng custom-error selector của calldata bị sửa/nonce đã dùng. Không ký mới, không broadcast, không chạy AI và không được gọi đây là bằng chứng phát hiện prompt injection. RPC/đối chứng lỗi là UNAVAILABLE, không được tính là chặn thành công.
 
-Chainlink public Fuji không luôn có round đủ mới. Runtime chờ tối đa **720 giây**, timeout job **900 giây**, vẫn giữ oracle age 300 giây. Nếu quay video ba phút, bắt đầu khi oracle đang fresh; không giả tiến độ hoặc gọi replay là giao dịch live. Session/policy hiện hết hạn epoch **1795832966**; Owner cần gia hạn/cấp vốn khi hết budget, server không có Owner key.
+Chainlink public Fuji không luôn có round đủ mới. Runtime chờ tối đa **720 giây**, timeout job **900 giây**, vẫn giữ oracle age 300 giây. Nếu quay video ba phút, bắt đầu khi oracle đang fresh; không giả tiến độ hoặc gọi replay là giao dịch live. Session/policy được gia hạn ngày 21/11/2026 đến epoch **1795861661**, 500 hành động, ngân sách payment 5 USDC. Owner cần gia hạn/cấp vốn khi hết budget, server không có Owner key. Cookie visitor mặc định 30 ngày và gia hạn khi gọi API, giữ nguyên visitor/history/quota qua restart. Tab vẫn giữ request chưa rõ kết quả để Resume đúng key/body/attack.
 
 ## Cập nhật code trên VPS
 
@@ -45,4 +45,12 @@ sudo systemctl restart pacevant-judge
 
 Không bật lại env fork/model-only lên service public. Không đưa private env, cookie browser, signing journals hay wallet keys lên Git. Không mở Anvil RPC, port 8000 hoặc admin API ra Internet.
 
-Một job đồng thời; 6 runs/visitor/ngày, 6 starts/IP/giờ, 30 runs toàn hệ thống/ngày. Khoảng 1 USDC được cấp cho Vault ban đầu; payment giảm dần số này, không có vòng chuyển tự động từ EOA trở lại Vault. Kiểm tra số dư Vault, AVAX Relayer, expiry và budget khi vận hành lâu dài. Gas Fuji trong receipt là phí thực trả tại thời điểm đó, không phải báo giá gas cố định.
+Một job đồng thời; 6 runs/visitor/ngày, 6 starts/IP/giờ, 30 runs toàn hệ thống/ngày. Cả ca bất lợi cũng chịu quota. Vault đã được thu hồi tiền demo và bổ sung lên 5 USDC; payment tiếp tục giảm số dư. Không tự reset cap hay giữ Owner key trong daemon để thu tiền. Operator dừng nhận job mới, đối soát pending rồi chạy công cụ sau từ máy giữ khóa; mặc định chỉ xem kế hoạch:
+
+```bash
+uv run --locked python tools/operations/maintain_mvp_demo.py --journal data/maintenance-UNIQUE-BATCH
+# Thêm --broadcast để thực hiện; thêm --renew khi cần phiên 7 ngày mới.
+# Retry phải giữ nguyên journal; batch mới dùng thư mục mới.
+```
+
+Công cụ thu phần USDC payment vượt khoản dự trữ 20 USDC tại Attestor/Relayer về Vault, Owner bù đến 5 USDC; giữ AVAX trả gas. Renewal giữ nguyên economic thresholds, payees và daily counters, chỉ cấp phiên/ngân sách tuần mới. Sau renewal cập nhật signed manifest và restart khi không có job; public signing/send journals được giữ lâu dài. Kiểm tra số dư Vault, AVAX Relayer, expiry và budget khi vận hành lâu dài. Gas Fuji trong receipt là phí thực trả tại thời điểm đó, không phải báo giá gas cố định. Các kiểm tra thời gian giả lập/restart không thay thế việc soak liên tục nhiều ngày trên VPS.

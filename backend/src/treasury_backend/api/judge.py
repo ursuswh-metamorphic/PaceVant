@@ -54,8 +54,8 @@ def create_app(settings=None, *, controller=None):
         if request.url.path.startswith("/judge/"):
             response.headers["Cache-Control"] = "no-store"
         response.headers["X-Content-Type-Options"] = "nosniff"
-        if new_cookie:
-            response.set_cookie(COOKIE, value, max_age=86400, httponly=True, secure=settings.secure_cookie, samesite="strict", path="/")
+        if request.url.path.startswith("/judge/"):
+            response.set_cookie(COOKIE, value, max_age=settings.visitor_session_seconds, httponly=True, secure=settings.secure_cookie, samesite="strict", path="/")
         return response
 
     @app.exception_handler(ControlError)
@@ -139,11 +139,12 @@ def create_app(settings=None, *, controller=None):
     class Start(BaseModel):
         model_config = ConfigDict(extra="forbid")
         scenario: Literal["payment", "swap", "guard"]
+        attack: Literal["payment-amount", "payment-replay", "swap-slippage", "swap-route"] | None = None
 
     @app.post("/judge/jobs", status_code=202)
     def start(payload: Start, request: Request):
         return controller.create(request.state.visitor, request.client.host if request.client else "unknown",
-                                 payload.scenario, request.headers.get("Idempotency-Key"))
+                                 payload.scenario, request.headers.get("Idempotency-Key"), attack=payload.attack)
 
     @app.get("/judge/jobs/{id_}")
     def job(id_: str, request: Request):

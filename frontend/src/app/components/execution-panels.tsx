@@ -348,6 +348,19 @@ export function ExecutionStatus({
 
       {job && <BlockReason job={job} language={language} />}
 
+      {job?.attack && (
+        <section className="panel-section" data-testid="attack-evidence">
+          <h3>{vi ? 'Bằng chứng ca kiểm thử' : 'Security test evidence'}</h3>
+          <p className="risk-summary">{vi ? 'Kiểm tra eth_call trên trạng thái Fuji lịch sử với giao dịch đối chứng đã thành công. Không ký mới, không phát giao dịch; các bước AI không chạy trong ca này.' : 'Historical Fuji eth_call with a successful control transaction. No new signing or broadcast; AI stages do not run in this test.'}</p>
+          <dl className="fact-rows">
+            <div><dt>{vi ? 'Ca thử' : 'Case'}</dt><dd>{job.attack}</dd></div>
+            <div><dt>{vi ? 'Đối chứng' : 'Control'}</dt><dd>{String(job.attack_evidence?.control ?? '—')}</dd></div>
+            <div><dt>{vi ? 'Lỗi dự kiến' : 'Expected error'}</dt><dd>{String(job.attack_evidence?.expected_error ?? '—')}</dd></div>
+            <div><dt>{vi ? 'Lỗi thực tế' : 'Observed selector'}</dt><dd>{String(job.attack_evidence?.observed_selector ?? '—')}</dd></div>
+          </dl>
+        </section>
+      )}
+
       <section className="panel-section">
         <div className="panel-label">
           <span>

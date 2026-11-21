@@ -1,6 +1,5 @@
 import * as Select from '@radix-ui/react-select';
-import {Check, ChevronDown, ShieldAlert, ArrowRight, ScanEye} from 'lucide-react';
-import {Dialog, DialogContent, DialogTitle, DialogDescription} from '@/components/ui/dialog';
+import {Check, ChevronDown, ShieldAlert, ScanEye} from 'lucide-react';
 import type {Language} from '@/lib/i18n';
 import type {ScenarioId} from '@/lib/types';
 
@@ -15,28 +14,11 @@ interface AttackPreset {
 
 const payment: AttackPreset[] = [
   {
-    id: 'payment-recipient',
-    title: ['Đánh tráo người nhận', 'Recipient substitution'],
-    description: [
-      'Chỉ dẫn độc hại cố đổi địa chỉ nhận USDC đã được duyệt sang địa chỉ khác.',
-      'A malicious instruction attempts to replace the approved USDC recipient.',
-    ],
-    change: [
-      'Địa chỉ đã duyệt → địa chỉ ngoài danh sách cho phép',
-      'Approved recipient → recipient outside the allowlist',
-    ],
-    checks: ['Agent & Intent', 'Shield + ITAG', 'Owner Policy'],
-    expected: [
-      'Đối chiếu người nhận với yêu cầu gốc và danh sách được phép trước khi cấp quyền ký.',
-      'Compare recipient with original request and allowlist before authorizing signing.',
-    ],
-  },
-  {
     id: 'payment-amount',
     title: ['Nâng số tiền thanh toán', 'Payment amount inflation'],
     description: [
       'Nội dung không đáng tin yêu cầu trả nhiều USDC hơn số tiền được cho phép.',
-      'Untrusted content requests more USDC than the authorized payment amount.',
+      'Increase the payment from 0.01 to 0.02 USDC with the original signature; the contract must reject the changed data.',
     ],
     change: [
       'Số tiền cố định → số tiền lớn hơn yêu cầu',
@@ -73,7 +55,7 @@ const swap: AttackPreset[] = [
     title: ['Hạ đầu ra tối thiểu', 'Minimum output manipulation'],
     description: [
       'Báo giá độc hại cố nới điều kiện nhận WAVAX để che giấu tổn thất.',
-      'A malicious quote attempts to relax minimum WAVAX output and hide loss.',
+      'Lower minimum WAVAX output to 1 base unit with the original signature; the contract must reject it.',
     ],
     change: [
       'Đầu ra được bảo vệ → đầu ra dưới giới hạn cho phép',
@@ -86,28 +68,11 @@ const swap: AttackPreset[] = [
     ],
   },
   {
-    id: 'swap-oracle',
-    title: ['Dùng dữ liệu giá quá hạn', 'Stale oracle data'],
-    description: [
-      'Nguồn dữ liệu đưa ra giá cũ để định giá sai giao dịch hoán đổi.',
-      'A data source provides an outdated price to misvalue the swap.',
-    ],
-    change: [
-      'Giá trong cửa sổ hợp lệ → giá đã quá hạn',
-      'Price within valid window → expired price data',
-    ],
-    checks: ['Owner Policy', 'Economic Risk', 'Attestor'],
-    expected: [
-      'Kiểm tra nguồn giá và cửa sổ hiệu lực, rồi kiểm tra lại trước khi ký.',
-      'Verify price provenance and validity, then revalidate before signing.',
-    ],
-  },
-  {
     id: 'swap-route',
     title: ['Thay router ngoài phạm vi', 'Unauthorized swap router'],
     description: [
       'Phản hồi công cụ cố chuyển giao dịch sang contract ngoài phạm vi được cấp quyền.',
-      'A tool response attempts to route the swap through an unauthorized contract.',
+      'Replace the swap target with an unapproved router while retaining the original signature; the contract must reject it.',
     ],
     change: [
       'Đường giao dịch được duyệt → router ngoài phạm vi',
@@ -209,93 +174,5 @@ export function AttackSelect({
         </div>
       )}
     </section>
-  );
-}
-
-export function AttackPreview({
-  scenario,
-  value,
-  open,
-  onOpenChange,
-  language,
-}: {
-  scenario: ScenarioId;
-  value: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  language: Language;
-}) {
-  const vi = language === 'vi';
-  const index = vi ? 0 : 1;
-  const preset = presetsFor(scenario).find(item => item.id === value);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="module-sheet attack-preview-sheet" closeLabel={vi?'Đóng chi tiết':'Close details'}>
-        <div className="module-sheet-heading">
-          <span className="module-sheet-icon attack-preview-icon">
-            <ShieldAlert size={26} />
-          </span>
-          <div>
-            <DialogTitle>{preset?.title[index]}</DialogTitle>
-            <span className="module-state">
-              {vi ? 'Mô tả kịch bản' : 'Scenario preview'}
-            </span>
-          </div>
-        </div>
-
-        <DialogDescription className="module-description">
-          {preset?.description[index]}
-        </DialogDescription>
-
-        {preset && (
-          <div className="attack-preview-body">
-            <section>
-              <h3>{vi ? 'Giao dịch được chọn' : 'Selected operation'}</h3>
-              <p>
-                {scenario === 'swap'
-                  ? vi
-                    ? 'Hoán đổi USDC sang WAVAX qua LFJ V1 pool.'
-                    : 'Swap USDC for WAVAX through LFJ V1 pool.'
-                  : vi
-                    ? 'Thanh toán USDC đến địa chỉ đã duyệt trong allowlist.'
-                    : 'Pay USDC to the approved allowlist recipient.'}
-              </p>
-            </section>
-
-            <section>
-              <h3>{vi ? 'Hành vi cần được kiểm tra' : 'Manipulation to evaluate'}</h3>
-              <p className="attack-mutation">{preset.change[index]}</p>
-            </section>
-
-            <section>
-              <h3>{vi ? 'Các lớp kiểm tra bảo mật liên quan' : 'Relevant security gates'}</h3>
-              <div className="attack-checkpoints">
-                {preset.checks.map((check, i) => (
-                  <span key={check} className="inline-flex items-center gap-2">
-                    {i > 0 && <ArrowRight size={12} className="text-slate-400" />}
-                    <strong>{check}</strong>
-                  </span>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <h3>{vi ? 'Mục tiêu bảo vệ' : 'Protection objective'}</h3>
-              <p>{preset.expected[index]}</p>
-            </section>
-
-            <div className="preview-disclosure">
-              <ScanEye size={18} className="text-primary flex-shrink-0 mt-0.5" />
-              <p>
-                {vi
-                  ? 'Đây là mô tả để tìm hiểu, chưa chạy kiểm tra và chưa tạo giao dịch. Kết luận chặn hay cho phép chỉ xuất hiện sau một lượt kiểm tra thực tế có bằng chứng từ backend.'
-                  : 'This is an educational scenario description, not a completed security test or transaction. A verdict requires a real backend run with evidence.'}
-              </p>
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
   );
 }

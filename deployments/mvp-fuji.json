@@ -10,7 +10,7 @@
   "owner": "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
   "attestor": "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
   "relayer": "0x761b1ffb7aa70c7a946d3970a25f5a3859da328c",
-  "default_session_id": "0x3243c11db6d938825acb390c272348c665ca959e6c2482261c5d5ca458f4aa88",
+  "default_session_id": "0x5e3b707e3bdfeab379ac215ba4aac41744718d3736f5eb4baa8eb4114a8e095e",
   "payee_candidates": [
     "0x607bd883bd3621378812cf5b4b8ddccfaebbab1b",
     "0x5704fa0ff7cbed213f622c99ac6f9d6e5cbf2989",
@@ -22,7 +22,7 @@
     "usdc": "0x7140a935aa3bb55d334d6d325fea277e47674770b10823feefa6f8b2c58af5fc",
     "wavax": "0xbe0979d9ff9e744b48d32e81fd67db0d32dfc74120989df9b7b1588e2aff8597"
   },
-  "owner_signature": "0x7f8ae819163046d060e5ee242b0be026bf812629992e032b99bfe3e926afec0f45331cda19308acd1d3830d9de9bdbdd6ceae91ac139e51d9ee78f5138725fd81b",
+  "owner_signature": "0xb27353b79196cf112bc0aeb1d434d0ad22e8371a49eeec45f87e236d8ce354750cf0bad3bdbf6a4a9475aa384b9991fbed1abc45c58958c2317facf5a21497841b",
   "local_usdc_price_e8": "100000000",
   "local_wavax_price_e8": "2000000000",
   "max_daily_execution_cost_usd_e8": "100000000",

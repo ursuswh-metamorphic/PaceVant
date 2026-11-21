@@ -76,6 +76,30 @@ contract PolicyVaultMVPTest {
         a.recipient=address(0xBAD);a=bind(a,phi);failure(a,phi,PolicyVaultV3.PayeeNotAllowed.selector);
     }
     function testAttackUnauthorizedProposal() public {testAttackInvalidPayee();}
+    function testDemoAmountInflation() public {
+        (PolicyVaultV3.Operation memory a,PolicyVaultV3.Constraints memory phi)=make(2,10000,1);
+        bytes memory signature=sign(a);
+        a.amount=20000;a.minOutput=20000;phi.receiptCredit=20000;phi.minDeltas[0]=-20000;a=bind(a,phi);
+        vm.expectRevert(PolicyVault.BadSignature.selector);v.executeOperation(a,phi,signature);
+        require(u.balanceOf(PAYEE)==0 && !v.usedNonce(1),"inflated payment moved funds");
+    }
+    function testDemoPaymentReplay() public {
+        (PolicyVaultV3.Operation memory a,PolicyVaultV3.Constraints memory phi)=make(2,10000,1);
+        bytes memory signature=sign(a);v.executeOperation(a,phi,signature);
+        vm.expectRevert(PolicyVault.NonceReplay.selector);v.executeOperation(a,phi,signature);
+        require(u.balanceOf(PAYEE)==10000 && v.usedNonce(1),"duplicate payment");
+    }
+    function testDemoMinimumOutputManipulation() public {
+        (PolicyVaultV3.Operation memory a,PolicyVaultV3.Constraints memory phi)=make(1,1e6,1);
+        bytes memory signature=sign(a);a.minOutput=1;phi.minDeltas[1]=1;a=bind(a,phi);
+        vm.expectRevert(PolicyVault.BadSignature.selector);v.executeOperation(a,phi,signature);
+        require(u.balanceOf(address(v))==1000e6 && !v.usedNonce(1),"tampered output executed");
+    }
+    function testDemoUnauthorizedRouter() public {
+        (PolicyVaultV3.Operation memory a,PolicyVaultV3.Constraints memory phi)=make(1,1e6,1);
+        a.target=address(0xBAD);a=bind(a,phi);failure(a,phi,PolicyVault.InvalidCall.selector);
+        require(u.balanceOf(address(v))==1000e6,"unauthorized router moved funds");
+    }
     function testAttackTamperedCall() public {
         (PolicyVaultV3.Operation memory a,PolicyVaultV3.Constraints memory phi)=make(2,1e6,1);
         a.calldataHash=keccak256("arbitrary approval");failure(a,phi,PolicyVault.HashMismatch.selector);

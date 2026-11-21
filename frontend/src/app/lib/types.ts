@@ -20,6 +20,7 @@ export interface Workflow {
 }
 export type JobStatus = 'QUEUED' | 'RUNNING' | 'CONFIRMED' | 'REJECTED' | 'FAILED' | 'UNKNOWN' | 'INTERRUPTED' | 'UNAVAILABLE';
 export interface Job {
+  attack?: string; execution_kind?: 'HISTORICAL_ETH_CALL'; attack_evidence?: Evidence;
   job_id: string; scenario: ScenarioId; status: JobStatus; created_at: number;
   environment: 'ANVIL_FORK' | 'LOCAL_TEST' | 'VERIFIED_REPLAY' | 'REAL_FUJI_EXECUTION';
   active_stage?: string; phase?: string; reason_code?: string; workflow?: Workflow;

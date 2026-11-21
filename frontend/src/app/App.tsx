@@ -6,7 +6,6 @@ import {Button} from '@/components/ui/button';
 import {Tabs, TabsContent} from '@/components/ui/tabs';
 import {EvidenceDrawer} from '@/components/evidence';
 const Pipeline = lazy(() => import('@/components/pipeline').then(module => ({default: module.Pipeline})));
-import {AttackPreview} from '@/components/attack-select';
 import {SiteFooter, SiteHeader, type BackendState} from '@/components/site-chrome';
 import {Overview} from '@/components/overview';
 import {RunComposer} from '@/components/live/run-composer';
@@ -84,7 +83,6 @@ export default function App() {
     initial.attempt?.body.scenario ?? initial.view?.scenario ?? 'payment',
   );
   const [attackPreset, setAttackPreset] = useState('none');
-  const [attackPreview, setAttackPreview] = useState(false);
   const [baseScenario, setBaseScenario] = useState<ScenarioId>(
     scenario === 'guard' ? 'payment' : scenario,
   );
@@ -149,7 +147,7 @@ export default function App() {
     if (active === 'payment' || active === 'swap') {
       setBaseScenario(active);
       setScenario(active);
-      setAttackPreset('none');
+      setAttackPreset(saved?.body.attack ?? current?.attack ?? 'none');
     }
   }, [saved?.body.scenario, current?.job_id]);
 
@@ -189,8 +187,8 @@ export default function App() {
   }, [job.data?.terminal, job.data?.job_id]);
 
   const start = useMutation({
-    mutationFn: async (id: ScenarioId) => {
-      const attempt = savedRef.current ?? beginAttempt(id);
+    mutationFn: async ({id, attack}: {id: ScenarioId; attack?: string}) => {
+      const attempt = savedRef.current ?? beginAttempt(id, sessionStorage, attack);
       retain(attempt);
       setScenario(attempt.body.scenario);
       setMessage('');
@@ -205,7 +203,7 @@ export default function App() {
           throw error;
         }
       }
-      return {value: await api.start(attempt.body.scenario, attempt.key), attempt};
+      return {value: await api.start(attempt.body.scenario, attempt.key, attempt.body.attack), attempt};
     },
     onSuccess: ({value, attempt}) => accept(value, attempt),
     onError: error =>
@@ -216,11 +214,11 @@ export default function App() {
       ),
   });
 
-  async function run(id: ScenarioId) {
+  async function run(id: ScenarioId, attack?: string) {
     if (inFlight.current) return;
     inFlight.current = true;
     try {
-      await start.mutateAsync(id);
+      await start.mutateAsync({id, attack});
     } catch {
       // The saved identity is deliberately retained.
     } finally {
@@ -369,8 +367,8 @@ export default function App() {
                     attack={attackPreset}
                     onAttack={setAttackPreset}
                     busy={liveBusy}
-                    runDisabled={liveBusy || start.isPending || (attackPreset === 'none' && !ready)}
-                    onRun={() => (attackPreset === 'none' ? void run(baseScenario) : setAttackPreview(true))}
+                    runDisabled={liveBusy || start.isPending || !ready}
+                    onRun={() => void run(baseScenario, attackPreset === 'none' ? undefined : attackPreset)}
                     onGuard={() => {setAttackPreset('none');void run('guard');}}
                     guardDisabled={liveBusy || start.isPending || !ready}
                     runIcon={
@@ -392,8 +390,8 @@ export default function App() {
                           : attackPreset === 'none'
                             ? t.run
                             : vi
-                              ? 'Xem kịch bản tấn công'
-                              : 'Preview attack scenario'
+                              ? 'Chạy ca kiểm thử'
+                              : 'Run security test'
                     }
                     hint={attackPreset === 'none' && !ready && !ownRunActive && !restoring ? t.busy : undefined}
                   />
@@ -455,14 +453,6 @@ export default function App() {
 
         <SiteFooter language={language} />
       </Tabs>
-
-      <AttackPreview
-        scenario={baseScenario}
-        value={attackPreset}
-        open={attackPreview}
-        onOpenChange={setAttackPreview}
-        language={language}
-      />
 
       <EvidenceDrawer job={historyJob ?? current} open={drawer} onOpenChange={setDrawer} language={language} />
     </div>

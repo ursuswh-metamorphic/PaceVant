@@ -20,6 +20,7 @@ class JudgeSettings:
     timeout_seconds: int = 240
     wait_oracle_seconds: int = 45
     secure_cookie: bool = True
+    visitor_session_seconds: int = 30 * 86400
     execution_mode: str = 'ANVIL_FORK'
     manifest_file: Path | None = None
 
@@ -57,7 +58,8 @@ class JudgeSettings:
             global_daily_limit=integer("PACEVANT_JUDGE_GLOBAL_DAILY_LIMIT", 30, 1, 200),
             timeout_seconds=integer("PACEVANT_JUDGE_TIMEOUT_SECONDS", 240, 60, 900 if mode=='REAL_FUJI_EXECUTION' else 360),
             wait_oracle_seconds=integer("PACEVANT_JUDGE_ORACLE_WAIT_SECONDS", 45, 0, 720 if mode=='REAL_FUJI_EXECUTION' else 90),
-            secure_cookie=flag("PACEVANT_JUDGE_SECURE_COOKIE", "1"))
+            secure_cookie=flag("PACEVANT_JUDGE_SECURE_COOKIE", "1"),
+            visitor_session_seconds=integer("PACEVANT_JUDGE_SESSION_SECONDS", 30*86400, 86400, 90*86400))
 
     def configured(self):
         try:

@@ -109,11 +109,13 @@ class JudgeController:
         with self.db() as db:
             for row in db.execute("SELECT * FROM judge_jobs WHERE state IN ('QUEUED','RUNNING')").fetchall():
                 result = json.loads(row["body"])
-                result.update(status="INTERRUPTED", reason_code="FORK_RUN_INTERRUPTED", terminal=True)
+                result.update(status="INTERRUPTED", reason_code="PUBLIC_RUN_INTERRUPTED_RECONCILE_REQUIRED" if self.settings.execution_mode == "REAL_FUJI_EXECUTION" else "FORK_RUN_INTERRUPTED", terminal=True)
                 db.execute("UPDATE judge_jobs SET state='INTERRUPTED',body=? WHERE id=?", (json.dumps(result), row["id"]))
         self.cleanup()
 
     def cleanup(self):
+        if self.settings.execution_mode == "REAL_FUJI_EXECUTION":
+            return  # Preserve public signing/send journals and reconciliation evidence.
         # Completed evidence is already in SQLite; only expire disposable run
         # directories older than seven days, never journals/records themselves.
         root = (self.settings.data_dir / "runs").resolve()
@@ -144,16 +146,22 @@ class JudgeController:
             count = db.execute("SELECT COUNT(*) FROM judge_jobs WHERE visitor=? AND created_at>=?", (visitor, day)).fetchone()[0]
         return max(0, self.settings.daily_limit - count)
 
-    def create(self, visitor, ip, scenario, key):
+    def create(self, visitor, ip, scenario, key, *, attack=None):
+        from treasury_backend.operations.judge_attacks import CASES
+
         if scenario not in {s["id"] for s in SCENARIOS} or not re.fullmatch(r"[A-Za-z0-9_-]{8,128}", key or ""):
             raise ControlError("INVALID_REQUEST", 400)
+        if attack is not None and (attack not in CASES or CASES[attack][0] != scenario):
+            raise ControlError("INVALID_ATTACK_SCENARIO", 400)
+        if attack is not None and self.settings.execution_mode != "REAL_FUJI_EXECUTION":
+            raise ControlError("PUBLIC_ATTACK_PROBE_REQUIRED", 400)
         now = int(self.clock())
         ip_hash = hashlib.sha256(ip.encode()).hexdigest()
         with self.db() as db:
             db.execute("BEGIN IMMEDIATE")
             previous = db.execute("SELECT * FROM judge_jobs WHERE visitor=? AND request_key=?", (visitor, key)).fetchone()
             if previous:
-                if previous["scenario"] != scenario:
+                if previous["scenario"] != scenario or json.loads(previous["body"]).get("attack") != attack:
                     raise ControlError("IDEMPOTENCY_CONFLICT", 409)
                 return self.read(previous)
             if not self.configured() or self.closing:
@@ -173,6 +181,9 @@ class JudgeController:
             value = {"job_id":id_, "scenario":scenario, "status":"QUEUED", "created_at":now, "environment":self.settings.execution_mode,
                 "phase":"QUEUED", "public_chain_broadcast":False, "terminal":False, "semantic_scope":"REAL_CONFIGURED_PROVIDER"}
             value["request"] = next(dict(s) for s in SCENARIOS if s["id"] == scenario)
+            if attack is not None:
+                value.update(attack=attack, semantic_scope="CONTRACT_ENFORCEMENT_ONLY")
+                value["request"]["attack"] = attack
             if scenario == "guard":
                 value["request"] = {"id": "guard", "scope": "SERVER_SELECTED_SECURITY_CASE"}
             if self.settings.execution_mode=='REAL_FUJI_EXECUTION' and scenario=='payment':
@@ -213,12 +224,23 @@ class JudgeController:
         directory = self.settings.data_dir / "runs" / id_
         directory.mkdir(parents=True, exist_ok=True)
         command = [sys.executable, "-m", "treasury_backend.operations.judge_worker", "--scenario", scenario, "--directory", str(directory)]
+        with self.db() as db:
+            row = db.execute('SELECT body FROM judge_jobs WHERE id=?', (id_,)).fetchone()
+        if row and (attack := json.loads(row["body"]).get("attack")):
+            command.extend(["--attack", attack])
         if self.settings.execution_mode=='REAL_FUJI_EXECUTION' and scenario=='payment':
             with self.db() as db:
                 body=json.loads(db.execute('SELECT body FROM judge_jobs WHERE id=?',(id_,)).fetchone()[0])
             command.extend(['--recipient-index',str(body['recipient_index'])])
         options = {"creationflags":subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {"start_new_session":True}
-        proc = subprocess.Popen(command, cwd=ROOT, env=worker_environment(self.settings), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **options)
+        environment = worker_environment(self.settings)
+        if row and json.loads(row["body"]).get("attack"):
+            # Contract probes never receive signing keys or model credentials.
+            from treasury_contracts.toolchain import native_tool_environment
+
+            environment = native_tool_environment() | {k: v for k, v in environment.items() if k in {
+                "PYTHONPATH", "PACEVANT_JUDGE_RPC_URL", "PACEVANT_MVP_MANIFEST_FILE", "PACEVANT_JUDGE_EXECUTION_MODE"}}
+        proc = subprocess.Popen(command, cwd=ROOT, env=environment, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **options)
         self.process = proc
         if self.closing:
             stop_tree(proc)

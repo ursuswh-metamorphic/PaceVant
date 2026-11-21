@@ -3,6 +3,10 @@ import type {Evidence, Job, Json} from './types';
 import {nodeTitle,workflowNodes} from './workflow-nodes';
 
 const phrases:Record<string,[string,string]>={
+ ATTACK_BAD_SIGNATURE:['Contract chặn dữ liệu bị sửa vì chữ ký gốc không còn khớp. Không gửi giao dịch mới.','The contract rejected modified data because the original signature no longer matches. No new transaction was sent.'],
+ ATTACK_NONCE_REPLAY:['Contract chặn nonce đã dùng, ngăn thanh toán lần hai. Không gửi giao dịch mới.','The contract rejected the used nonce, preventing duplicate payment. No new transaction was sent.'],
+ ATTACK_NOT_BLOCKED_AS_EXPECTED:['Kết quả không khớp lỗi dự kiến; ca kiểm thử chưa đạt.','The result did not match the expected error; the security test did not pass.'],
+ PUBLIC_RUN_INTERRUPTED_RECONCILE_REQUIRED:['Phiên bị gián đoạn; cần đối soát yêu cầu cũ trước khi thực hiện giao dịch tiếp theo.','The run was interrupted; reconcile the original request before another transaction.'],
  DEMO_NOT_CONFIGURED:['Chạy trực tiếp chưa được cấu hình. Bạn vẫn có thể xem các bản ghi đã xác minh ở Tổng quan.','Live execution is not configured. Verified recordings remain available in Overview.'],
  DEMO_BUSY:['Một lượt chạy khác đang xử lý. Hãy chờ hoàn tất rồi thử lại.','Another run is active. Wait for it to finish and retry.'],
  DEMO_RATE_LIMIT:['Đã đạt giới hạn lượt chạy của phiên hoặc địa chỉ kết nối.','The visitor or network request allowance has been reached.'],
