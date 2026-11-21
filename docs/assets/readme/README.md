@@ -7,6 +7,8 @@
 | [hero-dark.svg](hero-dark.svg) | Hero khi GitHub dark mode | Nhận diện sản phẩm, minh họa quyền hạn → verification → PolicyVault |
 | [hero-light.svg](hero-light.svg) | Hero khi GitHub light mode | Nội dung giống dark; cấu trúc riêng tối ưu tương phản |
 | [attack-defense.svg](attack-defense.svg) | LOCAL Anvil budget isolation | 2 × 10 USDC trong ngân sách 20 USDC; request thứ ba bị chặn trước ký. Đọc [evidence gốc](../../evaluation/itag-final/ANVIL_BUDGET_ISOLATION.json) |
+| [purpose-drift.svg](purpose-drift.svg) | Minh họa purpose conflict, desktop | Cặp objective/candidate rationale cho thấy numeric checks PASS nhưng graph-aware semantic MISALIGNED; **chỉ là illustration của nghiên cứu real-model**, không phải Fuji attack. [Nguồn thử nghiệm](../../evaluation/itag-semantic-reliability/FINAL_REPORT.md) |
+| [purpose-drift-mobile.svg](purpose-drift-mobile.svg) | Cùng minh họa, layout chữ lớn cho màn hình nhỏ | Dùng cùng ý nghĩa, không tự nhận dữ liệu kiểm thử mới |
 | [metrics.svg](metrics.svg) | Kết quả nổi bật | Public Fuji MVP payment/swap acceptance 21/11/2026; 8/12 deterministic ITAG scripted adverse; 95,67% TaskShield component regression (constraints-only bằng điểm) |
 | [innovations.svg](innovations.svg) | Ba lớp năng lực (không tuyên bố mọi lớp đều novel) | Task Integrity, Long-Horizon ITAG, Proof-Bound Execution |
 | [architecture.svg](architecture.svg) | Tổng quan 3 vùng security, source-aligned | Sơ đồ khái quát public MVP; [source workflow hiện hành](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/backend/src/treasury_backend/modules/workflows/treasury.py) định nghĩa thứ tự thực tế. MEV reserve stress thuộc nghiên cứu LOCAL |
@@ -16,6 +18,7 @@
 - **Screenshot frontend thực tế:** chỉ thêm sau khi chụp từ phiên bản backend/UI xác thực; loại bỏ private credentials, thông tin người dùng và journal nội bộ.
 - **GIF/video attack → defense:** quay từ UI thật với mode LOCAL Anvil/scripted hoặc real-model được ghi rõ; gắn workflow/trace tương ứng.
 - **ITAG graph screenshot:** chụp từ graph viewer có task/revision, evidence và quyết định tương ứng; không dựng graph giả rồi gọi là test result.
+- **Image purpose-drift hiện tại** là sơ đồ diễn giải, không phải graph snapshot hay evidence thô. Mobile dùng `picture` + `source media` và có link mở SVG kích thước gốc.
 
 Không nâng cấp clip diễn giải thành “public Fuji adversarial execution” nếu trên thực tế tình huống chỉ chạy LOCAL. Không viết mọi báo cáo vào SVG và không sửa số liệu không truy được về raw artifact.
 
