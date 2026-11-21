@@ -1,5 +1,19 @@
 # Thư viện nghiên cứu PaceVant — Chỉ mục đầy đủ
 
+## Cập nhật công khai — nguồn current trước khi đọc báo cáo lịch sử
+
+Tại checkpoint **21/11/2026**, PaceVant đã có [website public](https://pacevant.live) với **PolicyVaultMVP** và các operation giới hạn **USDC_PAYMENT / SWAP_EXACT_IN**. Giao dịch payment và swap trên Fuji được đối soát bằng [public acceptance report](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/audit/public-fuji-live-acceptance-20261121.json). Frontend dùng React/TypeScript/Vite; `develop` là nhánh public deploy; `main` cung cấp source/docs mới để review, còn nhánh README này giữ code ở checkpoint cũ và **không merge**.
+
+**Đọc trước các nguồn hiện hành:** [System Review 21/11](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PACEVANT_CURRENT_SYSTEM_REVIEW.md) · [Public Fuji Runbook](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/PUBLIC_FUJI_RUNBOOK.md) · [EVM / Vault Code](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/contracts/src/PolicyVaultMVP.sol) · [Economics & proof audit](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/MVP_ECONOMIC_RISK_AUDIT.md).
+
+**Nghiên cứu được kế thừa và phân biệt novelty:** [PACE — Policy-Attested Contract Execution](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/paper/PACE_Policy_Attested_Contract_Execution.md) và [Proof-Gated Signing](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/paper/Proof_Gated_Signing_Solver_Checked_Transaction_Guards.md). ITAG + evidence-grounded semantic purpose là hướng khác biệt nhóm đang kiểm chứng; PDR, simulation và Z3 không được tự nhận là phát minh hoàn toàn mới.
+
+**E08–E09 — Public acceptances và merger provenance:** [Experiment Catalog](EXPERIMENT_CATALOG.md#e08--current-public-mvp-paymentswap-fuji-21112026). Giữ các research topics R01–R13 dưới đây làm **bản đồ tích lũy**, bao gồm những module không thuộc current public route.
+
+---
+
+
+
 > **Trạng thái:** REVIEW INDEX, tổng hợp từ source/doc/evidence của repository tại checkpoint 21/11/2026. Đây là chỉ mục nghiên cứu, **không** thay thế raw evidence hay tuyên bố kiểm toán độc lập. Các tài liệu lịch sử có checkpoint riêng; không đồng nhất kết quả cũ với source HEAD.
 
 ## Mục tiêu của thư viện
