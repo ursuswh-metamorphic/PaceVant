@@ -214,6 +214,9 @@ function verdictFor(job: Job | undefined, language: Language): {tone: Tone; titl
       title: job.status === 'INTERRUPTED' ? (vi ? 'Bị gián đoạn' : 'Interrupted') : vi ? 'Chưa xác định' : 'Unresolved',
       detail: vi ? 'Kết quả được giữ ở trạng thái chưa xác định, không tự coi là thành công.' : 'The outcome stays unresolved; it is never assumed successful.',
     };
+  if (job.status === 'UNAVAILABLE')
+    return {tone: 'unknown', title: vi ? 'Chưa thể kiểm tra' : 'Verification unavailable',
+      detail: vi ? 'Nguồn giá, mô hình hoặc kết nối chưa sẵn sàng. Đây không phải kết luận phát hiện tấn công.' : 'A price feed, model or connection is unavailable. This is not a confirmed attack finding.'};
   return {
     tone: 'failed',
     title: vi ? 'Không hoàn tất' : 'Failed',

@@ -16,10 +16,11 @@ export const workflowNodes=[
 ];
 export function workflowNodeState(job:Job|undefined,index:number):ModuleState{
  const node=workflowNodes[index];
- if(!job?.workflow)return job?.terminal?'skipped':job&&index===0?'running':'idle';
+ if(!job?.workflow)return job?.terminal?(index===0?(job.status==='FAILED'?'failed':'unknown'):'skipped'):job&&index===0?'running':'idle';
  const lifecycle=job.workflow.activity?.filter(e=>e.kind!=='check'&&(node.active.includes(e.stage)||node.events.includes(e.stage))).at(-1);
  if(!job.terminal&&lifecycle?.kind==='started')return 'running';
  const event=(name:string)=>job.workflow?.timeline.slice().reverse().find(e=>e.stage===name)?.evidence;
+ if(job.attack&&node.events.includes('EXACT_SIGNED_PREFLIGHT')&&job.terminal)return job.status==='REJECTED'?'rejected':job.status==='FAILED'?'failed':'unknown';
  const outcome=job.workflow.outcome??event('RECONCILIATION')??event('OUTCOME');
  if(index>=10&&outcome){const status=outcome.status;return status==='CONFIRMED'?'passed':status==='REVERTED'?(index===10?'rejected':'passed'):'unknown';}
  if(node.events.includes('ITAG')&&event('ITAG')?.verdict&&event('ITAG')?.verdict!=='PASS')return event('ITAG')?.verdict==='UNCERTAIN'?'unknown':'rejected';
@@ -27,9 +28,14 @@ export function workflowNodeState(job:Job|undefined,index:number):ModuleState{
  if(node.events.includes('PROOF')&&event('PROOF_REJECTION'))return job.status==='UNKNOWN'||job.status==='INTERRUPTED'?'unknown':'rejected';
  if(node.events.includes('PROOF')&&event('PROOF')?.status&&event('PROOF')?.status!=='VERIFIED')return 'unknown';
  if(node.events.includes('SDE')&&event('SDE')?.verdict==='REJECT')return 'rejected';
+ if(job.terminal&&node.active.includes(job.active_stage??'')&&job.status!=='CONFIRMED')return job.status==='REJECTED'?'rejected':job.status==='FAILED'?'failed':'unknown';
  if(node.events.some(name=>!!event(name)))return 'passed';
  if(node.active.includes(job.active_stage??''))return job.status==='REJECTED'?'rejected':job.status==='UNKNOWN'||job.status==='INTERRUPTED'?'unknown':job.terminal?'failed':'running';
  return job.terminal?'skipped':'idle';
+}
+export function workflowEdgeState(source:ModuleState,target:ModuleState):ModuleState{
+ if(target==='rejected'||target==='failed'||target==='unknown'||target==='running')return target;
+ return source==='passed'&&target==='passed'?'passed':'idle';
 }
 export const workflowNodeChecks:Record<string,[string,string][]>={
  OWNER_AUTHORITY:[['Policy và phiên còn hiệu lực, không bị tạm dừng.','Policy and session are active and not paused.'],['Token, người nhận và ngân sách thuộc phạm vi chủ ví cho phép.','Assets, recipient and budgets remain within owner authority.']],

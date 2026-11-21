@@ -46,6 +46,12 @@ def workflows(mvp, tmp_path):
 def test_mvp_both_swap_directions_and_receipt_payment(mvp, workflows):
     forward = workflows.run(intent(mvp), "forward")
     assert forward["status"] == "CONFIRMED", forward.get("reason_code")
+    simulation = next(e["evidence"] for e in forward["timeline"] if e["stage"] == "SIMULATION")
+    assert simulation["received"] == "0"
+    assert int(simulation["output_amount"]) > 0
+    assert simulation["output_amount"] == simulation["deltas"][1]
+    assert simulation["output_token"] == mvp["manifest"].wavax
+    assert simulation["balance_asset_order"][1] == mvp["manifest"].wavax
     reverse = workflows.run(
         intent(
             mvp, amount=str(10**18), token_in=mvp["manifest"].wavax, token_out=mvp["manifest"].usdc
@@ -55,6 +61,8 @@ def test_mvp_both_swap_directions_and_receipt_payment(mvp, workflows):
     assert reverse["status"] == "CONFIRMED", reverse.get("reason_code")
     payment = workflows.run(intent(mvp, "TOKEN_PAYMENT", "1000000"), "payment")
     assert payment["status"] == "CONFIRMED", payment.get("reason_code")
+    payment_simulation = next(e["evidence"] for e in payment["timeline"] if e["stage"] == "SIMULATION")
+    assert payment_simulation["received"] == payment_simulation["output_amount"] == "1000000"
     proof = next(e["evidence"] for e in payment["timeline"] if e["stage"] == "PROOF")
     assert proof["risk_debit_usd_e8"] == "0"
     assert proof["phi"]["receipt_credit"] == "1000000"

@@ -109,6 +109,15 @@ class JudgeController:
         with self.db() as db:
             for row in db.execute("SELECT * FROM judge_jobs WHERE state IN ('QUEUED','RUNNING')").fetchall():
                 result = json.loads(row["body"])
+                if self.settings.execution_mode == "REAL_FUJI_EXECUTION":
+                    progress = self.settings.data_dir / "runs" / row["id"] / "progress.json"
+                    try:
+                        saved = json.loads(progress.read_text())
+                        result.update({k: saved[k] for k in ("workflow", "phase", "active_stage", "source_block", "semantic_scope") if k in saved})
+                        outcome = (result.get("workflow") or {}).get("outcome") or {}
+                        result["public_chain_broadcast"] = bool(outcome.get("tx_hash"))
+                    except (OSError, ValueError):
+                        pass
                 result.update(status="INTERRUPTED", reason_code="PUBLIC_RUN_INTERRUPTED_RECONCILE_REQUIRED" if self.settings.execution_mode == "REAL_FUJI_EXECUTION" else "FORK_RUN_INTERRUPTED", terminal=True)
                 db.execute("UPDATE judge_jobs SET state='INTERRUPTED',body=? WHERE id=?", (json.dumps(result), row["id"]))
         self.cleanup()

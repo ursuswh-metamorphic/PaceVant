@@ -9,12 +9,13 @@ import {dictionary} from '@/lib/i18n';
 export function BlockReason({job, language}: {job: Job; language: Language}) {
   const issue = runIssue(job, language);
   const vi = language === 'vi';
+  const warning = ['UNAVAILABLE', 'UNKNOWN', 'INTERRUPTED'].includes(job.status);
   if (!issue) return null;
 
   return (
-    <section className="run-block-reason" data-testid="run-block-reason">
+    <section className="run-block-reason" data-tone={warning ? 'unknown' : 'rejected'} data-testid="run-block-reason">
       <h3>
-        <ShieldX size={15} />
+        {warning ? <CircleAlert size={15} /> : <ShieldX size={15} />}
         {vi ? 'Vì sao lượt chạy dừng?' : 'Why did the run stop?'}
       </h3>
       <p className="block-stage">

@@ -24,10 +24,11 @@
 .process-checks summary::-webkit-details-marker { display:none; }
 .process-checks summary>svg:last-child { flex-shrink:0; margin-top:3px; color:var(--detail-muted,#4d6082); transition:transform .16s; }
 .process-checks details[open]>summary>svg:last-child { transform:rotate(180deg); }
-.process-state-icon { color:var(--ok,#06705d); padding-top:3px; flex-shrink:0; }
+.process-state-icon { color:var(--warn,#8f5507); padding-top:3px; flex-shrink:0; }
 .process-check-name { flex:1; min-width:0; font-size:12px; line-height:1.7; font-weight:500; color:var(--detail-ink,#33476b); }
 .process-check-name small { display:block; margin-top:4px; color:var(--detail-muted,#4d6082); font-size:10.5px; font-weight:400; font-variant-numeric:tabular-nums; }
-.process-state-label { flex-shrink:0; max-width:115px; text-align:right; color:var(--ok,#06705d); font-size:11px; line-height:1.7; }
+.process-state-label { flex-shrink:0; max-width:115px; text-align:right; color:var(--warn,#8f5507); font-size:11px; line-height:1.7; }
+.process-checks [data-status="PASS"] .process-state-icon,.process-checks [data-status="PASS"] .process-state-label { color:var(--ok,#06705d); }
 .process-checks [data-status="FAIL"] .process-state-icon,.process-checks [data-status="FAIL"] .process-state-label { color:var(--bad,#c0263a); }
 .process-checks [data-status="RUNNING"] .process-state-icon,.process-checks [data-status="RUNNING"] .process-state-label { color:var(--accent-ink,#0047c2); }
 .process-checks [data-status="UNKNOWN"] .process-state-icon,.process-checks [data-status="UNKNOWN"] .process-state-label,.process-checks [data-status="UNCERTAIN"] .process-state-label,.process-checks [data-status="UNAVAILABLE"] .process-state-label { color:var(--warn,#8f5507); }

@@ -8,6 +8,7 @@ USDC returns/top-ups never reset the contract's daily spend counters.
 import argparse
 import hashlib
 import json
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -25,8 +26,14 @@ from treasury_contracts.mvp import MvpManifest
 from treasury_contracts.rpc import evm_web3
 
 
-def inventory(w3, manifest, vault, token):
+def inventory(w3, manifest, vault, token, *, minimum_block=0):
     height = w3.eth.block_number
+    until = time.monotonic()+60
+    while height < minimum_block:
+        if time.monotonic() >= until:
+            raise ValueError("CONFIRMATION_BLOCK_PENDING_REUSE_JOURNAL")
+        time.sleep(1)
+        height = w3.eth.block_number
     session = vault.functions.sessions(manifest.default_session_id).call(block_identifier=height)
     return {"block": height, "session_expires_at": session[2],
         "authority": list(vault.functions.authorities(manifest.default_session_id).call(block_identifier=height)),
@@ -132,8 +139,12 @@ def maintain(args):
         manifest = manifest.model_copy(update={"owner_signature": Web3.to_hex(accounts["owner"].sign_message(manifest.signing_message()).signature)})
         manifest.verify_owner()
         atomic_json(args.manifest, manifest.model_dump(mode="json"))
+    after = inventory(w3, manifest, vault, token, minimum_block=max((r["block"] for r in receipts), default=0)+1)
+    expected_balance = int(batch["before"]["wallets"]["treasury"]["usdc_base_units"])+sum(t["amount"] for t in batch["transfers"])
+    if int(after["wallets"]["treasury"]["usdc_base_units"]) != expected_balance:
+        raise ValueError("TREASURY_ACTUAL_RECEIPT_MISMATCH")
     result = {"status": "CONFIRMED", "broadcast": True, "chain_id": 43113,
-        "before": batch["before"], "after": inventory(w3, manifest, vault, token), "transactions": receipts,
+        "before": batch["before"], "after": after, "transactions": receipts,
         "session_id": manifest.default_session_id, "owner_key_on_server": False,
         "scope": "Operator demo-fund recycling/top-up and bounded session renewal; no economic thresholds or daily counters changed"}
     atomic_json(args.output, result)

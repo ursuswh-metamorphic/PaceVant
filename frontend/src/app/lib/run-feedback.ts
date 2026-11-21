@@ -30,6 +30,7 @@ const phrases:Record<string,[string,string]>={
  ITAG_SEMANTIC_UNCERTAIN:['Chưa có đủ bằng chứng để xác nhận hành động phù hợp với ý định.','There is insufficient evidence to verify intent alignment.'],
  ITAG_INVALID_SEMANTIC_REFERENCES_OR_OUTPUT:['Bộ kiểm tra ý định trả về bằng chứng hoặc trích dẫn không hợp lệ. Đây không phải kết luận đã phát hiện tấn công.','Intent verification returned invalid evidence or citations. This is not a confirmed attack finding.'],
  ITAG_PROVIDER_UNAVAILABLE:['Dịch vụ kiểm tra ý định chưa trả về kết quả xác minh hợp lệ.','The intent verification provider did not return a valid result.'],
+ TASK_SHIELD_UNAVAILABLE:['Task Shield chưa xác nhận được bằng chứng phù hợp với ý định. Hệ thống dừng an toàn; đây chưa phải kết luận phát hiện tấn công.','Task Shield could not verify intent alignment. Execution stopped safely; this is not a confirmed attack finding.'],
  ITAG_BUILD_MISMATCH:['Giao dịch được dựng không khớp intent hoặc policy đã xác thực.','The built transaction does not match the authenticated intent or policy.'],
  ITAG_ACTION_SCOPE_MISMATCH:['Nghiệp vụ nằm ngoài quyền được cấp cho phiên này.','The operation exceeds this session’s authority.'],
  ITAG_SESSION_EXHAUSTED:['Phiên đã chạm giới hạn hành động hoặc thời hạn cho phép.','The session has reached its action or validity limits.'],

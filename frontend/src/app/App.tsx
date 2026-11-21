@@ -369,8 +369,6 @@ export default function App() {
                     busy={liveBusy}
                     runDisabled={liveBusy || start.isPending || !ready}
                     onRun={() => void run(baseScenario, attackPreset === 'none' ? undefined : attackPreset)}
-                    onGuard={() => {setAttackPreset('none');void run('guard');}}
-                    guardDisabled={liveBusy || start.isPending || !ready}
                     runIcon={
                       ownRunActive || restoring ? (
                         <LoaderCircle size={17} className="animate-spin" aria-hidden="true" />
@@ -396,6 +394,11 @@ export default function App() {
                     hint={attackPreset === 'none' && !ready && !ownRunActive && !restoring ? t.busy : undefined}
                   />
 
+                  {current?.attack && (
+                    <div className="notice" role="status" data-testid="attack-scope">
+                      {vi ? 'Ca kiểm thử contract trên trạng thái Fuji lịch sử. Không chạy các bước AI, không ký mới và không gửi giao dịch.' : 'Contract test against historical Fuji state. AI stages are skipped; no new signing or transaction broadcast.'}
+                    </div>
+                  )}
                   <div className="workspace-grid">
                     {/* Center: three stacked phase rows */}
                     <section className="panel graph-panel" aria-label={t.graph}>

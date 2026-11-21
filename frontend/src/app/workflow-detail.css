@@ -421,6 +421,7 @@
   font-weight: 700;
   color: var(--bad);
 }
+.run-block-reason[data-tone="unknown"] h3 { color: var(--warn); }
 
 .run-block-reason .block-stage {
   font-size: 11px;

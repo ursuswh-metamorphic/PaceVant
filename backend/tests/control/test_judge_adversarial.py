@@ -64,6 +64,29 @@ def test_public_cleanup_never_removes_send_journals(tmp_path):
     controller.close()
 
 
+def test_public_restart_retains_broadcast_evidence_without_resubmission(tmp_path):
+    settings = JudgeSettings(data_dir=tmp_path, execution_mode="REAL_FUJI_EXECUTION")
+    first = JudgeController(settings)
+    value = {"job_id": "judge_old", "scenario": "payment", "status": "RUNNING", "terminal": False}
+    with first.db() as db:
+        db.execute("INSERT INTO judge_jobs VALUES(?,?,?,?,?,?,?,?)", ("judge_old", "visitor", "ip", "request", "payment", "RUNNING", 1, json.dumps(value)))
+    directory = tmp_path / "runs" / "judge_old"
+    directory.mkdir(parents=True)
+    (directory / "progress.json").write_text(json.dumps({"active_stage": "RELAY", "workflow": {
+        "workflow_id": "original", "outcome": {"tx_hash": "0xknown", "status": "SUBMITTED_UNKNOWN"}}}))
+    first.close()
+    second = JudgeController(settings, runner=lambda *_: pytest.fail("Restart must not submit"))
+    second.start()
+    try:
+        observed = second.get("visitor", id_="judge_old")
+        assert observed["status"] == "INTERRUPTED"
+        assert observed["workflow"]["outcome"]["tx_hash"] == "0xknown"
+        assert observed["public_chain_broadcast"] is True
+        assert observed["active_stage"] == "RELAY"
+    finally:
+        second.close()
+
+
 def test_probe_worker_receives_no_signing_keys_or_model_secrets(tmp_path, monkeypatch):
     from types import SimpleNamespace
 

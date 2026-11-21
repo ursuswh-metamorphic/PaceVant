@@ -79,11 +79,22 @@ def fork_simulate(chain, build, context, *, operation=None, phi=None, signature=
             allowance_pairs.extend(((usdc,chain.manifest.shares),(shares,chain.manifest.adapter)))
         allowances = [t.functions.allowance(vault.address, Web3.to_checksum_address(spender)).call()
                       for t, spender in allowance_pairs]
+        deltas = [b - a for a, b in zip(before, after, strict=True)]
+        registry = [context["usdc"], context["wavax"], context["shares"], ZERO]
+        # `received` measures the external payment recipient only. For swaps the
+        # output returns to the vault and is measured by its output-token delta.
+        output_index = registry.index(build["intent"]["token_out"])
+        output_amount = received if operation.kind == 2 else max(0, deltas[output_index])
         return {"source": "LOCAL_FORK_EVM", "environment": chain.manifest.environment,
                 "execution_status": "SUCCESS", "build_hash": content_hash(build),
                 "source_block": context["block_number"], "source_block_hash": context["block_hash"],
                 "before": [str(v) for v in before], "after": [str(v) for v in after],
-                "deltas": [str(b - a) for a, b in zip(before, after, strict=True)],
+                "deltas": [str(v) for v in deltas],
+                "operation_kind": int(operation.kind),
+                "balance_asset_order": registry,
+                "output_token": build["intent"]["token_out"], "output_amount": str(output_amount),
+                "output_recipient": operation.recipient,
+                "received_scope": "EXTERNAL_PAYMENT_RECIPIENT_ONLY; swap output is output_amount and the vault output-token delta",
                 "received": str(received), "allowances": [str(v) for v in allowances],
                 "gas_used": int(receipt.gasUsed), "simulation_overrides": overrides,
                 "exact_signed_preflight": final, "fork_tx_hash": Web3.to_hex(tx),

@@ -33,6 +33,7 @@ import {
   nodeTitle,
   workflowNodeChecks,
   workflowNodeState,
+  workflowEdgeState,
   type ModuleState,
 } from '@/lib/workflow-nodes';
 import {PHASES, summarizePhase, phaseMembers} from '@/lib/phases';
@@ -200,7 +201,7 @@ const nodeTypes = {security: SecurityGraphNode, phaseRow: PhaseRowNode};
 const edgeTypes = {return: ReturnEdge};
 
 // Edge colours: idle is a readable slate; completed steps light up in brand green; the active hop is azure.
-const EDGE = {idle: '#94a6c4', passed: '#0ea47e', running: '#0a5cf0', rejected: '#d43246'};
+const EDGE = {idle: '#94a6c4', skipped: '#94a6c4', passed: '#0ea47e', running: '#0a5cf0', rejected: '#c0263a', failed: '#c0263a', unknown: '#8f5507'};
 
 function GraphTools({
   job,
@@ -276,6 +277,7 @@ function runTone(job?: Job): {state: ModuleState; label: [string, string]} {
   if (!job.terminal) return {state: 'running', label: ['Đang chạy', 'Running']};
   if (job.status === 'CONFIRMED') return {state: 'passed', label: ['Hoàn tất', 'Completed']};
   if (job.status === 'REJECTED') return {state: 'rejected', label: ['Đã chặn', 'Blocked']};
+  if (job.status === 'UNAVAILABLE') return {state: 'unknown', label: ['Chưa thể kiểm tra', 'Unavailable']};
   if (job.status === 'UNKNOWN' || job.status === 'INTERRUPTED') return {state: 'unknown', label: ['Chưa xác định', 'Unresolved']};
   return {state: 'failed', label: ['Không hoàn tất', 'Not completed']};
 }
@@ -373,14 +375,7 @@ function PipelineCanvas({job, language}: {job?: Job; language: Language}) {
       const source = states[i];
       const target = states[i + 1];
       const running = target === 'running';
-      const kind: keyof typeof EDGE =
-        target === 'rejected' || target === 'failed'
-          ? 'rejected'
-          : running
-            ? 'running'
-            : source === 'passed'
-              ? 'passed'
-              : 'idle';
+      const kind = workflowEdgeState(source, target);
       const color = EDGE[kind];
       const midY =
         from.phase === to.phase
