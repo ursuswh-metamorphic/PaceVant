@@ -1,4 +1,4 @@
-"""Bounded asynchronous adapter around the existing fork workflow; no signer here."""
+"""Bounded asynchronous adapter for isolated or explicitly enabled public workflows."""
 
 import hashlib
 import json
@@ -55,7 +55,7 @@ def stop_tree(proc):
 
 
 def worker_environment(settings):
-    # Anvil and this process never inherit live wallet keys, tokens, or root .env.
+    # Start with the native-tool whitelist; public workers add exactly two serving keys.
     from treasury_contracts.toolchain import native_tool_environment
 
     allowed = {k:v for k, v in os.environ.items() if k.startswith(("PACEVANT_SHIELD_", "GROQ_", "GEMINI_", "XINGCHI_", "DEEPSEEK_"))}

@@ -11,6 +11,7 @@ from pydantic import SecretStr
 
 from treasury_backend.config.control import Settings as ControlSettings
 from treasury_backend.config.execution import Settings
+from treasury_backend.core.errors import ControlError
 from treasury_backend.modules.execution.mvp import MvpExecution
 from treasury_backend.modules.workflows.service import ControlPlane
 from treasury_backend.modules.workflows.treasury import TreasuryWorkflows
@@ -41,8 +42,8 @@ def prepared_public(directory,shield,progress):
             _,_,_,valid_until=execution.chain.reference(header.number,{'max_oracle_age':policy[5]},int(time.time()))
             if valid_until-int(time.time())>=120:
                 break
-        except ValueError as error:
-            if str(error)!='ORACLE_WINDOW_UNAVAILABLE':
+        except (ValueError,ControlError) as error:
+            if getattr(error,'code',str(error)) not in {'ORACLE_WINDOW_UNAVAILABLE','STALE_OR_UNVERIFIED_CHAINLINK_PRICE'}:
                 raise
         if time.monotonic()>=until:
             raise ValueError('FRESH_CHAINLINK_SIGNING_WINDOW_UNAVAILABLE')

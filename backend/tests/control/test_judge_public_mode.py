@@ -71,6 +71,34 @@ def test_public_can_wait_for_real_oracle_without_extending_fork_limits(enabled_p
         JudgeSettings.from_env()
 
 
+def test_public_waits_on_stale_feed_instead_of_approving_or_stopping_early(enabled_public,tmp_path,monkeypatch):
+    from types import SimpleNamespace
+
+    from treasury_backend.core.errors import ControlError
+    from treasury_backend.operations import public_treasury as module
+
+    calls=[]
+    progress=[]
+    header=SimpleNamespace(number=123,timestamp=1000)
+    def reference(*args):
+        calls.append(args)
+        if len(calls)==1:
+            raise ControlError('STALE_OR_UNVERIFIED_CHAINLINK_PRICE')
+        return (100,200,{},1300)
+    chain=SimpleNamespace(w3=SimpleNamespace(eth=SimpleNamespace(get_block=lambda _:header)),
+        vault=SimpleNamespace(functions=SimpleNamespace(proofPolicy=lambda:SimpleNamespace(call=lambda **_: (0,0,0,0,0,300)))),
+        reference=reference)
+    monkeypatch.setenv('PACEVANT_JUDGE_RPC_URL','https://api.avax-test.network/ext/bc/C/rpc')
+    monkeypatch.setattr(module,'MvpExecution',lambda *_,**__:SimpleNamespace(chain=chain))
+    monkeypatch.setattr(module,'ControlPlane',lambda *_,**__:SimpleNamespace(close=lambda:None))
+    monkeypatch.setattr(module,'TreasuryWorkflows',lambda *_:None)
+    monkeypatch.setattr(module.time,'time',lambda:1000)
+    monkeypatch.setattr(module.time,'sleep',lambda _:None)
+    with module.prepared_public(tmp_path/'runs'/'job',None,lambda **v:progress.append(v)) as prepared:
+        assert prepared.intent_context['oracle_valid_until']==1300
+    assert len(calls)==2 and progress==[{'phase':'WAITING_FOR_ORACLE'}]
+
+
 def test_shared_reconciliation_never_publishes_another_workflow_to_current_job():
     from types import SimpleNamespace
 
