@@ -144,14 +144,7 @@ Một job swap được ghi nhận đi qua **Risk PASS → ITAG PASS / semantic 
 
 ### Does long-horizon analysis add value?
 
-| So sánh trên 12 adverse trajectories scripted | Số ca can thiệp |
-| --- | ---: |
-| Wallet guardrails | 0/12 |
-| Wallet + TaskShield cho từng action | 0/12 |
-| **Deterministic ITAG với task history** | **8/12** |
-| TaskShield + Deterministic ITAG | 8/12 |
-
-Trên cùng benchmark scripted, các cấu hình đều giữ **12/12 benign approvals**. “Can thiệp” gồm reject, replan hoặc escalate, **không đồng nghĩa 8 lần AI phát hiện semantic attack**. Thử nghiệm **7/8** real-model semantic ở một tập khác, không được cộng gộp. [ITAG Evaluation](docs/evaluation/itag-final/FINAL_VALIDATION.md).
+Trong **12 adverse / 12 benign trajectories SCRIPTED**, wallet-only và TaskShield-only can thiệp **0/12 adverse**; **Deterministic ITAG can thiệp 8/12** và vẫn cho phép **12/12 benign**. Các quyết định gồm reject/replan/escalate; không phải 8 semantic detections. [Xem so sánh và điều kiện thử nghiệm](docs/evaluation/itag-final/FINAL_VALIDATION.md).
 
 ---
 
@@ -279,20 +272,17 @@ flowchart TD
 <a id="prior-work"></a>
 ## Chúng tôi khác gì với những hướng trước?
 
-**Đóng góp khác biệt:** kết hợp **ITAG dài hạn** với **EVM economic verification** trước bước ký có điều kiện. Simulation, EIP-712, allowlist và Z3 là nền tảng đã có; ITAG vẫn cần ablation độc lập.
+**Điểm mới PaceVant theo đuổi là ITAG:** kiểm **ngân sách và mục đích xuyên lịch sử**, kết hợp với simulation/economic verification **trước khi ký phê duyệt ràng buộc on-chain**. Nhóm **không** tuyên bố sáng tạo ra Z3, EIP-712, PDR hoặc simulation.
 
-| Hướng / nghiên cứu tham khảo | Trọng tâm chính | PaceVant bổ sung / khác biệt ở mức thiết kế |
-| --- | --- | --- |
-| Wallet allowlist / per-tx policy | Chặn call/token/amount ngoài phạm vi từng lần | Kiểm task binding, history, purpose và economic effect, không chỉ call hợp lệ |
-| [Auditable LLM Arbiter — LAST-X/NDSS 2026](https://www.ndss-symposium.org/ndss-paper/auto-draft-682/) | Graph-of-Thoughts kết hợp rule/LLM kiểm intent–transaction alignment; phát hành [Intent-Tx-18K](https://github.com/duanyiyao/intent-tx-18k) | Tham khảo hybrid verification, sửa TaskShield bằng source-bound constraints; **300 adapted Uniswap V2 cases** chỉ đo component, Hybrid hiện **không vượt constraints-only** trên tập này. ITAG thêm chiều lịch sử nhưng chưa benchmark đối đầu với Arbiter. |
-| [PACE — Policy-Attested Contract Execution](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/paper/PACE_Policy_Attested_Contract_Execution.md) | Typed intents, policy verification, signed PDR và binding on-chain | Áp dụng nền bảo vệ transaction, bổ sung TaskShield + ITAG xuyên hành động và semantic evidence; không tự nhận đã sáng tạo cơ chế PDR. |
-| [Proof-Gated Signing](https://github.com/ursuswh-metamorphic/PaceVant/blob/main/docs/paper/Proof_Gated_Signing_Solver_Checked_Transaction_Guards.md) | Simulation, SMT proof, compiled postconditions chống state drift | Áp dụng/điều chỉnh bounded economic guard cho fixed swap/payment, kết hợp với long-horizon intent checks; không tự nhận đã sáng tạo Z3/Phi. |
-| [When LLM Agents Act On-Chain — ICT Express 2026](https://doi.org/10.1016/j.icte.2026.09.014) | Phân tích gap xuyên **Agent / Trust / Infrastructure**, quyền định danh DID/VC và các tấn công ghép tầng | PaceVant hiện thực hóa **một phần** hướng agent-intent + execution: tách quyền ký, gate có bằng chứng, PolicyVault; **chưa có DID/VC, A2A credential delegation hoặc bảo vệ xuyên mọi giao thức**. |
-| LLM semantic reviewer độc lập | Đánh giá ngôn ngữ, dễ gặp schema và provenance errors | Evidence-bound catalog, deterministic veto và explicit uncertainty |
+| Nguồn tham khảo | Điều PaceVant kế thừa và mở rộng |
+| --- | --- |
+| **[Task Shield — ACL 2025](https://aclanthology.org/2025.acl-long.1435/)** | Xem mỗi tool/action có phục vụ nhiệm vụ được xác thực không → **TaskShield** |
+| **[Auditable LLM Arbiter — LAST-X 2026](https://www.ndss-symposium.org/ndss-paper/auto-draft-682/)** | Hybrid intent–transaction alignment và [Intent-Tx-18K](https://github.com/duanyiyao/intent-tx-18k) → TaskShield component benchmark; **ITAG** thêm history/purpose |
+| **[PACE — Policy-Attested Contract Execution](docs/paper/PACE_Policy_Attested_Contract_Execution.md)** | Typed intents, signed **PDR**, transaction binding và smart-contract enforcement |
+| **[Proof-Gated Signing](docs/paper/Proof_Gated_Signing_Solver_Checked_Transaction_Guards.md)** | **EVM simulation → SMT/Z3 → Φ** bảo vệ các hậu điều kiện trước state drift |
+| **[When LLM Agents Act On-Chain](https://doi.org/10.1016/j.icte.2026.09.014)** | Trust boundaries giữa AI reasoning, signing authority và execution |
 
-**Chưa có benchmark đối đầu độc lập** chứng minh vượt PACE/PGS. ITAG là hướng nghiên cứu có bằng chứng bước đầu, chưa peer review.
-
-**Cần nghiên cứu tiếp:** ablation `deterministic history` vs `plain-history LLM` vs `graph-aware LLM` vs `graph + evidence`; graph MVP chưa phải full causal graph. [Implementation](backend/src/treasury_backend/modules/temporal/operations.py).
+**Ranh giới đóng góp:** ITAG đã có kết quả về temporal budget và một số purpose conflicts, **chưa** có ablation độc lập *graph-aware LLM vs plain-history LLM*, chưa chứng minh vượt PACE/PGS trong cùng benchmark. Public graph không được mô tả là full causal dependency graph. [Implementation](backend/src/treasury_backend/modules/temporal/operations.py) · [References](#references).
 
 <a id="technology"></a>
 ## Technology stack & triển khai thực tế
